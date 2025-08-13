@@ -35,9 +35,24 @@ This guide describes the conventions and best practices for writing C++ code in 
 ## Formatting
 
 - **Indentation:** Use 4 spaces per level. No tabs.
-- **Braces:** Place opening braces on a new line.
+- **Braces:** Place opening braces on a new line for all control statements (`if`, `for`, `while`, `switch`, `class`, `struct`, etc.).
   ```cpp
-  if (condition) 
+  if (condition)
+  {
+      // code
+  }
+
+  for (int i = 0; i < 10; ++i)
+  {
+      // code
+  }
+
+  while (running)
+  {
+      // code
+  }
+
+  class example_class_t
   {
       // code
   }
