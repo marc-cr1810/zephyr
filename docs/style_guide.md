@@ -68,7 +68,6 @@ This guide describes the conventions and best practices for writing C++ code in 
 **Header File Example (`example_class.hpp`):**
 
 ```cpp
-// filepath: /home/marc/programming/c++/zephyr/include/example_class.hpp
 #pragma once
 
 #include <string>
@@ -99,7 +98,6 @@ private:
 **Source File Example (`example_class.cpp`):**
 
 ```cpp
-// filepath: /home/marc/programming/c++/zephyr/src/example_class.cpp
 #include "example_class.hpp"
 #include <iostream>
 
