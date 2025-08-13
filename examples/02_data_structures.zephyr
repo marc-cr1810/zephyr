@@ -1,0 +1,576 @@
+# Zephyr Data Structures
+# This file demonstrates lists, dictionaries, and indexing operations
+
+print("=== Zephyr Data Structures Demo ===")
+print("")
+print("")
+
+# ============================================================================
+# Lists - Ordered Collections
+# ============================================================================
+
+print("1. Lists - Ordered Collections")
+print("===============================")
+
+# Creating lists
+numbers = [1, 2, 3, 4, 5]
+mixed_list = [1, "hello", true, 3.14]
+empty_list = []
+
+print("Numbers list:", numbers)
+print("Mixed list:", mixed_list)
+print("Empty list:", empty_list)
+
+# List indexing (zero-based)
+print("First number:", numbers[0])
+print("Last number:", numbers[4])
+print("Mixed element:", mixed_list[1])
+
+# List length
+print("Length of numbers:", len(numbers))
+print("Length of mixed_list:", len(mixed_list))
+
+print("")
+
+# ============================================================================
+# List Operations
+# ============================================================================
+
+print("2. List Operations")
+print("===================")
+
+# Adding elements
+original_list = [10, 20, 30]
+print("Original list:", original_list)
+
+append(original_list, 40)
+print("After appending 40:", original_list)
+
+append(original_list, "end")
+print("After appending 'end':", original_list)
+
+# Removing elements
+removed = pop(original_list, 1)  # Remove element at index 1
+print("Removed element:", removed)
+print("List after pop:", original_list)
+
+print("")
+
+# ============================================================================
+# List Assignment and Modification
+# ============================================================================
+
+print("3. List Assignment and Modification")
+print("====================================")
+
+modifiable = [100, 200, 300, 400]
+print("Original:", modifiable)
+
+# Modify individual elements
+modifiable[0] = 999
+modifiable[2] = 777
+print("After modification:", modifiable)
+
+# Create nested lists
+matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+print("Matrix:", matrix)
+print("First row:", matrix[0])
+print("Element at [1][2]:", matrix[1][2])
+
+# Modify nested elements
+matrix[0][1] = 99
+print("After modifying matrix[0][1]:", matrix)
+
+print("")
+
+# ============================================================================
+# Dictionaries - Key-Value Pairs
+# ============================================================================
+
+print("4. Dictionaries - Key-Value Pairs")
+print("===================================")
+
+# Creating dictionaries
+person = {"name": "Alice", "age": 30, "city": "New York"}
+mixed_keys = {"string_key": "value", "numeric_key": "value for numeric key", "boolean_key": "value for boolean key"}
+empty_dict = {}
+
+print("Person dictionary:", person)
+print("Mixed keys dictionary:", mixed_keys)
+print("Empty dictionary:", empty_dict)
+
+# Dictionary access
+print("Person's name:", person["name"])
+print("Person's age:", person["age"])
+print("Value for numeric_key:", mixed_keys["numeric_key"])
+
+# Dictionary length
+print("Number of person attributes:", len(person))
+
+# Simple dictionary creation and modification
+simple_dict = {"name": "Alice", "age": 30}
+print("Original dictionary:", simple_dict)
+
+# Adding new entries
+simple_dict["city"] = "New York"
+print("After adding city:", simple_dict)
+
+# Modifying existing entries
+simple_dict["age"] = 31
+print("After updating age:", simple_dict)
+
+# Accessing all values
+print("Name:", simple_dict["name"])
+print("Age:", simple_dict["age"])
+print("City:", simple_dict["city"])
+
+# Empty dictionary creation
+empty_dict = {}
+print("Empty dictionary:", empty_dict)
+
+print("")
+
+# ============================================================================
+# Dictionary Operations
+# ============================================================================
+
+print("5. Dictionary Operations")
+print("=========================")
+
+# Adding and modifying entries
+student = {"name": "Bob", "grade": 85}
+print("Original student:", student)
+
+student["subject"] = "Math"
+student["grade"] = 90
+print("After additions/modifications:", student)
+
+# Getting keys and values
+print("Student keys:", keys(student))
+print("Student values:", values(student))
+
+# Complex dictionary with nested structures
+nested_dict = {
+    "user": {"name": "Charlie", "details": {"age": 25, "scores": [95, 87, 92]}},
+    "settings": {"theme": "dark", "notifications": true}
+}
+
+print("Nested dictionary:", nested_dict)
+print("User name:", nested_dict["user"]["name"])
+print("User age:", nested_dict["user"]["details"]["age"])
+print("First score:", nested_dict["user"]["details"]["scores"][0])
+
+print("")
+
+# ============================================================================
+# Advanced Chaining and Indexing
+# ============================================================================
+
+print("6. Advanced Chaining and Indexing")
+print("===================================")
+
+# List of dictionaries (common pattern)
+users = [
+    {"name": "Alice", "age": 30, "skills": ["Python", "JavaScript"]},
+    {"name": "Bob", "age": 25, "skills": ["Java", "C++", "Go"]},
+    {"name": "Charlie", "age": 35, "skills": ["Rust", "Assembly"]}
+]
+
+print("Users list:", users)
+
+# Chaining: list[index].member access
+print("First user's name:", users[0]["name"])
+print("Second user's age:", users[1]["age"])
+print("Third user's first skill:", users[2]["skills"][0])
+
+# Dictionary of lists
+categories = {
+    "fruits": ["apple", "banana", "orange"],
+    "vegetables": ["carrot", "broccoli", "spinach"],
+    "numbers": [1, 2, 3, 4, 5]
+}
+
+print("Categories:", categories)
+
+# Chaining: dict[key][index] access
+print("First fruit:", categories["fruits"][0])
+print("Second vegetable:", categories["vegetables"][1])
+print("Last number:", categories["numbers"][4])
+
+# Complex nested structure
+company = {
+    "departments": [
+        {
+            "name": "Engineering",
+            "employees": [
+                {"name": "Alice", "projects": ["Web App", "API"]},
+                {"name": "Bob", "projects": ["Database", "Analytics"]}
+            ]
+        },
+        {
+            "name": "Marketing",
+            "employees": [
+                {"name": "Charlie", "projects": ["Campaign A"]},
+                {"name": "Diana", "projects": ["Social Media", "Content"]}
+            ]
+        }
+    ]
+}
+
+# Deep chaining examples
+print("Company structure created")
+print("First department:", company["departments"][0]["name"])
+print("First employee in first dept:", company["departments"][0]["employees"][0]["name"])
+print("Alice's first project:", company["departments"][0]["employees"][0]["projects"][0])
+print("Diana's second project:", company["departments"][1]["employees"][1]["projects"][1])
+
+# Chained assignment examples
+print("\nTesting chained assignments:")
+print("Before: Alice's second project:", company["departments"][0]["employees"][0]["projects"][1])
+company["departments"][0]["employees"][0]["projects"][1] = "New API Design"
+print("After: Alice's second project:", company["departments"][0]["employees"][0]["projects"][1])
+
+# Mixed data type chaining
+mixed_structure = {
+    "data": [
+        [1, 2, 3],
+        ["a", "b", "c"],
+        [{"key": "value1"}, {"key": "value2"}]
+    ]
+}
+
+print("\nMixed structure chaining:")
+print("Number from nested list:", mixed_structure["data"][0][1])
+print("String from nested list:", mixed_structure["data"][1][2])
+print("Value from nested dict:", mixed_structure["data"][2][1]["key"])
+
+print("")
+course = {
+    "name": "Computer Science",
+    "students": ["Alice", "Bob", "Charlie"],
+    "grades": [85, 90, 88],
+    "info": {"semester": "Fall", "year": 2024}
+}
+
+print("Course dictionary:", course)
+print("Course name:", course["name"])
+print("First student:", course["students"][0])
+print("Course semester:", course["info"]["semester"])
+
+print("")
+
+# ============================================================================
+# Advanced Indexing Patterns
+# ============================================================================
+
+print("7. Advanced Indexing Patterns")
+print("==============================")
+
+# Dictionary of lists
+data_structure = {
+    "numbers": [1, 2, 3, 4, 5],
+    "letters": ["a", "b", "c"],
+    "booleans": [true, false, true]
+}
+
+print("Data structure:", data_structure)
+print("First number:", data_structure["numbers"][0])
+print("Last letter:", data_structure["letters"][2])
+
+# Modify elements in nested structures
+data_structure["numbers"][1] = 999
+data_structure["letters"][0] = "Z"
+print("After modifications:", data_structure)
+
+# List of dictionaries
+employees = [
+    {"name": "Alice", "department": "Engineering", "salary": 75000},
+    {"name": "Bob", "department": "Sales", "salary": 60000},
+    {"name": "Charlie", "department": "Marketing", "salary": 65000}
+]
+
+print("Employees:", employees)
+print("First employee:", employees[0])
+print("Bob's salary:", employees[1]["salary"])
+
+# Modify nested dictionary
+employees[0]["salary"] = 80000
+print("After Alice's raise:", employees[0])
+
+print("")
+
+# ============================================================================
+# Complex Nested Structures
+# ============================================================================
+
+print("8. Complex Nested Structures")
+print("=============================")
+
+# Three-dimensional data structure
+company = {
+    "departments": {
+        "engineering": {
+            "teams": [
+                {"name": "Backend", "members": ["Alice", "Bob"]},
+                {"name": "Frontend", "members": ["Charlie", "Diana"]}
+            ],
+            "budget": 500000
+        },
+        "sales": {
+            "teams": [
+                {"name": "Enterprise", "members": ["Eve", "Frank"]},
+                {"name": "SMB", "members": ["Grace", "Henry"]}
+            ],
+            "budget": 300000
+        }
+    },
+    "year": 2024
+}
+
+print("Company structure created")
+print("Backend team name:", company["departments"]["engineering"]["teams"][0]["name"])
+print("First backend member:", company["departments"]["engineering"]["teams"][0]["members"][0])
+print("Sales budget:", company["departments"]["sales"]["budget"])
+
+# Modify deep nested values
+company["departments"]["engineering"]["teams"][1]["members"][0] = "Charlotte"
+company["departments"]["sales"]["budget"] = 350000
+
+print("After modifications:")
+print("Updated frontend member:", company["departments"]["engineering"]["teams"][1]["members"][0])
+print("Updated sales budget:", company["departments"]["sales"]["budget"])
+
+print("")
+
+# ============================================================================
+# For-Each Loops with Collections
+# ============================================================================
+
+print("9. For-Each Loops with Collections")
+print("===================================")
+
+# Iterate over lists
+fruits = ["apple", "banana", "cherry"]
+print("Fruits:")
+for fruit in fruits {
+    print("- " + fruit)
+}
+
+# Iterate over dictionary keys
+scores = {"Alice": 95, "Bob": 87, "Charlie": 92}
+print("Scores:")
+for student in scores {
+    print("- " + student + ": " + str(scores[student]))
+}
+
+print("")
+
+# ============================================================================
+# Type Information
+# ============================================================================
+
+print("10. Type Information")
+print("====================")
+
+sample_list = [1, 2, 3]
+sample_dict = {"key": "value"}
+
+print("Type of [1, 2, 3]:", type(sample_list))
+print("Type of {\"key\": \"value\"}:", type(sample_dict))
+
+print("")
+
+# ============================================================================
+# Destructuring Assignment (Currently disabled due to parser issue)
+# ============================================================================
+
+print("11. List Destructuring Assignment")
+print("==================================")
+
+# Note: Destructuring assignment has a parser issue when preceded by other statements
+# This will be fixed in a future update
+
+# Basic list destructuring (commented out temporarily)
+coordinates = [10, 20, 30]
+print("Original coordinates:", coordinates)
+
+# [x, y, z] = coordinates
+# print("Destructured values - x:", x, "y:", y, "z:", z)
+
+# Alternative: manual assignment for now
+x = coordinates[0]
+y = coordinates[1]
+z = coordinates[2]
+print("Manual assignment - x:", x, "y:", y, "z:", z)
+
+print("")
+
+# ============================================================================
+# Indexed Assignment with Objects
+# ============================================================================
+
+print("12. Indexed Assignment with Objects")
+print("====================================")
+
+# Test class for indexed assignment
+class TestContainer {
+    func init() {
+        this.test_dict = {"key1": 10, "key2": 20, "key3": 30}
+        this.test_list = [100, 200, 300, 400, 500]
+        this.name = "container"
+    }
+
+    func test_dict_assignment() {
+        print("Dictionary assignment tests:")
+        print("Before:", this.test_dict)
+
+        # Modify existing key
+        this.test_dict["key2"] = 99
+        print("After modifying key2:", this.test_dict)
+
+        # Add new key
+        this.test_dict["new_key"] = 42
+        print("After adding new_key:", this.test_dict)
+    }
+
+    func test_list_assignment() {
+        print("List assignment tests:")
+        print("Before:", this.test_list)
+
+        # Modify existing elements
+        this.test_list[2] = 777
+        print("After modifying index 2:", this.test_list)
+
+        this.test_list[0] = 888
+        print("After modifying index 0:", this.test_list)
+    }
+}
+
+container = TestContainer()
+container.test_dict_assignment()
+print("")
+container.test_list_assignment()
+
+print("")
+
+# ============================================================================
+# Chained Indexed Assignment
+# ============================================================================
+
+print("13. Chained Indexed Assignment")
+print("===============================")
+
+# Nested container for chained operations
+class NestedContainer {
+    func init() {
+        this.inner = TestContainer()
+        this.matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        this.dict_of_lists = {
+            "list1": [10, 20, 30],
+            "list2": [40, 50, 60]
+        }
+        this.list_of_dicts = [
+            {"name": "first", "value": 111},
+            {"name": "second", "value": 222}
+        ]
+    }
+
+    func test_chained_operations() {
+        print("Testing chained member and index access:")
+
+        # Chain: object.member.dict[key] = value
+        print("Before: inner dict key1 =", this.inner.test_dict["key1"])
+        this.inner.test_dict["key1"] = 555
+        print("After assignment:", this.inner.test_dict["key1"])
+
+        # Chain: object.member.list[index] = value
+        print("Before: inner list[3] =", this.inner.test_list[3])
+        this.inner.test_list[3] = 666
+        print("After assignment:", this.inner.test_list[3])
+
+        # Matrix assignment
+        print("Before: matrix[1][2] =", this.matrix[1][2])
+        this.matrix[1][2] = 999
+        print("After assignment:", this.matrix[1][2])
+
+        # Dictionary of lists
+        print("Before: dict_of_lists[\"list1\"][0] =", this.dict_of_lists["list1"][0])
+        this.dict_of_lists["list1"][0] = 1111
+        print("After assignment:", this.dict_of_lists["list1"][0])
+
+        # List of dictionaries
+        print("Before: list_of_dicts[0][\"value\"] =", this.list_of_dicts[0]["value"])
+        this.list_of_dicts[0]["value"] = 2222
+        print("After assignment:", this.list_of_dicts[0]["value"])
+    }
+}
+
+nested = NestedContainer()
+nested.test_chained_operations()
+
+print("")
+
+# ============================================================================
+# Complex Indexed Assignment Examples
+# ============================================================================
+
+print("14. Complex Indexed Assignment Examples")
+print("========================================")
+
+# Example matching common use cases
+class ExampleClass {
+    func init() {
+        this.test_dict = {"key": 25}
+        this.test_list = [10, 20, 30]
+        this.nested_obj = NestedContainer()
+    }
+
+    func demonstrate_patterns() {
+        print("Demonstrating common assignment patterns:")
+
+        # Pattern 1: Simple member dictionary assignment
+        print("Pattern 1 - this.test_dict[\"key\"] = 45")
+        print("Before:", this.test_dict["key"])
+        this.test_dict["key"] = 45
+        print("After:", this.test_dict["key"])
+
+        # Pattern 2: Simple member list assignment
+        print("Pattern 2 - this.test_list[2] = 45")
+        print("Before:", this.test_list[2])
+        this.test_list[2] = 45
+        print("After:", this.test_list[2])
+
+        # Pattern 3: Deep chained assignment
+        print("Pattern 3 - this.nested_obj.inner.test_dict[\"key1\"] = 45")
+        print("Before:", this.nested_obj.inner.test_dict["key1"])
+        this.nested_obj.inner.test_dict["key1"] = 45
+        print("After:", this.nested_obj.inner.test_dict["key1"])
+
+        # Pattern 4: Deep chained list assignment
+        print("Pattern 4 - this.nested_obj.inner.test_list[2] = 45")
+        print("Before:", this.nested_obj.inner.test_list[2])
+        this.nested_obj.inner.test_list[2] = 45
+        print("After:", this.nested_obj.inner.test_list[2])
+
+        # Verify assignments worked
+        x = this.test_dict["key"]
+        print("Retrieved from dict:", x)
+
+        y = this.test_list[2]
+        print("Retrieved from list:", y)
+
+        z = this.nested_obj.inner.test_dict["key1"]
+        print("Retrieved from chained dict:", z)
+
+        w = this.nested_obj.inner.test_list[2]
+        print("Retrieved from chained list:", w)
+    }
+}
+
+example = ExampleClass()
+example.demonstrate_patterns()
+
+print("")
+
+print("")
+print("=== Data Structures Demo Complete ===")

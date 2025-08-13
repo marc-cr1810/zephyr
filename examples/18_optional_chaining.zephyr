@@ -1,0 +1,187 @@
+# Zephyr Optional Chaining and Direct Dictionary Access
+# This file demonstrates optional chaining operators (?., ?[]) and direct dictionary member access
+
+print("=== Zephyr Optional Chaining Demo ===")
+print("")
+
+# ============================================================================
+# Basic Optional Member Access
+# ============================================================================
+
+print("1. Basic Optional Member Access")
+print("================================")
+
+user_data_none = none
+user_name_from_none = user_data_none?.name
+print("1. User name from 'none' object:", user_name_from_none) # Expected: none
+
+user_data_alice = {"name": "Alice", "profile": {"age": 30}}
+user_name_from_alice = user_data_alice?.name
+print("2. User name from valid object:", user_name_from_alice) # Expected: Alice
+
+print("")
+
+# 2. Nested Optional Member Access
+#    Chaining multiple optional accesses. The chain stops if any
+#    intermediate property is 'none'.
+
+user_profile_age = user_data_alice?.profile?.age
+print("3. Nested access (full path exists):", user_profile_age) # Expected: 30
+
+user_data_bob_no_profile = {"name": "Bob", "profile": none}
+user_profile_age_none = user_data_bob_no_profile?.profile?.age
+print("4. Nested access (intermediate 'profile' is none):", user_profile_age_none) # Expected: none
+
+# 3. Optional Method Call (?.method())
+#    Calling a method on an object that might be 'none'.
+#    If the object is 'none', the method is not called, and the result is 'none'.
+
+class Greeter {
+    func init(name) {
+        this.name = name
+    }
+    func get_greeting() {
+        return "Hello, " + this.name
+    }
+}
+
+greeter_instance = Greeter("World")
+greeting_result = greeter_instance?.get_greeting()
+print("5. Optional method call (instance exists):", greeting_result) # Expected: Hello, World
+
+none_greeter_instance = none
+greeting_from_none = none_greeter_instance?.get_greeting()
+print("6. Optional method call (instance is none):", greeting_from_none) # Expected: none
+
+# 4. Optional Index Access (?[index])
+#    Accessing an element in a list or dictionary that might be 'none'.
+#    If the collection is 'none', the result is 'none'.
+
+data_with_list = {"items": [100, 200, 300]}
+first_item = data_with_list?.items?[0]
+print("7. Optional index access (list exists):", first_item) # Expected: 60
+
+data_none_list = none
+item_from_none_list = data_none_list?.items?[0]
+print("8. Optional index access (list is none):", item_from_none_list) # Expected: none
+
+# 5. Combining Optional Chaining with Nullish Coalescing (??)
+#    Use '??' to provide a default value if the optional chain results in 'none'.
+
+user_data_charlie = {"name": "Charlie"} # No 'email' property
+user_email_default = user_data_charlie?.contact?.email ?? "no_email@example.com"
+print("9. Email with default (path is none):", user_email_default) # Expected: no_email@example.com
+
+user_data_diana = {"name": "Diana", "contact": {"email": "diana@example.com"}}
+user_email_actual = user_data_diana?.contact?.email ?? "diana@example.com"
+print("10. Email with default (path exists):", user_email_actual) # Expected: diana@example.com
+
+# 6. Complex Chaining Scenarios
+#    Demonstrates mixed optional member, method, and index access in a single chain.
+
+complex_nested_data = {
+    "departments": [
+        {"name": "HR", "employees": [
+            {"id": 1, "info": {"phone": "111-222-3333"}},
+            {"id": 2, "info": none} # Employee 2 has no info
+        ]},
+        {"name": "IT", "employees": none} # IT department has no employees
+    ]
+}
+
+print("")
+
+# ============================================================================
+# Nested Optional Member Access
+# ============================================================================
+
+print("2. Nested Optional Member Access")
+print("=================================")
+
+# Chaining multiple optional accesses
+user_profile_age = user_data_alice?.profile?.age
+print("Nested access (full path exists):", user_profile_age) # Expected: 30
+
+user_data_bob_no_profile = {"name": "Bob", "profile": none}
+user_profile_age_none = user_data_bob_no_profile?.profile?.age
+print("Nested access (intermediate 'profile' is none):", user_profile_age_none) # Expected: none
+
+print("")
+
+# ============================================================================
+# Optional Method Calls
+# ============================================================================
+
+print("3. Optional Method Calls")
+print("=========================")
+
+greeting_result = greeter_instance?.get_greeting()
+print("Optional method call (instance exists):", greeting_result) # Expected: Hello, World
+
+none_greeter_instance = none
+greeting_from_none = none_greeter_instance?.get_greeting()
+print("Optional method call (instance is none):", greeting_from_none) # Expected: none
+
+print("")
+
+# ============================================================================
+# Optional Index Access
+# ============================================================================
+
+print("4. Optional Index Access")
+print("=========================")
+
+data_with_list = {"items": [100, 200, 300]}
+first_item = data_with_list?.items?[0]
+print("Optional index access (list exists):", first_item) # Expected: 60
+
+data_none_list = none
+item_from_none_list = data_none_list?.items?[0]
+print("Optional index access (list is none):", item_from_none_list) # Expected: none
+
+print("")
+
+# ============================================================================
+# Optional Chaining with Nullish Coalescing
+# ============================================================================
+
+print("5. Optional Chaining with Nullish Coalescing")
+print("=============================================")
+
+user_data_charlie = {"name": "Charlie"} # No 'email' property
+user_email_default = user_data_charlie?.contact?.email ?? "no_email@example.com"
+print("Email with default (path is none):", user_email_default) # Expected: no_email@example.com
+
+user_data_diana = {"name": "Diana", "contact": {"email": "diana@example.com"}}
+user_email_actual = user_data_diana?.contact?.email ?? "diana@example.com"
+print("Email with default (path exists):", user_email_actual) # Expected: diana@example.com
+
+print("")
+
+# ============================================================================
+# Complex Chaining Scenarios
+# ============================================================================
+
+print("6. Complex Chaining Scenarios")
+print("==============================")
+
+# Access phone of employee 1 in HR
+hr_employee_phone = complex_nested_data?.departments?[0]?.employees?[0]?.info?.phone
+print("HR Employee 1 Phone:", hr_employee_phone) # Expected: 111-222-3333
+
+# Access phone of employee 2 in HR (info is none)
+hr_employee_no_info_phone = complex_nested_data?.departments?[0]?.employees?[1]?.info?.phone
+print("HR Employee 2 Phone (info is none):", hr_employee_no_info_phone) # Expected: none
+
+# Access phone of employee in IT (employees is none)
+it_employee_phone = complex_nested_data?.departments?[1]?.employees?[0]?.info?.phone
+print("IT Employee Phone (employees is none):", it_employee_phone) # Expected: none
+
+# Access a completely non-existent path
+non_existent_path_value = complex_nested_data?.locations?.north?.building?.floor
+print("Non-existent path:", non_existent_path_value) # Expected: none
+
+print("")
+
+print("")
+print("=== Optional Chaining Demo Complete ===")

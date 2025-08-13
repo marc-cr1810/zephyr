@@ -1,0 +1,817 @@
+# Zephyr Example: Lists of Dictionaries with Lambda Functions and Nested Calls
+# This example demonstrates complex data structures combining lists, dictionaries,
+# and lambda functions with various calling patterns including nested calls.
+
+print("=== Lists of Dictionaries with Lambda Functions ===")
+
+# Basic list of dictionaries containing lambda functions
+math_operations = [
+    {
+        "name": "arithmetic",
+        "add": (a, b) -> a + b,
+        "multiply": (x, y) -> x * y,
+        "power": (base, exp) -> {
+            if exp == 0 {
+                return 1
+            }
+            result = base
+            for i = 1; i < exp; i++ {
+                result *= base
+            }
+            return result
+        }
+    },
+    {
+        "name": "string_ops",
+        "concat": (s1, s2) -> s1 + s2,
+        "repeat": (text, count) -> text * count,
+        "length": s -> len(s)
+    },
+    {
+        "name": "list_ops",
+        "sum": lst -> {
+            total = 0
+            for item in lst {
+                total += item
+            }
+            return total
+        },
+        "product": lst -> {
+            result = 1
+            for item in lst {
+                result *= item
+            }
+            return result
+        }
+    }
+]
+
+print("")
+
+# ============================================================================
+# Basic Lambda Function Calls
+# ============================================================================
+
+print("1. Basic Lambda Function Calls")
+print("===============================")
+
+# Call lambda functions from dictionaries in list (using intermediate variables)
+arithmetic_ops = math_operations[0]
+add_func = arithmetic_ops["add"]
+result1 = add_func(10, 15)
+print("Addition result:", result1)
+
+power_func = arithmetic_ops["power"]
+result2 = power_func(2, 8)
+print("Power result:", result2)
+
+string_ops = math_operations[1]
+concat_func = string_ops["concat"]
+result3 = concat_func("Hello", " World")
+print("Concatenation result:", result3)
+
+repeat_func = string_ops["repeat"]
+result4 = repeat_func("*", 5)
+print("Repeat result:", result4)
+
+list_ops = math_operations[2]
+sum_func = list_ops["sum"]
+numbers = [1, 2, 3, 4, 5]
+result5 = sum_func(numbers)
+print("Sum result:", result5)
+
+print("")
+
+# ============================================================================
+# Nested Lambda Function Calls
+# ============================================================================
+
+print("2. Nested Lambda Function Calls")
+print("================================")
+
+# Create a more complex structure with nested lambda calls
+calculator = {
+    "basic": {
+        "add": (a, b) -> a + b,
+        "subtract": (a, b) -> a - b,
+        "multiply": (a, b) -> a * b,
+        "divide": (a, b) -> {
+            if b == 0 {
+                return "Error: Division by zero"
+            }
+            return a / b
+        }
+    },
+    "advanced": {
+        "factorial": n -> {
+            if n <= 1 {
+                return 1
+            }
+            # Get factorial function for recursive call
+            advanced_ops = calculator["advanced"]
+            factorial_func = advanced_ops["factorial"]
+            return n * factorial_func(n - 1)
+        },
+        "fibonacci": n -> {
+            if n <= 1 {
+                return n
+            }
+            # Simple iterative approach to avoid deep recursion issues
+            if n == 2 {
+                return 1
+            }
+            a = 0
+            b = 1
+            for i = 2; i <= n; i++ {
+                temp = a + b
+                a = b
+                b = temp
+            }
+            return b
+        },
+        "compound": (x, y, z) -> {
+            # Nested calls to basic operations
+            basic_ops = calculator["basic"]
+            add_op = basic_ops["add"]
+            multiply_op = basic_ops["multiply"]
+            divide_op = basic_ops["divide"]
+
+            temp1 = add_op(x, y)
+            temp2 = multiply_op(temp1, z)
+            return divide_op(temp2, 2)
+        }
+    }
+}
+
+# Test nested recursive calls
+advanced_ops = calculator["advanced"]
+fact_func = advanced_ops["factorial"]
+fact_result = fact_func(5)
+print("Factorial of 5:", fact_result)
+
+fib_func = advanced_ops["fibonacci"]
+
+# Test smaller Fibonacci numbers first to debug
+print("Fibonacci of 0:", fib_func(0))
+print("Fibonacci of 1:", fib_func(1))
+print("Fibonacci of 2:", fib_func(2))
+print("Fibonacci of 3:", fib_func(3))
+print("Fibonacci of 4:", fib_func(4))
+print("Fibonacci of 5:", fib_func(5))
+
+fib_result = fib_func(7)
+print("Fibonacci of 7:", fib_result)
+
+compound_func = advanced_ops["compound"]
+compound_result = compound_func(10, 5, 4)
+print("Compound operation result:", compound_result)
+
+print("")
+
+# ============================================================================
+# List of Function Processors
+# ============================================================================
+
+print("3. List of Function Processors")
+print("===============================")
+
+# Create processors that work with other lambda functions
+processors = [
+    {
+        "name": "number_processor",
+        "transform": x -> x * 2 + 1,
+        "validate": x -> x > 0,
+        "process": (value, transformer, validator) -> {
+            if validator(value) {
+                return transformer(value)
+            } else {
+                return "Invalid input"
+            }
+        }
+    },
+    {
+        "name": "string_processor",
+        "transform": s -> s + "!",
+        "validate": s -> len(s) > 0,
+        "process": (value, transformer, validator) -> {
+            if validator(value) {
+                return transformer(value)
+            } else {
+                return "Empty string"
+            }
+        }
+    },
+    {
+        "name": "list_processor",
+        "transform": lst -> {
+            doubled = []
+            for item in lst {
+                append(doubled, item * 2)
+            }
+            return doubled
+        },
+        "validate": lst -> len(lst) > 0,
+        "process": (value, transformer, validator) -> {
+            if validator(value) {
+                return transformer(value)
+            } else {
+                return []
+            }
+        }
+    }
+]
+
+# Use processors with their own lambda functions
+proc1 = processors[0]
+transform1 = proc1["transform"]
+validate1 = proc1["validate"]
+process1 = proc1["process"]
+num_result = process1(5, transform1, validate1)
+print("Number processing result:", num_result)
+
+proc2 = processors[1]
+transform2 = proc2["transform"]
+validate2 = proc2["validate"]
+process2 = proc2["process"]
+str_result = process2("Hello", transform2, validate2)
+print("String processing result:", str_result)
+
+proc3 = processors[2]
+transform3 = proc3["transform"]
+validate3 = proc3["validate"]
+process3 = proc3["process"]
+list_result = process3([1, 2, 3], transform3, validate3)
+print("List processing result:", list_result)
+
+print("")
+
+# ============================================================================
+# Complex Nested Structure with Lambda Chains
+# ============================================================================
+
+print("4. Complex Nested Structure with Lambda Chains")
+print("===============================================")
+
+# Create a complex nested structure
+function_library = {
+    "math": [
+        {
+            "category": "trigonometry",
+            "functions": {
+                "sin_approx": x -> {
+                    # Simple sine approximation using Taylor series (first few terms)
+                    x2 = x * x
+                    return x - (x2 * x) / 6 + (x2 * x2 * x) / 120
+                },
+                "cos_approx": x -> {
+                    # Simple cosine approximation
+                    x2 = x * x
+                    return 1 - x2 / 2 + (x2 * x2) / 24
+                }
+            }
+        },
+        {
+            "category": "statistics",
+            "functions": {
+                "mean": lst -> {
+                    if len(lst) == 0 {
+                        return 0
+                    }
+                    total = 0
+                    for item in lst {
+                        total += item
+                    }
+                    return total / len(lst)
+                },
+                "variance": lst -> {
+                    if len(lst) == 0 {
+                        return 0
+                    }
+                    # Use the mean function from the same structure
+                    math_section = function_library["math"]
+                    stats_section = math_section[1]
+                    stats_functions = stats_section["functions"]
+                    mean_func = stats_functions["mean"]
+                    mean_val = mean_func(lst)
+
+                    sum_sq_diff = 0
+                    for item in lst {
+                        diff = item - mean_val
+                        sum_sq_diff += diff * diff
+                    }
+                    return sum_sq_diff / len(lst)
+                }
+            }
+        }
+    ],
+    "utils": [
+        {
+            "category": "converters",
+            "functions": {
+                "to_string": x -> str(x),
+                "to_int": x -> int(x),
+                "to_float": x -> float(x)
+            }
+        }
+    ]
+}
+
+# Test complex nested lambda calls
+math_section = function_library["math"]
+stats_section = math_section[1]
+stats_functions = stats_section["functions"]
+mean_func = stats_functions["mean"]
+
+data = [1.0, 2.0, 3.0, 4.0, 5.0]
+mean_result = mean_func(data)
+print("Mean of data:", mean_result)
+
+variance_func = stats_functions["variance"]
+variance_result = variance_func(data)
+print("Variance of data:", variance_result)
+
+trig_section = math_section[0]
+trig_functions = trig_section["functions"]
+sin_func = trig_functions["sin_approx"]
+sin_result = sin_func(0.5)
+print("Sine approximation of 0.5:", sin_result)
+
+print("")
+
+# ============================================================================
+# Lambda Function Factory
+# ============================================================================
+
+print("5. Lambda Function Factory")
+print("===========================")
+
+# Create a factory that generates lambda functions
+function_factory = [
+    {
+        "type": "arithmetic_generator",
+        "create_adder": offset -> x -> x + offset,
+        "create_multiplier": factor -> x -> x * factor,
+        "create_polynomial": (a, b, c) -> x -> a * x * x + b * x + c
+    },
+    {
+        "type": "string_generator",
+        "create_formatter": template -> text -> template + text + template,
+        "create_validator": min_length -> text -> len(text) >= min_length
+    }
+]
+
+# Generate and use lambda functions
+factory1 = function_factory[0]
+adder_creator = factory1["create_adder"]
+add_ten = adder_creator(10)
+
+multiplier_creator = factory1["create_multiplier"]
+multiply_by_three = multiplier_creator(3)
+
+poly_creator = factory1["create_polynomial"]
+quadratic = poly_creator(1, -2, 1)  # x^2 - 2x + 1
+
+print("Add 10 to 5:", add_ten(5))
+print("Multiply 7 by 3:", multiply_by_three(7))
+print("Quadratic f(3):", quadratic(3))
+
+factory2 = function_factory[1]
+formatter_creator = factory2["create_formatter"]
+star_formatter = formatter_creator("***")
+
+validator_creator = factory2["create_validator"]
+length_validator = validator_creator(5)
+
+formatted = star_formatter("HELLO")
+print("Formatted string:", formatted)
+print("Is 'test' valid?", length_validator("test"))
+print("Is 'testing' valid?", length_validator("testing"))
+
+print("")
+
+# ============================================================================
+# Chained Lambda Operations
+# ============================================================================
+
+print("6. Chained Lambda Operations")
+print("=============================")
+
+# Create a pipeline of lambda operations
+pipeline = {
+    "stages": [
+        {
+            "name": "input_stage",
+            "transform": x -> x * 2,
+            "next_stage": 1
+        },
+        {
+            "name": "middle_stage",
+            "transform": x -> x + 10,
+            "next_stage": 2
+        },
+        {
+            "name": "output_stage",
+            "transform": x -> x / 3,
+            "next_stage": -1  # End of pipeline
+        }
+    ],
+    "execute": (value, stage_index) -> {
+        if stage_index < 0 or stage_index >= len(pipeline["stages"]) {
+            return value
+        }
+
+        stages = pipeline["stages"]
+        current_stage = stages[stage_index]
+        transform_func = current_stage["transform"]
+        transformed = transform_func(value)
+
+        if current_stage["next_stage"] == -1 {
+            return transformed
+        } else {
+            # Recursive call to next stage
+            execute_func = pipeline["execute"]
+            return execute_func(transformed, current_stage["next_stage"])
+        }
+    }
+}
+
+# Execute the pipeline
+input_value = 5
+execute_func = pipeline["execute"]
+final_result = execute_func(input_value, 0)
+print("Pipeline result for input", input_value, ":", final_result)
+
+print("")
+
+# ============================================================================
+# Advanced Function Composition
+# ============================================================================
+
+print("7. Advanced Function Composition")
+print("=================================")
+
+# Create composable functions
+composers = [
+    {
+        "type": "function_composer",
+        "compose": (f, g) -> x -> f(g(x)),
+        "pipe": (f, g) -> x -> g(f(x)),
+        "curry": f -> x -> y -> f(x, y)
+    }
+]
+
+composer = composers[0]
+
+# Create some basic functions
+double = x -> x * 2
+add_five = x -> x + 5
+square = x -> x * x
+
+# Compose functions
+pipe_func = composer["pipe"]
+double_then_add = pipe_func(double, add_five)
+
+compose_func = composer["compose"]
+add_then_square = compose_func(square, add_five)
+
+print("Double then add 5 to 3:", double_then_add(3))  # (3 * 2) + 5 = 11
+print("Add 5 then square 3:", add_then_square(3))     # (3 + 5)^2 = 64
+
+# Curry a function
+add_function = (x, y) -> x + y
+curry_func = composer["curry"]
+curried_add = curry_func(add_function)
+add_ten_curried = curried_add(10)
+
+print("Curried add 10 to 7:", add_ten_curried(7))
+
+print("")
+
+# ============================================================================
+# Error Handling with Lambda Functions
+# ============================================================================
+
+print("8. Error Handling with Lambda Functions")
+print("========================================")
+
+# Functions with error handling
+safe_operations = [
+    {
+        "name": "safe_math",
+        "safe_divide": (a, b) -> {
+            if b == 0 {
+                return {"success": false, "error": "Division by zero", "result": 0}
+            }
+            return {"success": true, "error": "", "result": a / b}
+        },
+        "safe_access": (lst, index) -> {
+            if index < 0 or index >= len(lst) {
+                return {"success": false, "error": "Index out of bounds", "result": 0}
+            }
+            return {"success": true, "error": "", "result": lst[index]}
+        }
+    }
+]
+
+safe_ops = safe_operations[0]
+safe_divide_func = safe_ops["safe_divide"]
+safe_access_func = safe_ops["safe_access"]
+
+# Test safe operations
+div_result = safe_divide_func(10, 2)
+print("Safe division result:", div_result)
+
+div_error = safe_divide_func(10, 0)
+print("Safe division error:", div_error)
+
+test_list = [1, 2, 3, 4, 5]
+access_result = safe_access_func(test_list, 2)
+print("Safe access result:", access_result)
+
+access_error = safe_access_func(test_list, 10)
+print("Safe access error:", access_error)
+
+print("")
+
+# ============================================================================
+# Lambda Functions as Data
+# ============================================================================
+
+print("9. Lambda Functions as Data")
+print("============================")
+
+# Store lambda functions in complex data structures
+lambda_store = {
+    "math_funcs": [
+        {"name": "square", "func": x -> x * x},
+        {"name": "cube", "func": x -> x * x * x},
+        {"name": "sqrt_approx", "func": x -> {
+            if x < 0 {
+                return 0
+            }
+            # Simple approximation using Newton's method (few iterations)
+            guess = x / 2
+            for i = 0; i < 5; i++ {
+                guess = (guess + x / guess) / 2
+            }
+            return guess
+        }}
+    ],
+    "string_funcs": [
+        {"name": "reverse", "func": s -> {
+            # Simplified reverse - just return original for demo
+            return s + "_reversed"
+        }},
+        {"name": "uppercase", "func": s -> s},  # Simplified - would need built-in
+        {"name": "word_count", "func": s -> {
+            # Simplified word count based on length
+            if len(s) == 0 {
+                return 0
+            }
+            # Approximate word count (simplified for demo)
+            return len(s) / 5 + 1
+        }}
+    ]
+}
+
+# Use stored lambda functions
+math_funcs = lambda_store["math_funcs"]
+square_entry = math_funcs[0]
+square_func = square_entry["func"]
+print("Square of 7:", square_func(7))
+
+cube_entry = math_funcs[1]
+cube_func = cube_entry["func"]
+print("Cube of 4:", cube_func(4))
+
+sqrt_entry = math_funcs[2]
+sqrt_func = sqrt_entry["func"]
+print("Square root of 16 (approx):", sqrt_func(16))
+
+string_funcs = lambda_store["string_funcs"]
+word_count_entry = string_funcs[2]
+word_count_func = word_count_entry["func"]
+print("Word count of 'hello world test':", word_count_func("hello world test"))
+
+print("")
+
+# ============================================================================
+# Dynamic Lambda Creation
+# ============================================================================
+
+print("10. Dynamic Lambda Creation")
+print("============================")
+
+# Create lambdas dynamically based on parameters
+lambda_factory = {
+    "create_math_sequence": (operation, start, count) -> {
+        sequence = []
+        current = start
+
+        for i = 0; i < count; i++ {
+            append(sequence, current)
+            if operation == "add" {
+                current += start
+            } else if operation == "multiply" {
+                current *= start
+            } else if operation == "power" {
+                current = current * current
+            }
+        }
+
+        return sequence
+    },
+    "create_filter": condition_type -> {
+        if condition_type == "even" {
+            return x -> x % 2 == 0
+        } else if condition_type == "positive" {
+            return x -> x > 0
+        } else if condition_type == "large" {
+            return x -> x > 100
+        } else {
+            return x -> true
+        }
+    }
+}
+
+# Use dynamic lambda creation
+sequence_creator = lambda_factory["create_math_sequence"]
+add_sequence = sequence_creator("add", 5, 6)
+print("Addition sequence:", add_sequence)
+
+multiply_sequence = sequence_creator("multiply", 2, 5)
+print("Multiplication sequence:", multiply_sequence)
+
+filter_creator = lambda_factory["create_filter"]
+even_filter = filter_creator("even")
+positive_filter = filter_creator("positive")
+
+test_numbers = [-2, -1, 0, 1, 2, 3, 4, 5, 6]
+
+# Manual filtering since filter() isn't available
+even_results = []
+positive_results = []
+
+for num in test_numbers {
+    if even_filter(num) {
+        append(even_results, num)
+    }
+    if positive_filter(num) {
+        append(positive_results, num)
+    }
+}
+
+print("Even numbers:", even_results)
+print("Positive numbers:", positive_results)
+
+print("")
+
+# ============================================================================
+# Summary
+# ============================================================================
+
+print("11. Summary")
+print("============")
+print("Successfully demonstrated:")
+print("1. Basic lists of dictionaries with lambda functions")
+print("2. Nested lambda function calls using intermediate variables")
+print("3. Recursive lambda functions")
+print("4. Lambda function factories and higher-order functions")
+print("5. Function composition and currying")
+print("6. Pipeline processing with lambdas")
+print("7. Error handling in lambda functions")
+print("8. Complex nested data structures with lambda chains")
+print("9. Lambda functions as stored data")
+print("10. Dynamic lambda creation and filtering")
+print("11. Const lambda parameters in data structures")
+
+print("")
+
+# ============================================================================
+# Const Lambda Parameters in Data Structures
+# ============================================================================
+
+print("11. Const Lambda Parameters in Data Structures")
+print("================================================")
+
+# Const lambdas in lists
+const_lambda_list = [
+    const x -> x * x,                    # Single const parameter
+    (const a, const b) -> a + b,         # Multiple const parameters
+    const text -> len(text),             # Const parameter with built-in function
+    (const value, multiplier) -> {       # Mixed const and regular parameters
+        print("Processing const value:", value, "with multiplier:", multiplier)
+        multiplier = multiplier * 2      # Can modify regular parameter
+        return value * multiplier        # Cannot modify const parameter
+    }
+]
+
+print("Testing const lambdas from list:")
+
+# Test single const parameter lambda
+square_func = const_lambda_list[0]
+square_result = square_func(7)
+print("Square of 7:", square_result)
+
+# Test multiple const parameters lambda
+add_func = const_lambda_list[1]
+add_result = add_func(15, 25)
+print("15 + 25 =", add_result)
+
+# Test const parameter with built-in
+len_func = const_lambda_list[2]
+len_result = len_func("Zephyr")
+print("Length of 'Zephyr':", len_result)
+
+# Test mixed parameters
+mixed_func = const_lambda_list[3]
+mixed_result = mixed_func(10, 3)
+print("Mixed const/regular result:", mixed_result)
+
+# Const lambdas in dictionaries
+const_validators = {
+    "positive": const x -> x > 0,
+    "even": const num -> num % 2 == 0,
+    "range_check": (const value, const min_val, const max_val) -> {
+        return value >= min_val and value <= max_val
+    },
+    "string_validator": (const text, min_length) -> {
+        # const parameter cannot be modified
+        # min_length can be modified (regular parameter)
+        if min_length < 1 {
+            min_length = 1  # Adjust minimum length
+        }
+        return len(text) >= min_length
+    }
+}
+
+print("\nTesting const validators from dictionary:")
+
+# Test const lambda validators
+positive_validator = const_validators["positive"]
+print("Is 5 positive?", positive_validator(5))
+print("Is -3 positive?", positive_validator(-3))
+
+even_validator = const_validators["even"]
+print("Is 8 even?", even_validator(8))
+print("Is 7 even?", even_validator(7))
+
+range_validator = const_validators["range_check"]
+print("Is 15 in range [10, 20]?", range_validator(15, 10, 20))
+print("Is 25 in range [10, 20]?", range_validator(25, 10, 20))
+
+string_validator = const_validators["string_validator"]
+print("Is 'test' valid (min 3)?", string_validator("test", 3))
+print("Is 'hi' valid (min 5)?", string_validator("hi", 5))
+
+# Nested const lambdas in complex data structures
+nested_const_structure = {
+    "processors": [
+        {
+            "name": "doubler",
+            "process": const x -> x * 2,
+            "validator": const val -> val > 0
+        },
+        {
+            "name": "formatter",
+            "process": (const text, const prefix) -> prefix + ": " + text,
+            "validator": (const str, min_len) -> {
+                # const str cannot be modified, min_len can be
+                if min_len < 0 {
+                    min_len = 0
+                }
+                return len(str) >= min_len
+            }
+        }
+    ],
+    "execute_processor": (const processor_index, const input_value) -> {
+        if processor_index < 0 or processor_index >= len(nested_const_structure["processors"]) {
+            return "Invalid processor index"
+        }
+
+        processors = nested_const_structure["processors"]
+        processor = processors[processor_index]
+        process_func = processor["process"]
+
+        # Cannot modify const parameters processor_index or input_value
+        return process_func(input_value)
+    }
+}
+
+print("\nTesting nested const lambdas:")
+
+# Test nested const lambda execution
+executor = nested_const_structure["execute_processor"]
+double_result = executor(0, 21)  # Use doubler processor
+print("Doubler result:", double_result)
+
+# Access nested const lambda directly
+formatter_processor = nested_const_structure["processors"][1]
+format_func = formatter_processor["process"]
+format_result = format_func("Important Message", "NOTICE")
+print("Formatter result:", format_result)
+
+print("")
+
+print("")
+print("=== Lambda Dictionaries Nested Demo Complete ===")

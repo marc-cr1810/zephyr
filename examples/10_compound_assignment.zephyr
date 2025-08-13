@@ -1,0 +1,409 @@
+# Zephyr Compound Assignment Operators - Example 10
+# Comprehensive demonstration of compound assignment features
+
+print("=== Zephyr Compound Assignment Demo ===")
+print("")
+
+# ============================================================================
+# Basic Compound Assignment
+# ============================================================================
+
+print("1. Basic Compound Assignment")
+print("=============================")
+
+# Addition assignment (+=)
+score = 100
+print("score = 100")
+score += 50
+print("score += 50     => score =", score)  # 150
+
+# Subtraction assignment (-=)
+health = 200
+print("health = 200")
+health -= 25
+print("health -= 25    => health =", health)  # 175
+
+# Multiplication assignment (*=)
+damage = 10
+print("damage = 10")
+damage *= 3
+print("damage *= 3     => damage =", damage)  # 30
+
+# Division assignment (/=)
+money = 1000
+print("money = 1000")
+money /= 4
+print("money /= 4      => money =", money)  # 250
+
+# Modulo assignment (%=)
+remainder = 17
+print("remainder = 17")
+remainder %= 5
+print("remainder %= 5  => remainder =", remainder)  # 2
+
+print("\n🔤 String Compound Operations")
+print("=============================")
+
+# String concatenation with +=
+message = "Hello"
+print("message = 'Hello'")
+message += " Zephyr!"
+print("message += ' Zephyr!'  => message =", message)
+
+# String repetition with *=
+border = "="
+print("border = '='")
+border *= 30
+print("border *= 30              => border =", border)
+
+# Pattern building
+pattern = "ABC"
+pattern += "123"
+pattern *= 2
+print("Pattern operations        => pattern =", pattern)
+
+print("")
+
+# ============================================================================
+# Increment and Decrement Operators
+# ============================================================================
+
+print("2. Increment and Decrement Operators")
+print("=====================================")
+
+# Statement-level increment/decrement
+counter = 5
+print("counter = 5")
+counter++
+print("After counter++: counter =", counter)  # 6
+
+value = 15
+print("value = 15")
+value--
+print("After value--: value =", value)  # 14
+
+# Prefix operators
+prefix_test = 10
+print("prefix_test = 10")
+++prefix_test
+print("After ++prefix_test: prefix_test =", prefix_test)  # 11
+
+# Works with floats
+float_val = 7.5
+print("float_val = 7.5")
+float_val++
+print("After float_val++: float_val =", float_val)  # 8.5
+
+print("")
+
+# ============================================================================
+# Class Member Compound Assignment
+# ============================================================================
+
+print("3. Class Member Compound Assignment")
+print("====================================")
+
+class GameCharacter {
+    func init(name, level) {
+        this.name = name
+        this.level = level
+        this.health = 100
+        this.experience = 0
+        this.gold = 50
+    }
+
+    func show_stats() {
+        print(this.name + " (Level " + str(this.level) + ")")
+        print("  Health: " + str(this.health) + " | XP: " + str(this.experience) + " | Gold: " + str(this.gold))
+    }
+
+    func gain_experience(amount) {
+        this.experience += amount
+        print("Gained " + str(amount) + " XP!")
+
+        # Check for level up
+        if this.experience >= 100 {
+            this.level += 1
+            this.experience -= 100
+            this.health += 20
+            print("Level up! Now level " + str(this.level))
+        }
+    }
+
+    func take_damage(damage) {
+        this.health -= damage
+        print("Took " + str(damage) + " damage")
+    }
+
+    func find_treasure(gold_amount) {
+        this.gold += gold_amount
+        print("Found " + str(gold_amount) + " gold!")
+    }
+
+    func buy_health_potion(cost) {
+        if this.gold >= cost {
+            this.gold -= cost
+            this.health += 30
+            print("Bought health potion for " + str(cost) + " gold")
+        } else {
+            print("Not enough gold for potion!")
+        }
+    }
+}
+
+# Create and test character
+hero = GameCharacter("Adventurer", 1)
+print("Character created:")
+hero.show_stats()
+
+# Simulate gameplay with compound assignments
+print("\n--- Adventure Begins ---")
+hero.gain_experience(75)
+hero.show_stats()
+
+hero.take_damage(30)
+hero.find_treasure(100)
+hero.show_stats()
+
+hero.buy_health_potion(25)
+hero.show_stats()
+
+hero.gain_experience(40)  # Should trigger level up
+hero.show_stats()
+
+print("")
+
+# ============================================================================
+# Collection Compound Assignment
+# ============================================================================
+
+print("4. Collection Compound Assignment")
+print("==================================")
+
+# List operations
+player_scores = [85, 92, 78, 88, 95]
+print("Initial scores:", player_scores)
+
+# Apply various modifications
+player_scores[0] += 5       # Bonus points
+player_scores[1] *= 1.1     # Grade curve
+player_scores[2] -= 3       # Penalty
+player_scores[3] /= 2       # Special case
+print("After modifications:", player_scores)
+
+# Dictionary operations
+inventory = {"weapons": 5, "potions": 12, "gold": 250}
+print("\nInitial inventory:", inventory)
+
+inventory["weapons"] += 2   # Found new weapons
+inventory["potions"] -= 4   # Used some potions
+inventory["gold"] *= 1.1    # Interest earned
+print("After updates:", inventory)
+
+print("")
+
+# ============================================================================
+# Nested Structure Operations
+# ============================================================================
+
+print("5. Nested Structure Operations")
+print("===============================")
+
+# Complex nested data
+game_world = {
+    "regions": [
+        {"name": "Forest", "enemies": 15, "treasures": 3},
+        {"name": "Cave", "enemies": 8, "treasures": 5}
+    ],
+    "global_stats": {"total_enemies": 0, "total_treasures": 0}
+}
+
+print("Initial world data:")
+print("Forest:", game_world["regions"][0])
+print("Cave:", game_world["regions"][1])
+
+# Defeat some enemies
+game_world["regions"][0]["enemies"] -= 5
+game_world["regions"][1]["enemies"] -= 3
+print("\nAfter combat:")
+print("Forest enemies:", game_world["regions"][0]["enemies"])
+print("Cave enemies:", game_world["regions"][1]["enemies"])
+
+# Find treasures
+game_world["regions"][0]["treasures"] += 2
+game_world["regions"][1]["treasures"] *= 2
+print("\nAfter treasure hunting:")
+print("Forest treasures:", game_world["regions"][0]["treasures"])
+print("Cave treasures:", game_world["regions"][1]["treasures"])
+
+# Update global statistics
+game_world["global_stats"]["total_enemies"] += game_world["regions"][0]["enemies"]
+game_world["global_stats"]["total_enemies"] += game_world["regions"][1]["enemies"]
+game_world["global_stats"]["total_treasures"] += game_world["regions"][0]["treasures"]
+game_world["global_stats"]["total_treasures"] += game_world["regions"][1]["treasures"]
+print("\nGlobal stats:", game_world["global_stats"])
+
+print("")
+
+# ============================================================================
+# Loop Integration
+# ============================================================================
+
+print("6. Loop Integration")
+print("===================")
+
+# Factorial calculation using compound assignment
+factorial_n = 6
+factorial_result = 1
+print("Calculating " + str(factorial_n) + "! using compound assignment:")
+
+for i = 1; i <= factorial_n; i++ {
+    factorial_result *= i
+    print("Step " + str(i) + ": " + str(factorial_result))
+}
+print("Final result: " + str(factorial_n) + "! =", factorial_result)
+
+# Sum of squares with compound assignment
+sum_squares = 0
+limit = 5
+print("\nSum of squares from 1 to " + str(limit) + ":")
+for i = 1; i <= limit; i++ {
+    square = i * i
+    sum_squares += square
+    print("i=" + str(i) + ", i²=" + str(square) + ", sum=" + str(sum_squares))
+}
+
+# String building in loop
+report = "Summary: "
+data_points = ["players=4", "score=1250", "time=45min"]
+for point in data_points {
+    report += point
+    if point != "time=45min" {
+        report += ", "
+    }
+}
+print("\nBuilt report:", report)
+
+print("")
+
+# ============================================================================
+# Advanced Examples
+# ============================================================================
+
+print("7. Advanced Examples")
+print("====================")
+
+# Lambda function integration
+multiplier_func = x -> x * 2.5
+bonus_func = x -> x + 100
+
+base_value = 200
+print("base_value = 200")
+base_value += bonus_func(50)     # base_value += 150
+print("base_value += bonus_func(50)  => base_value =", base_value)
+base_value *= multiplier_func(1) # base_value *= 2.5
+print("base_value *= multiplier_func(1) => base_value =", base_value)
+
+# Complex calculation example
+physics_simulation = {
+    "objects": [
+        {"mass": 10.0, "velocity": 5.0, "acceleration": 2.0},
+        {"mass": 15.0, "velocity": 3.0, "acceleration": 1.5}
+    ]
+}
+
+print("\nPhysics simulation using compound assignment:")
+time_step = 0.1
+steps = 3
+
+for step = 1; step <= steps; step++ {
+    print("Time step " + str(step) + ":")
+
+    for i = 0; i < len(physics_simulation["objects"]); i++ {
+        # Update velocity: v = v + a*t
+        physics_simulation["objects"][i]["velocity"] += physics_simulation["objects"][i]["acceleration"] * time_step
+
+        print("  Object " + str(i + 1) + ": velocity = " + str(physics_simulation["objects"][i]["velocity"]))
+    }
+}
+
+print("")
+
+# ============================================================================
+# Performance Example
+# ============================================================================
+
+print("8. Performance Example")
+print("=======================")
+
+# Large-scale data processing
+print("Processing large dataset with compound assignment:")
+dataset = []
+size = 100
+
+# Build dataset
+for i = 1; i <= size; i++ {
+    append(dataset, i)
+}
+
+# Process dataset - apply transformations
+processing_total = 0
+for i = 0; i < len(dataset); i++ {
+    dataset[i] *= 2        # Double all values
+    dataset[i] += 10       # Add baseline
+    processing_total += dataset[i]
+}
+
+average = processing_total / len(dataset)
+print("Processed " + str(len(dataset)) + " items")
+print("Average after processing:", average)
+
+print("\n🧪 Error Handling Examples")
+print("==========================")
+
+# Division by zero protection
+print("Testing division by zero handling:")
+try {
+    risky_value = 42
+    risky_value /= 0
+} catch e {
+    print("✓ Caught division by zero:", e)
+}
+
+# Type safety demonstration
+print("\nTesting type safety:")
+try {
+    mixed_operation = 100
+    mixed_operation += 25.5  # int + float (should work)
+    print("✓ Mixed int/float worked:", mixed_operation)
+} catch e {
+    print("Caught type error:", e)
+}
+
+print("")
+
+# ============================================================================
+# Best Practices Summary
+# ============================================================================
+
+print("9. Best Practices Summary")
+print("===========================")
+print("Use compound assignment for clarity:")
+print("   x += 5 is clearer than x = x + 5")
+print("")
+print("Statement-level increment/decrement:")
+print("   counter++ as statements work perfectly")
+print("")
+print("Member compound assignment:")
+print("   obj.member += 1 works universally")
+print("")
+print("Collection operations:")
+print("   list[index] *= 2 and dict[key] += value work great")
+print("")
+print("Inside class methods:")
+print("   this.member++ works perfectly in methods")
+
+print("")
+
+print("")
+print("=== Compound Assignment Demo Complete ===")

@@ -1,0 +1,500 @@
+# 21_exit_function.zephyr
+# Comprehensive demonstration of the exit() function in Zephyr
+# This example showcases proper usage patterns, exit codes, and best practices
+
+print("=== Zephyr exit() Function Examples ===")
+print("")
+
+# ==============================================================================
+# Introduction to exit() Function
+# ==============================================================================
+
+print("--- Introduction to exit() Function ---")
+print("The exit() function terminates the program immediately with a specified exit code.")
+print("Exit code 0 indicates success, non-zero codes indicate various error conditions.")
+print("Use exit() for unrecoverable errors that require immediate program termination.")
+print("")
+
+# ==============================================================================
+# Basic exit() Usage Patterns
+# ==============================================================================
+
+print("1. Basic exit() Usage Patterns")
+print("===============================")
+
+# Function demonstrating graceful exit with success code
+func demonstrate_success_exit() {
+    print("Operation completed successfully")
+    print("Exiting with success code 0")
+    # exit(0)  # Commented out for demonstration
+    print("(exit(0) call commented out for demo)")
+}
+
+# Function demonstrating error exit with specific code
+func demonstrate_error_exit(error_type) {
+    if error_type == "config" {
+        print("FATAL ERROR: Configuration file not found")
+        print("Exiting with error code 1")
+        # exit(1)  # Commented out for demonstration
+        print("(exit(1) call commented out for demo)")
+    } else if error_type == "network" {
+        print("FATAL ERROR: Network connection failed")
+        print("Exiting with error code 2")
+        # exit(2)  # Commented out for demonstration
+        print("(exit(2) call commented out for demo)")
+    } else {
+        print("FATAL ERROR: Unknown error occurred")
+        print("Exiting with error code 99")
+        # exit(99)  # Commented out for demonstration
+        print("(exit(99) call commented out for demo)")
+    }
+}
+
+# Test basic patterns
+demonstrate_success_exit()
+print("")
+demonstrate_error_exit("config")
+print("")
+demonstrate_error_exit("network")
+print("")
+demonstrate_error_exit("unknown")
+print("")
+
+# ==============================================================================
+# Configuration Validation with exit()
+# ==============================================================================
+
+print("2. Configuration Validation")
+print("============================")
+
+func validate_app_config(config) {
+    print("Validating application configuration...")
+
+    # Critical: Configuration must exist
+    if config == none {
+        print("FATAL ERROR: Configuration is null")
+        print("Application cannot start without configuration")
+        # exit(10)
+        print("(Would exit with code 10)")
+        return false
+    }
+
+    # Critical: Database URL is required
+    if not ("database_url" in config) {
+        print("FATAL ERROR: Missing 'database_url' in configuration")
+        print("Database connection is required for operation")
+        # exit(11)
+        print("(Would exit with code 11)")
+        return false
+    }
+
+    # Critical: API key is required
+    if not ("api_key" in config) {
+        print("FATAL ERROR: Missing 'api_key' in configuration")
+        print("API authentication is required")
+        # exit(12)
+        print("(Would exit with code 12)")
+        return false
+    }
+
+    # Validate port number
+    if "port" in config {
+        port = config["port"]
+        if port < 1 or port > 65535 {
+            print("FATAL ERROR: Invalid port number:", port)
+            print("Port must be between 1 and 65535")
+            # exit(13)
+            print("(Would exit with code 13)")
+            return false
+        }
+    }
+
+    print("✓ Configuration validation passed")
+    return true
+}
+
+# Test configuration validation
+print("Testing valid configuration:")
+valid_config = {
+    "database_url": "postgresql://localhost:5432/myapp",
+    "api_key": "sk-1234567890abcdef",
+    "port": 8080,
+    "debug": true
+}
+validate_app_config(valid_config)
+
+print("\nTesting invalid configurations:")
+validate_app_config(none)
+validate_app_config({"api_key": "test"})  # Missing database_url
+validate_app_config({"database_url": "test://db", "port": 99999})  # Missing api_key, invalid port
+
+print("")
+
+# ==============================================================================
+# Resource Validation with exit()
+# ==============================================================================
+
+print("3. Resource Validation")
+print("=======================")
+
+func check_system_resources() {
+    print("Checking system resources...")
+
+    # Simulated resource checks
+    available_memory = 256  # MB
+    required_memory = 512   # MB
+    available_disk = 1024   # GB
+    required_disk = 2048    # GB
+
+    if available_memory < required_memory {
+        print("FATAL ERROR: Insufficient memory")
+        print("Required:", required_memory, "MB")
+        print("Available:", available_memory, "MB")
+        # exit(20)
+        print("(Would exit with code 20)")
+        return false
+    }
+
+    if available_disk < required_disk {
+        print("FATAL ERROR: Insufficient disk space")
+        print("Required:", required_disk, "GB")
+        print("Available:", available_disk, "GB")
+        # exit(21)
+        print("(Would exit with code 21)")
+        return false
+    }
+
+    print("✓ System resources are adequate")
+    return true
+}
+
+check_system_resources()
+print("")
+
+# ==============================================================================
+# Business Logic Validation with exit()
+# ==============================================================================
+
+print("4. Business Logic Validation")
+print("=============================")
+
+func validate_user_account(user) {
+    print("Validating user account...")
+
+    if user == none {
+        print("FATAL ERROR: User data is null")
+        # exit(30)
+        print("(Would exit with code 30)")
+        return false
+    }
+
+    # Critical business rule: Email is mandatory
+    if not ("email" in user) or user["email"] == "" {
+        print("FATAL ERROR: User email is required")
+        print("Email is mandatory for all user accounts")
+        # exit(31)
+        print("(Would exit with code 31)")
+        return false
+    }
+
+    # Critical business rule: Age verification for legal compliance
+    if "age" in user and user["age"] < 18 {
+        print("FATAL ERROR: User age", user["age"], "below legal minimum")
+        print("Legal compliance requires users to be 18+")
+        # exit(32)
+        print("(Would exit with code 32)")
+        return false
+    }
+
+    # Critical business rule: Valid user ID
+    if "id" in user and user["id"] <= 0 {
+        print("FATAL ERROR: Invalid user ID:", user["id"])
+        print("User ID must be a positive integer")
+        # exit(33)
+        print("(Would exit with code 33)")
+        return false
+    }
+
+    print("✓ User account validation passed")
+    return true
+}
+
+# Test user validation
+valid_user = {
+    "id": 12345,
+    "email": "user@example.com",
+    "age": 25,
+    "name": "Alice"
+}
+validate_user_account(valid_user)
+
+print("\nTesting invalid users:")
+validate_user_account(none)
+validate_user_account({"name": "Bob"})  # Missing email
+validate_user_account({"email": "minor@example.com", "age": 16})  # Underage
+validate_user_account({"email": "test@example.com", "id": -1})  # Invalid ID
+
+print("")
+
+# ==============================================================================
+# Class System Integrity with exit()
+# ==============================================================================
+
+print("5. Class System Integrity")
+print("==========================")
+
+class CriticalSystemComponent {
+    func init(component_id) {
+        if component_id == none or component_id == "" {
+            print("FATAL ERROR: Component ID cannot be null or empty")
+            # exit(40)
+            print("(Would exit with code 40)")
+            return
+        }
+
+        this.component_id = component_id
+        this.status = "initialized"
+        this.checksum = 54321
+    }
+
+    func validate_integrity() {
+        print("Validating component integrity...")
+
+        if this.checksum != 54321 {
+            print("FATAL ERROR: Component checksum corruption")
+            print("Expected: 54321, Found:", this.checksum)
+            print("Memory corruption detected")
+            # exit(41)
+            print("(Would exit with code 41)")
+            return false
+        }
+
+        if this.component_id == none {
+            print("FATAL ERROR: Component ID corrupted to null")
+            # exit(42)
+            print("(Would exit with code 42)")
+            return false
+        }
+
+        if this.status != "initialized" and this.status != "running" {
+            print("FATAL ERROR: Invalid component status:", this.status)
+            # exit(43)
+            print("(Would exit with code 43)")
+            return false
+        }
+
+        print("✓ Component integrity validated")
+        return true
+    }
+
+    func start() {
+        if not this.validate_integrity() {
+            return false
+        }
+
+        this.status = "running"
+        print("Component", this.component_id, "started successfully")
+        return true
+    }
+}
+
+# Test class system integrity
+component = CriticalSystemComponent("CORE_001")
+component.validate_integrity()
+component.start()
+
+print("")
+
+# ==============================================================================
+# Async System Validation with exit()
+# ==============================================================================
+
+print("6. Async System Validation")
+print("===========================")
+
+async func validate_async_operations() {
+    print("Validating async system...")
+
+    try {
+        # Test basic async functionality
+        test_async = async x -> x * 2
+        result = await test_async(21)
+
+        if result != 42 {
+            print("FATAL ERROR: Async operation failed")
+            print("Expected: 42, Got:", result)
+            # exit(50)
+            print("(Would exit with code 50)")
+            return false
+        }
+
+        # Test spawn functionality
+        spawn_test = async () -> "async_works"
+        promise = spawn spawn_test()
+        spawn_result = await promise
+
+        if spawn_result != "async_works" {
+            print("FATAL ERROR: Spawn operation failed")
+            print("Expected: 'async_works', Got:", spawn_result)
+            # exit(51)
+            print("(Would exit with code 51)")
+            return false
+        }
+
+        print("✓ Async system validation passed")
+        return true
+
+    } catch e {
+        print("FATAL ERROR: Async system validation failed:", e)
+        # exit(52)
+        print("(Would exit with code 52)")
+        return false
+    }
+}
+
+# Test async validation
+async_result = await validate_async_operations()
+print("")
+
+# ==============================================================================
+# Graceful Shutdown Patterns
+# ==============================================================================
+
+print("7. Graceful Shutdown Patterns")
+print("==============================")
+
+func graceful_shutdown(reason, exit_code) {
+    print("=== INITIATING GRACEFUL SHUTDOWN ===")
+    print("Shutdown reason:", reason)
+    print("Exit code:", exit_code)
+    print("")
+
+    # Step 1: Stop accepting new requests
+    print("1. Stopping new request acceptance...")
+
+    # Step 2: Complete pending operations
+    print("2. Completing pending operations...")
+
+    # Step 3: Close database connections
+    print("3. Closing database connections...")
+
+    # Step 4: Save critical state
+    print("4. Saving critical application state...")
+
+    # Step 5: Clean up temporary files
+    print("5. Cleaning up temporary files...")
+
+    # Step 6: Notify monitoring systems
+    print("6. Notifying monitoring systems...")
+
+    # Step 7: Release resource locks
+    print("7. Releasing resource locks...")
+
+    print("")
+    print("=== SHUTDOWN PREPARATION COMPLETE ===")
+    print("Final exit code:", exit_code)
+
+    # In production, this would call exit(exit_code)
+    # exit(exit_code)
+    print("(exit(" + str(exit_code) + ") call would occur here)")
+}
+
+# Demonstrate graceful shutdown scenarios
+print("Normal shutdown scenario:")
+graceful_shutdown("User requested shutdown", 0)
+print("")
+
+print("Error shutdown scenario:")
+graceful_shutdown("Critical system error detected", 1)
+print("")
+
+print("Configuration error shutdown scenario:")
+graceful_shutdown("Invalid configuration loaded", 2)
+print("")
+
+# ==============================================================================
+# Exit Code Documentation
+# ==============================================================================
+
+print("8. Exit Code Documentation")
+print("===========================")
+
+print("Standard Exit Codes Used in This Example:")
+print("")
+print("SUCCESS CODES:")
+print("  0   - Normal successful termination")
+print("")
+print("CONFIGURATION ERRORS (10-19):")
+print("  10  - Configuration is null")
+print("  11  - Missing database_url")
+print("  12  - Missing api_key")
+print("  13  - Invalid port number")
+print("")
+print("RESOURCE ERRORS (20-29):")
+print("  20  - Insufficient memory")
+print("  21  - Insufficient disk space")
+print("")
+print("BUSINESS LOGIC ERRORS (30-39):")
+print("  30  - User data is null")
+print("  31  - User email is required")
+print("  32  - User age below legal minimum")
+print("  33  - Invalid user ID")
+print("")
+print("SYSTEM INTEGRITY ERRORS (40-49):")
+print("  40  - Component ID null or empty")
+print("  41  - Component checksum corruption")
+print("  42  - Component ID corrupted")
+print("  43  - Invalid component status")
+print("")
+print("ASYNC SYSTEM ERRORS (50-59):")
+print("  50  - Async operation failed")
+print("  51  - Spawn operation failed")
+print("  52  - Async system validation failed")
+print("")
+
+# ==============================================================================
+# Best Practices Summary
+# ==============================================================================
+
+print("9. Best Practices for exit() Usage")
+print("===================================")
+
+print("DO:")
+print("✓ Use meaningful, documented exit codes")
+print("✓ Log clear error messages before calling exit()")
+print("✓ Use exit() only for unrecoverable errors")
+print("✓ Group related exit codes in ranges (e.g., 10-19 for config errors)")
+print("✓ Perform critical cleanup before exit() when possible")
+print("✓ Document all exit codes in your application")
+print("✓ Use exit(0) for successful program termination")
+print("")
+
+print("DON'T:")
+print("✗ Use exit() for recoverable errors (use try/catch instead)")
+print("✗ Use random or undocumented exit codes")
+print("✗ Call exit() without logging the reason")
+print("✗ Use exit() in normal control flow")
+print("✗ Forget to clean up critical resources before exit")
+print("✗ Use the same exit code for different error types")
+print("")
+
+print("WHEN TO USE exit():")
+print("• Critical system configuration errors")
+print("• Unrecoverable resource allocation failures")
+print("• System integrity violations")
+print("• Business rule violations that require immediate shutdown")
+print("• Security violations or data corruption detection")
+print("• Legal/regulatory compliance violations")
+print("")
+
+print("WHEN TO USE try/catch INSTEAD:")
+print("• Expected runtime errors")
+print("• Input validation failures")
+print("• Network timeouts or temporary failures")
+print("• User input errors")
+print("• Recoverable operation failures")
+print("")
+
+print("=== exit() Function Examples Complete ===")
+print("Remember: exit() is a powerful tool for handling critical failures.")
+print("Use it wisely to ensure robust and reliable applications!")

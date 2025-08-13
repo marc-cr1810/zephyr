@@ -1,0 +1,391 @@
+# Zephyr String Operations and Formatting
+# This file demonstrates string manipulation, multiplication, and formatting features
+
+print("=== Zephyr String Operations Demo ===")
+print("")
+
+# ============================================================================
+# Basic String Operations
+# ============================================================================
+
+print("1. Basic String Operations")
+print("===========================")
+
+# String concatenation
+first_name = "John"
+last_name = "Doe"
+full_name = first_name + " " + last_name
+print("Full name:", full_name)
+
+# String properties
+message = "Hello, Zephyr!"
+print("Message:", message)
+print("Message length:", len(message))
+
+# String conversion
+number = 42
+text_number = str(number)
+print("Number as string:", text_number)
+print("Type of original:", type(number))
+print("Type of converted:", type(text_number))
+
+print("")
+
+# ============================================================================
+# String Multiplication (Repetition)
+# ============================================================================
+
+print("2. String Multiplication (Repetition)")
+print("======================================")
+
+# Basic string repetition
+equals_line = "=" * 40
+stars_line = "*" * 25
+dashes = "-" * 15
+
+print("Equals line:", equals_line)
+print("Stars line:", stars_line)
+print("Dashes:", dashes)
+
+# String repetition with variables
+char = "#"
+count = 12
+pattern = char * count
+print("Pattern (" + char + " * " + str(count) + "):", pattern)
+
+# Reverse multiplication (number * string)
+reverse_pattern = 8 * "ABC"
+print("Reverse pattern (8 * \"ABC\"):", reverse_pattern)
+
+# Different characters and lengths
+dot_pattern = "." * 20
+arrow_pattern = "arrow" * 3
+greeting_pattern = "Hi" * 5
+
+print("Dot pattern:", dot_pattern)
+print("Arrow pattern:", arrow_pattern)
+print("Greeting pattern:", greeting_pattern)
+
+print("")
+
+# ============================================================================
+# String Multiplication Edge Cases
+# ============================================================================
+
+print("3. String Multiplication Edge Cases")
+print("====================================")
+
+# Zero repetition
+empty_result = "test" * 0
+zero_reverse = 0 * "hello"
+print("\"test\" * 0 =", empty_result, "(empty)")
+print("0 * \"hello\" =", zero_reverse, "(empty)")
+
+# Single repetition
+single_result = "word" * 1
+one_reverse = 1 * "text"
+print("\"word\" * 1 =", single_result)
+print("1 * \"text\" =", one_reverse)
+
+# Negative repetition (returns empty string)
+neg_count = -3
+neg_result = "test" * neg_count
+neg_reverse = (-2) * "hello"
+print("\"test\" * (-3) =", neg_result, "(empty)")
+print("(-2) * \"hello\" =", neg_reverse, "(empty)")
+
+# Empty string repetition
+empty_string_result = "" * 10
+print("\"\" * 10 =", empty_string_result, "(empty)")
+
+print("")
+
+# ============================================================================
+# Practical String Formatting
+# ============================================================================
+
+print("4. Practical String Formatting")
+print("===============================")
+
+# Creating headers and separators
+func create_header(title) {
+    title_length = len(title)
+    border_length = title_length + 4
+    border = "=" * border_length
+
+    return border + "\n  " + title + "\n" + border
+}
+
+func create_section(title, content) {
+    separator = "-" * 30
+    return separator + "\n" + title + "\n" + separator + "\n" + content
+}
+
+# Test header creation
+header1 = create_header("Important Notice")
+print(header1)
+
+header2 = create_header("Status Report")
+print(header2)
+
+# Test section creation
+section1 = create_section("Overview", "This is the overview content")
+print(section1)
+
+print("")
+
+# ============================================================================
+# String Formatting with Data Structures
+# ============================================================================
+
+print("5. String Formatting with Data Structures")
+print("===========================================")
+
+class TextFormatter {
+    func init() {
+        this.styles = {
+            "border": "=",
+            "separator": "-",
+            "bullet": "*",
+            "indent": " "
+        }
+        this.sizes = {
+            "small": 20,
+            "medium": 40,
+            "large": 60
+        }
+    }
+
+    func create_line(style, size_name) {
+        char = this.styles[style]
+        length = this.sizes[size_name]
+        return char * length
+    }
+
+    func create_indented_text(text, level) {
+        indent = this.styles["indent"] * (level * 4)
+        return indent + text
+    }
+
+    func create_bullet_list(items) {
+        result = ""
+        for item in items {
+            line = this.styles["bullet"] + " " + item + "\n"
+            result = result + line
+        }
+        return result
+    }
+
+    func format_table_row(columns, width) {
+        row = ""
+        for column in columns {
+            padding_needed = width - len(column)
+            if padding_needed > 0 {
+                padding = " " * padding_needed
+                row = row + column + padding + " | "
+            } else {
+                row = row + column + " | "
+            }
+        }
+        return row
+    }
+}
+
+formatter = TextFormatter()
+
+# Test different line styles
+small_border = formatter.create_line("border", "small")
+medium_sep = formatter.create_line("separator", "medium")
+large_border = formatter.create_line("border", "large")
+
+print("Small border:", small_border)
+print("Medium separator:", medium_sep)
+print("Large border:", large_border)
+
+# Test indented text
+level1 = formatter.create_indented_text("Level 1 text", 1)
+level2 = formatter.create_indented_text("Level 2 text", 2)
+level3 = formatter.create_indented_text("Level 3 text", 3)
+
+print("Indented text:")
+print(level1)
+print(level2)
+print(level3)
+
+# Test bullet list
+items = ["First item", "Second item", "Third item"]
+bullet_list = formatter.create_bullet_list(items)
+print("Bullet list:")
+print(bullet_list)
+
+print("")
+
+# ============================================================================
+# Advanced String Operations with Chaining
+# ============================================================================
+
+print("6. Advanced String Operations with Chaining")
+print("============================================")
+
+class DocumentGenerator {
+    func init() {
+        this.templates = [
+            {
+                "name": "Report",
+                "header_char": "=",
+                "separator_char": "-",
+                "sections": [
+                    {"title": "Summary", "content": "Executive summary here"},
+                    {"title": "Details", "content": "Detailed information here"},
+                    {"title": "Conclusion", "content": "Final thoughts here"}
+                ]
+            },
+            {
+                "name": "Letter",
+                "header_char": "#",
+                "separator_char": "~",
+                "sections": [
+                    {"title": "Header", "content": "Dear recipient"},
+                    {"title": "Body", "content": "Letter content here"},
+                    {"title": "Footer", "content": "Sincerely, sender"}
+                ]
+            }
+        ]
+        this.config = {
+            "page_width": 50,
+            "indent_size": 4,
+            "line_spacing": 2
+        }
+    }
+
+    func generate_document(template_index) {
+        template = this.templates[template_index]
+        width = this.config["page_width"]
+
+        # Create header using string multiplication
+        header_char = template["header_char"]
+        header_line = header_char * width
+
+        print(header_line)
+        print("Document Type: " + template["name"])
+        print(header_line)
+
+        # Generate sections
+        for section in template["sections"] {
+            this.generate_section(section, template["separator_char"])
+        }
+
+        print(header_line)
+    }
+
+    func generate_section(section, sep_char) {
+        width = this.config["page_width"]
+        separator = sep_char * (width / 2)
+
+        print(separator + " " + section["title"] + " " + separator)
+        print(section["content"])
+        print("")
+    }
+
+    func create_table_border(columns) {
+        total_width = 0
+        for col in columns {
+            total_width = total_width + len(col) + 3  # +3 for " | "
+        }
+        return "+" + "-" * (total_width - 1) + "+"
+    }
+}
+
+# Test document generation
+doc_gen = DocumentGenerator()
+
+print("Generating Report document:")
+doc_gen.generate_document(0)
+
+print("Generating Letter document:")
+doc_gen.generate_document(1)
+
+# Test chained access to string multiplication results
+report_header_char = doc_gen.templates[0]["header_char"]
+report_width = doc_gen.config["page_width"]
+custom_header = report_header_char * report_width
+
+print("Custom header from chained access:", custom_header)
+
+# Test assignment with chaining and string multiplication
+doc_gen.templates[1]["sections"][0]["title"] = "Modified Header"
+new_sep = doc_gen.templates[1]["separator_char"] * 25
+doc_gen.config["page_width"] = 45
+
+print("Configuration updated via chaining")
+
+print("")
+
+# ============================================================================
+# String Operations Integration Summary
+# ============================================================================
+
+print("7. String Operations Integration Summary")
+print("========================================")
+
+# Combine all features
+class IntegrationDemo {
+    func init() {
+        this.data = {
+            "patterns": ["*" * 10, "=" * 15, "-" * 20],
+            "multipliers": [3, 5, 8],
+            "templates": [
+                {"border": "#" * 30, "content": "Template 1"},
+                {"border": "~" * 35, "content": "Template 2"}
+            ]
+        }
+    }
+
+    func demonstrate_integration() {
+        print("Integration of all string features:")
+
+        # Access patterns created with string multiplication
+        for i = 0; i < len(this.data["patterns"]); i = i + 1 {
+            pattern = this.data["patterns"][i]
+            print("Pattern " + str(i) + ":", pattern)
+        }
+
+        # Create new patterns using chained access
+        multiplier = this.data["multipliers"][1]  # 5
+        new_pattern = "X" * multiplier
+        print("New pattern (X * 5):", new_pattern)
+
+        # Access template borders
+        border1 = this.data["templates"][0]["border"]
+        border2 = this.data["templates"][1]["border"]
+        print("Template borders:")
+        print("Template 1:", border1)
+        print("Template 2:", border2)
+
+        # Assignment with string multiplication in chained context
+        this.data["templates"][0]["border"] = "%" * 40
+        print("Updated template 1 border:", this.data["templates"][0]["border"])
+    }
+}
+
+demo = IntegrationDemo()
+demo.demonstrate_integration()
+
+print("")
+
+# Final success banner
+banner_char = "*"
+banner = banner_char * 20
+print(banner)
+print("STRING OPERATIONS COMPLETE!")
+print("- String concatenation")
+print("- String multiplication/repetition")
+print("- String multiplication with chaining")
+print("- Edge cases handled properly")
+print("- Integration with all language features")
+print(banner)
+
+print("")
+
+print("")
+print("=== String Operations Demo Complete ===")

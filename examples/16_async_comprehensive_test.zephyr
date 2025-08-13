@@ -1,0 +1,483 @@
+# Zephyr Async/Await Comprehensive Test
+# This file demonstrates comprehensive async/await functionality, edge cases,
+# and proper use of exit() for critical async system failures
+
+print("=== Zephyr Async/Await Comprehensive Demo ===")
+print("")
+
+# ============================================================================
+# Critical Async System Validation
+# ============================================================================
+
+print("0. Critical Async System Validation")
+print("====================================")
+
+# Function to validate async system integrity at startup
+async func validate_async_system() {
+    print("Validating async system integrity...")
+
+    # Test basic async/await functionality
+    try {
+        test_async = async x -> x + 1
+        result = await test_async(5)
+        if result != 6 {
+            print("FATAL ERROR: Basic async operation failed")
+            print("Expected: 6, Got:", result)
+            print("Async system is not functioning correctly")
+            exit(300)
+        }
+    } catch e {
+        print("FATAL ERROR: Async system validation failed:", e)
+        print("Core async functionality is broken")
+        exit(301)
+    }
+
+    # Test spawn functionality
+    try {
+        spawn_test = async () -> "spawn_works"
+        promise = spawn spawn_test()
+        spawn_result = await promise
+        if spawn_result != "spawn_works" {
+            print("FATAL ERROR: Spawn system failure")
+            print("Expected: 'spawn_works', Got:", spawn_result)
+            print("Parallel execution is compromised")
+            exit(302)
+        }
+    } catch e {
+        print("FATAL ERROR: Spawn system validation failed:", e)
+        print("Parallel execution system is broken")
+        exit(303)
+    }
+
+    print("✓ Async system validation completed successfully")
+    return "validation_complete"
+}
+
+# Critical validation for Promise.all functionality
+async func validate_promise_all_system() {
+    print("Validating Promise.all system...")
+
+    try {
+        # Test multiple async operations
+        async_op1 = async () -> "result1"
+        async_op2 = async () -> "result2"
+        async_op3 = async () -> "result3"
+
+        promises = [
+            spawn async_op1(),
+            spawn async_op2(),
+            spawn async_op3()
+        ]
+
+        results = await all(promises)
+
+        if len(results) != 3 {
+            print("FATAL ERROR: Promise.all returned wrong number of results")
+            print("Expected: 3, Got:", len(results))
+            exit(304)
+        }
+
+        if results[0] != "result1" or results[1] != "result2" or results[2] != "result3" {
+            print("FATAL ERROR: Promise.all results corrupted")
+            print("Results:", results)
+            exit(305)
+        }
+
+    } catch e {
+        print("FATAL ERROR: Promise.all system failure:", e)
+        print("Concurrent operation coordination is broken")
+        exit(306)
+    }
+
+    print("✓ Promise.all system validation completed")
+}
+
+# Validate async error handling system
+async func validate_async_error_handling() {
+    print("Validating async error handling...")
+
+    # Test that async errors are properly caught
+    error_caught = false
+    try {
+        faulty_async = async () -> {
+            # Simulate a critical async error
+            return 10 / 0  # Division by zero
+        }
+        result = await faulty_async()
+        print("FATAL ERROR: Async error was not caught")
+        print("Error handling system is compromised")
+        exit(307)
+    } catch e {
+        error_caught = true
+        print("✓ Async error properly caught:", e)
+    }
+
+    if not error_caught {
+        print("FATAL ERROR: Async error handling system failure")
+        print("Critical errors may go undetected")
+        exit(308)
+    }
+
+    print("✓ Async error handling validation completed")
+}
+
+# Run critical async system validations
+print("Running critical async system validations...")
+
+# These validations are essential for system integrity
+validation_result = await validate_async_system()
+await validate_promise_all_system()
+await validate_async_error_handling()
+
+print("All async system validations passed - proceeding with examples")
+print("")
+
+# Exit code documentation for async system
+print("Async System Exit Codes:")
+print("  300 - Basic async operation failure")
+print("  301 - Core async functionality broken")
+print("  302 - Spawn system failure")
+print("  303 - Parallel execution system broken")
+print("  304 - Promise.all wrong result count")
+print("  305 - Promise.all result corruption")
+print("  306 - Concurrent operation coordination broken")
+print("  307 - Async error not caught")
+print("  308 - Async error handling system failure")
+print("")
+
+# ============================================================================
+# Immediate Async Lambda Usage
+# ============================================================================
+
+print("1. Immediate Async Lambda Usage")
+print("================================")
+immediate_lambda = async x -> x * 2
+immediate_result = await immediate_lambda(5)
+print("Immediate result:", immediate_result)
+
+print("")
+
+# ============================================================================
+# Delayed Async Lambda Usage
+# ============================================================================
+
+print("2. Delayed Async Lambda Usage")
+print("==============================")
+delayed_lambda = async y -> y + 10
+other_var = "some other work"
+print("Did other work:", other_var)
+delayed_result = await delayed_lambda(15)
+print("Delayed result:", delayed_result)
+
+# Test 3: Create multiple lambdas and use them
+print("Test 3: Multiple lambdas")
+lambda1 = async a -> a * 3
+lambda2 = async b -> b - 5
+lambda3 = async c -> c / 2
+
+result1 = await lambda1(10)
+result2 = await lambda2(20)
+result3 = await lambda3(8)
+print("Multiple results:", result1, result2, result3)
+
+# Test 4: Overwrite lambda variables
+print("Test 4: Lambda variable overwriting")
+reused_lambda = async x -> x + 1
+first_use = await reused_lambda(5)
+print("First use:", first_use)
+
+reused_lambda = async x -> x * 10
+second_use = await reused_lambda(5)
+print("Second use (overwritten):", second_use)
+
+# Test 5: Complex lambda bodies
+print("Test 5: Complex lambda bodies")
+complex_lambda = async value -> {
+    step1 = value * 2
+    step2 = step1 + 10
+    if step2 > 20 {
+        return step2 * 2
+    } else {
+        return step2
+    }
+}
+
+complex_result1 = await complex_lambda(5)
+complex_result2 = await complex_lambda(15)
+print("Complex results:", complex_result1, complex_result2)
+
+print("")
+
+# ============================================================================
+# Nested Async Lambda Calls
+# ============================================================================
+
+print("5. Nested Async Lambda Calls")
+print("==============================")
+multiplier = async x -> x * 3
+adder = async y -> {
+    temp = await multiplier(y)
+    return temp + 100
+}
+
+nested_result = await adder(5)
+print("Nested result:", nested_result)
+
+# Test 7: Lambda with spawn
+print("Test 7: Lambda with spawn")
+spawn_lambda = async z -> z * z
+spawned_promise = spawn spawn_lambda(7)
+spawned_result = await spawned_promise
+print("Spawned result:", spawned_result)
+
+# Test 8: Multiple calls to same lambda
+print("Test 8: Multiple calls to same lambda")
+repeated_lambda = async n -> n + n
+for i = 0; i < 5; i++ {
+    repeated_result = await repeated_lambda(i)
+    print("Call", i, "result:", repeated_result)
+}
+
+# Test 9: Lambda stored in data structures
+print("Test 9: Lambdas in data structures")
+lambda_dict = {
+    "double": async x -> x * 2,
+    "triple": async x -> x * 3
+}
+
+# Note: Using two-step approach due to parser limitation
+doubler = lambda_dict["double"]
+tripler = lambda_dict["triple"]
+
+double_result = await doubler(8)
+triple_result = await tripler(8)
+print("Dict lambda results:", double_result, triple_result)
+
+print("")
+
+# ============================================================================
+# Error Handling with Async Lambdas
+# ============================================================================
+
+print("6. Error Handling with Async Lambdas")
+print("=====================================")
+error_lambda = async input -> {
+    if input == 0 {
+        return "Cannot process zero"
+    }
+    return input * 5
+}
+
+try {
+    error_result1 = await error_lambda(4)
+    error_result2 = await error_lambda(0)
+    print("Error handling results:", error_result1, error_result2)
+} catch e {
+    print("Caught error:", e)
+}
+
+print("")
+
+# ============================================================================
+# Simplified Stress Test
+# ============================================================================
+
+print("7. Simplified Stress Test")
+print("==========================")
+simple_stress_lambda = async x -> x + 1
+for i = 0; i < 5; i++ {
+    stress_result = await simple_stress_lambda(i)
+    print("Stress iteration", i, "result:", stress_result)
+}
+print("Simplified stress test completed")
+
+print("")
+
+# ============================================================================
+# Lambda Reassignment in Loop
+# ============================================================================
+
+print("8. Lambda Reassignment in Loop")
+print("===============================")
+loop_lambda = async x -> x
+loop_lambda = async x -> x * 1
+loop_result1 = await loop_lambda(5)
+print("Loop iteration 1 result:", loop_result1)
+
+loop_lambda = async x -> x * 2
+loop_result2 = await loop_lambda(5)
+print("Loop iteration 2 result:", loop_result2)
+
+loop_lambda = async x -> x * 3
+loop_result3 = await loop_lambda(5)
+print("Loop iteration 3 result:", loop_result3)
+
+print("")
+
+# ============================================================================
+# Final Verification
+# ============================================================================
+
+print("9. Async Class Methods Comprehensive Test")
+print("==========================================")
+
+# Class with comprehensive async methods and const parameters
+class AsyncComprehensiveTester {
+    func init(name) {
+        this.name = name
+        this.async_operations = 0
+        this.test_results = []
+    }
+
+    # Basic async method with const parameter
+    async func basic_async_test(const data) {
+        print("Basic async test with data:", data, "on", this.name)
+
+        # Const parameter protection
+        try {
+            data = "modified"  # Will fail
+        } catch e {
+            print("✓ Const parameter protected in async method:", e)
+        }
+
+        this.async_operations += 1
+        return "Basic async: " + data
+    }
+
+    # Multiple const parameters async method
+    async func multi_const_async(const a, const b, const operation) {
+        print("Multi-const async:", a, b, operation, "on", this.name)
+
+        # Test all const parameters
+        try {
+            a = "changed_a"
+        } catch e {
+            print("✓ Const 'a' protected:", e)
+        }
+
+        try {
+            b = "changed_b"
+        } catch e {
+            print("✓ Const 'b' protected:", e)
+        }
+
+        try {
+            operation = "changed_op"
+        } catch e {
+            print("✓ Const 'operation' protected:", e)
+        }
+
+        this.async_operations += 1
+
+        if operation == "concat" {
+            return a + " + " + b
+        } else if operation == "multiply" {
+            return a + " * " + b
+        }
+        return a
+    }
+
+    # Mixed async parameters
+    async func mixed_async_params(const readonly, writable, const config) {
+        print("Mixed async params - readonly:", readonly, "writable:", writable)
+
+        # Const protection
+        try {
+            readonly = "modified_readonly"
+        } catch e {
+            print("✓ Readonly const protected:", e)
+        }
+
+        try {
+            config = {"new": "config"}
+        } catch e {
+            print("✓ Config const protected:", e)
+        }
+
+        # Regular parameter modification
+        original = writable
+        writable = "async_modified_" + writable
+        print("✓ Successfully modified writable from", original, "to", writable)
+
+        this.async_operations += 1
+        return readonly + " | " + writable + " | " + str(config)
+    }
+
+    func get_stats() {
+        return {"name": this.name, "operations": this.async_operations}
+    }
+}
+
+# Test async class methods
+print("\nTesting async class methods...")
+
+tester = AsyncComprehensiveTester("CompTester")
+
+# Test 1: Basic async method
+basic_result = await tester.basic_async_test("comprehensive_data")
+print("Basic async result:", basic_result)
+
+# Test 2: Multiple const parameters
+multi_result = await tester.multi_const_async("first", "second", "concat")
+print("Multi-const result:", multi_result)
+
+# Test 3: Mixed parameters
+mixed_result = await tester.mixed_async_params("readonly_val", "writable_val", {"mode": "test"})
+print("Mixed params result:", mixed_result)
+
+print("\nTesting spawn with async class methods...")
+
+# Test 4: Spawn with async method calls
+spawn_promise1 = spawn tester.basic_async_test("spawn_data_1")
+spawn_promise2 = spawn tester.multi_const_async("x", "y", "multiply")
+
+spawn_result1 = await spawn_promise1
+spawn_result2 = await spawn_promise2
+
+print("Spawn results:")
+print("- Spawn 1:", spawn_result1)
+print("- Spawn 2:", spawn_result2)
+
+print("\nTesting Promise.all with async class methods...")
+
+# Test 5: Promise.all with spawned method calls
+tester2 = AsyncComprehensiveTester("SecondTester")
+
+all_promises = [
+    spawn tester.basic_async_test("all_data_1"),
+    spawn tester2.basic_async_test("all_data_2"),
+    spawn tester.multi_const_async("a", "b", "concat"),
+    spawn tester2.mixed_async_params("const_val", "var_val", {"type": "all_test"})
+]
+
+all_results = await all(all_promises)
+print("Promise.all with method calls results:")
+for i = 0; i < len(all_results); i += 1 {
+    print("- All result " + str(i + 1) + ":", all_results[i])
+}
+
+# Check final statistics
+final_stats1 = tester.get_stats()
+final_stats2 = tester2.get_stats()
+print("Final async method statistics:")
+print("- Tester1:", final_stats1)
+print("- Tester2:", final_stats2)
+
+print("10. Final Verification")
+print("======================")
+final_check1 = await immediate_lambda(100)
+final_check2 = await delayed_lambda(200)
+final_check3 = await tester.basic_async_test("final_verification")
+print("Final verification:", final_check1, final_check2, final_check3)
+
+print("")
+
+print("")
+print("=== Async/Await Comprehensive Demo Complete ===")
+print("✅ All async patterns demonstrated and working:")
+print("  • Async functions with const parameters")
+print("  • Async lambda functions")
+print("  • Async class methods with const parameters")
+print("  • Spawn with both function calls AND method calls")
+print("  • Promise.all with mixed function and method calls")
+print("  • Complete const parameter protection in all async contexts")

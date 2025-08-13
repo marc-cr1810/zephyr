@@ -1,0 +1,514 @@
+# Zephyr Async/Await Parallel Execution Example
+# This file demonstrates parallel execution using spawn and Promise.all equivalent
+
+print("=== Zephyr Async Parallel Execution Demo ===\n")
+
+# ============================================================================
+# Basic Spawn Usage
+# ============================================================================
+
+print("1. Basic Spawn Usage")
+print("====================")
+
+# Simple async function for parallel execution
+async func fetch_item(name) {
+    print("Fetching item:", name)
+    return "Item " + name
+}
+
+async func basic_spawn_test() {
+    print("Starting basic spawn test...")
+
+    # Spawn multiple async tasks concurrently
+    promise1 = spawn fetch_item("Apple")
+    promise2 = spawn fetch_item("Banana")
+    promise3 = spawn fetch_item("Cherry")
+
+    print("All fetch tasks spawned. Doing other work...")
+    print("This executes while fetches are running in parallel")
+
+    # Await their results when needed
+    item1 = await promise1
+    item2 = await promise2
+    item3 = await promise3
+
+    print("All items fetched:")
+    print("- " + item1)
+    print("- " + item2)
+    print("- " + item3)
+
+    return [item1, item2, item3]
+}
+
+spawn_result = await basic_spawn_test()
+print("Basic spawn test completed\n")
+
+# ============================================================================
+# Spawn with Class Methods
+# ============================================================================
+
+print("2. Spawn with Class Methods")
+print("=================================")
+
+# Class with async methods for spawn testing
+class AsyncProcessor {
+    func init(name) {
+        this.name = name
+        this.processed_count = 0
+    }
+
+    async func process_data(const data) {
+        print("Processing data:", data, "with processor:", this.name)
+
+        # Const parameter protection works in spawned methods
+        try {
+            data = "modified"  # Will fail
+        } catch e {
+            print("✓ Const parameter protected in spawn:", e)
+        }
+
+        this.processed_count += 1
+        return "Processed by " + this.name + ": " + data
+    }
+
+    async func batch_process(const items, const config) {
+        print("Batch processing", len(items), "items with config:", config)
+
+        # Multiple const parameters protected
+        try {
+            items = []  # Will fail
+        } catch e {
+            print("✓ Const items protected:", e)
+        }
+
+        try {
+            config = {}  # Will fail
+        } catch e {
+            print("✓ Const config protected:", e)
+        }
+
+        total = 0
+        for item in items {
+            total = total + item
+        }
+
+        this.processed_count += len(items)
+        return "Batch " + str(total) + " by " + this.name
+    }
+
+    func get_stats() {
+        return {"name": this.name, "processed": this.processed_count}
+    }
+}
+
+async func class_spawn_test() {
+    print("Starting class method spawn test...")
+
+    # Create multiple processors
+    processor1 = AsyncProcessor("Processor1")
+    processor2 = AsyncProcessor("Processor2")
+    processor3 = AsyncProcessor("Processor3")
+
+    # Spawn multiple async method calls for parallel execution
+    promise1 = spawn processor1.process_data("data_set_1")
+    promise2 = spawn processor2.process_data("data_set_2")
+    promise3 = spawn processor3.batch_process([10, 20, 30], {"mode": "fast"})
+    promise4 = spawn processor1.batch_process([1, 2, 3, 4], {"mode": "thorough"})
+
+    print("All method calls spawned. Executing in parallel...")
+    print("This message appears while methods are running concurrently")
+
+    # Await results
+    result1 = await promise1
+    result2 = await promise2
+    result3 = await promise3
+    result4 = await promise4
+
+    print("All parallel method calls completed:")
+    print("- " + result1)
+    print("- " + result2)
+    print("- " + result3)
+    print("- " + result4)
+
+    # Check stats from all processors
+    stats1 = processor1.get_stats()
+    stats2 = processor2.get_stats()
+    stats3 = processor3.get_stats()
+
+    print("Processor statistics:")
+    print("- Processor1:", stats1)
+    print("- Processor2:", stats2)
+    print("- Processor3:", stats3)
+
+    return [result1, result2, result3, result4]
+}
+
+class_spawn_results = await class_spawn_test()
+print("Class spawn test completed\n")
+
+# ============================================================================
+# Parallel vs Sequential Comparison
+# ============================================================================
+
+print("3. Parallel vs Sequential Comparison")
+print("=====================================")
+
+async func slow_operation(id, delay_info) {
+    print("Starting operation", id, "(" + delay_info + ")")
+    # Simulate work
+    counter = 0
+    for i = 0; i < 1000; i++ {
+        counter += i
+    }
+    print("Completed operation", id)
+    return "Result " + str(id)
+}
+
+# Sequential execution
+async func sequential_execution() {
+    print("Sequential execution:")
+
+    result1 = await slow_operation(1, "sequential")
+    result2 = await slow_operation(2, "sequential")
+    result3 = await slow_operation(3, "sequential")
+
+    return [result1, result2, result3]
+}
+
+# Parallel execution
+async func parallel_execution() {
+    print("Parallel execution:")
+
+    # Start all operations at once
+    promise1 = spawn slow_operation(1, "parallel")
+    promise2 = spawn slow_operation(2, "parallel")
+    promise3 = spawn slow_operation(3, "parallel")
+
+    # Wait for all to complete
+    result1 = await promise1
+    result2 = await promise2
+    result3 = await promise3
+
+    return [result1, result2, result3]
+}
+
+print("Running sequential execution...")
+seq_results = await sequential_execution()
+print("Sequential results:", seq_results)
+
+print("\nRunning parallel execution...")
+par_results = await parallel_execution()
+print("Parallel results:", par_results)
+
+# ============================================================================
+# Complex Parallel Workflows
+# ============================================================================
+
+print("3. Complex Parallel Workflows")
+print("==============================")
+
+async func fetch_user_data(user_id) {
+    print("Fetching user data for ID:", user_id)
+    return {
+        "id": user_id,
+        "name": "User" + str(user_id),
+        "email": "user" + str(user_id) + "@example.com"
+    }
+}
+
+async func fetch_user_posts(user_id) {
+    print("Fetching posts for user ID:", user_id)
+    return [
+        "Post 1 by User " + str(user_id),
+        "Post 2 by User " + str(user_id)
+    ]
+}
+
+async func fetch_user_profile(user_id) {
+    print("Fetching profile for user ID:", user_id)
+    return {
+        "bio": "Biography of User " + str(user_id),
+        "location": "Location " + str(user_id)
+    }
+}
+
+async func load_complete_user_info(user_id) {
+    print("Loading complete info for user:", user_id)
+
+    # Spawn all user-related requests in parallel
+    user_promise = spawn fetch_user_data(user_id)
+    posts_promise = spawn fetch_user_posts(user_id)
+    profile_promise = spawn fetch_user_profile(user_id)
+
+    # Wait for all data
+    user_data = await user_promise
+    posts_data = await posts_promise
+    profile_data = await profile_promise
+
+    # Combine results
+    complete_info = {
+        "user": user_data,
+        "posts": posts_data,
+        "profile": profile_data
+    }
+
+    print("Complete info loaded for user:", user_id)
+    return complete_info
+}
+
+# Load multiple users in parallel
+async func load_multiple_users() {
+    print("Loading multiple users in parallel...")
+
+    user1_promise = spawn load_complete_user_info(1)
+    user2_promise = spawn load_complete_user_info(2)
+    user3_promise = spawn load_complete_user_info(3)
+
+    # Wait for all users
+    user1_info = await user1_promise
+    user2_info = await user2_promise
+    user3_info = await user3_promise
+
+    print("All users loaded successfully")
+    return [user1_info, user2_info, user3_info]
+}
+
+all_users = await load_multiple_users()
+print("Loaded", len(all_users), "users with complete information")
+
+# ============================================================================
+# Error Handling in Parallel Execution
+# ============================================================================
+
+print("4. Error Handling in Parallel Execution")
+print("========================================")
+
+async func operation_with_potential_error(id, should_fail) {
+    print("Running operation", id, "(fail=" + str(should_fail) + ")")
+
+    if should_fail {
+        return "Operation " + str(id) + " failed"
+    } else {
+        return "Operation " + str(id) + " succeeded"
+    }
+}
+
+async func parallel_error_handling() {
+    print("Testing parallel error handling...")
+
+    try {
+        # Mix of successful and failing operations
+        promise1 = spawn operation_with_potential_error(1, false)
+        promise2 = spawn operation_with_potential_error(2, true)
+        promise3 = spawn operation_with_potential_error(3, false)
+
+        result1 = await promise1
+        result2 = await promise2
+        result3 = await promise3
+
+        print("Results:")
+        print("- " + result1)
+        print("- " + result2)
+        print("- " + result3)
+
+        return [result1, result2, result3]
+    } catch e {
+        print("Caught error in parallel execution:", e)
+        return []
+    }
+}
+
+error_test_results = await parallel_error_handling()
+print("Error handling test completed")
+
+# ============================================================================
+# Async Lambda Functions in Parallel
+# ============================================================================
+
+print("5. Async Lambda Functions in Parallel")
+print("======================================")
+
+# Define async lambdas for parallel execution
+async_processor1 = async x -> {
+    print("Processor 1 working on:", x)
+    return x * 2
+}
+
+async_processor2 = async x -> {
+    print("Processor 2 working on:", x)
+    return x + 10
+}
+
+async_processor3 = async x -> {
+    print("Processor 3 working on:", x)
+    return x * x
+}
+
+async func parallel_lambda_test() {
+    print("Testing parallel async lambdas...")
+
+    input_value = 5
+
+    # Spawn lambda executions in parallel
+    promise1 = spawn async_processor1(input_value)
+    promise2 = spawn async_processor2(input_value)
+    promise3 = spawn async_processor3(input_value)
+
+    # Collect results
+    result1 = await promise1
+    result2 = await promise2
+    result3 = await promise3
+
+    print("Lambda results for input", input_value, ":")
+    print("- Processor 1 (x2):", result1)
+    print("- Processor 2 (+10):", result2)
+    print("- Processor 3 (x²):", result3)
+
+    return [result1, result2, result3]
+}
+
+lambda_results = await parallel_lambda_test()
+print("Parallel lambda test completed")
+
+print("")
+
+# ============================================================================
+# Parallel Execution with Const Lambda Parameters
+# ============================================================================
+
+print("6. Parallel Execution with Const Lambda Parameters")
+print("====================================================")
+
+# Async const lambdas for parallel execution
+async_const_processor1 = async const data -> {
+    print("Processor 1 (const) processing:", data)
+    try {
+        data = data + 100  # Should fail - const parameter
+        print("ERROR: const parameter was modified in async context!")
+    } catch e {
+        print("SUCCESS: const parameter protected in parallel execution -", e)
+    }
+    return data * 2
+}
+
+async_const_processor2 = async (const input, const multiplier) -> {
+    print("Processor 2 (multiple const) - input:", input, "multiplier:", multiplier)
+    try {
+        input = 999  # Should fail
+        print("ERROR: first const parameter modified!")
+    } catch e {
+        print("SUCCESS: first const parameter protected -", e)
+    }
+    try {
+        multiplier = 888  # Should also fail
+        print("ERROR: second const parameter modified!")
+    } catch e {
+        print("SUCCESS: second const parameter protected -", e)
+    }
+    return input * multiplier
+}
+
+# Mixed const and regular parameters in async context
+async_mixed_processor = async (const readonly_base, modifier) -> {
+    print("Mixed processor - readonly_base:", readonly_base, "modifier:", modifier)
+
+    # Cannot modify const parameter
+    try {
+        readonly_base = 777
+        print("ERROR: const parameter modified in async!")
+    } catch e {
+        print("SUCCESS: const parameter protected in async -", e)
+    }
+
+    # Can modify regular parameter
+    modifier = modifier * 3
+    print("Modified regular parameter to:", modifier)
+
+    return readonly_base + modifier
+}
+
+# Test parallel execution with const lambdas
+async func parallel_const_test() {
+    print("Starting parallel execution with const lambdas...")
+
+    # Spawn multiple const lambda tasks
+    promise1 = spawn async_const_processor1(10)
+    promise2 = spawn async_const_processor2(5, 4)
+    promise3 = spawn async_mixed_processor(20, 6)
+
+    print("All const lambda tasks spawned - running in parallel")
+
+    # Await results
+    result1 = await promise1
+    result2 = await promise2
+    result3 = await promise3
+
+    print("Parallel const lambda results:")
+    print("- Const processor 1:", result1)
+    print("- Multiple const processor:", result2)
+    print("- Mixed const/regular processor:", result3)
+
+    return [result1, result2, result3]
+}
+
+const_parallel_results = await parallel_const_test()
+print("Parallel const lambda execution completed")
+
+# Store const lambdas in data structures for parallel execution
+parallel_const_operations = {
+    "math": [
+        async const x -> x * x,
+        async (const a, const b) -> a + b,
+        async const value -> {
+            print("Complex const async operation on:", value)
+            return value * 2 + 1
+        }
+    ],
+    "string": [
+        async const text -> text + " (processed)",
+        async (const str, const count) -> str * count
+    ]
+}
+
+# Execute const lambdas from data structures in parallel
+async func test_stored_const_lambdas() {
+    print("\nTesting stored const lambdas in parallel...")
+
+    math_ops = parallel_const_operations["math"]
+    string_ops = parallel_const_operations["string"]
+
+    # Spawn math operations (using two-step approach)
+    square_func = math_ops[0]
+    square_promise = spawn square_func(6)
+
+    add_func = math_ops[1]
+    add_promise = spawn add_func(8, 12)
+
+    complex_func = math_ops[2]
+    complex_promise = spawn complex_func(15)
+
+    # Spawn string operations (using two-step approach)
+    process_func = string_ops[0]
+    process_promise = spawn process_func("Hello")
+
+    repeat_func = string_ops[1]
+    repeat_promise = spawn repeat_func("*", 5)
+
+    # Await all results
+    math_results = await all([square_promise, add_promise, complex_promise])
+    string_results = await all([process_promise, repeat_promise])
+
+    print("Stored const lambda results:")
+    print("- Math operations:", math_results)
+    print("- String operations:", string_results)
+
+    return {"math": math_results, "string": string_results}
+}
+
+stored_results = await test_stored_const_lambdas()
+print("Stored const lambdas test completed")
+
+print("")
+
+print("")
+print("=== Async Parallel Execution Demo Complete ===")

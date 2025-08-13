@@ -1,0 +1,827 @@
+# Zephyr Advanced Indexing and Member Access
+# This file demonstrates complex indexing patterns, chained access, and member assignment operations
+
+print("=== Zephyr Advanced Indexing Demo ===")
+print("")
+
+# ============================================================================
+# Basic Indexed Assignment Patterns
+# ============================================================================
+
+print("1. Basic Indexed Assignment Patterns")
+print("=====================================")
+
+# Simple list indexing
+numbers = [10, 20, 30, 40, 50]
+print("Original list:", numbers)
+
+numbers[0] = 100
+numbers[2] = 300
+print("After modifications:", numbers)
+
+# Simple dictionary indexing
+person = {"name": "Alice", "age": 25, "city": "Boston"}
+print("Original dict:", person)
+
+person["age"] = 26
+person["country"] = "USA"
+print("After modifications:", person)
+
+# Nested list indexing
+matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+print("Original matrix:", matrix)
+
+matrix[0][1] = 99
+matrix[2][0] = 77
+print("After matrix modifications:", matrix)
+
+# Nested dictionary indexing
+config = {
+    "database": {"host": "localhost", "port": 5432},
+    "cache": {"enabled": true, "ttl": 300}
+}
+print("Original config:", config)
+
+config["database"]["port"] = 3306
+config["cache"]["enabled"] = false
+print("After config modifications:", config)
+
+print("")
+
+# ============================================================================
+# Direct Dictionary Member Access (Dot Notation)
+# ============================================================================
+
+print("1.1. Direct Dictionary Member Access (Dot Notation)")
+print("====================================================")
+
+# Dictionaries with string keys can be accessed using dot notation (e.g., dict.key)
+# This provides a more concise and readable syntax for accessing elements.
+
+user_profile = {
+    "username": "zephyr_user",
+    "email": "user@example.com",
+    "settings": {
+        "theme": "dark",
+        "notifications": true
+    }
+}
+print("Original user_profile:", user_profile)
+
+# Accessing values using dot notation
+print("Username:", user_profile.username)
+print("Email:", user_profile.email)
+print("Theme setting:", user_profile.settings.theme)
+
+# Modifying values using dot notation
+user_profile.username = "new_zephyr_user"
+user_profile.settings.theme = "light"
+user_profile.settings.notifications = false
+print("Modified user_profile:", user_profile)
+
+# Adding new keys using dot notation
+user_profile.status = "active"
+user_profile.settings.language = "en-US"
+print("User profile after adding new keys:", user_profile)
+
+# Chained direct member access
+print("Chained access to notification setting:", user_profile.settings.notifications)
+
+# Direct member access mixed with traditional indexing
+nested_dict = {
+    "data": {
+        "items": [
+            {"id": 1, "name": "itemA"},
+            {"id": 2, "name": "itemB"}
+        ]
+    }
+}
+print("Original nested_dict:", nested_dict)
+print("Item A name (dot and index):", nested_dict.data.items[0].name)
+nested_dict.data.items[1].name = "updated_itemB"
+print("Updated Item B name:", nested_dict.data.items[1].name)
+
+print("")
+
+# ============================================================================
+# Object Member Indexed Assignment
+# ============================================================================
+
+print("2. Object Member Indexed Assignment")
+print("====================================")
+
+class DataContainer {
+    func init() {
+        this.items = [100, 200, 300, 400]
+        this.lookup = {"key1": "value1", "key2": "value2"}
+        this.nested_data = {
+            "lists": [[10, 20], [30, 40]],
+            "dicts": [{"id": 1}, {"id": 2}]
+        }
+    }
+
+    func test_member_indexing() {
+        print("Testing member indexing patterns:")
+
+        # Member list indexing
+        print("Before: this.items[1] =", this.items[1])
+        this.items[1] = 999
+        print("After: this.items[1] =", this.items[1])
+
+        # Member dictionary indexing
+        print("Before: this.lookup[\"key1\"] =", this.lookup["key1"])
+        this.lookup["key1"] = "new_value"
+        print("After: this.lookup[\"key1\"] =", this.lookup["key1"])
+
+        # Complex nested member indexing
+        print("Before: this.nested_data[\"lists\"][0][1] =", this.nested_data["lists"][0][1])
+        this.nested_data["lists"][0][1] = 777
+        print("After: this.nested_data[\"lists\"][0][1] =", this.nested_data["lists"][0][1])
+
+        print("Before: this.nested_data[\"dicts\"][1][\"id\"] =", this.nested_data["dicts"][1]["id"])
+        this.nested_data["dicts"][1]["id"] = 999
+        print("After: this.nested_data[\"dicts\"][1][\"id\"] =", this.nested_data["dicts"][1]["id"])
+    }
+
+    func add_new_entries() {
+        # Adding new entries to member collections
+        append(this.items, 500)
+        this.lookup["new_key"] = "new_value"
+        print("Added new entries")
+        print("Updated items:", this.items)
+        print("Updated lookup:", this.lookup)
+    }
+}
+
+container = DataContainer()
+container.test_member_indexing()
+print("")
+container.add_new_entries()
+
+print("")
+
+# ============================================================================
+# Chained Member and Index Access
+# ============================================================================
+
+print("3. Chained Member and Index Access")
+print("===================================")
+
+class NestedStructure {
+    func init() {
+        this.data = DataContainer()
+        this.metadata = {"version": 1, "tags": ["test", "demo"]}
+    }
+
+    func test_chained_access() {
+        print("Testing chained member and index access:")
+
+        # Chain: object.member.member_list[index]
+        print("Chained list access:", this.data.items[0])
+        this.data.items[0] = 1000
+        print("After chained assignment:", this.data.items[0])
+
+        # Chain: object.member.member_dict[key]
+        print("Chained dict access:", this.data.lookup["key2"])
+        this.data.lookup["key2"] = "chained_value"
+        print("After chained assignment:", this.data.lookup["key2"])
+
+        # Chain: object.member_dict[key][index]
+        print("Mixed chain access:", this.metadata["tags"][0])
+        this.metadata["tags"][0] = "updated"
+        print("After mixed chain assignment:", this.metadata["tags"][0])
+
+        # Deep chain: object.member.nested_member[key][index][key]
+        original = this.data.nested_data["dicts"][0]["id"]
+        print("Deep chain access:", original)
+        this.data.nested_data["dicts"][0]["id"] = 12345
+        print("After deep chain assignment:", this.data.nested_data["dicts"][0]["id"])
+    }
+}
+
+nested = NestedStructure()
+nested.test_chained_access()
+
+print("")
+
+# ============================================================================
+# Complex Assignment Patterns
+# ============================================================================
+
+print("4. Complex Assignment Patterns")
+print("===============================")
+
+class AssignmentTester {
+    func init() {
+        this.test_dict = {"key": 25}
+        this.test_list = [10, 20, 30]
+        this.nested_container = NestedStructure()
+        this.multi_level = {
+            "level1": {
+                "level2": {
+                    "items": [1, 2, 3],
+                    "config": {"enabled": true}
+                }
+            }
+        }
+    }
+
+    func run_assignment_tests() {
+        print("Running complex assignment pattern tests:")
+
+        # Pattern 1: Simple member dictionary
+        print("Pattern 1 - this.test_dict[\"key\"] = 45")
+        print("Before:", this.test_dict["key"])
+        this.test_dict["key"] = 45
+        print("After:", this.test_dict["key"])
+
+        # Pattern 2: Simple member list
+        print("Pattern 2 - this.test_list[2] = 45")
+        print("Before:", this.test_list[2])
+        this.test_list[2] = 45
+        print("After:", this.test_list[2])
+
+        # Pattern 3: Deep nested assignment
+        print("Pattern 3 - Deep nested member access")
+        print("Before:", this.nested_container.data.items[1])
+        this.nested_container.data.items[1] = 888
+        print("After:", this.nested_container.data.items[1])
+
+        # Pattern 4: Multi-level dictionary assignment
+        print("Pattern 4 - Multi-level dict assignment")
+        print("Before:", this.multi_level["level1"]["level2"]["items"][1])
+        this.multi_level["level1"]["level2"]["items"][1] = 999
+        print("After:", this.multi_level["level1"]["level2"]["items"][1])
+
+        # Pattern 5: Mixed member and index chains
+        print("Pattern 5 - Mixed chains")
+        print("Before:", this.nested_container.metadata["tags"][1])
+        this.nested_container.metadata["tags"][1] = "complex"
+        print("After:", this.nested_container.metadata["tags"][1])
+    }
+
+    func verify_assignments() {
+        print("Verifying all assignments worked correctly:")
+
+        x = this.test_dict["key"]
+        y = this.test_list[2]
+        z = this.nested_container.data.items[1]
+        w = this.multi_level["level1"]["level2"]["items"][1]
+        v = this.nested_container.metadata["tags"][1]
+
+        print("Retrieved x (dict):", x)
+        print("Retrieved y (list):", y)
+        print("Retrieved z (nested):", z)
+        print("Retrieved w (multi-level):", w)
+        print("Retrieved v (mixed chain):", v)
+    }
+}
+
+tester = AssignmentTester()
+tester.run_assignment_tests()
+print("")
+tester.verify_assignments()
+
+print("")
+
+# ============================================================================
+# Matrix and Grid Operations
+# ============================================================================
+
+print("5. Matrix and Grid Operations")
+print("==============================")
+
+class MatrixOperations {
+    func init(rows, cols) {
+        this.rows = rows
+        this.cols = cols
+        this.grid = []
+
+        # Initialize matrix
+        for i = 0; i < rows; i = i + 1 {
+            row = []
+            for j = 0; j < cols; j = j + 1 {
+                append(row, i * cols + j)
+            }
+            append(this.grid, row)
+        }
+    }
+
+    func display_matrix() {
+        print("Matrix " + str(this.rows) + "x" + str(this.cols) + ":")
+        for i = 0; i < this.rows; i = i + 1 {
+            row_str = "  "
+            for j = 0; j < this.cols; j = j + 1 {
+                row_str = row_str + str(this.grid[i][j]) + " "
+            }
+            print(row_str)
+        }
+    }
+
+    func set_value(row, col, value) {
+        if row >= 0 and row < this.rows and col >= 0 and col < this.cols {
+            this.grid[row][col] = value
+            print("Set grid[" + str(row) + "][" + str(col) + "] = " + str(value))
+        } else {
+            print("Index out of bounds!")
+        }
+    }
+
+    func get_value(row, col) {
+        if row >= 0 and row < this.rows and col >= 0 and col < this.cols {
+            return this.grid[row][col]
+        } else {
+            print("Index out of bounds!")
+            return 0
+        }
+    }
+
+    func fill_diagonal(value) {
+        min_dim = this.rows < this.cols ? this.rows : this.cols
+        for i = 0; i < min_dim; i = i + 1 {
+            this.grid[i][i] = value
+        }
+        print("Filled diagonal with value:", value)
+    }
+
+    func transpose() {
+        new_grid = []
+        for j = 0; j < this.cols; j = j + 1 {
+            new_row = []
+            for i = 0; i < this.rows; i = i + 1 {
+                append(new_row, this.grid[i][j])
+            }
+            append(new_grid, new_row)
+        }
+        this.grid = new_grid
+        # Swap dimensions
+        temp = this.rows
+        this.rows = this.cols
+        this.cols = temp
+        print("Matrix transposed")
+    }
+}
+
+matrix = MatrixOperations(3, 4)
+print("Initial matrix:")
+matrix.display_matrix()
+
+matrix.set_value(1, 2, 999)
+matrix.set_value(0, 0, 100)
+matrix.set_value(2, 3, 888)
+
+print("\nAfter setting values:")
+matrix.display_matrix()
+
+matrix.fill_diagonal(77)
+print("\nAfter filling diagonal:")
+matrix.display_matrix()
+
+matrix.transpose()
+print("\nAfter transpose:")
+matrix.display_matrix()
+
+print("")
+
+# ============================================================================
+# Dictionary of Lists and Lists of Dictionaries
+# ============================================================================
+
+print("6. Dictionary of Lists and Lists of Dictionaries")
+print("=================================================")
+
+class ComplexDataStructures {
+    func init() {
+        # Dictionary containing lists
+        this.dict_of_lists = {
+            "numbers": [1, 2, 3, 4, 5],
+            "words": ["hello", "world", "test"],
+            "flags": [true, false, true, false]
+        }
+
+        # List containing dictionaries
+        this.list_of_dicts = [
+            {"name": "Alice", "score": 95, "active": true},
+            {"name": "Bob", "score": 87, "active": false},
+            {"name": "Charlie", "score": 92, "active": true}
+        ]
+
+        # Mixed nested structure
+        this.complex_nest = {
+            "users": [
+                {"id": 1, "data": {"preferences": ["dark", "large"], "settings": {"auto": true}}},
+                {"id": 2, "data": {"preferences": ["light", "small"], "settings": {"auto": false}}}
+            ],
+            "system": {
+                "logs": [
+                    {"level": "info", "messages": ["startup", "ready"]},
+                    {"level": "error", "messages": ["failed", "retry"]}
+                ]
+            }
+        }
+    }
+
+    func test_dict_of_lists() {
+        print("Testing dictionary of lists operations:")
+
+        # Access and modify elements
+        print("First number:", this.dict_of_lists["numbers"][0])
+        this.dict_of_lists["numbers"][0] = 999
+        print("After modification:", this.dict_of_lists["numbers"][0])
+
+        # Add elements to lists within dictionary
+        append(this.dict_of_lists["words"], "new_word")
+        print("Updated words:", this.dict_of_lists["words"])
+
+        # Modify boolean flags
+        this.dict_of_lists["flags"][1] = true
+        print("Updated flags:", this.dict_of_lists["flags"])
+    }
+
+    func test_list_of_dicts() {
+        print("Testing list of dictionaries operations:")
+
+        # Access nested dictionary values
+        print("First user name:", this.list_of_dicts[0]["name"])
+        print("Second user score:", this.list_of_dicts[1]["score"])
+
+        # Modify nested values
+        this.list_of_dicts[0]["score"] = 98
+        this.list_of_dicts[1]["active"] = true
+
+        print("Updated first user score:", this.list_of_dicts[0]["score"])
+        print("Updated second user active:", this.list_of_dicts[1]["active"])
+
+        # Add new dictionary to list
+        new_user = {"name": "Diana", "score": 89, "active": true}
+        append(this.list_of_dicts, new_user)
+        print("Added new user. Total users:", len(this.list_of_dicts))
+    }
+
+    func test_complex_nesting() {
+        print("Testing complex nested structure operations:")
+
+        # Deep access: dict -> list -> dict -> dict -> list
+        user_pref = this.complex_nest["users"][0]["data"]["preferences"][0]
+        print("First user's first preference:", user_pref)
+
+        # Deep modification
+        this.complex_nest["users"][0]["data"]["preferences"][0] = "custom"
+        print("After modification:", this.complex_nest["users"][0]["data"]["preferences"][0])
+
+        # Access system logs
+        error_msg = this.complex_nest["system"]["logs"][1]["messages"][0]
+        print("First error message:", error_msg)
+
+        # Modify system logs
+        this.complex_nest["system"]["logs"][1]["messages"][0] = "critical"
+        print("After modification:", this.complex_nest["system"]["logs"][1]["messages"][0])
+
+        # Add new log entry
+        new_log = {"level": "warning", "messages": ["disk", "space"]}
+        append(this.complex_nest["system"]["logs"], new_log)
+        print("Added new log. Total logs:", len(this.complex_nest["system"]["logs"]))
+    }
+
+    func display_all_data() {
+        print("Current state of all data structures:")
+        print("Dict of lists:", this.dict_of_lists)
+        print("List of dicts:", this.list_of_dicts)
+        print("Complex nest users:", this.complex_nest["users"])
+        print("Complex nest system:", this.complex_nest["system"])
+    }
+}
+
+complex_data = ComplexDataStructures()
+complex_data.test_dict_of_lists()
+print("")
+complex_data.test_list_of_dicts()
+print("")
+complex_data.test_complex_nesting()
+print("")
+complex_data.display_all_data()
+
+print("")
+
+# ============================================================================
+# Assignment Chain Debugging Patterns
+# ============================================================================
+
+print("7. Assignment Chain Debugging Patterns")
+print("=======================================")
+
+class ChainDebugger {
+    func init() {
+        this.step_counter = 0
+        this.debug_data = {
+            "simple": [1, 2, 3],
+            "nested": {"inner": [10, 20, 30]},
+            "complex": [{"values": [100, 200]}, {"values": [300, 400]}]
+        }
+    }
+
+    func debug_step(description, before_value, operation) {
+        this.step_counter = this.step_counter + 1
+        print("Step " + str(this.step_counter) + ": " + description)
+        print("  Before: " + str(before_value))
+
+        # The operation parameter would be a lambda in real usage
+        # For this demo, we'll just show the pattern
+        print("  Operation: " + operation)
+    }
+
+    func test_assignment_chains() {
+        print("Testing assignment chain patterns for debugging:")
+
+        # Pattern 1: Simple assignment
+        before1 = this.debug_data["simple"][1]
+        this.debug_step("Simple assignment", before1, "this.debug_data[\"simple\"][1] = 999")
+        this.debug_data["simple"][1] = 999
+        print("  After: " + str(this.debug_data["simple"][1]))
+
+        # Pattern 2: Nested assignment
+        before2 = this.debug_data["nested"]["inner"][2]
+        this.debug_step("Nested assignment", before2, "this.debug_data[\"nested\"][\"inner\"][2] = 888")
+        this.debug_data["nested"]["inner"][2] = 888
+        print("  After: " + str(this.debug_data["nested"]["inner"][2]))
+
+        # Pattern 3: Complex assignment
+        before3 = this.debug_data["complex"][0]["values"][1]
+        this.debug_step("Complex assignment", before3, "this.debug_data[\"complex\"][0][\"values\"][1] = 777")
+        this.debug_data["complex"][0]["values"][1] = 777
+        print("  After: " + str(this.debug_data["complex"][0]["values"][1]))
+
+        print("Assignment chain debugging completed.")
+        print("Final state:", this.debug_data)
+    }
+
+    func test_exact_problem_patterns() {
+        print("Testing exact problem patterns that might cause issues:")
+
+        # Test the specific pattern mentioned in issues
+        test_dict = {"key": 25}
+        test_list = [10, 20, 30]
+
+        print("Testing: test_dict[\"key\"] = 45")
+        print("Before:", test_dict["key"])
+        test_dict["key"] = 45
+        print("After:", test_dict["key"])
+
+        print("Testing: test_list[2] = 45")
+        print("Before:", test_list[2])
+        test_list[2] = 45
+        print("After:", test_list[2])
+
+        # Verify retrieval works
+        x = test_dict["key"]
+        y = test_list[2]
+        print("Retrieved x:", x)
+        print("Retrieved y:", y)
+    }
+}
+
+debugger = ChainDebugger()
+debugger.test_assignment_chains()
+print("")
+debugger.test_exact_problem_patterns()
+
+print("")
+
+# ============================================================================
+# Basic Indexed Access Verification
+# ============================================================================
+
+print("8. Basic Indexed Access Verification")
+print("=====================================")
+
+class BasicAccessTester {
+    func init() {
+        this.test_dict = {"key1": 10, "key2": 20}
+        this.test_list = [100, 200, 300]
+        this.name = "container"
+    }
+
+    func test_basic_access() {
+        print("Testing basic access patterns:")
+
+        # Test simple member access
+        print("this.name:", this.name)
+
+        # Test dict member access
+        print("this.test_dict:", this.test_dict)
+
+        # Test list member access
+        print("this.test_list:", this.test_list)
+
+        # Test direct indexed access on members
+        dict_obj = this.test_dict
+        list_obj = this.test_list
+
+        print("dict_obj[\"key1\"]:", dict_obj["key1"])
+        print("list_obj[0]:", list_obj[0])
+    }
+
+    func test_chained_indexed_access() {
+        print("Testing chained indexed access:")
+
+        # Test if chained indexed access works
+        print("Trying this.test_dict[\"key1\"]:")
+        val = this.test_dict["key1"]
+        print("Value:", val)
+
+        print("Trying this.test_list[1]:")
+        val2 = this.test_list[1]
+        print("Value:", val2)
+    }
+}
+
+basic_tester = BasicAccessTester()
+basic_tester.test_basic_access()
+print("")
+basic_tester.test_chained_indexed_access()
+
+print("")
+
+# ============================================================================
+# Extreme Chained Indexing Patterns
+# ============================================================================
+
+print("9. Extreme Chained Indexing Patterns")
+print("=====================================")
+
+class ExtremeIndexingTester {
+    func init() {
+        this.matrix = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ]
+        this.dict_of_lists = {
+            "row1": [10, 20, 30],
+            "row2": [40, 50, 60]
+        }
+        this.list_of_dicts = [
+            {"a": 100, "b": 200},
+            {"a": 300, "b": 400}
+        ]
+        this.triple_nested = [
+            [
+                [1, 2],
+                [3, 4]
+            ],
+            [
+                [5, 6],
+                [7, 8]
+            ]
+        ]
+        this.mixed_crazy = {
+            "arrays": [
+                {"data": [100, 200, 300]},
+                {"data": [400, 500, 600]}
+            ]
+        }
+    }
+
+    func test_matrix_assignment() {
+        print("Testing matrix assignment patterns:")
+
+        # Test matrix assignment: this.matrix[1][2] = 999
+        print("Before: this.matrix[1][2] =", this.matrix[1][2])
+        this.matrix[1][2] = 999
+        print("After assignment: this.matrix[1][2] =", this.matrix[1][2])
+        print("Full row: this.matrix[1] =", this.matrix[1])
+    }
+
+    func test_dict_list_assignment() {
+        print("Testing dictionary of lists assignment:")
+
+        # Test dict of lists: this.dict_of_lists["row1"][0] = 777
+        print("Before: this.dict_of_lists[\"row1\"][0] =", this.dict_of_lists["row1"][0])
+        this.dict_of_lists["row1"][0] = 777
+        print("After assignment: this.dict_of_lists[\"row1\"][0] =", this.dict_of_lists["row1"][0])
+        print("Full list: this.dict_of_lists[\"row1\"] =", this.dict_of_lists["row1"])
+    }
+
+    func test_list_dict_assignment() {
+        print("Testing list of dictionaries assignment:")
+
+        # Test list of dicts: this.list_of_dicts[0]["a"] = 555
+        print("Before: this.list_of_dicts[0][\"a\"] =", this.list_of_dicts[0]["a"])
+        this.list_of_dicts[0]["a"] = 555
+        print("After assignment: this.list_of_dicts[0][\"a\"] =", this.list_of_dicts[0]["a"])
+        print("Full dict: this.list_of_dicts[0] =", this.list_of_dicts[0])
+    }
+
+    func test_triple_indexing() {
+        print("Testing triple indexing:")
+
+        # Test triple indexing: this.triple_nested[1][0][1] = 9999
+        print("Before: this.triple_nested[1][0][1] =", this.triple_nested[1][0][1])
+        this.triple_nested[1][0][1] = 9999
+        print("After assignment: this.triple_nested[1][0][1] =", this.triple_nested[1][0][1])
+    }
+
+    func test_mixed_extreme() {
+        print("Testing extreme mixed indexing:")
+
+        # Test mixed dict/list/dict/list: this.mixed_crazy["arrays"][1]["data"][2] = 8888
+        print("Before: this.mixed_crazy[\"arrays\"][1][\"data\"][2] =", this.mixed_crazy["arrays"][1]["data"][2])
+        this.mixed_crazy["arrays"][1]["data"][2] = 8888
+        print("After assignment: this.mixed_crazy[\"arrays\"][1][\"data\"][2] =", this.mixed_crazy["arrays"][1]["data"][2])
+    }
+}
+
+extreme_tester = ExtremeIndexingTester()
+extreme_tester.test_matrix_assignment()
+print("")
+extreme_tester.test_dict_list_assignment()
+print("")
+extreme_tester.test_list_dict_assignment()
+print("")
+extreme_tester.test_triple_indexing()
+print("")
+extreme_tester.test_mixed_extreme()
+
+print("")
+
+# ============================================================================
+# Cross-Object Chained Indexing
+# ============================================================================
+
+print("10. Cross-Object Chained Indexing")
+print("==================================")
+
+class CrossObjectTester {
+    func init() {
+        this.container = ExtremeIndexingTester()
+        this.deep_structure = {
+            "level1": {
+                "level2": [
+                    [1, 2, 3],
+                    [4, 5, 6]
+                ]
+            }
+        }
+        this.question_examples = {
+            "test_dict": {"key": [1, 2, 3]},
+            "test_list": [[10, 20], [30, 40]]
+        }
+    }
+
+    func test_cross_object_assignment() {
+        print("Testing cross-object chained assignment:")
+
+        # Test chained object + indexed: this.container.matrix[0][1] = 888
+        print("Before: this.container.matrix[0][1] =", this.container.matrix[0][1])
+        this.container.matrix[0][1] = 888
+        print("After assignment: this.container.matrix[0][1] =", this.container.matrix[0][1])
+
+        # Test very deep nesting: this.deep_structure["level1"]["level2"][1][2] = 1234
+        print("Before: this.deep_structure[\"level1\"][\"level2\"][1][2] =", this.deep_structure["level1"]["level2"][1][2])
+        this.deep_structure["level1"]["level2"][1][2] = 1234
+        print("After assignment: this.deep_structure[\"level1\"][\"level2\"][1][2] =", this.deep_structure["level1"]["level2"][1][2])
+    }
+
+    func test_question_pattern_variations() {
+        print("Testing variations of user question patterns:")
+
+        # Dictionary containing list, then list indexing
+        print("this.question_examples[\"test_dict\"][\"key\"][1] =", this.question_examples["test_dict"]["key"][1])
+        this.question_examples["test_dict"]["key"][1] = 999
+        print("After assignment: this.question_examples[\"test_dict\"][\"key\"][1] =", this.question_examples["test_dict"]["key"][1])
+
+        # List of lists indexing
+        print("this.question_examples[\"test_list\"][0][1] =", this.question_examples["test_list"][0][1])
+        this.question_examples["test_list"][0][1] = 888
+        print("After assignment: this.question_examples[\"test_list\"][0][1] =", this.question_examples["test_list"][0][1])
+
+        # Chained object member + double indexing
+        print("this.container.matrix[2][0] =", this.container.matrix[2][0])
+        this.container.matrix[2][0] = 777
+        print("After assignment: this.container.matrix[2][0] =", this.container.matrix[2][0])
+    }
+
+    func display_success_summary() {
+        print("✅ All Advanced Indexing Patterns Working:")
+        print("✅ Matrix indexing: obj.matrix[i][j] = value")
+        print("✅ Dict->List indexing: obj.dict[key][index] = value")
+        print("✅ List->Dict indexing: obj.list[index][key] = value")
+        print("✅ Triple indexing: obj.arr[i][j][k] = value")
+        print("✅ Mixed dict/list chaining: obj.dict[key][index][key2] = value")
+        print("✅ Object member + indexing: obj.member.matrix[i][j] = value")
+        print("✅ Cross-object chaining: obj.member.nested[i][j] = value")
+        print("✅ All extreme indexing patterns verified!")
+    }
+}
+
+cross_tester = CrossObjectTester()
+cross_tester.test_cross_object_assignment()
+print("")
+cross_tester.test_question_pattern_variations()
+print("")
+cross_tester.display_success_summary()
+
+print("")
+
+print("")
+print("=== Advanced Indexing Demo Complete ===")

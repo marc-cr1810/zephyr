@@ -1,0 +1,340 @@
+# Zephyr Async/Await Basic Example
+# This file demonstrates basic async function definitions and await usage
+
+print("=== Zephyr Async/Await Basic Demo ===")
+print("")
+
+# ============================================================================
+# Basic Async Function Definitions
+# ============================================================================
+
+print("1. Basic Async Functions")
+print("=========================")
+
+# Simple async function that returns a value
+async func fetch_data(url) {
+    print("Fetching data from:", url)
+    return "Data from " + url
+}
+
+# Another async function that processes data
+async func process_data(data) {
+    print("Processing data:", data)
+    return "Processed " + data
+}
+
+print("Async functions defined successfully")
+
+# ============================================================================
+# Basic Await Usage
+# ============================================================================
+
+print("2. Basic Await Usage")
+print("=====================")
+
+# Test basic await
+async func test_basic_await() {
+    print("Starting basic await test...")
+
+    # Await a simple async function
+    result1 = await fetch_data("http://example.com/api/users")
+    print("Received:", result1)
+
+    # Await another async function with the result
+    final_result = await process_data(result1)
+    print("Final result:", final_result)
+
+    return final_result
+}
+
+# Call the test function
+test_result = await test_basic_await()
+print("Test completed with result:", test_result)
+
+# ============================================================================
+# Sequential Async Operations
+# ============================================================================
+
+print("3. Sequential Async Operations")
+print("===============================")
+
+async func fetch_user(id) {
+    print("Fetching user:", id)
+    return "User " + str(id) + " data"
+}
+
+async func sequential_test() {
+    print("Starting sequential operations...")
+
+    # Sequential awaits
+    user1 = await fetch_user(1)
+    user2 = await fetch_user(2)
+    user3 = await fetch_user(3)
+
+    print("All users fetched:")
+    print("- " + user1)
+    print("- " + user2)
+    print("- " + user3)
+
+    return [user1, user2, user3]
+}
+
+sequential_result = await sequential_test()
+print("Sequential test completed")
+
+# ============================================================================
+# Async Functions with Error Handling
+# ============================================================================
+
+print("4. Async Error Handling")
+print("========================")
+
+async func risky_operation(should_fail) {
+    if should_fail {
+        return "Operation failed"
+    } else {
+        return "Operation succeeded"
+    }
+}
+
+async func error_test() {
+    print("Testing error handling...")
+
+    try {
+        result1 = await risky_operation(false)
+        print("Success case:", result1)
+
+        result2 = await risky_operation(true)
+        print("Failure case:", result2)
+    } catch e {
+        print("Caught error:", e)
+    }
+
+    return "Error test completed"
+}
+
+error_result = await error_test()
+print("Error handling test:", error_result)
+
+# ============================================================================
+# Async Lambda Functions
+# ============================================================================
+
+print("5. Async Lambda Functions")
+print("==========================")
+
+# Define async lambda
+async_lambda = async x -> {
+    print("Async lambda processing:", x)
+    return x * 2
+}
+
+print("Async lambda defined")
+
+# Use async lambda
+async func lambda_test() {
+    print("Testing async lambda...")
+    result = await async_lambda(5)
+    print("Async lambda result:", result)
+    return result
+}
+
+lambda_result = await lambda_test()
+print("Lambda test completed with result:", lambda_result)
+
+print("")
+
+# ============================================================================
+# Async Functions with Const Parameters
+# ============================================================================
+
+print("4. Async Functions with Const Parameters")
+print("=========================================")
+
+# Single async const parameter function
+async func async_greet_const(const name) {
+    print("Async greeting for:", name)
+    try {
+        name = "Modified"  # Should fail
+        print("ERROR: async const parameter was modified!")
+    } catch e {
+        print("✓ Async const parameter protected:", e)
+    }
+    return "Hello, " + name + " (async)"
+}
+
+# Multiple async const parameters
+async func async_compute(const a, const b, const operation) {
+    print("Async compute - a:", a, "b:", b, "operation:", operation)
+
+    try {
+        a = 999  # Should fail
+        print("ERROR: first async const parameter modified!")
+    } catch e {
+        print("✓ First async const parameter protected:", e)
+    }
+
+    try {
+        b = 888  # Should fail
+        print("ERROR: second async const parameter modified!")
+    } catch e {
+        print("✓ Second async const parameter protected:", e)
+    }
+
+    if operation == "add" {
+        return a + b
+    } else if operation == "multiply" {
+        return a * b
+    }
+    return 0
+}
+
+# Mixed async const and regular parameters
+async func async_process_mixed(const data, multiplier, const settings) {
+    print("Async mixed processing - data:", data, "multiplier:", multiplier)
+
+    # Cannot modify const parameters
+    try {
+        data = "changed"
+        print("ERROR: async const data modified!")
+    } catch e {
+        print("✓ Async const data protected:", e)
+    }
+
+    try {
+        settings = {"new": "config"}
+        print("ERROR: async const settings modified!")
+    } catch e {
+        print("✓ Async const settings protected:", e)
+    }
+
+    # Can modify regular parameter
+    multiplier = multiplier * 3
+    print("✓ Modified multiplier to:", multiplier)
+
+    return data + " (multiplied by " + str(multiplier) + ")"
+}
+
+# Test async const functions
+print("\n--- Testing async const function parameters ---")
+
+async func test_async_const_functions() {
+    print("Starting async const function tests...")
+
+    result1 = await async_greet_const("Alice")
+    print("Async greet result:", result1)
+
+    result2 = await async_compute(15, 25, "add")
+    print("Async compute result:", result2)
+
+    result3 = await async_process_mixed("Data", 2, {"mode": "test"})
+    print("Async mixed result:", result3)
+
+    return [result1, result2, result3]
+}
+
+async_const_results = await test_async_const_functions()
+print("Async const function tests completed:", async_const_results)
+
+print("")
+
+# ============================================================================
+# Async Lambda Expressions
+# ============================================================================
+
+print("5. Async Const Lambda Parameters")
+print("==================================")
+
+# Single async const parameter
+async_single_const = async const x -> {
+    print("Async single const parameter x:", x)
+    try {
+        x = 888  # Should fail even in async context
+        print("ERROR: async const parameter was modified!")
+    } catch e {
+        print("SUCCESS: async const parameter protected -", e)
+    }
+    return x * 2
+}
+
+# Multiple async const parameters
+async_multiple_const = async (const a, const b) -> {
+    print("Async multiple const parameters - a:", a, "b:", b)
+    try {
+        a = 111  # Should fail
+        print("ERROR: first async const parameter was modified!")
+    } catch e {
+        print("SUCCESS: first async const parameter protected -", e)
+    }
+    try {
+        b = 222  # Should also fail
+        print("ERROR: second async const parameter was modified!")
+    } catch e {
+        print("SUCCESS: second async const parameter protected -", e)
+    }
+    return a + b
+}
+
+# Mixed async const and regular parameters
+async_mixed_params = async (const readonly, writable) -> {
+    print("Async mixed parameters - readonly:", readonly, "writable:", writable)
+
+    # Try to modify const parameter (should fail)
+    try {
+        readonly = 777
+        print("ERROR: async const parameter was modified!")
+    } catch e {
+        print("SUCCESS: async const parameter protected -", e)
+    }
+
+    # Modify regular parameter (should work)
+    writable = writable * 5
+    print("Successfully modified regular async parameter to:", writable)
+
+    return readonly + writable
+}
+
+# Async const lambda with compound assignment
+async_compound_const = async const value -> {
+    print("Testing async const compound assignment with value:", value)
+    try {
+        value += 100  # Should fail
+        print("ERROR: async const compound assignment succeeded!")
+    } catch e {
+        print("SUCCESS: async const compound assignment blocked -", e)
+    }
+    return value
+}
+
+# Testing async const lambdas
+print("\n--- Testing async const lambda parameters ---")
+
+async func test_async_const_lambdas() {
+    print("Starting async const lambda tests...")
+
+    # Test single const parameter
+    result1 = await async_single_const(42)
+    print("Async single const result:", result1)
+
+    # Test multiple const parameters
+    result2 = await async_multiple_const(10, 20)
+    print("Async multiple const result:", result2)
+
+    # Test mixed parameters
+    result3 = await async_mixed_params(5, 8)
+    print("Async mixed parameters result:", result3)
+
+    # Test compound assignment
+    result4 = await async_compound_const(30)
+    print("Async compound const result:", result4)
+
+    print("All async const lambda tests completed!")
+    return [result1, result2, result3, result4]
+}
+
+# Execute async const lambda tests
+async_const_results = await test_async_const_lambdas()
+print("Final async const test results:", async_const_results)
+
+print("")
+print("=== Async/Await Basic Demo Complete ===")

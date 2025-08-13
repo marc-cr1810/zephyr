@@ -1,0 +1,1334 @@
+# Zephyr Functions and Lambda Expressions
+# This file demonstrates function definitions, lambda expressions, and functional programming
+
+print("=== Zephyr Functions and Lambdas Demo ===")
+print("")
+
+# ============================================================================
+# Basic Function Definitions
+# ============================================================================
+
+print("1. Basic Function Definitions")
+print("==============================")
+
+# Simple function with no parameters
+func say_hello() {
+    print("Hello from Zephyr!")
+}
+
+say_hello()
+
+# Function with parameters
+func greet(name) {
+    print("Hello, " + name + "!")
+}
+
+greet("World")
+greet("Developer")
+
+# Function with multiple parameters
+func add(a, b) {
+    return a + b
+}
+
+result = add(5, 3)
+print("5 + 3 =", result)
+
+# Function with string formatting using multiplication
+func create_border(char, length) {
+    return char * length
+}
+
+func format_title(title) {
+    border = "=" * (len(title) + 4)
+    return border + "\n  " + title + "\n" + border
+}
+
+border = create_border("*", 30)
+print("Created border:", border)
+
+formatted = format_title("Zephyr Demo")
+print("Formatted title:")
+print(formatted)
+
+# Function with negative number handling
+func safe_repeat(text, count) {
+    if count < 0 {
+        return ""
+    }
+    return text * count
+}
+
+print("Safe repeat with negative:", safe_repeat("test", -3))
+print("Safe repeat with positive:", safe_repeat("Hi", 4))
+
+# Function with complex logic
+func calculate_grade(score) {
+    if score >= 90 {
+        return "A"
+    } else if score >= 80 {
+        return "B"
+    } else if score >= 70 {
+        return "C"
+    } else if score >= 60 {
+        return "D"
+    } else {
+        return "F"
+    }
+}
+
+print("Score 95 gets grade:", calculate_grade(95))
+print("Score 72 gets grade:", calculate_grade(72))
+
+print("")
+
+# ============================================================================
+# Const Function Parameters
+# ============================================================================
+
+print("1.1. Const Function Parameters")
+print("===============================")
+
+# Single const parameter function
+func greet_const(const name) {
+    print("Hello, " + name + " (const)!")
+    try {
+        name = "Jane" # Attempt to reassign const parameter
+        print("ERROR: const parameter was modified!")
+    } catch e {
+        print("✓ Const parameter protected:", e)
+    }
+}
+
+# Regular parameter function for comparison
+func greet_normal(name) {
+    print("Hello, " + name + " (normal)!")
+    name = "Jane" # Reassign normal parameter
+    print("✓ Name after reassignment:", name)
+}
+
+# Multiple const parameters function
+func calculate_area(const length, const width) {
+    print("Calculating area with length:", length, "width:", width)
+    try {
+        length = 100  # Should fail
+        print("ERROR: first const parameter modified!")
+    } catch e {
+        print("✓ First const parameter protected:", e)
+    }
+    try {
+        width = 200   # Should also fail
+        print("ERROR: second const parameter modified!")
+    } catch e {
+        print("✓ Second const parameter protected:", e)
+    }
+    return length * width
+}
+
+# Mixed const and regular parameters
+func process_data(const base_value, multiplier, const settings) {
+    print("Processing - base:", base_value, "multiplier:", multiplier, "settings:", settings)
+
+    # Cannot modify const parameters
+    try {
+        base_value = 999
+        print("ERROR: const base_value modified!")
+    } catch e {
+        print("✓ Const base_value protected:", e)
+    }
+
+    try {
+        settings = {"new": "config"}
+        print("ERROR: const settings modified!")
+    } catch e {
+        print("✓ Const settings protected:", e)
+    }
+
+    # Can modify regular parameter
+    multiplier = multiplier * 2
+    print("✓ Modified regular multiplier to:", multiplier)
+
+    return base_value * multiplier
+}
+
+# Const parameters with compound assignment protection
+func test_compound_operations(const value, const factor) {
+    print("Testing compound operations on const parameters")
+    try {
+        value += 10
+        print("ERROR: const compound assignment succeeded!")
+    } catch e {
+        print("✓ Const compound assignment blocked:", e)
+    }
+
+    try {
+        factor *= 2
+        print("ERROR: const multiplication assignment succeeded!")
+    } catch e {
+        print("✓ Const multiplication assignment blocked:", e)
+    }
+
+    return value * factor  # Use original values
+}
+
+# Const parameters with increment/decrement protection
+func test_increment_operations(const counter) {
+    print("Testing increment operations on const parameter:", counter)
+    try {
+        counter++
+        print("ERROR: const increment succeeded!")
+    } catch e {
+        print("✓ Const increment blocked:", e)
+    }
+
+    try {
+        --counter
+        print("ERROR: const decrement succeeded!")
+    } catch e {
+        print("✓ Const decrement blocked:", e)
+    }
+
+    return counter
+}
+
+# Test all const function variations
+print("\n--- Testing const function parameters ---")
+
+greet_const("Alice")
+greet_normal("Bob")
+
+area = calculate_area(10, 15)
+print("Calculated area:", area)
+
+processed = process_data(5, 3, {"mode": "production"})
+print("Processed result:", processed)
+
+compound_result = test_compound_operations(20, 4)
+print("Compound operations result:", compound_result)
+
+increment_result = test_increment_operations(100)
+print("Increment operations result:", increment_result)
+
+print("")
+
+# ============================================================================
+# Const Lambda Parameters
+# ============================================================================
+
+print("1.2. Const Lambda Parameters")
+print("============================")
+
+# Single const parameter (no parentheses)
+single_const = const x -> {
+    print("Single const parameter x:", x)
+    try {
+        x = 999  # Should fail
+        print("ERROR: const parameter was modified!")
+    } catch e {
+        print("SUCCESS: const parameter protected -", e)
+    }
+    return x
+}
+
+# Single const parameter (with parentheses)
+parenthesized_const = (const x) -> {
+    print("Parenthesized const parameter x:", x)
+    return x * 2
+}
+
+# Multiple const parameters
+multiple_const = (const a, const b) -> {
+    print("Multiple const parameters - a:", a, "b:", b)
+    try {
+        a = 100  # Should fail
+        print("ERROR: first const parameter was modified!")
+    } catch e {
+        print("SUCCESS: first const parameter protected -", e)
+    }
+    try {
+        b = 200  # Should also fail
+        print("ERROR: second const parameter was modified!")
+    } catch e {
+        print("SUCCESS: second const parameter protected -", e)
+    }
+    return a + b
+}
+
+# Mixed const and regular parameters
+mixed_params = (const readonly, writable, const also_readonly) -> {
+    print("Mixed parameters - readonly:", readonly, "writable:", writable, "also_readonly:", also_readonly)
+
+    # Try to modify const parameters (should fail)
+    try {
+        readonly = 500
+        print("ERROR: first const parameter was modified!")
+    } catch e {
+        print("SUCCESS: first const parameter protected -", e)
+    }
+
+    try {
+        also_readonly = 600
+        print("ERROR: second const parameter was modified!")
+    } catch e {
+        print("SUCCESS: second const parameter protected -", e)
+    }
+
+    # Modify regular parameter (should work)
+    writable = writable * 10
+    print("Successfully modified regular parameter to:", writable)
+
+    return readonly + writable + also_readonly
+}
+
+# Async const lambda parameters
+async_const_lambda = async const x -> {
+    print("Async const lambda with x:", x)
+    return x * 3
+}
+
+# Async multiple const parameters
+async_multiple_const = async (const a, const b) -> {
+    print("Async multiple const - a:", a, "b:", b)
+    try {
+        a = 777  # Should fail even in async context
+        print("ERROR: async const parameter was modified!")
+    } catch e {
+        print("SUCCESS: async const parameter protected -", e)
+    }
+    return a + b
+}
+
+# Const parameters with compound assignment
+compound_const_test = (const value, multiplier) -> {
+    print("Testing compound assignment - value:", value, "multiplier:", multiplier)
+    try {
+        value += 50  # Should fail for const parameter
+        print("ERROR: const parameter compound assignment succeeded!")
+    } catch e {
+        print("SUCCESS: const parameter compound assignment blocked -", e)
+    }
+
+    # Regular parameter compound assignment should work
+    multiplier *= 2
+    print("Regular parameter after compound assignment:", multiplier)
+
+    return value * multiplier
+}
+
+# Test all const lambda variations
+print("\n--- Testing const lambda parameters ---")
+
+result1 = single_const(42)
+print("Single const result:", result1)
+
+result2 = parenthesized_const(21)
+print("Parenthesized const result:", result2)
+
+result3 = multiple_const(10, 15)
+print("Multiple const result:", result3)
+
+result4 = mixed_params(5, 3, 7)
+print("Mixed parameters result:", result4)
+
+result5 = await async_const_lambda(8)
+print("Async const lambda result:", result5)
+
+result6 = await async_multiple_const(12, 18)
+print("Async multiple const result:", result6)
+
+result7 = compound_const_test(20, 4)
+print("Compound assignment test result:", result7)
+
+# ============================================================================
+# Async Functions with Const Parameters
+# ============================================================================
+
+print("1.3. Async Functions with Const Parameters")
+print("===========================================")
+
+# Single async const parameter function
+async func async_process(const data) {
+    print("Async processing data:", data)
+    try {
+        data = "modified"  # Should fail
+        print("ERROR: async const parameter was modified!")
+    } catch e {
+        print("✓ Async const parameter protected:", e)
+    }
+    return "Processed: " + data
+}
+
+# Multiple async const parameters
+async func async_calculate(const x, const y, const operation) {
+    print("Async calculation - x:", x, "y:", y, "operation:", operation)
+
+    try {
+        x = 999  # Should fail
+        print("ERROR: first async const parameter modified!")
+    } catch e {
+        print("✓ First async const parameter protected:", e)
+    }
+
+    try {
+        y = 888  # Should fail
+        print("ERROR: second async const parameter modified!")
+    } catch e {
+        print("✓ Second async const parameter protected:", e)
+    }
+
+    try {
+        operation = "different"  # Should fail
+        print("ERROR: third async const parameter modified!")
+    } catch e {
+        print("✓ Third async const parameter protected:", e)
+    }
+
+    if operation == "add" {
+        return x + y
+    } else if operation == "multiply" {
+        return x * y
+    } else {
+        return 0
+    }
+}
+
+# Mixed async const and regular parameters
+async func async_transform(const input, scale_factor, const config) {
+    print("Async transform - input:", input, "scale:", scale_factor, "config:", config)
+
+    # Cannot modify const parameters
+    try {
+        input = "changed"
+        print("ERROR: async const input modified!")
+    } catch e {
+        print("✓ Async const input protected:", e)
+    }
+
+    try {
+        config = {"changed": true}
+        print("ERROR: async const config modified!")
+    } catch e {
+        print("✓ Async const config protected:", e)
+    }
+
+    # Can modify regular parameter
+    scale_factor = scale_factor * 1.5
+    print("✓ Modified scale_factor to:", scale_factor)
+
+    return input + " (scaled by " + str(scale_factor) + ")"
+}
+
+# Async const with compound assignment protection
+async func async_compound_test(const base, const increment) {
+    print("Testing async const compound operations")
+    try {
+        base += increment
+        print("ERROR: async const compound assignment succeeded!")
+    } catch e {
+        print("✓ Async const compound assignment blocked:", e)
+    }
+
+    return base + increment  # Use original values
+}
+
+# Test async const functions
+print("\n--- Testing async const function parameters ---")
+
+async func test_async_const_functions() {
+    print("Starting async const function tests...")
+
+    result1 = await async_process("test_data")
+    print("Async process result:", result1)
+
+    result2 = await async_calculate(10, 20, "add")
+    print("Async calculation result:", result2)
+
+    result3 = await async_transform("Hello", 2, {"format": "uppercase"})
+    print("Async transform result:", result3)
+
+    result4 = await async_compound_test(100, 25)
+    print("Async compound test result:", result4)
+
+    print("All async const function tests completed!")
+    return [result1, result2, result3, result4]
+}
+
+async_results = await test_async_const_functions()
+print("Final async const results:", async_results)
+
+print("")
+
+# ============================================================================
+# Recursive Functions
+# ============================================================================
+
+print("2. Recursive Functions")
+print("=======================")
+
+# Classic factorial function
+func factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+print("Factorial of 5:", factorial(5))
+print("Factorial of 7:", factorial(7))
+
+# Simple function examples from test files
+func simple_greet(name) {
+    print("Hello, ", name, "!")
+}
+
+simple_greet("World")
+
+func simple_add(a, b) {
+    return a + b
+}
+
+simple_result = simple_add(5, 3)
+print("Result of simple_add(5, 3):", simple_result)
+
+# Fibonacci sequence
+func fibonacci(n) {
+    if n <= 1 {
+        return n
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2)
+}
+
+print("Fibonacci sequence (first 8 numbers):")
+for i = 0; i < 8; i = i + 1 {
+    print("F(" + str(i) + ") =", fibonacci(i))
+}
+
+print("")
+
+# ============================================================================
+# Lambda Expressions - Basic Syntax
+# ============================================================================
+
+print("3. Lambda Expressions - Basic Syntax")
+print("=====================================")
+
+# Single parameter lambda
+square = x -> x * x
+print("Square of 6:", square(6))
+
+# Multiple parameter lambda
+multiply = (a, b) -> a * b
+print("3 * 7 =", multiply(3, 7))
+
+# No parameter lambda
+get_pi = () -> 3.14159
+print("Pi:", get_pi())
+
+# Lambda with conditional expression
+absolute = x -> x >= 0 ? x : -x
+print("Absolute value of -5:", absolute(-5))
+print("Absolute value of 8:", absolute(8))
+
+print("")
+
+# ============================================================================
+# Lambda Expressions - Block Bodies
+# ============================================================================
+
+print("4. Lambda Expressions - Block Bodies")
+print("=====================================")
+
+# Lambda with block body for complex logic
+power_with_limit = (base, exponent, limit) -> {
+    result = 1
+    for i = 0; i < exponent; i = i + 1 {
+        result = result * base
+        if result > limit {
+            return limit
+        }
+    }
+    return result
+}
+
+print("2^10 with limit 500:", power_with_limit(2, 10, 500))
+print("2^5 with limit 500:", power_with_limit(2, 5, 500))
+
+# Lambda factorial
+lambda_factorial = n -> {
+    if n <= 1 {
+        return 1
+    }
+    return n * lambda_factorial(n - 1)
+}
+
+print("Lambda factorial of 6:", lambda_factorial(6))
+
+# Additional simple lambda examples
+simple_square = x -> x * x
+print("Simple square of 5:", simple_square(5))
+
+simple_add_lambda = (a, b) -> a + b
+print("Simple lambda add 3 + 7 =", simple_add_lambda(3, 7))
+
+get_answer_lambda = () -> 42
+print("The answer from lambda:", get_answer_lambda())
+
+# Lambda with block body (alternative factorial)
+alt_factorial = n -> {
+    if n <= 1 {
+        return 1
+    } else {
+        return n * alt_factorial(n - 1)
+    }
+}
+print("Alternative factorial of 5:", alt_factorial(5))
+
+# Lambda capturing variables (closure example)
+multiplier_value = 10
+create_multiplier_func = x -> x * multiplier_value
+print("Closure example 5 * 10 =", create_multiplier_func(5))
+
+# Lambda as function argument
+func apply_func(fn, value) {
+    return fn(value)
+}
+
+double_func = x -> x * 2
+apply_result = apply_func(double_func, 15)
+print("Applied double function to 15:", apply_result)
+
+# Lambda with comparison
+greater_than_10_check = x -> x > 10
+print("Is 15 > 10?", greater_than_10_check(15))
+print("Is 5 > 10?", greater_than_10_check(5))
+
+# Lambda with conditional expression
+sign_check = x -> x > 0 ? 1 : (x < 0 ? -1 : 0)
+print("Sign of 5:", sign_check(5))
+print("Sign of -3:", sign_check(-3))
+print("Sign of 0:", sign_check(0))
+
+# Lambda returning lambda (currying example)
+func curry_add_func(a) {
+    return b -> a + b
+}
+
+add_five_func = curry_add_func(5)
+print("Curried add: 5 + 10 =", add_five_func(10))
+
+print("")
+
+# ============================================================================
+# Closures - Variable Capture
+# ============================================================================
+
+print("5. Closures - Variable Capture")
+print("===============================")
+
+# Simple closure
+multiplier = 10
+create_multiplier = x -> x * multiplier
+print("5 * 10 =", create_multiplier(5))
+
+# Closure factory
+func make_adder(increment) {
+    return x -> x + increment
+}
+
+add_five = make_adder(5)
+add_ten = make_adder(10)
+
+print("7 + 5 =", add_five(7))
+print("7 + 10 =", add_ten(7))
+
+# Complex closure with multiple captures
+func make_range_checker(min, max) {
+    return x -> {
+        if x < min {
+            return "too low"
+        } else if x > max {
+            return "too high"
+        } else {
+            return "just right"
+        }
+    }
+}
+
+check_score = make_range_checker(0, 100)
+print("Score -5:", check_score(-5))
+print("Score 85:", check_score(85))
+print("Score 150:", check_score(150))
+
+print("")
+
+# ============================================================================
+# Higher-Order Functions
+# ============================================================================
+
+print("6. Higher-Order Functions")
+print("==========================")
+
+# Function that takes another function as parameter
+func apply_operation(function_param, value) {
+    return function_param(value)
+}
+
+double = x -> x * 2
+cube = x -> x * x * x
+
+print("Apply double to 4:", apply_operation(double, 4))
+print("Apply cube to 3:", apply_operation(cube, 3))
+
+# Function that returns a function
+func create_polynomial(a, b, c) {
+    return x -> a * x * x + b * x + c
+}
+
+quadratic = create_polynomial(1, -2, 1)  # x² - 2x + 1
+print("Quadratic at x=0:", quadratic(0))
+print("Quadratic at x=1:", quadratic(1))
+print("Quadratic at x=2:", quadratic(2))
+
+print("")
+
+# ============================================================================
+# Functional Programming with Collections
+# ============================================================================
+
+print("7. Functional Programming with Collections")
+print("===========================================")
+
+# Manual implementation of functional programming concepts
+numbers = [1, 2, 3, 4, 5]
+print("Original numbers:", numbers)
+
+# Manual map implementation - squaring numbers
+squared = []
+for num in numbers {
+    squared_val = num * num
+    append(squared, squared_val)
+}
+print("Squared numbers:", squared)
+
+# Manual map implementation - doubling numbers
+doubled = []
+for num in numbers {
+    doubled_val = num * 2
+    append(doubled, doubled_val)
+}
+print("Doubled numbers:", doubled)
+
+# Manual filter implementation - even numbers
+all_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print("All numbers:", all_numbers)
+
+evens = []
+for num in all_numbers {
+    divided = num / 2
+    multiplied = divided * 2
+    if multiplied == num {
+        append(evens, num)
+    }
+}
+print("Even numbers:", evens)
+
+# Manual filter implementation - big numbers
+big_numbers = []
+for num in all_numbers {
+    if num > 5 {
+        append(big_numbers, num)
+    }
+}
+print("Numbers > 5:", big_numbers)
+
+# Manual reduce implementation - sum
+sum_result = 0
+for num in numbers {
+    sum_result = sum_result + num
+}
+print("Sum of numbers:", sum_result)
+
+# Manual reduce implementation - product
+product_result = 1
+for num in numbers {
+    product_result = product_result * num
+}
+print("Product of numbers:", product_result)
+
+# Manual reduce implementation - maximum
+max_number = all_numbers[0]
+for num in all_numbers {
+    if num > max_number {
+        max_number = num
+    }
+}
+print("Maximum number:", max_number)
+
+print("")
+
+# ============================================================================
+# Manual Chaining Operations
+# ============================================================================
+
+print("8. Manual Chaining Operations")
+print("==============================")
+
+# Process a list through multiple transformations manually
+data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print("Original data:", data)
+
+# Step 1: Filter evens
+step1 = []
+for num in data {
+    divided = num / 2
+    multiplied = divided * 2
+    if multiplied == num {
+        append(step1, num)
+    }
+}
+print("After filtering evens:", step1)
+
+# Step 2: Square them
+step2 = []
+for num in step1 {
+    squared = num * num
+    append(step2, squared)
+}
+print("After squaring:", step2)
+
+# Step 3: Sum them
+final_result = 0
+for num in step2 {
+    final_result = final_result + num
+}
+print("Final sum:", final_result)
+
+print("")
+
+# ============================================================================
+# Lambda Functions in Data Structures
+# ============================================================================
+
+print("9. Lambda Functions in Data Structures")
+print("=======================================")
+
+# Store lambdas in lists
+operations = [
+    x -> x + 1,
+    x -> x * 2,
+    x -> x * x,
+    x -> x - 1
+]
+
+test_value = 5
+print("Applying operations to " + str(test_value) + ":")
+for i = 0; i < len(operations); i = i + 1 {
+    operation_func = operations[i]
+    result = operation_func(test_value)
+    print("Operation " + str(i) + ": " + str(result))
+}
+
+# Store lambdas in dictionaries
+calculators = {
+    "add": (a, b) -> a + b,
+    "subtract": (a, b) -> a - b,
+    "multiply": (a, b) -> a * b,
+    "divide": (a, b) -> a / b,
+    "power": (a, b) -> {
+        result = 1
+        for i = 0; i < b; i = i + 1 {
+            result = result * a
+        }
+        return result
+    }
+}
+
+print("Calculator operations:")
+add_func = calculators["add"]
+print("8 + 3 =", add_func(8, 3))
+subtract_func = calculators["subtract"]
+print("8 - 3 =", subtract_func(8, 3))
+multiply_func = calculators["multiply"]
+print("8 * 3 =", multiply_func(8, 3))
+divide_func = calculators["divide"]
+print("8 / 3 =", divide_func(8, 3))
+power_func = calculators["power"]
+print("2^3 =", power_func(2, 3))
+
+print("")
+
+# ============================================================================
+# Advanced Lambda Patterns
+# ============================================================================
+
+print("10. Advanced Lambda Patterns")
+print("=============================")
+
+# Currying - functions that return functions
+add_curry = a -> (b -> a + b)
+multiply_curry = a -> (b -> a * b)
+
+add_10 = add_curry(10)
+multiply_3 = multiply_curry(3)
+
+print("Curried add: 10 + 7 =", add_10(7))
+print("Curried multiply: 3 * 8 =", multiply_3(8))
+
+# Function composition
+func compose(f, g) {
+    return x -> f(g(x))
+}
+
+add_one = x -> x + 1
+double_it = x -> x * 2
+
+# Compose: first double, then add one
+double_then_add = compose(add_one, double_it)
+print("Double 5 then add 1:", double_then_add(5))  # (5 * 2) + 1 = 11
+
+# Partial application
+func partial_apply(function_param, first_arg) {
+    return second_arg -> function_param(first_arg, second_arg)
+}
+
+add_function = (a, b) -> a + b
+add_100 = partial_apply(add_function, 100)
+
+print("Partial application: 100 + 23 =", add_100(23))
+
+print("")
+
+# ============================================================================
+# Advanced Lambda Patterns and Higher-Order Functions
+# ============================================================================
+
+print("11. Advanced Lambda Patterns and Higher-Order Functions")
+print("========================================================")
+
+# Custom functional programming implementations
+func custom_map(list, transform_fn) {
+    result = []
+    for item in list {
+        transformed = transform_fn(item)
+        append(result, transformed)
+    }
+    return result
+}
+
+func custom_filter(list, predicate_fn) {
+    result = []
+    for item in list {
+        if predicate_fn(item) {
+            append(result, item)
+        }
+    }
+    return result
+}
+
+func custom_reduce(list, accumulator_fn, initial) {
+    acc = initial
+    for item in list {
+        acc = accumulator_fn(acc, item)
+    }
+    return acc
+}
+
+# Test data for advanced operations
+test_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Advanced map examples
+doubled_custom = custom_map(test_numbers, x -> x * 2)
+print("Custom doubled numbers:", doubled_custom)
+
+# Advanced filter examples
+big_numbers_custom = custom_filter(test_numbers, x -> x > 5)
+print("Custom numbers > 5:", big_numbers_custom)
+
+# Advanced reduce examples
+sum_custom = custom_reduce(test_numbers, (acc, x) -> acc + x, 0)
+print("Custom sum of numbers:", sum_custom)
+
+max_num_custom = custom_reduce(test_numbers, (acc, x) -> x > acc ? x : acc, 0)
+print("Custom maximum number:", max_num_custom)
+
+# Chain operations with custom functions
+filtered_numbers = custom_filter(test_numbers, x -> x > 3)
+squared_filtered = custom_map(filtered_numbers, x -> x * x)
+print("Custom squares of numbers > 3:", squared_filtered)
+
+print("")
+
+# ============================================================================
+# Lambda Closures with Multiple Variables
+# ============================================================================
+
+print("12. Lambda Closures with Multiple Variables")
+print("============================================")
+
+# Lambda with multiple captured variables
+base_value = 2
+exponent_value = 3
+power_lambda = x -> x * base_value + exponent_value
+print("Power function with base=2, exp=3 applied to 5:", power_lambda(5))
+
+# Nested lambda factories
+make_adder_func = increment -> (value -> value + increment)
+add_10_func = make_adder_func(10)
+add_100_func = make_adder_func(100)
+
+print("Add 10 to 25:", add_10_func(25))
+print("Add 100 to 25:", add_100_func(25))
+
+# Lambda with string operations
+greet_lambda = name -> "Hello, " + name + "!"
+print("Greeting for Alice:", greet_lambda("Alice"))
+print("Greeting for Bob:", greet_lambda("Bob"))
+
+print("")
+
+# ============================================================================
+# Lambda Utilities and Data Access
+# ============================================================================
+
+print("13. Lambda Utilities and Data Access")
+print("=====================================")
+
+# Utility lambdas for data access
+get_first_element = list -> list[0]
+get_last_element = list -> list[len(list) - 1]
+get_middle_element = list -> list[len(list) / 2]
+
+test_data_list = ["apple", "banana", "cherry", "date", "elderberry"]
+print("Test list:", test_data_list)
+print("First item:", get_first_element(test_data_list))
+print("Last item:", get_last_element(test_data_list))
+print("Middle item:", get_middle_element(test_data_list))
+
+# Dictionary access lambdas
+get_dict_value = (dict, key) -> dict[key]
+person_data = {"name": "John", "age": 30, "city": "New York"}
+
+print("Person name:", get_dict_value(person_data, "name"))
+print("Person age:", get_dict_value(person_data, "age"))
+
+# Complex processing lambda
+process_number_advanced = n -> {
+    result = n * 2
+    if result > 20 {
+        result = result - 10
+    } else if result < 5 {
+        result = result + 5
+    }
+    return result
+}
+
+print("Advanced number processing:")
+for i = 1; i <= 15; i = i + 1 {
+    processed = process_number_advanced(i)
+    print("Processing " + str(i) + " -> " + str(processed))
+}
+
+print("")
+
+# ============================================================================
+# Lambda Predicates and Type Operations
+# ============================================================================
+
+print("14. Lambda Predicates and Type Operations")
+print("==========================================")
+
+# Predicate lambdas
+is_positive_lambda = x -> x > 0
+is_even_check = x -> {
+    divided = x / 2
+    multiplied = divided * 2
+    return multiplied == x
+}
+is_long_string = s -> len(s) > 5
+
+test_values_mixed = [-5, 0, 3, -2, 8, 12, -10]
+print("Testing positive predicate:")
+for value in test_values_mixed {
+    if is_positive_lambda(value) {
+        print(str(value) + " is positive")
+    } else {
+        print(str(value) + " is not positive")
+    }
+}
+
+print("Testing even predicate:")
+for value in test_values_mixed {
+    if is_even_check(value) {
+        print(str(value) + " is even")
+    } else {
+        print(str(value) + " is odd")
+    }
+}
+
+# Type checking lambda
+type_checker_lambda = x -> type(x)
+test_items_varied = [42, "hello", [1, 2, 3], {"key": "value"}, true]
+
+print("Type checking with lambda:")
+for item in test_items_varied {
+    item_type = type_checker_lambda(item)
+    print("Item " + str(item) + " is of type: " + item_type)
+}
+
+# String length predicate (manual implementation)
+test_strings = ["hi", "hello", "world", "programming", "a"]
+long_strings = []
+for string in test_strings {
+    if len(string) > 5 {
+        append(long_strings, string)
+    }
+}
+print("Strings longer than 5 characters:", long_strings)
+
+print("")
+
+# ============================================================================
+# Additional Lambda Examples and Patterns
+# ============================================================================
+
+print("15. Additional Lambda Examples and Patterns")
+print("============================================")
+
+# Additional simple lambda examples
+simple_square_alt = x -> x * x
+print("Alternative square of 5:", simple_square_alt(5))
+
+simple_add_alt = (a, b) -> a + b
+print("Alternative add 3 + 7 =", simple_add_alt(3, 7))
+
+get_answer_alt = () -> 42
+print("Alternative answer:", get_answer_alt())
+
+# Lambda with block body (alternative factorial)
+factorial_alt = n -> {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial_alt(n - 1)
+}
+print("Alternative factorial of 5:", factorial_alt(5))
+
+# Lambda capturing variables (closure example)
+multiplier_alt = 10
+create_multiplier_alt = x -> x * multiplier_alt
+print("Alternative closure 5 * 10 =", create_multiplier_alt(5))
+
+# Lambda as function argument (alternative)
+func apply_lambda(function_param, value) {
+    return function_param(value)
+}
+
+double_alt = x -> x * 2
+result_alt = apply_lambda(double_alt, 15)
+print("Alternative applied double to 15:", result_alt)
+
+# Even/odd checking lambda (simplified)
+is_even_lambda = x -> {
+    divided = x / 2
+    multiplied = divided * 2
+    return multiplied == x
+}
+print("Is 8 even?", is_even_lambda(8))
+print("Is 7 even?", is_even_lambda(7))
+
+# Sign checking lambda with conditional expression
+sign_lambda = x -> x > 0 ? 1 : (x < 0 ? -1 : 0)
+print("Sign of 5:", sign_lambda(5))
+print("Sign of -3:", sign_lambda(-3))
+print("Sign of 0:", sign_lambda(0))
+
+# Lambda returning lambda (currying alternative)
+func curry_add_alt(a) {
+    return b -> a + b
+}
+
+add_five_alt = curry_add_alt(5)
+print("Alternative curried add: 5 + 10 =", add_five_alt(10))
+
+print("")
+
+# ============================================================================
+# Comprehensive Lambda Testing
+# ============================================================================
+
+print("16. Comprehensive Lambda Testing")
+print("=================================")
+
+# Test basic lambda functionality variations
+simple_increment = x -> x + 1
+print("Simple increment lambda:", simple_increment(5))
+
+# Test lambda with multiple parameters (alternative)
+add_numbers = (a, b) -> a + b
+print("Add numbers lambda:", add_numbers(3, 4))
+
+# Test lambda with no parameters (alternative)
+constant_value = () -> 42
+print("Constant value lambda:", constant_value())
+
+# Test lambda with captured variables (alternative)
+multiplier_val = 3
+multiply_by_three = x -> x * multiplier_val
+print("Captured variable lambda:", multiply_by_three(7))
+
+# Test lambda with block body (recursive factorial)
+factorial_lambda = n -> {
+    if n <= 1 {
+        return 1
+    } else {
+        return n * factorial_lambda(n - 1)
+    }
+}
+print("Factorial lambda:", factorial_lambda(4))
+
+# Test nested lambdas (currying)
+outer_lambda = x -> (y -> x + y)
+inner_lambda = outer_lambda(10)
+print("Nested lambda result:", inner_lambda(5))
+
+# Test lambda with conditional expression (alternative)
+sign_lambda = x -> x > 0 ? 1 : (x < 0 ? -1 : 0)
+print("Sign of 5:", sign_lambda(5))
+print("Sign of -3:", sign_lambda(-3))
+print("Sign of 0:", sign_lambda(0))
+
+# Test lambda as function parameter (alternative)
+func apply_lambda(fn, value) {
+    return fn(value)
+}
+
+double_lambda = x -> x * 2
+apply_result = apply_lambda(double_lambda, 8)
+print("Applied double lambda to 8:", apply_result)
+
+# Test lambda returning from function (factory pattern)
+func make_adder_lambda(increment) {
+    return x -> x + increment
+}
+
+add_seven = make_adder_lambda(7)
+print("Add 7 to 15:", add_seven(15))
+
+print("All comprehensive lambda tests completed successfully!")
+
+print("")
+
+# ============================================================================
+# Explicit Typing for Functions and Lambdas
+# ============================================================================
+
+print("12. Explicit Typing for Functions and Lambdas")
+print("==============================================")
+
+# Functions with explicitly typed parameters
+func typed_add(a : int, b : int) {
+    return a + b
+}
+
+func typed_greet(name : string, age : int) {
+    return "Hello " + name + ", you are " + str(age) + " years old"
+}
+
+# Mixed typed and untyped parameters
+func mixed_params(typed_input : string, untyped_multiplier, const typed_const : int) {
+    print("Typed input:", typed_input)
+    print("Untyped multiplier:", untyped_multiplier)
+    print("Typed const:", typed_const)
+
+    # Can modify untyped parameter
+    untyped_multiplier = untyped_multiplier * 2
+    print("Modified untyped multiplier:", untyped_multiplier)
+
+    # Cannot modify const parameter (would error)
+    # typed_const = 100
+
+    result : string = typed_input * untyped_multiplier
+    return result
+}
+
+# Test typed functions
+typed_sum : int = typed_add(15, 25)
+greeting : string = typed_greet("Eve", 32)
+mixed_result : string = mixed_params("*", 3, 20)
+
+print("Typed addition result:", typed_sum)
+print("Typed greeting:", greeting)
+print("Mixed parameters result:", mixed_result)
+
+# Lambda functions with explicit typing
+print("\n--- Lambda Functions with Explicit Typing ---")
+
+# Typed lambda parameters
+multiply_typed : lambda = (a : int, b : int) -> a * b
+string_processor : lambda = (text : string, count : int) -> text * count
+
+# Const typed lambda parameters
+formatter : lambda = (const template : string, const value : int) -> {
+    # template = "changed"  # Would error: const parameter
+    return template + ": " + str(value)
+}
+
+# Mixed typing in lambdas
+mixed_lambda : lambda = (typed_str : string, untyped_val) -> {
+    untyped_val = untyped_val + 5  # Can modify untyped parameter
+    return typed_str + " " + str(untyped_val)
+}
+
+# Test typed lambdas
+mult_result : int = multiply_typed(8, 9)
+string_result : string = string_processor("Hi", 4)
+format_result : string = formatter("Score", 85)
+mixed_lambda_result : string = mixed_lambda("Result:", 10)
+
+print("Typed multiply lambda:", mult_result)
+print("String processor lambda:", string_result)
+print("Formatter lambda:", format_result)
+print("Mixed lambda result:", mixed_lambda_result)
+
+# Async functions with explicit typing
+print("\n--- Async Functions with Explicit Typing ---")
+
+async func async_typed_process(data : string, delay : int) {
+    print("Async processing:", data, "with delay:", delay)
+    return data + "_processed_after_" + str(delay) + "ms"
+}
+
+# Async lambda with typed parameters
+async_typed_lambda : lambda = async (input : string, multiplier : int) -> {
+    print("Async lambda processing:", input, "x", multiplier)
+    return input * multiplier
+}
+
+# Test async typed functions
+async_result : string = await async_typed_process("data", 100)
+async_lambda_result : string = await async_typed_lambda("*", 6)
+
+print("Async typed function result:", async_result)
+print("Async typed lambda result:", async_lambda_result)
+
+# Type validation examples
+print("\n--- Type Validation Examples ---")
+
+try {
+    bad_result = typed_add("not", "numbers")  # Type error
+    print("ERROR: This should not execute")
+} catch e {
+    print("Expected type error:", e)
+}
+
+try {
+    bad_lambda_result = multiply_typed(3.14, "text")  # Type error
+    print("ERROR: This should not execute")
+} catch e {
+    print("Expected lambda type error:", e)
+}
+
+print("Explicit typing examples completed successfully!")
+
+print("")
+print("=== Functions and Lambdas Demo Complete ===")

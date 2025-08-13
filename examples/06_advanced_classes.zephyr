@@ -1,0 +1,1341 @@
+# Zephyr Advanced Classes and Object-Oriented Patterns
+# This file demonstrates advanced class features, inheritance patterns, and complex object interactions
+
+print("=== Zephyr Advanced Classes Demo ===")
+print("")
+
+# ============================================================================
+# Advanced Class Constructors and Initialization
+# ============================================================================
+
+print("1. Advanced Class Constructors and Initialization")
+print("==================================================")
+
+# Class with complex initialization
+class DatabaseConnection {
+    func init(host, port, database, username, password) {
+        this.host = host
+        this.port = port
+        this.database = database
+        this.username = username
+        this.password = password
+        this.connected = false
+        this.connection_count = 0
+        this.last_query = ""
+        this.query_history = []
+        this.connection_time = 0
+
+        print("Database connection configured for " + this.host + ":" + str(this.port))
+    }
+
+    func connect() {
+        if not this.connected {
+            this.connected = true
+            this.connection_count = this.connection_count + 1
+            this.connection_time = this.connection_count * 100  # Simulate time
+            print("Connected to " + this.database + " on " + this.host)
+        } else {
+            print("Already connected to database")
+        }
+    }
+
+    func execute_query(sql) {
+        if this.connected {
+            this.last_query = sql
+            append(this.query_history, sql)
+            print("Executed: " + sql)
+            return "Result set for: " + sql
+        } else {
+            print("Not connected to database")
+            return none
+        }
+    }
+
+    func disconnect() {
+        if this.connected {
+            this.connected = false
+            print("Disconnected from " + this.database)
+        }
+    }
+
+    func get_connection_info() {
+        status = this.connected ? "Connected" : "Disconnected"
+        return this.username + "@" + this.host + ":" + str(this.port) + "/" + this.database + " - " + status
+    }
+}
+
+# Test advanced constructor
+db = DatabaseConnection("localhost", 5432, "myapp", "admin", "secret123")
+print("Connection info:", db.get_connection_info())
+db.connect()
+result = db.execute_query("SELECT * FROM users")
+print("Query result:", result)
+db.disconnect()
+
+print("")
+
+# ============================================================================
+# Factory Pattern and Object Creation
+# ============================================================================
+
+print("2. Factory Pattern and Object Creation")
+print("=======================================")
+
+# Abstract base for different vehicle types
+class Vehicle {
+    func init(make, model, year) {
+        this.make = make
+        this.model = model
+        this.year = year
+        this.fuel_level = 100
+        this.odometer = 0
+        this.maintenance_schedule = []
+    }
+
+    func start() {
+        print("Starting " + this.make + " " + this.model)
+    }
+
+    func get_info() {
+        return str(this.year) + " " + this.make + " " + this.model
+    }
+}
+
+class Car {
+    func init(make, model, year, doors) {
+        this.make = make
+        this.model = model
+        this.year = year
+        this.doors = doors
+        this.fuel_level = 100
+        this.odometer = 0
+        this.maintenance_schedule = []
+        this.trunk_capacity = 15
+        this.passenger_capacity = 5
+    }
+
+    func start() {
+        print("Car engine started: " + this.make + " " + this.model)
+    }
+
+    func honk() {
+        print("Beep beep!")
+    }
+
+    func get_info() {
+        return str(this.year) + " " + this.make + " " + this.model + " (" + str(this.doors) + " doors)"
+    }
+}
+
+class Truck {
+    func init(make, model, year, bed_size) {
+        this.make = make
+        this.model = model
+        this.year = year
+        this.bed_size = bed_size
+        this.fuel_level = 100
+        this.odometer = 0
+        this.maintenance_schedule = []
+        this.cargo_capacity = 50
+        this.towing_capacity = 10000
+    }
+
+    func start() {
+        print("Truck engine started: " + this.make + " " + this.model)
+    }
+
+    func lower_tailgate() {
+        print("Tailgate lowered for loading")
+    }
+
+    func get_info() {
+        return str(this.year) + " " + this.make + " " + this.model + " (" + str(this.bed_size) + "ft bed)"
+    }
+}
+
+class Motorcycle {
+    func init(make, model, year, engine_size) {
+        this.make = make
+        this.model = model
+        this.year = year
+        this.engine_size = engine_size
+        this.fuel_level = 100
+        this.odometer = 0
+        this.maintenance_schedule = []
+        this.helmet_required = true
+    }
+
+    func start() {
+        print("Motorcycle engine roars: " + this.make + " " + this.model)
+    }
+
+    func rev_engine() {
+        print("VROOM VROOM!")
+    }
+
+    func get_info() {
+        return str(this.year) + " " + this.make + " " + this.model + " (" + str(this.engine_size) + "cc)"
+    }
+}
+
+class VehicleFactory {
+    func init() {
+        this.vehicles_created = 0
+        this.production_log = []
+    }
+
+    func create_car(make, model, year, doors) {
+        this.vehicles_created = this.vehicles_created + 1
+        car = Car(make, model, year, doors)
+        log_entry = "Car: " + str(year) + " " + make + " " + model
+        append(this.production_log, log_entry)
+        print("Manufactured: " + log_entry)
+        return car
+    }
+
+    func create_truck(make, model, year, bed_size) {
+        this.vehicles_created = this.vehicles_created + 1
+        truck = Truck(make, model, year, bed_size)
+        log_entry = "Truck: " + str(year) + " " + make + " " + model
+        append(this.production_log, log_entry)
+        print("Manufactured: " + log_entry)
+        return truck
+    }
+
+    func create_motorcycle(make, model, year, engine_size) {
+        this.vehicles_created = this.vehicles_created + 1
+        bike = Motorcycle(make, model, year, engine_size)
+        log_entry = "Motorcycle: " + str(year) + " " + make + " " + model
+        append(this.production_log, log_entry)
+        print("Manufactured: " + log_entry)
+        return bike
+    }
+
+    func get_production_stats() {
+        print("Production Statistics:")
+        print("Total vehicles created: " + str(this.vehicles_created))
+        print("Production log:")
+        for entry in this.production_log {
+            print("  - " + entry)
+        }
+    }
+}
+
+# Test factory pattern
+factory = VehicleFactory()
+car1 = factory.create_car("Toyota", "Camry", 2023, 4)
+truck1 = factory.create_truck("Ford", "F-150", 2023, 6)
+bike1 = factory.create_motorcycle("Harley", "Sportster", 2023, 883)
+
+print("\nTesting created vehicles:")
+car1.start()
+car1.honk()
+truck1.start()
+truck1.lower_tailgate()
+bike1.start()
+bike1.rev_engine()
+
+print("")
+factory.get_production_stats()
+
+print("")
+
+# ============================================================================
+# Builder Pattern for Complex Objects
+# ============================================================================
+
+print("3. Builder Pattern for Complex Objects")
+print("=======================================")
+
+class Computer {
+    func init() {
+        this.cpu = ""
+        this.ram = 0
+        this.storage = 0
+        this.gpu = ""
+        this.motherboard = ""
+        this.power_supply = 0
+        this.case_type = ""
+        this.peripherals = []
+        this.price = 0
+        this.warranty_years = 1
+    }
+
+    func get_specs() {
+        print("Computer Specifications:")
+        print("CPU: " + this.cpu)
+        print("RAM: " + str(this.ram) + "GB")
+        print("Storage: " + str(this.storage) + "GB")
+        print("GPU: " + this.gpu)
+        print("Motherboard: " + this.motherboard)
+        print("Power Supply: " + str(this.power_supply) + "W")
+        print("Case: " + this.case_type)
+        print("Peripherals: " + str(this.peripherals))
+        print("Total Price: $" + str(this.price))
+        print("Warranty: " + str(this.warranty_years) + " years")
+    }
+
+    func boot() {
+        print("Computer booting...")
+        print("POST check: OK")
+        print("Loading OS...")
+        print("System ready!")
+    }
+}
+
+class ComputerBuilder {
+    func init() {
+        this.computer = Computer()
+        this.build_log = []
+    }
+
+    func set_cpu(cpu_model, price) {
+        this.computer.cpu = cpu_model
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added CPU: " + cpu_model + " ($" + str(price) + ")")
+        return this
+    }
+
+    func set_ram(gb, price) {
+        this.computer.ram = gb
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added RAM: " + str(gb) + "GB ($" + str(price) + ")")
+        return this
+    }
+
+    func set_storage(gb, storage_type, price) {
+        this.computer.storage = gb
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added Storage: " + str(gb) + "GB " + storage_type + " ($" + str(price) + ")")
+        return this
+    }
+
+    func set_gpu(gpu_model, price) {
+        this.computer.gpu = gpu_model
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added GPU: " + gpu_model + " ($" + str(price) + ")")
+        return this
+    }
+
+    func set_motherboard(mb_model, price) {
+        this.computer.motherboard = mb_model
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added Motherboard: " + mb_model + " ($" + str(price) + ")")
+        return this
+    }
+
+    func set_power_supply(watts, price) {
+        this.computer.power_supply = watts
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added PSU: " + str(watts) + "W ($" + str(price) + ")")
+        return this
+    }
+
+    func set_case(case_type, price) {
+        this.computer.case_type = case_type
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added Case: " + case_type + " ($" + str(price) + ")")
+        return this
+    }
+
+    func add_peripheral(peripheral, price) {
+        append(this.computer.peripherals, peripheral)
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Added Peripheral: " + peripheral + " ($" + str(price) + ")")
+        return this
+    }
+
+    func set_warranty(years, price) {
+        this.computer.warranty_years = years
+        this.computer.price = this.computer.price + price
+        append(this.build_log, "Extended Warranty: " + str(years) + " years ($" + str(price) + ")")
+        return this
+    }
+
+    func build() {
+        print("Build Log:")
+        for entry in this.build_log {
+            print("  - " + entry)
+        }
+        print("Build completed!")
+        return this.computer
+    }
+}
+
+# Test builder pattern
+print("Building a gaming computer:")
+gaming_pc = ComputerBuilder()
+    .set_cpu("Intel i9-12900K", 500)
+    .set_ram(32, 200)
+    .set_storage(1000, "NVMe SSD", 150)
+    .set_gpu("RTX 4080", 1200)
+    .set_motherboard("ASUS ROG", 300)
+    .set_power_supply(850, 120)
+    .set_case("Full Tower RGB", 80)
+    .add_peripheral("Gaming Keyboard", 100)
+    .add_peripheral("Gaming Mouse", 60)
+    .add_peripheral("4K Monitor", 400)
+    .set_warranty(3, 150)
+    .build()
+
+print("")
+gaming_pc.get_specs()
+print("")
+gaming_pc.boot()
+
+print("")
+
+# ============================================================================
+# Observer Pattern for Event Handling
+# ============================================================================
+
+print("4. Observer Pattern for Event Handling")
+print("=======================================")
+
+class EventPublisher {
+    func init(name) {
+        this.name = name
+        this.subscribers = []
+        this.event_count = 0
+    }
+
+    func subscribe(observer) {
+        append(this.subscribers, observer)
+        print("Observer subscribed to " + this.name)
+    }
+
+    func unsubscribe(observer) {
+        # In a real implementation, we'd remove the observer
+        print("Observer unsubscribed from " + this.name)
+    }
+
+    func notify(event_type, data) {
+        this.event_count = this.event_count + 1
+        print("Publishing event '" + event_type + "' from " + this.name)
+
+        for subscriber in this.subscribers {
+            subscriber.on_event(event_type, data, this.name)
+        }
+    }
+
+    func get_stats() {
+        return "Publisher '" + this.name + "': " + str(len(this.subscribers)) + " subscribers, " + str(this.event_count) + " events published"
+    }
+}
+
+class Logger {
+    func init(log_level) {
+        this.log_level = log_level
+        this.log_entries = []
+    }
+
+    func on_event(event_type, data, source) {
+        log_entry = "[" + this.log_level + "] " + source + " -> " + event_type + ": " + str(data)
+        append(this.log_entries, log_entry)
+        print("LOG: " + log_entry)
+    }
+
+    func get_logs() {
+        print("Log entries:")
+        for entry in this.log_entries {
+            print("  " + entry)
+        }
+    }
+}
+
+class EmailNotifier {
+    func init(email_address) {
+        this.email_address = email_address
+        this.notifications_sent = 0
+    }
+
+    func on_event(event_type, data, source) {
+        if event_type == "error" or event_type == "critical" {
+            this.notifications_sent = this.notifications_sent + 1
+            print("EMAIL to " + this.email_address + ": " + source + " " + event_type + " - " + str(data))
+        }
+    }
+
+    func get_stats() {
+        return "Email notifications sent: " + str(this.notifications_sent)
+    }
+}
+
+class DatabaseRecorder {
+    func init(table_name) {
+        this.table_name = table_name
+        this.records = []
+    }
+
+    func on_event(event_type, data, source) {
+        record = {
+            "source": source,
+            "event": event_type,
+            "data": data,
+            "timestamp": len(this.records) + 1000
+        }
+        append(this.records, record)
+        print("DB INSERT into " + this.table_name + ": " + str(record))
+    }
+
+    func get_record_count() {
+        return len(this.records)
+    }
+}
+
+# Test observer pattern
+system_events = EventPublisher("SystemMonitor")
+error_events = EventPublisher("ErrorHandler")
+
+# Create observers
+logger = Logger("INFO")
+error_logger = Logger("ERROR")
+email_notifier = EmailNotifier("admin@company.com")
+db_recorder = DatabaseRecorder("system_events")
+
+# Subscribe observers
+system_events.subscribe(logger)
+system_events.subscribe(db_recorder)
+error_events.subscribe(error_logger)
+error_events.subscribe(email_notifier)
+error_events.subscribe(db_recorder)
+
+# Publish events
+system_events.notify("startup", "System initialized")
+system_events.notify("user_login", "user123")
+error_events.notify("error", "Database connection failed")
+error_events.notify("critical", "Disk space low")
+system_events.notify("shutdown", "System shutting down")
+
+print("\nObserver statistics:")
+print(system_events.get_stats())
+print(error_events.get_stats())
+print(email_notifier.get_stats())
+print("Database records: " + str(db_recorder.get_record_count()))
+
+print("")
+
+# ============================================================================
+# Composite Pattern for Hierarchical Structures
+# ============================================================================
+
+print("5. Composite Pattern for Hierarchical Structures")
+print("=================================================")
+
+class FileSystemComponent {
+    func init(name) {
+        this.name = name
+        this.parent = none
+        this.creation_time = 0
+    }
+
+    func get_name() {
+        return this.name
+    }
+
+    func get_path() {
+        if this.parent == none {
+            return "/" + this.name
+        } else {
+            return this.parent.get_path() + "/" + this.name
+        }
+    }
+}
+
+class File {
+    func init(name, size, content) {
+        this.name = name
+        this.size = size
+        this.content = content
+        this.parent = ""
+        this.has_parent = false
+        this.creation_time = 0
+        this.file_type = "file"
+    }
+
+    func get_name() {
+        return this.name
+    }
+
+    func get_path() {
+        if this.has_parent == false {
+            return "/" + this.name
+        } else {
+            return this.parent.get_path() + "/" + this.name
+        }
+    }
+
+    func get_size() {
+        return this.size
+    }
+
+    func read() {
+        print("Reading file: " + this.get_path())
+        return this.content
+    }
+
+    func write(new_content) {
+        this.content = new_content
+        this.size = len(new_content)
+        print("Written to file: " + this.get_path())
+    }
+
+    func get_info() {
+        return "File: " + this.name + " (" + str(this.size) + " bytes)"
+    }
+}
+
+class Directory {
+    func init(name) {
+        this.name = name
+        this.children = []
+        this.parent = ""
+        this.has_parent = false
+        this.creation_time = 0
+        this.file_type = "directory"
+    }
+
+    func get_name() {
+        return this.name
+    }
+
+    func get_path() {
+        if this.has_parent == false {
+            return "/" + this.name
+        } else {
+            return this.parent.get_path() + "/" + this.name
+        }
+    }
+
+    func add_child(component) {
+        append(this.children, component)
+        component.parent = this
+        print("Added " + component.get_info() + " to " + this.get_path())
+    }
+
+    func remove_child(component) {
+        # In a real implementation, we'd remove from the list
+        component.parent = none
+        print("Removed " + component.name + " from " + this.get_path())
+    }
+
+    func list_contents() {
+        print("Contents of " + this.get_path() + ":")
+        for child in this.children {
+            print("  - " + child.get_info())
+        }
+    }
+
+    func get_size() {
+        total_size = 0
+        for child in this.children {
+            total_size = total_size + child.get_size()
+        }
+        return total_size
+    }
+
+    func find_file(filename) {
+        for child in this.children {
+            if child.name == filename {
+                return child
+            }
+            if child.file_type == "directory" {
+                found = child.find_file(filename)
+                if found != none {
+                    return found
+                }
+            }
+        }
+        return none
+    }
+
+    func get_info() {
+        return "Directory: " + this.name + " (" + str(len(this.children)) + " items, " + str(this.get_size()) + " bytes)"
+    }
+}
+
+# Test composite pattern
+root = Directory("root")
+home = Directory("home")
+user = Directory("user")
+documents = Directory("documents")
+downloads = Directory("downloads")
+
+# Create files
+readme = File("README.txt", 100, "This is a readme file")
+config = File("config.json", 250, "{\"theme\": \"dark\"}")
+photo = File("photo.jpg", 2048, "binary image data")
+document = File("report.pdf", 5120, "PDF document content")
+
+# Build file system hierarchy
+root.add_child(home)
+home.add_child(user)
+user.add_child(documents)
+user.add_child(downloads)
+user.add_child(readme)
+user.add_child(config)
+documents.add_child(document)
+downloads.add_child(photo)
+
+# Test operations
+print("\nFile system structure:")
+root.list_contents()
+home.list_contents()
+user.list_contents()
+documents.list_contents()
+downloads.list_contents()
+
+print("\nFile operations:")
+content = readme.read()
+print("README content: " + content)
+readme.write("Updated readme content")
+
+print("\nDirectory operations:")
+print("Total size of user directory: " + str(user.get_size()) + " bytes")
+
+found_file = root.find_file("photo.jpg")
+if found_file != none {
+    print("Found file: " + found_file.get_path())
+} else {
+    print("File not found")
+}
+
+print("")
+
+# ============================================================================
+# Strategy Pattern for Algorithm Selection
+# ============================================================================
+
+print("6. Strategy Pattern for Algorithm Selection")
+print("============================================")
+
+class SortingStrategy {
+    func sort(data) {
+        print("Base sorting strategy - not implemented")
+        return data
+    }
+
+    func get_name() {
+        return "Unknown"
+    }
+}
+
+class BubbleSort {
+    func sort(data) {
+        print("Performing bubble sort...")
+        # Simplified bubble sort simulation
+        sorted_data = data
+        for i = 0; i < len(data); i = i + 1 {
+            for j = 0; j < len(data) - 1; j = j + 1 {
+                if sorted_data[j] > sorted_data[j + 1] {
+                    temp = sorted_data[j]
+                    sorted_data[j] = sorted_data[j + 1]
+                    sorted_data[j + 1] = temp
+                }
+            }
+        }
+        return sorted_data
+    }
+
+    func get_name() {
+        return "Bubble Sort"
+    }
+
+    func get_complexity() {
+        return "O(n²)"
+    }
+}
+
+class QuickSort {
+    func sort(data) {
+        print("Performing quick sort...")
+        # Simplified - just return sorted for demo
+        return this.quick_sort_helper(data)
+    }
+
+    func quick_sort_helper(arr) {
+        if len(arr) <= 1 {
+            return arr
+        }
+
+        # Simple partitioning for demo
+        pivot = arr[0]
+        less = []
+        greater = []
+
+        for i = 1; i < len(arr); i = i + 1 {
+            if arr[i] <= pivot {
+                append(less, arr[i])
+            } else {
+                append(greater, arr[i])
+            }
+        }
+
+        # Recursively sort and combine
+        sorted_less = this.quick_sort_helper(less)
+        sorted_greater = this.quick_sort_helper(greater)
+
+        result = []
+        for item in sorted_less {
+            append(result, item)
+        }
+        append(result, pivot)
+        for item in sorted_greater {
+            append(result, item)
+        }
+
+        return result
+    }
+
+    func get_name() {
+        return "Quick Sort"
+    }
+
+    func get_complexity() {
+        return "O(n log n)"
+    }
+}
+
+class MergeSort {
+    func sort(data) {
+        print("Performing merge sort...")
+        return this.merge_sort_helper(data)
+    }
+
+    func merge_sort_helper(arr) {
+        if len(arr) <= 1 {
+            return arr
+        }
+
+        mid = len(arr) / 2
+        left = []
+        right = []
+
+        for i = 0; i < mid; i = i + 1 {
+            append(left, arr[i])
+        }
+        for i = mid; i < len(arr); i = i + 1 {
+            append(right, arr[i])
+        }
+
+        sorted_left = this.merge_sort_helper(left)
+        sorted_right = this.merge_sort_helper(right)
+
+        return this.merge(sorted_left, sorted_right)
+    }
+
+    func merge(left, right) {
+        result = []
+        i = 0
+        j = 0
+
+        while i < len(left) and j < len(right) {
+            if left[i] <= right[j] {
+                append(result, left[i])
+                i = i + 1
+            } else {
+                append(result, right[j])
+                j = j + 1
+            }
+        }
+
+        while i < len(left) {
+            append(result, left[i])
+            i = i + 1
+        }
+
+        while j < len(right) {
+            append(result, right[j])
+            j = j + 1
+        }
+
+        return result
+    }
+
+    func get_name() {
+        return "Merge Sort"
+    }
+
+    func get_complexity() {
+        return "O(n log n)"
+    }
+}
+
+class SortingContext {
+    func init() {
+        this.strategy = none
+        this.sort_history = []
+    }
+
+    func set_strategy(strategy) {
+        this.strategy = strategy
+        print("Sorting strategy set to: " + strategy.get_name())
+    }
+
+    func sort_data(data) {
+        if this.strategy != none {
+            print("Input data: " + str(data))
+            start_time = len(this.sort_history) + 1
+
+            result = this.strategy.sort(data)
+
+            end_time = start_time + 1
+            duration = end_time - start_time
+
+            sort_record = {
+                "algorithm": this.strategy.get_name(),
+                "complexity": this.strategy.get_complexity(),
+                "input_size": len(data),
+                "duration": duration
+            }
+            append(this.sort_history, sort_record)
+
+            print("Output data: " + str(result))
+            print("Algorithm: " + this.strategy.get_name() + " (" + this.strategy.get_complexity() + ")")
+            return result
+        } else {
+            print("No sorting strategy set!")
+            return data
+        }
+    }
+
+    func get_performance_stats() {
+        print("Sorting Performance History:")
+        for record in this.sort_history {
+            print("  " + record["algorithm"] + ": " + str(record["input_size"]) + " items in " + str(record["duration"]) + "ms (" + record["complexity"] + ")")
+        }
+    }
+}
+
+# Test strategy pattern
+sorter = SortingContext()
+test_data = [64, 34, 25, 12, 22, 11, 90]
+
+# Test different sorting strategies
+bubble_sort = BubbleSort()
+quick_sort = QuickSort()
+merge_sort = MergeSort()
+
+print("Testing Bubble Sort:")
+sorter.set_strategy(bubble_sort)
+sorter.sort_data(test_data)
+
+print("\nTesting Quick Sort:")
+sorter.set_strategy(quick_sort)
+sorter.sort_data(test_data)
+
+print("\nTesting Merge Sort:")
+sorter.set_strategy(merge_sort)
+sorter.sort_data(test_data)
+
+print("")
+sorter.get_performance_stats()
+
+print("")
+
+# ============================================================================
+# Advanced Class Inheritance-Like Behavior
+# ============================================================================
+
+print("7. Advanced Class Inheritance-Like Behavior")
+print("============================================")
+
+# Animal base class
+class Animal {
+    func init(name, species) {
+        this.name = name
+        this.species = species
+        this.energy = 100
+    }
+
+    func speak() {
+        print(this.name + " makes a sound")
+    }
+
+    func eat(food) {
+        print(this.name + " eats " + food)
+        this.energy = this.energy + 10
+        if this.energy > 100 {
+            this.energy = 100
+        }
+    }
+
+    func get_info() {
+        return this.name + " is a " + this.species + " with " + str(this.energy) + " energy"
+    }
+
+    func sleep() {
+        print(this.name + " is sleeping")
+        this.energy = 100
+    }
+}
+
+# Dog class with specialized behavior
+class DogAnimal {
+    func init(name, breed) {
+        this.name = name
+        this.breed = breed
+        this.energy = 100
+        this.tricks = []
+        this.happiness = 50
+    }
+
+    func bark() {
+        print(this.name + " says: Woof! Woof!")
+        this.energy = this.energy - 5
+    }
+
+    func learn_trick(trick) {
+        append(this.tricks, trick)
+        this.happiness = this.happiness + 10
+        print(this.name + " learned: " + trick)
+    }
+
+    func show_tricks() {
+        if len(this.tricks) == 0 {
+            print(this.name + " doesn't know any tricks yet")
+        } else {
+            print(this.name + " knows these tricks:")
+            for trick in this.tricks {
+                print("- " + trick)
+            }
+        }
+    }
+
+    func play() {
+        print(this.name + " is playing!")
+        this.happiness = this.happiness + 15
+        this.energy = this.energy - 10
+        if this.happiness > 100 {
+            this.happiness = 100
+        }
+    }
+
+    func get_status() {
+        return this.name + " (" + this.breed + ") - Energy: " + str(this.energy) + ", Happiness: " + str(this.happiness)
+    }
+}
+
+# Test inheritance-like behavior
+print("Testing animal behavior:")
+generic_dog = Animal("Buddy", "Golden Retriever")
+generic_cat = Animal("Whiskers", "Tabby Cat")
+
+print(generic_dog.get_info())
+print(generic_cat.get_info())
+
+generic_dog.eat("dog food")
+generic_cat.eat("fish")
+generic_dog.sleep()
+
+print(generic_dog.get_info())
+print(generic_cat.get_info())
+
+print("\nTesting specialized dog behavior:")
+max_dog = DogAnimal("Max", "German Shepherd")
+luna_dog = DogAnimal("Luna", "Border Collie")
+
+print(max_dog.get_status())
+print(luna_dog.get_status())
+
+max_dog.bark()
+luna_dog.bark()
+
+max_dog.learn_trick("sit")
+max_dog.learn_trick("stay")
+max_dog.learn_trick("fetch")
+
+luna_dog.learn_trick("roll over")
+luna_dog.learn_trick("play dead")
+
+max_dog.show_tricks()
+luna_dog.show_tricks()
+
+max_dog.play()
+luna_dog.play()
+
+print(max_dog.get_status())
+print(luna_dog.get_status())
+
+print("")
+
+# ============================================================================
+# Mathematical Classes and Operations
+# ============================================================================
+
+print("8. Mathematical Classes and Operations")
+print("======================================")
+
+# Vector class for mathematical operations
+class Vector2D {
+    func init(x, y) {
+        this.x = x
+        this.y = y
+    }
+
+    func add(other) {
+        return Vector2D(this.x + other.x, this.y + other.y)
+    }
+
+    func multiply(scalar) {
+        return Vector2D(this.x * scalar, this.y * scalar)
+    }
+
+    func magnitude() {
+        return this.x * this.x + this.y * this.y  # Simplified magnitude squared
+    }
+
+    func to_string() {
+        return "(" + str(this.x) + ", " + str(this.y) + ")"
+    }
+}
+
+# Math utilities class
+class MathUtils {
+    func init() {
+        this.pi = 3.14159
+        this.e = 2.71828
+    }
+
+    func circle_area(radius) {
+        return this.pi * radius * radius
+    }
+
+    func factorial(n) {
+        if n <= 1 {
+            return 1
+        }
+        return n * this.factorial(n - 1)
+    }
+
+    func fibonacci(n) {
+        if n <= 1 {
+            return n
+        }
+        return this.fibonacci(n - 1) + this.fibonacci(n - 2)
+    }
+}
+
+# Test mathematical operations
+print("Testing Vector2D operations:")
+v1 = Vector2D(3, 4)
+v2 = Vector2D(1, 2)
+
+print("v1:", v1.to_string())
+print("v2:", v2.to_string())
+
+v3 = v1.add(v2)
+print("v1 + v2:", v3.to_string())
+
+v4 = v1.multiply(2)
+print("v1 * 2:", v4.to_string())
+
+print("v1 magnitude squared:", v1.magnitude())
+print("v2 magnitude squared:", v2.magnitude())
+
+print("\nTesting MathUtils:")
+math = MathUtils()
+
+print("Circle area (radius 5):", math.circle_area(5))
+print("Factorial of 5:", math.factorial(5))
+print("Fibonacci of 10:", math.fibonacci(10))
+print("Pi:", math.pi)
+print("E:", math.e)
+
+print("")
+
+# ============================================================================
+# Classes with Lambda Integration
+# ============================================================================
+
+print("9. Classes with Lambda Integration")
+print("===================================")
+
+# Calculator with lambda operations
+class LambdaCalculator {
+    func init() {
+        this.operations = {
+            "add": (a, b) -> a + b,
+            "subtract": (a, b) -> a - b,
+            "multiply": (a, b) -> a * b,
+            "divide": (a, b) -> a / b
+        }
+        this.history = []
+    }
+
+    func calculate(operation, a, b) {
+        result = 0
+        if operation == "add" {
+            add_func = this.operations["add"]
+            result = add_func(a, b)
+        } else if operation == "subtract" {
+            subtract_func = this.operations["subtract"]
+            result = subtract_func(a, b)
+        } else if operation == "multiply" {
+            multiply_func = this.operations["multiply"]
+            result = multiply_func(a, b)
+        } else if operation == "divide" {
+            divide_func = this.operations["divide"]
+            result = divide_func(a, b)
+        } else {
+            return "Unknown operation"
+        }
+
+        operation_str = str(a) + " " + operation + " " + str(b) + " = " + str(result)
+        append(this.history, operation_str)
+        return result
+    }
+
+    func get_history() {
+        return this.history
+    }
+
+    func clear_history() {
+        this.history = []
+    }
+}
+
+# Test lambda calculator
+print("Testing Calculator with lambdas:")
+calc = LambdaCalculator()
+
+result1 = calc.calculate("add", 10, 5)
+result2 = calc.calculate("multiply", 7, 3)
+result3 = calc.calculate("subtract", 20, 8)
+result4 = calc.calculate("divide", 15, 3)
+
+print("10 + 5 =", result1)
+print("7 * 3 =", result2)
+print("20 - 8 =", result3)
+print("15 / 3 =", result4)
+
+print("\nCalculation History:")
+history = calc.get_history()
+for entry in history {
+    print(entry)
+}
+
+calc.clear_history()
+print("History after clearing:", len(calc.get_history()))
+
+print("")
+
+# ============================================================================
+# Complex Object Interactions
+# ============================================================================
+
+print("10. Complex Object Interactions")
+print("================================")
+
+# Person class that interacts with pets
+class PersonWithPets {
+    func init(name, age) {
+        this.name = name
+        this.age = age
+        this.pets = []
+    }
+
+    func adopt_pet(pet) {
+        append(this.pets, pet)
+        print(this.name + " adopted " + pet.name)
+    }
+
+    func play_with_pets() {
+        print(this.name + " is playing with their pets:")
+        for pet in this.pets {
+            pet.play()
+        }
+    }
+
+    func get_info() {
+        pet_names = []
+        for pet in this.pets {
+            append(pet_names, pet.name)
+        }
+
+        if len(pet_names) == 0 {
+            return this.name + " (" + str(this.age) + ") has no pets"
+        } else {
+            pets_str = ""
+            for i = 0; i < len(pet_names); i = i + 1 {
+                if i > 0 {
+                    pets_str = pets_str + ", "
+                }
+                pets_str = pets_str + pet_names[i]
+            }
+            return this.name + " (" + str(this.age) + ") has pets: " + pets_str
+        }
+    }
+}
+
+# Test complex object interactions
+print("Testing object interactions:")
+alice = PersonWithPets("Alice", 25)
+bob = PersonWithPets("Bob", 30)
+
+buddy = DogAnimal("Buddy", "Labrador")
+charlie = DogAnimal("Charlie", "Beagle")
+
+alice.adopt_pet(buddy)
+bob.adopt_pet(charlie)
+
+print(alice.get_info())
+print(bob.get_info())
+
+alice.play_with_pets()
+bob.play_with_pets()
+
+print("")
+
+# ============================================================================
+# Method Chaining Pattern
+# ============================================================================
+
+print("11. Method Chaining Pattern")
+print("============================")
+
+# Chainable calculator for fluent interface
+class ChainableCalculator {
+    func init(value) {
+        this.value = value
+    }
+
+    func add(x) {
+        this.value = this.value + x
+        return this
+    }
+
+    func multiply(x) {
+        this.value = this.value * x
+        return this
+    }
+
+    func subtract(x) {
+        this.value = this.value - x
+        return this
+    }
+
+    func get_value() {
+        return this.value
+    }
+
+    func reset() {
+        this.value = 0
+        return this
+    }
+}
+
+# Test method chaining
+print("Testing method chaining:")
+chain_calc = ChainableCalculator(10)
+result = chain_calc.add(5).multiply(2).subtract(3).get_value()
+print("Chained calculation result:", result)
+
+# Test resetting and chaining again
+final_result = chain_calc.reset().add(100).multiply(2).subtract(50).get_value()
+print("After reset and new chain:", final_result)
+
+print("")
+
+print("")
+print("=== Advanced Classes Demo Complete ===")

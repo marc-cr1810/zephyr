@@ -1,0 +1,969 @@
+# Zephyr Debugging and Edge Cases
+# This file demonstrates debugging techniques, error handling patterns, edge case scenarios,
+# and proper use of the exit() function for critical errors
+
+print("=== Zephyr Debugging and Edge Cases Demo ===")
+print("")
+
+# ============================================================================
+# Critical Configuration Validation
+# ============================================================================
+
+print("0. Critical Configuration Validation")
+print("====================================")
+
+# Example of validating critical configuration at startup
+func validate_configuration(config) {
+    if config == none {
+        print("FATAL ERROR: Configuration is null")
+        exit(1)
+    }
+
+    if not ("database_url" in config) {
+        print("FATAL ERROR: Missing required configuration 'database_url'")
+        print("Application cannot continue without database connection")
+        exit(2)
+    }
+
+    if not ("api_key" in config) {
+        print("FATAL ERROR: Missing required configuration 'api_key'")
+        print("Application cannot continue without API authentication")
+        exit(3)
+    }
+
+    # Check for valid port number
+    if "port" in config {
+        port = config["port"]
+        if port < 1 or port > 65535 {
+            print("FATAL ERROR: Invalid port number:", port)
+            print("Port must be between 1 and 65535")
+            exit(4)
+        }
+    }
+
+    print("✓ Configuration validation passed")
+}
+
+# Test with valid configuration
+print("Testing valid configuration:")
+valid_config = {
+    "database_url": "postgres://localhost:5432/mydb",
+    "api_key": "abc123",
+    "port": 8080
+}
+validate_configuration(valid_config)
+
+# Test with invalid configuration (commented out to avoid actual exit)
+print("\nTesting invalid configuration scenarios:")
+print("(These would normally call exit(), but are commented out for demo)")
+
+# This would exit with code 1
+# validate_configuration(none)
+
+# This would exit with code 2
+# invalid_config = {"api_key": "abc123"}
+# validate_configuration(invalid_config)
+
+# This would exit with code 4
+# invalid_port_config = {
+#     "database_url": "postgres://localhost:5432/mydb",
+#     "api_key": "abc123",
+#     "port": 99999
+# }
+# validate_configuration(invalid_port_config)
+
+print("")
+
+# ============================================================================
+# Stack Trace and Error Debugging
+# ============================================================================
+
+print("1. Stack Trace and Error Debugging")
+print("===================================")
+
+# Function that demonstrates graceful error handling vs exit scenarios
+func recursive_function(n) {
+    print("Entering recursive_function with n =", n)
+
+    # Critical validation - negative values indicate corrupted data
+    if n < -100 {
+        print("CRITICAL ERROR: Severely corrupted input data detected:", n)
+        print("This indicates a serious system failure. Exiting immediately.")
+        exit(10)
+    }
+
+    # Normal error handling for edge cases
+    if n <= 0 {
+        print("Warning: Invalid parameter, returning error")
+        return "error"
+    }
+
+    # Safety check for excessive recursion that could crash the system
+    if n > 1000 {
+        print("FATAL ERROR: Recursion depth limit exceeded")
+        print("Input value", n, "would cause stack overflow")
+        print("Maximum safe recursion depth is 1000")
+        exit(11)
+    }
+
+    if n == 1 {
+        return 1
+    }
+    return n * recursive_function(n - 1)
+}
+
+# Test normal recursion
+print("Testing normal recursion:")
+result = recursive_function(5)
+print("Result:", result)
+
+# Test error condition
+print("\nTesting error condition:")
+error_result = recursive_function(0)
+print("Error result:", error_result)
+
+# Deep recursion to test stack
+print("\nTesting deeper recursion:")
+deep_result = recursive_function(10)
+print("Deep result:", deep_result)
+
+# Test critical error scenarios (commented out to avoid actual exit)
+print("\nTesting critical error scenarios:")
+print("(These would call exit(), but are commented out for demo)")
+
+# This would exit with code 10
+# recursive_function(-500)
+
+# This would exit with code 11
+# recursive_function(2000)
+
+print("")
+
+# ============================================================================
+# Resource Validation and Cleanup
+# ============================================================================
+
+print("2. Resource Validation and Cleanup")
+print("===================================")
+
+# Example of validating system resources before proceeding
+func validate_system_resources() {
+    print("Checking system resources...")
+
+    # Simulated resource checks
+    available_memory = 512  # MB
+    required_memory = 256   # MB
+
+    if available_memory < required_memory {
+        print("FATAL ERROR: Insufficient memory available")
+        print("Required:", required_memory, "MB")
+        print("Available:", available_memory, "MB")
+        print("Cannot continue without adequate memory")
+        exit(20)
+    }
+
+    # Simulated disk space check
+    available_disk = 100   # GB
+    required_disk = 50     # GB
+
+    if available_disk < required_disk {
+        print("FATAL ERROR: Insufficient disk space")
+        print("Required:", required_disk, "GB")
+        print("Available:", available_disk, "GB")
+        exit(21)
+    }
+
+    print("✓ System resources validated successfully")
+}
+
+# Resource cleanup function that uses exit for critical failures
+func cleanup_resources(resources) {
+    print("Cleaning up resources...")
+
+    if resources == none {
+        print("CRITICAL ERROR: Resource list is null during cleanup")
+        print("This indicates memory corruption. Emergency exit.")
+        exit(30)
+    }
+
+    for resource in resources {
+        if resource == none {
+            print("CRITICAL ERROR: Null resource found during cleanup")
+            print("System state is corrupted. Emergency exit.")
+            exit(31)
+        }
+
+        print("Cleaning resource:", resource)
+    }
+
+    print("✓ Resource cleanup completed")
+}
+
+# Test resource validation
+validate_system_resources()
+
+# Test resource cleanup
+test_resources = ["database_connection", "file_handles", "network_sockets"]
+cleanup_resources(test_resources)
+
+# Test critical cleanup scenario (commented out)
+print("Testing critical cleanup scenarios:")
+print("(These would call exit(), but are commented out for demo)")
+
+# This would exit with code 30
+# cleanup_resources(none)
+
+# This would exit with code 31
+# corrupted_resources = ["valid_resource", none, "another_resource"]
+# cleanup_resources(corrupted_resources)
+
+print("")
+
+# ============================================================================
+# Member Access Debugging Patterns
+# ============================================================================
+
+print("3. Member Access Debugging Patterns")
+print("====================================")
+
+class DebugContainer {
+    func init() {
+        this.data = {"key1": "value1", "key2": "value2"}
+        this.items = [10, 20, 30, 40]
+        this.nested = {
+            "inner": {"deep": [1, 2, 3]},
+            "other": {"values": [100, 200]}
+        }
+    }
+
+    func debug_member_access() {
+        print("=== Debug Member Access ===")
+
+        # Test direct member access
+        print("this.data:", this.data)
+        print("this.items:", this.items)
+
+        # Test indexed member access
+        print("this.data[\"key1\"]:", this.data["key1"])
+        print("this.items[0]:", this.items[0])
+
+        # Test nested access
+        print("this.nested[\"inner\"]:", this.nested["inner"])
+        print("this.nested[\"inner\"][\"deep\"]:", this.nested["inner"]["deep"])
+        print("this.nested[\"inner\"][\"deep\"][0]:", this.nested["inner"]["deep"][0])
+    }
+
+    func debug_member_assignment() {
+        print("=== Debug Member Assignment ===")
+
+        # Test simple assignment
+        print("Before: this.data[\"key1\"] =", this.data["key1"])
+        this.data["key1"] = "new_value"
+        print("After: this.data[\"key1\"] =", this.data["key1"])
+
+        # Test list assignment
+        print("Before: this.items[1] =", this.items[1])
+        this.items[1] = 999
+        print("After: this.items[1] =", this.items[1])
+
+        # Test deep nested assignment
+        print("Before: this.nested[\"inner\"][\"deep\"][2] =", this.nested["inner"]["deep"][2])
+        this.nested["inner"]["deep"][2] = 777
+        inner_dict = this.nested["inner"]
+        deep_list = inner_dict["deep"]
+        print("After: this.nested inner deep [2] =", deep_list[2])
+    }
+}
+
+debug_container = DebugContainer()
+debug_container.debug_member_access()
+print("")
+debug_container.debug_member_assignment()
+
+print("")
+
+# ============================================================================
+# Chaining Debug Patterns
+# ============================================================================
+
+print("3. Chaining Debug Patterns")
+print("===========================")
+
+class ChainDebugger {
+    func init() {
+        this.chain_data = {
+            "level1": {
+                "level2": {
+                    "items": [{"value": 100}, {"value": 200}],
+                    "flags": [true, false, true]
+                }
+            }
+        }
+    }
+
+    func test_assignment_chain() {
+        print("=== Assignment Chain Debug ===")
+
+        # Simple chain
+        print("Simple chain test:")
+        print("Before: this.chain_data[\"level1\"][\"level2\"][\"items\"][0][\"value\"] =",
+              this.chain_data["level1"]["level2"]["items"][0]["value"])
+
+        this.chain_data["level1"]["level2"]["items"][0]["value"] = 555
+
+        print("After: this.chain_data[\"level1\"][\"level2\"][\"items\"][0][\"value\"] =",
+              this.chain_data["level1"]["level2"]["items"][0]["value"])
+
+        # Flag chain
+        print("\nFlag chain test:")
+        print("Before: this.chain_data[\"level1\"][\"level2\"][\"flags\"][1] =",
+              this.chain_data["level1"]["level2"]["flags"][1])
+
+        this.chain_data["level1"]["level2"]["flags"][1] = true
+
+        print("After: this.chain_data[\"level1\"][\"level2\"][\"flags\"][1] =",
+              this.chain_data["level1"]["level2"]["flags"][1])
+    }
+
+    func test_method_chain_sequence() {
+        print("=== Method Chain Sequence Debug ===")
+
+        # Create a simple object to chain with
+        temp_obj = {"x": 10, "y": 20}
+
+        print("Original object:", temp_obj)
+        print("Accessing temp_obj[\"x\"]:", temp_obj["x"])
+        print("Accessing temp_obj[\"y\"]:", temp_obj["y"])
+
+        # Modify through chaining
+        temp_obj["x"] = temp_obj["x"] + 5
+        temp_obj["y"] = temp_obj["y"] * 2
+
+        print("After modifications:")
+        print("temp_obj[\"x\"]:", temp_obj["x"])
+        print("temp_obj[\"y\"]:", temp_obj["y"])
+    }
+}
+
+chain_debugger = ChainDebugger()
+chain_debugger.test_assignment_chain()
+print("")
+chain_debugger.test_method_chain_sequence()
+
+print("")
+
+# ============================================================================
+# Token Debug and Parsing Edge Cases
+# ============================================================================
+
+print("4. Token Debug and Parsing Edge Cases")
+print("======================================")
+
+# Test various edge cases in parsing
+func test_token_edge_cases() {
+    print("=== Token Edge Cases ===")
+
+    # String with special characters
+    special_string = "Hello \"world\" with 'quotes'"
+    print("Special string:", special_string)
+
+    # Numbers in various formats
+    int_num = 42
+    float_num = 3.14159
+    negative_num = -25
+
+    print("Integer:", int_num)
+    print("Float:", float_num)
+    print("Negative:", negative_num)
+
+    # Boolean values
+    bool_true = true
+    bool_false = false
+
+    print("True:", bool_true)
+    print("False:", bool_false)
+
+    # Complex expressions
+    complex_expr = (10 + 5) * 2 - 3
+    print("Complex expression result:", complex_expr)
+
+    # Nested function calls
+    nested_result = str(int(float("123.45")))
+    print("Nested function calls:", nested_result)
+}
+
+test_token_edge_cases()
+
+print("")
+
+# ============================================================================
+# Unary Operator Edge Cases
+# ============================================================================
+
+print("5. Unary Operator Edge Cases")
+print("=============================")
+
+func test_unary_edge_cases() {
+    print("=== Unary Operator Edge Cases ===")
+
+    # Simple unary operators
+    pos_num = +42
+    neg_num = -42
+    not_true = !true
+    not_false = !false
+
+    print("Positive unary:", pos_num)
+    print("Negative unary:", neg_num)
+    print("NOT true:", not_true)
+    print("NOT false:", not_false)
+
+    # Multiple unary operators
+    double_neg = -(-42)
+    triple_pos = +(+(+7))
+
+    print("Double negative:", double_neg)
+    print("Triple positive:", triple_pos)
+
+    # Unary with variables
+    x = 15
+    neg_x = -x
+    not_x = !x
+
+    print("Original x:", x)
+    print("Negative x:", neg_x)
+    print("NOT x:", not_x)
+
+    # Complex unary expressions
+    complex_unary = -(10 + 5)
+    print("Complex unary:", complex_unary)
+}
+
+test_unary_edge_cases()
+
+print("")
+
+# ============================================================================
+# Member Corruption and Memory Issues
+# ============================================================================
+
+print("6. Member Corruption and Memory Issues")
+print("=======================================")
+
+# Example of detecting and handling memory corruption scenarios
+class CorruptionDetector {
+    func init() {
+        this.checksum = 12345
+        this.data = [1, 2, 3, 4, 5]
+        this.state = "initialized"
+    }
+
+    func validate_integrity() {
+        # Check for critical corruption indicators
+        if this.checksum != 12345 {
+            print("CRITICAL ERROR: Object checksum mismatch")
+            print("Expected: 12345, Found:", this.checksum)
+            print("Memory corruption detected - immediate exit required")
+            exit(40)
+        }
+
+        if this.data == none {
+            print("CRITICAL ERROR: Data member corrupted to null")
+            print("This indicates severe memory corruption")
+            exit(41)
+        }
+
+        if len(this.data) != 5 {
+            print("CRITICAL ERROR: Data length corruption")
+            print("Expected: 5, Found:", len(this.data))
+            print("Memory layout compromised")
+            exit(42)
+        }
+
+        print("✓ Object integrity validation passed")
+    }
+
+    func corrupt_for_testing() {
+        print("Simulating corruption for testing (would trigger exit)")
+        # this.checksum = 99999  # Would trigger exit(40)
+        # this.data = none       # Would trigger exit(41)
+    }
+}
+
+# Test corruption detection
+detector = CorruptionDetector()
+detector.validate_integrity()
+detector.corrupt_for_testing()
+
+print("")
+
+# ============================================================================
+# Exit Code Documentation and Best Practices
+# ============================================================================
+
+print("7. Exit Code Documentation and Best Practices")
+print("==============================================")
+
+print("Exit codes used in this example:")
+print("  0  - Success (default)")
+print("  1  - Configuration is null")
+print("  2  - Missing database_url configuration")
+print("  3  - Missing api_key configuration")
+print("  4  - Invalid port number")
+print(" 10  - Corrupted recursive function input")
+print(" 11  - Recursion depth limit exceeded")
+print(" 20  - Insufficient memory")
+print(" 21  - Insufficient disk space")
+print(" 30  - Null resource list during cleanup")
+print(" 31  - Null resource found during cleanup")
+print(" 40  - Object checksum corruption")
+print(" 41  - Data member corruption")
+print(" 42  - Data length corruption")
+print("")
+
+print("Best practices for exit() usage:")
+print("1. Use meaningful exit codes (non-zero for errors)")
+print("2. Log clear error messages before calling exit()")
+print("3. Use exit() for unrecoverable errors only")
+print("4. Document your exit codes")
+print("5. Clean up critical resources before exit when possible")
+print("6. Use try/catch for recoverable errors")
+print("7. Reserve exit() for system-level failures")
+
+print("")
+
+# ============================================================================
+# Graceful Shutdown Example
+# ============================================================================
+
+print("8. Graceful Shutdown Example")
+print("============================")
+
+func graceful_shutdown(reason, exit_code) {
+    print("=== GRACEFUL SHUTDOWN INITIATED ===")
+    print("Reason:", reason)
+    print("Exit code:", exit_code)
+
+    # Perform cleanup operations
+    print("1. Closing database connections...")
+    print("2. Saving pending work...")
+    print("3. Releasing file locks...")
+    print("4. Notifying dependent services...")
+    print("5. Flushing log buffers...")
+
+    print("=== SHUTDOWN COMPLETE ===")
+    print("Exiting with code:", exit_code)
+
+    # In a real scenario, you would call exit(exit_code) here
+    # exit(exit_code)
+
+    print("(exit() call commented out for demo purposes)")
+}
+
+# Example of controlled shutdown
+print("Demonstrating graceful shutdown scenarios:")
+graceful_shutdown("User requested shutdown", 0)
+print("")
+graceful_shutdown("Configuration error detected", 1)
+print("")
+graceful_shutdown("Critical system resource exhausted", 2)
+
+print("")
+print("=== End of Debugging and Edge Cases Demo ===")
+
+class MemoryTester {
+    func init() {
+        this.data = [1, 2, 3, 4, 5]
+        this.references = {}
+        this.counter = 0
+    }
+
+    func test_member_corruption() {
+        print("=== Member Corruption Tests ===")
+
+        # Test multiple references to same data
+        this.references["ref1"] = this.data
+        this.references["ref2"] = this.data
+
+        print("Original data:", this.data)
+        print("Reference 1:", this.references["ref1"])
+        print("Reference 2:", this.references["ref2"])
+
+        # Modify through different references
+        this.data[0] = 999
+        print("After modifying this.data[0]:")
+        print("this.data:", this.data)
+        print("ref1:", this.references["ref1"])
+        print("ref2:", this.references["ref2"])
+
+        # Test creating new lists
+        this.references["ref3"] = [10, 20, 30]
+        this.references["ref3"][1] = 777
+
+        print("Independent reference ref3:", this.references["ref3"])
+        print("Original data unchanged:", this.data)
+    }
+
+    func test_deep_nesting() {
+        print("=== Deep Nesting Tests ===")
+
+        # Create deeply nested structure
+        this.deep = {
+            "a": {
+                "b": {
+                    "c": [
+                        {"d": [1, 2, 3]},
+                        {"d": [4, 5, 6]}
+                    ]
+                }
+            }
+        }
+
+        print("Deep structure created")
+        print("Access: this.deep[\"a\"][\"b\"][\"c\"][0][\"d\"][1] =",
+              this.deep["a"]["b"]["c"][0]["d"][1])
+
+        # Modify deep structure
+        this.deep["a"]["b"]["c"][0]["d"][1] = 888
+        print("After modification:", this.deep["a"]["b"]["c"][0]["d"][1])
+
+        # Verify structure integrity
+        print("Structure integrity check:")
+        print("Level a:", keys(this.deep))
+        print("Level b:", keys(this.deep["a"]))
+        print("Level c:", len(this.deep["a"]["b"]["c"]))
+    }
+}
+
+memory_tester = MemoryTester()
+memory_tester.test_member_corruption()
+print("")
+memory_tester.test_deep_nesting()
+
+print("")
+
+# ============================================================================
+# Problematic Patterns and Known Issues
+# ============================================================================
+
+print("7. Problematic Patterns and Known Issues")
+print("=========================================")
+
+class ProblematicPatterns {
+    func init() {
+        this.test_dict = {"key": 25}
+        this.test_list = [10, 20, 30]
+        this.problematic_data = {
+            "nested": [
+                {"values": [1, 2, 3]},
+                {"values": [4, 5, 6]}
+            ]
+        }
+    }
+
+    func test_exact_assignment_problems() {
+        print("=== Exact Assignment Problem Tests ===")
+
+        # The exact patterns that might cause issues
+        print("Testing: this.test_dict[\"key\"] = 45")
+        print("Before:", this.test_dict["key"])
+        this.test_dict["key"] = 45
+        print("After:", this.test_dict["key"])
+
+        # Verify retrieval works
+        x = this.test_dict["key"]
+        print("Retrieved x:", x)
+
+        print("\nTesting: this.test_list[2] = 45")
+        print("Before:", this.test_list[2])
+        this.test_list[2] = 45
+        print("After:", this.test_list[2])
+
+        # Verify retrieval works
+        y = this.test_list[2]
+        print("Retrieved y:", y)
+    }
+
+    func test_problematic_nested_patterns() {
+        print("=== Problematic Nested Patterns ===")
+
+        # Test pattern that might cause corruption
+        print("Testing nested assignment:")
+        print("Before: this.problematic_data[\"nested\"][0][\"values\"][1] =",
+              this.problematic_data["nested"][0]["values"][1])
+
+        this.problematic_data["nested"][0]["values"][1] = 999
+
+        print("After: this.problematic_data[\"nested\"][0][\"values\"][1] =",
+              this.problematic_data["nested"][0]["values"][1])
+
+        # Verify other data is intact
+        print("Other data intact:")
+        print("this.problematic_data[\"nested\"][1][\"values\"]:",
+              this.problematic_data["nested"][1]["values"])
+    }
+
+    func test_assignment_then_chain() {
+        print("=== Assignment Then Chain Tests ===")
+
+        # Test assignment followed by chaining
+        temp_obj = {"data": [1, 2, 3]}
+        print("Original temp_obj:", temp_obj)
+
+        # Assign then access
+        temp_obj["data"][0] = 777
+        result = temp_obj["data"][0]
+        print("After assignment and retrieval:", result)
+
+        # Complex assignment then chain
+        this.test_dict["new_key"] = [100, 200, 300]
+        this.test_dict["new_key"][1] = 888
+        chained_result = this.test_dict["new_key"][1]
+        print("Complex assignment then chain result:", chained_result)
+    }
+}
+
+problematic = ProblematicPatterns()
+problematic.test_exact_assignment_problems()
+print("")
+problematic.test_problematic_nested_patterns()
+print("")
+problematic.test_assignment_then_chain()
+
+print("")
+
+# ============================================================================
+# Method Call Debugging
+# ============================================================================
+
+print("8. Method Call Debugging")
+print("=========================")
+
+class MethodCallDebugger {
+    func init() {
+        this.value = 42
+        this.data = {"items": [1, 2, 3]}
+    }
+
+    func get_value() {
+        print("get_value() called, returning:", this.value)
+        return this.value
+    }
+
+    func set_value(new_value) {
+        print("set_value() called with:", new_value)
+        this.value = new_value
+    }
+
+    func process_data() {
+        print("process_data() called")
+        for i = 0; i < len(this.data["items"]); i = i + 1 {
+            this.data["items"][i] = this.data["items"][i] * 2
+        }
+        print("Data after processing:", this.data["items"])
+    }
+
+    func chain_methods() {
+        print("=== Method Call Chain Debug ===")
+
+        # Test method call sequence
+        old_value = this.get_value()
+        this.set_value(old_value * 2)
+        new_value = this.get_value()
+
+        print("Method chain completed. Old:", old_value, "New:", new_value)
+
+        # Test method with member access
+        this.process_data()
+
+        # Test accessing processed data
+        result = this.data["items"][0]
+        print("First processed item:", result)
+    }
+}
+
+method_debugger = MethodCallDebugger()
+method_debugger.chain_methods()
+
+print("")
+
+# ============================================================================
+# Edge Case Scenarios
+# ============================================================================
+
+print("9. Edge Case Scenarios")
+print("=======================")
+
+func test_edge_case_scenarios() {
+    print("=== Edge Case Scenarios ===")
+
+    # Empty collections
+    empty_list = []
+    empty_dict = {}
+
+    print("Empty list length:", len(empty_list))
+    print("Empty dict length:", len(empty_dict))
+
+    # Single element collections
+    single_list = [42]
+    single_dict = {"only": "value"}
+
+    print("Single list:", single_list)
+    print("Single dict:", single_dict)
+
+    # Modifying single element collections
+    single_list[0] = 999
+    single_dict["only"] = "changed"
+
+    print("Modified single list:", single_list)
+    print("Modified single dict:", single_dict)
+
+    # Boolean conversions edge cases
+    if [] {
+        print("Empty list is truthy")
+    } else {
+        print("Empty list is falsy")
+    }
+
+    if {} {
+        print("Empty dict is truthy")
+    } else {
+        print("Empty dict is falsy")
+    }
+
+    # None/undefined behavior
+    none_value = ""
+    print("Null value:", none_value)
+    print("Type of none:", type(none_value))
+}
+
+test_edge_case_scenarios()
+
+print("")
+
+# ============================================================================
+# Clean Version Tests
+# ============================================================================
+
+print("10. Clean Version Tests")
+print("========================")
+
+class CleanVersionTester {
+    func init() {
+        this.clean_data = {
+            "numbers": [1, 2, 3, 4, 5],
+            "strings": ["a", "b", "c"],
+            "nested": {
+                "inner": [10, 20, 30],
+                "other": {"value": 100}
+            }
+        }
+    }
+
+    func run_clean_tests() {
+        print("=== Clean Version Tests ===")
+
+        # Test all basic operations work correctly
+        print("Original data:", this.clean_data)
+
+        # Test simple access
+        first_number = this.clean_data["numbers"][0]
+        print("First number:", first_number)
+
+        # Test simple assignment
+        this.clean_data["numbers"][0] = 999
+        print("After assignment:", this.clean_data["numbers"][0])
+
+        # Test nested access
+        inner_value = this.clean_data["nested"]["inner"][1]
+        print("Inner value:", inner_value)
+
+        # Test nested assignment
+        this.clean_data["nested"]["inner"][1] = 777
+        print("After nested assignment:", this.clean_data["nested"]["inner"][1])
+
+        # Test deep nested access
+        deep_value = this.clean_data["nested"]["other"]["value"]
+        print("Deep value:", deep_value)
+
+        # Test deep nested assignment
+        this.clean_data["nested"]["other"]["value"] = 555
+        print("After deep assignment:", this.clean_data["nested"]["other"]["value"])
+
+        print("Clean tests completed successfully!")
+    }
+}
+
+clean_tester = CleanVersionTester()
+clean_tester.run_clean_tests()
+
+print("")
+
+# ============================================================================
+# Stack Trace Testing
+# ============================================================================
+
+print("11. Stack Trace Testing")
+print("========================")
+
+# Test function that causes division by zero error
+func inner_function_error() {
+    print("About to cause division by zero error")
+    a = 1 / 0
+    return a
+}
+
+func outer_function_error() {
+    print("Calling inner function that will error")
+    return inner_function_error()
+}
+
+# Test stack trace
+print("Testing stack trace with error:")
+try {
+    result = outer_function_error()
+} catch e {
+    print("Caught error:", e)
+    print("This demonstrates stack trace functionality")
+}
+
+print("")
+
+# ============================================================================
+# Simple Unary Operator Tests
+# ============================================================================
+
+print("12. Simple Unary Operator Tests")
+print("================================")
+
+func test_simple_unary_operators() {
+    print("=== Simple Unary Operators ===")
+
+    # Single unary operators
+    pos_ten = +10
+    neg_five = -5
+    not_true = !true
+    not_false = !false
+
+    print("Positive ten:", pos_ten)
+    print("Negative five:", neg_five)
+    print("NOT true:", not_true)
+    print("NOT false:", not_false)
+
+    # Multiple unary operators
+    double_negative = -(-10)
+    triple_positive = +(+(+5))
+
+    print("Double negative -(-10):", double_negative)
+    print("Triple positive +(+(+5)):", triple_positive)
+
+    # Test very simple single unary
+    simple_pos = +10
+    print("Simple positive unary:", simple_pos)
+}
+
+test_simple_unary_operators()
+
+print("")
+
+print("")
+print("=== Debugging and Edge Cases Demo Complete ===")

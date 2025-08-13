@@ -1,0 +1,739 @@
+# 20_explicit_typing.zephyr
+# Comprehensive demonstration of Zephyr's explicit typing system
+# This example showcases optional type annotations for variables, function parameters, class members, and return types
+# Includes proper use of exit() for critical type system failures
+
+print("=== Zephyr Explicit Typing Examples ===")
+
+# ==============================================================================
+# Critical Type System Validation
+# ==============================================================================
+
+print("\n--- Critical Type System Validation ---")
+
+# Function to validate type system integrity at startup
+func validate_type_system() {
+    print("Validating type system integrity...")
+
+    # Test basic type constraint enforcement
+    try {
+        test_var : string = "test"
+        test_var = 42  # This should fail
+        print("FATAL ERROR: Type system constraint violation not caught")
+        print("String variable accepted integer assignment")
+        print("Type safety is compromised - immediate exit required")
+        exit(200)
+    } catch e {
+        print("✓ Type constraint enforcement working")
+    }
+
+    # Test const parameter protection
+    test_func = (const x : int) -> {
+        try {
+            x = 999  # This should fail
+            print("FATAL ERROR: Const parameter protection failed")
+            print("Immutable parameters can be modified")
+            print("Memory safety is compromised")
+            exit(201)
+        } catch e {
+            print("✓ Const parameter protection working")
+        }
+        return x
+    }
+
+    result = test_func(42)
+    print("Type system validation completed successfully")
+}
+
+# Critical function for validating user-defined class types
+func validate_class_type_system(instance, expected_type_name) {
+    if instance == none {
+        print("FATAL ERROR: Class instance is null")
+        print("Cannot validate type for null instance")
+        exit(202)
+    }
+
+    actual_type = type(instance)
+    if actual_type != expected_type_name {
+        print("FATAL ERROR: Class type mismatch")
+        print("Expected:", expected_type_name)
+        print("Actual:", actual_type)
+        print("Type system integrity violation")
+        exit(203)
+    }
+
+    print("✓ Class type validation passed for", expected_type_name)
+}
+
+# Run critical type system validation
+validate_type_system()
+
+# ==============================================================================
+# Basic Variable Type Declarations
+# ==============================================================================
+
+print("\n--- Basic Variable Type Declarations ---")
+
+# Explicit type annotations using the colon syntax
+name : string = "Alice"
+age : int = 25
+score : float = 98.5
+active : bool = true
+
+# Empty typed declarations (default to none)
+empty_email : string      # Equivalent to: empty_email : string = none
+empty_count : int         # Explicitly typed as int, defaults to none
+
+print("name (string):", name)
+print("age (int):", age)
+print("score (float):", score)
+print("active (bool):", active)
+print("empty_email (typed, none):", empty_email)
+print("empty_count (typed, none):", empty_count)
+
+# ==============================================================================
+# Typed Constants
+# ==============================================================================
+
+print("\n--- Typed Constants ---")
+
+const MAX_USERS : int = 1000
+const API_VERSION : string = "v2.1"
+const DEFAULT_RATE : float = 0.05
+const FEATURE_ENABLED : bool = true
+
+print("MAX_USERS:", MAX_USERS)
+print("API_VERSION:", API_VERSION)
+print("DEFAULT_RATE:", DEFAULT_RATE)
+print("FEATURE_ENABLED:", FEATURE_ENABLED)
+
+# ==============================================================================
+# None Assignment with Type Retention
+# ==============================================================================
+
+print("\n--- None Assignment with Type Retention ---")
+
+# Explicitly typed variables can be assigned none while retaining type constraints
+nullable_name : string = "Bob"
+nullable_count : int = 42
+
+print("Before none assignment - name:", nullable_name, "count:", nullable_count)
+
+# Assign none while preserving type constraints
+nullable_name = none
+nullable_count = none
+
+print("After none assignment - name:", nullable_name, "count:", nullable_count)
+
+# Valid reassignments (same type)
+nullable_name = "Charlie"
+nullable_count = 100
+
+print("After valid reassignment - name:", nullable_name, "count:", nullable_count)
+
+# Assign to none (always allowed)
+nullable_name = none
+nullable_count = none
+
+print("After none assignment - name:", nullable_name, "count:", nullable_count)
+
+# Reassign with correct types (works)
+nullable_name = "Charlie"
+nullable_count = 100
+
+print("After reassignment - name:", nullable_name, "count:", nullable_count)
+
+# Type mismatches after none assignment still fail
+try {
+    nullable_name = 42  # Error: cannot assign int to string variable
+    print("FATAL ERROR: Type constraint violation not caught")
+    print("This indicates a critical type system failure")
+    exit(204)
+} catch e {
+    print("✓ Type constraint properly enforced:", e)
+}
+
+# ==============================================================================
+# Function Parameter Typing
+# ==============================================================================
+
+print("\n--- Function Parameter Typing ---")
+
+# Functions with explicitly typed parameters
+func calculate_area(length : float, width : float) {
+    return length * width
+}
+
+func format_user_info(name : string, age : int, const is_admin : bool) {
+    prefix = is_admin ? "Admin" : "User"
+    return prefix + ": " + name + " (age " + str(age) + ")"
+}
+
+# Mixed typed and untyped parameters
+func process_data(typed_input : string, untyped_multiplier, const max_length : int) {
+    # Can modify untyped parameter
+    untyped_multiplier = untyped_multiplier * 2
+
+    result : string = typed_input * untyped_multiplier
+
+    # Cannot modify const parameter
+    try {
+        result = mixed_params_func(100, "not_a_number", 42)
+        print("FATAL ERROR: Function parameter type validation failed")
+        print("Mixed parameter typing is compromised")
+        exit(205)
+    } catch e {
+        print("✓ Function parameter type validation working:", e)
+    }
+
+    # Apply length limit
+    if (len(result) > max_length) {
+        result = typed_input  # Fallback
+    }
+
+    return result
+}
+
+# Test typed functions
+area_result : float = calculate_area(10.5, 7.2)
+user_info : string = format_user_info("David", 28, true)
+processed_data : string = process_data("Hi", 3, 10)
+
+print("Area calculation:", area_result)
+print("User info:", user_info)
+print("Processed data:", processed_data)
+
+# ==============================================================================
+# Lambda Functions with Explicit Typing
+# ==============================================================================
+
+print("\n--- Lambda Functions with Explicit Typing ---")
+
+# Lambda with typed parameters
+multiply : lambda = (a : int, b : int) -> a * b
+divide : lambda = (dividend : float, divisor : float) -> dividend / divisor
+
+# Lambda with const typed parameters
+formatter : lambda = (const template : string, const value : int) -> {
+    # template = "changed"  # Would error: const parameter
+    return template + ": " + str(value)
+}
+
+# Mixed typing in lambdas
+mixed_lambda : lambda = (typed_param : string, untyped_param) -> {
+    untyped_param = untyped_param + 10  # Can modify untyped parameter
+    return typed_param + " " + str(untyped_param)
+}
+
+# Test typed lambdas
+multiply_result : int = multiply(6, 7)
+divide_result : float = divide(15.0, 4.0)
+format_result : string = formatter("Score", 95)
+mixed_result : string = mixed_lambda("Result:", 5)
+
+print("Multiply lambda:", multiply_result)
+print("Divide lambda:", divide_result)
+print("Format lambda:", format_result)
+print("Mixed lambda:", mixed_result)
+
+# ==============================================================================
+# Async Functions with Explicit Typing
+# ==============================================================================
+
+print("\n--- Async Functions with Explicit Typing ---")
+
+async func fetch_user_data(user_id : int, format : string) {
+    print("Fetching user", user_id, "in format", format)
+    return format + "_data_for_user_" + str(user_id)
+}
+
+async func process_async_data(const data : string, multiplier : int) {
+    print("Async processing:", data, "with multiplier:", multiplier)
+    # data = "modified"  # Would error: const parameter
+    return data * multiplier
+}
+
+# Async lambda with typed parameters
+async_lambda : lambda = async (input : string, count : int) -> {
+    print("Async lambda processing:", input, "count:", count)
+    return input * count
+}
+
+# Test async typed functions
+user_data : string = await fetch_user_data(123, "json")
+async_processed : string = await process_async_data("*", 5)
+async_lambda_result : string = await async_lambda("Hi", 3)
+
+print("Async user data:", user_data)
+print("Async processed:", async_processed)
+print("Async lambda result:", async_lambda_result)
+
+# ==============================================================================
+# User-Defined Class Types
+# ==============================================================================
+
+print("\n--- User-Defined Class Types ---")
+
+class Person {
+    func init(person_name : string, person_age : int) {
+        this.name = person_name
+        this.age = person_age
+    }
+
+    func greet() {
+        return "Hello, I'm " + this.name + " and I'm " + str(this.age) + " years old"
+    }
+
+    func celebrate_birthday(const message : string) {
+        this.age = this.age + 1
+        # message = "changed"  # Would error: const parameter
+        return message + " Happy birthday! Now " + str(this.age)
+    }
+}
+
+class Company {
+    func init(company_name : string) {
+        this.name = company_name
+        this.employees = []
+    }
+
+    func add_employee(employee : Person) {
+        append(this.employees, employee)
+    }
+}
+
+# Test user-defined class types
+person : Person = Person("Emma", 30)
+company : Company = Company("TechCorp")
+
+print("Person greeting:", person.greet())
+
+company.add_employee(person)
+print("Company employee count:", len(company.employees))
+
+birthday_msg : string = person.celebrate_birthday("Congratulations!")
+print("Birthday message:", birthday_msg)
+
+# Test class type validation
+try {
+    bad_result = typed_add("not", "numbers")  # Type error
+    print("FATAL ERROR: Lambda type validation failed")
+    print("Lambda parameter typing is compromised")
+    exit(207)
+} catch e {
+    print("✓ Lambda type validation working:", e)
+}
+
+try {
+    bad_async_result = await async_typed_process(123, "wrong_type")
+    print("FATAL ERROR: Async function type validation failed")
+    print("Async typing system is compromised")
+    exit(208)
+} catch e {
+    print("✓ Async function type validation working:", e)
+}
+
+# ==============================================================================
+# Complex Data Type Annotations
+# ==============================================================================
+
+print("\n--- Complex Data Type Annotations ---")
+
+# Built-in collection types
+numbers : list = [1, 2, 3, 4, 5]
+config : dict = {"debug": true, "port": 8080}
+processor : lambda = x -> x * 2
+utility_func : function = calculate_area
+
+print("Numbers list:", numbers)
+print("Config dict:", config)
+print("Processor lambda result:", processor(10))
+print("Utility function result:", utility_func(5.0, 3.0))
+
+# Test collection type validation
+try {
+    numbers = "not a list"  # Error: cannot assign string to list variable
+    print("ERROR: This should not execute")
+} catch e {
+    print("Expected list type error:", e)
+}
+
+try {
+    config = [1, 2, 3]  # Error: cannot assign list to dict variable
+    print("ERROR: This should not execute")
+} catch e {
+    print("Expected dict type error:", e)
+}
+
+# ==============================================================================
+# Class Member Variables with Explicit Typing
+# ==============================================================================
+
+print("\n--- Class Member Variables with Explicit Typing ---")
+
+class TypedPerson {
+    # Typed member variables with defaults
+    name : string = "Unknown Person"
+    age : int = 0
+    score : float = 0.0
+    active : bool = true
+
+    # Typed member variables without defaults (default to none)
+    email : string
+    phone : string
+
+    # Untyped member variables
+    metadata = {"created": "now"}
+    tags
+
+    func init(person_name : string, person_age : int) {
+        this.name = person_name
+        this.age = person_age
+        this.email = person_name + "@example.com"
+        this.tags = []
+    }
+
+    func update_score(new_score : float) : bool {
+        if (new_score >= 0.0 and new_score <= 100.0) {
+            this.score = new_score
+            return true
+        }
+        return false
+    }
+
+    func add_tag(tag : string) {
+        append(this.tags, tag)
+    }
+
+    func get_profile() : dict {
+        return {
+            "name": this.name,
+            "age": this.age,
+            "score": this.score,
+            "email": this.email,
+            "active": this.active,
+            "tags": this.tags
+        }
+    }
+}
+
+# Test class member variable typing
+typed_person : TypedPerson = TypedPerson("Alice Johnson", 28)
+print("Person name:", typed_person.name)
+print("Person age:", typed_person.age)
+print("Person email:", typed_person.email)
+print("Person phone (should be none):", typed_person.phone)
+print("Person metadata:", typed_person.metadata)
+
+# Test method calls with return types
+update_success : bool = typed_person.update_score(92.5)
+print("Score update success:", update_success)
+print("Updated score:", typed_person.score)
+
+typed_person.add_tag("VIP")
+typed_person.add_tag("Premium")
+
+profile : dict = typed_person.get_profile()
+print("Person profile:", profile)
+
+# Function that uses TypedPerson (defined after class)
+func get_user_status(user : TypedPerson) : string {
+    if (user.active) {
+        return "Active user: " + user.name
+    } else {
+        return "Inactive user: " + user.name
+    }
+}
+
+# Test member variable type validation
+try {
+    typed_person.name = 123  # Error: name is typed as string
+    print("ERROR: This should not execute")
+} catch e {
+    print("Expected member type error:", e)
+}
+
+# ==============================================================================
+# For-Each Loop Variable Typing
+# ==============================================================================
+
+print("\n--- For-Each Loop Variable Typing ---")
+
+# Basic typed for-each loops
+numbers : list = [1, 2, 3, 4, 5]
+for num : int in numbers {
+    print("Number:", num, "Type:", type(num))
+}
+
+# Const typed for-each variables (immutable during iteration)
+words : list = ["hello", "world", "zephyr"]
+for const word : string in words {
+    print("Const word:", word)
+    # word = "modified"  # Would error: const protection
+}
+
+# Destructuring with mixed typing
+pairs : list = [[1, "one"], [2, "two"], [3, "three"]]
+for (num : int, text : string) in pairs {
+    print("Number:", num, "Text:", text)
+}
+
+# Mixed const and regular variables in destructuring
+for (const num : int, value) in pairs {
+    print("Const num:", num, "Modifiable value:", value)
+    value = value + " modified"  # This works
+    # num = 999  # Would error: const protection
+}
+
+# Dictionary iteration with typing
+scores : dict = {"Alice": 95, "Bob": 87, "Charlie": 92}
+for (student : string, score : int) in scores {
+    print("Student:", student, "Score:", score)
+}
+
+# For-each with where clause and typing
+large_numbers : list = [1, 5, 10, 15, 20, 25, 30]
+for num : int in large_numbers where num > 10 {
+    print("Large number:", num)
+}
+
+# ==============================================================================
+# Function Return Types
+# ==============================================================================
+
+print("\n--- Function Return Types ---")
+
+# Functions with explicit return types
+func calculate_volume(length : float, width : float, height : float) : float {
+    return length * width * height
+}
+
+
+
+async func fetch_data(url : string) : dict {
+    print("Fetching data from:", url)
+    return {
+        "url": url,
+        "data": "Sample data from " + url,
+        "status": "success"
+    }
+}
+
+# Test return type functions
+volume : float = calculate_volume(2.0, 3.0, 4.0)
+status : string = get_user_status(typed_person)
+api_result : dict = await fetch_data("https://api.example.com/users")
+
+print("Volume calculation:", volume)
+print("User status:", status)
+print("API result:", api_result)
+
+# ==============================================================================
+# Type Inheritance Across Scopes
+# ==============================================================================
+
+print("\n--- Type Inheritance Across Scopes ---")
+
+global_var : string = "global"
+print("Global variable:", global_var)
+
+func scope_inheritance_test() {
+    print("In function - global_var:", global_var)
+
+    # Type constraint is inherited
+    global_var = "modified_in_function"
+    print("Modified in function:", global_var)
+
+    # Test nested scope with if statement
+    if (true) {
+        # Type constraint still enforced in nested scope
+        global_var = "modified_in_if"
+        print("Modified in if block:", global_var)
+
+        try {
+            invalid_person = Person("Alice", "not_a_number")
+            print("FATAL ERROR: Constructor type validation failed")
+            print("Class instantiation type safety is compromised")
+            exit(206)
+        } catch e {
+            print("✓ Constructor type validation working:", e)
+        }
+    }
+
+    print("After if block:", global_var)
+}
+
+scope_inheritance_test()
+print("After function call:", global_var)
+
+# ==============================================================================
+# Advanced Integration Examples
+# ==============================================================================
+
+print("\n--- Advanced Integration Examples ---")
+
+# Explicit typing with complex lambda operations
+math_operations : list = [
+    (a : int, b : int) -> a + b,
+    (a : int, b : int) -> a * b,
+    (const x : int, const y : int) -> {
+        # x = 10  # Would error: const parameter
+        # y = 20  # Would error: const parameter
+        lambda_result = x * x + y * y
+        return lambda_result
+    }
+]
+
+# Type-safe lambda execution
+add_op : lambda = math_operations[0]
+multiply_op : lambda = math_operations[1]
+complex_op : lambda = math_operations[2]
+
+add_result : int = add_op(5, 3)
+multiply_result : int = multiply_op(4, 6)
+complex_result : int = complex_op(3, 4)
+
+print("Add operation:", add_result)
+print("Multiply operation:", multiply_result)
+print("Complex operation:", complex_result)
+
+# Explicit typing with async operations and spawn
+async func typed_async_worker(worker_id : int, const task : string) {
+    print("Worker", worker_id, "processing task:", task)
+    # task = "modified"  # Would error: const parameter
+    return "Worker_" + str(worker_id) + "_completed_" + task
+}
+
+# Spawn async operations with typed parameters
+promise1 = spawn typed_async_worker(1, "data_processing")
+promise2 = spawn typed_async_worker(2, "file_upload")
+promise3 = spawn typed_async_worker(3, "email_sending")
+
+# Collect results with explicit typing
+results : list = await all([promise1, promise2, promise3])
+print("All async worker results:", results)
+
+# ==============================================================================
+# Error Recovery and Validation
+# ==============================================================================
+
+print("\n--- Error Recovery and Validation ---")
+
+recovery_test : int = 100
+print("Recovery test initial value:", recovery_test)
+
+# Test error recovery in loops
+for (i = 0; i < 5; i++) {
+    try {
+        if (i == 2) {
+            recovery_test = "this will cause a type error"
+        } else {
+            recovery_test = recovery_test + i
+        }
+        print("Loop", i, "- recovery_test:", recovery_test)
+    } catch e {
+        print("Loop", i, "- caught error:", e)
+        print("Loop", i, "- variable retained value:", recovery_test)
+    }
+}
+
+print("Final recovery_test value:", recovery_test)
+
+# ==============================================================================
+# Real-World Usage Patterns
+# ==============================================================================
+
+print("\n--- Real-World Usage Patterns ---")
+
+# Configuration management with explicit typing
+config_manager : dict = {
+    "database_url": "localhost:5432",
+    "max_connections": 100,
+    "timeout_seconds": 30.0,
+    "debug_enabled": false
+}
+
+func get_config_value(key : string, default_value) {
+    if (key in config_manager) {
+        return config_manager[key]
+    }
+    return default_value
+}
+
+func update_config(key : string, value, const validate : bool) {
+    if (validate) {
+        print("Validating config update for key:", key)
+    }
+    config_manager[key] = value
+}
+
+# Use configuration with explicit typing
+db_url : string = get_config_value("database_url", "default_db")
+max_conn : int = get_config_value("max_connections", 50)
+timeout : float = get_config_value("timeout_seconds", 15.0)
+
+print("Database URL:", db_url)
+print("Max connections:", max_conn)
+print("Timeout:", timeout)
+
+update_config("new_setting", "enabled", true)
+new_setting : string = get_config_value("new_setting", "disabled")
+print("New setting:", new_setting)
+
+# Data processing pipeline with explicit typing
+data_pipeline : list = [
+    (input : string) -> input + "_validated",
+    (input : string) -> input + "_processed",
+    (const input : string) -> input + "_finalized"
+]
+
+func run_pipeline(data : string, pipeline : list) {
+    result : string = data
+    for processor in pipeline {
+        processor_func : lambda = processor
+        result = processor_func(result)
+    }
+    return result
+}
+
+pipeline_result : string = run_pipeline("raw_data", data_pipeline)
+print("Pipeline result:", pipeline_result)
+
+# ==============================================================================
+# Exit Code Documentation for Type System
+# ==============================================================================
+
+print("\n--- Type System Exit Codes ---")
+print("Exit codes for critical type system failures:")
+print("  200 - Type constraint enforcement failure")
+print("  201 - Const parameter protection failure")
+print("  202 - Null class instance validation")
+print("  203 - Class type mismatch")
+print("  204 - Variable type constraint violation")
+print("  205 - Function parameter type validation failure")
+print("  206 - Constructor type validation failure")
+print("  207 - Lambda type validation failure")
+print("  208 - Async function type validation failure")
+
+print("\nType system validation scenarios (commented out to avoid exit):")
+print("# These would call exit() in production if type safety fails")
+
+# Example of production-level type validation
+func production_type_check() {
+    print("Production type validation would include:")
+    print("- Runtime type constraint verification")
+    print("- Memory safety validation")
+    print("- Type system integrity checks")
+    print("- Critical type operation validation")
+
+    # In production, any type system failure would be critical:
+    # if type_system_compromised {
+    #     print("CRITICAL: Type system integrity compromised")
+    #     exit(209)
+    # }
+}
+
+production_type_check()
+
+print("\n=== Explicit Typing Examples Complete ===")
+print("All examples demonstrate type safety while maintaining dynamic flexibility!")

@@ -1,0 +1,611 @@
+# Zephyr Promise.all Example using all() builtin function
+# This file demonstrates using all() for waiting on multiple promises
+
+print("=== Zephyr Promise.all Pattern Demo ===")
+print("")
+
+# ============================================================================
+# Basic Promise.all Usage
+# ============================================================================
+
+print("1. Basic Promise.all Usage")
+print("==========================")
+
+# Simple async functions
+async func fetch_data(source) {
+    print("Fetching from:", source)
+    return "Data from " + source
+}
+
+async func basic_all_test() {
+    print("Creating multiple promises...")
+
+    # Create a list of promises by spawning async functions
+    promises = [
+        spawn fetch_data("API-1"),
+        spawn fetch_data("API-2"),
+        spawn fetch_data("API-3")
+    ]
+
+    print("Waiting for all promises to resolve...")
+
+    # Use all() to wait for all promises
+    results = await all(promises)
+
+    print("All promises resolved!")
+    print("Results:", results)
+
+    return results
+}
+
+basic_results = await basic_all_test()
+print("Basic all() test completed\n")
+
+# ============================================================================
+# Complex Data Fetching with Promise.all
+# ============================================================================
+
+print("2. Complex Data Fetching")
+print("=========================")
+
+async func fetch_user_profile(user_id) {
+    print("Fetching profile for user:", user_id)
+    return {
+        "id": user_id,
+        "name": "User " + str(user_id),
+        "status": "active"
+    }
+}
+
+async func fetch_user_preferences(user_id) {
+    print("Fetching preferences for user:", user_id)
+    return {
+        "user_id": user_id,
+        "theme": "dark",
+        "notifications": true
+    }
+}
+
+# ============================================================================
+# Promise.all with Class Methods
+# ============================================================================
+
+print("2.5. Promise.all with Class Methods")
+print("===================================")
+
+# Class with async methods for Promise.all testing
+class DataFetcher {
+    func init(source_name) {
+        this.source = source_name
+        this.fetch_count = 0
+    }
+
+    async func fetch_records(const query, const limit) {
+        print("Fetching records with query:", query, "limit:", limit, "from:", this.source)
+
+        # Const parameter protection in spawned methods
+        try {
+            query = "modified"  # Will fail
+        } catch e {
+            print("✓ Query const protected:", e)
+        }
+
+        try {
+            limit = 999  # Will fail
+        } catch e {
+            print("✓ Limit const protected:", e)
+        }
+
+        this.fetch_count += 1
+        return "Records for '" + query + "' (limit: " + str(limit) + ") from " + this.source
+    }
+
+    async func fetch_metadata(const table_name) {
+        print("Fetching metadata for table:", table_name, "from:", this.source)
+
+        try {
+            table_name = "modified_table"  # Will fail
+        } catch e {
+            print("✓ Table name const protected:", e)
+        }
+
+        this.fetch_count += 1
+        return "Metadata for " + table_name + " from " + this.source
+    }
+
+    func get_fetch_count() {
+        return this.fetch_count
+    }
+}
+
+async func class_method_all_test() {
+    print("Creating multiple data fetchers...")
+
+    # Create multiple fetcher instances
+    db_fetcher = DataFetcher("Database")
+    api_fetcher = DataFetcher("API")
+    cache_fetcher = DataFetcher("Cache")
+
+    # Create promises by spawning method calls
+    promises = [
+        spawn db_fetcher.fetch_records("users", 100),
+        spawn api_fetcher.fetch_records("orders", 50),
+        spawn cache_fetcher.fetch_metadata("sessions"),
+        spawn db_fetcher.fetch_metadata("products"),
+        spawn api_fetcher.fetch_records("reviews", 25)
+    ]
+
+    print("All method calls spawned. Waiting for Promise.all...")
+
+    # Use all() to wait for all method call promises
+    results = await all(promises)
+
+    print("All method calls completed!")
+    print("Results:")
+    for i = 0; i < len(results); i += 1 {
+        print("- Result " + str(i + 1) + ":", results[i])
+    }
+
+    # Check statistics
+    db_stats = db_fetcher.get_fetch_count()
+    api_stats = api_fetcher.get_fetch_count()
+    cache_stats = cache_fetcher.get_fetch_count()
+
+    print("Fetch statistics:")
+    print("- Database fetches:", db_stats)
+    print("- API fetches:", api_stats)
+    print("- Cache fetches:", cache_stats)
+
+    return results
+}
+
+class_all_results = await class_method_all_test()
+print("Class method Promise.all test completed\n")
+
+# ============================================================================
+# Mixed Function and Method Call Promise.all
+# ============================================================================
+
+print("2.75. Mixed Function and Method Call Promise.all")
+print("================================================")
+
+async func mixed_promise_all_test() {
+    print("Testing mixed function and method calls in Promise.all...")
+
+    fetcher = DataFetcher("MixedSource")
+
+    # Mix function calls and method calls in same Promise.all
+    mixed_promises = [
+        spawn fetch_data("Function-API"),      # Function call
+        spawn fetcher.fetch_records("table1", 10),  # Method call
+        spawn fetch_data("MixedItem"),         # Function call
+        spawn fetcher.fetch_metadata("table2") # Method call
+    ]
+
+    print("Mixed promises created. Waiting for all to complete...")
+
+    mixed_results = await all(mixed_promises)
+
+    print("All mixed operations completed:")
+    for i = 0; i < len(mixed_results); i += 1 {
+        print("- Mixed result " + str(i + 1) + ":", mixed_results[i])
+    }
+
+    return mixed_results
+}
+
+mixed_results = await mixed_promise_all_test()
+print("Mixed Promise.all test completed\n")
+
+# ============================================================================
+# Complex Data Fetching with Promise.all
+# ============================================================================
+
+print("3. Complex Data Fetching")
+print("=========================")
+
+async func fetch_user_profile(user_id) {
+    print("Fetching preferences for user:", user_id)
+    return {
+        "theme": "dark",
+        "language": "en",
+        "notifications": true
+    }
+}
+
+async func fetch_user_activity(user_id) {
+    print("Fetching activity for user:", user_id)
+    return {
+        "last_login": "2024-01-15",
+        "posts_count": 42,
+        "followers": 128
+    }
+}
+
+async func load_dashboard_data(user_id) {
+    print("Loading dashboard data for user:", user_id)
+
+    # Create promises for all user data
+    user_promises = [
+        spawn fetch_user_profile(user_id),
+        spawn fetch_user_preferences(user_id),
+        spawn fetch_user_activity(user_id)
+    ]
+
+    # Wait for all data to load
+    all_data = await all(user_promises)
+
+    print("Dashboard data loaded for user:", user_id)
+
+    # Combine into dashboard object
+    dashboard = {
+        "user_id": user_id,
+        "profile": all_data[0],
+        "preferences": all_data[1],
+        "activity": all_data[2],
+        "loaded_at": "2024-01-15T10:30:00Z"
+    }
+
+    return dashboard
+}
+
+dashboard = await load_dashboard_data(12345)
+print("Dashboard loaded successfully")
+
+# ============================================================================
+# Multiple Users with Promise.all
+# ============================================================================
+
+print("3. Multiple Users Processing")
+print("=============================")
+
+async func process_user_batch(user_ids) {
+    print("Processing batch of", len(user_ids), "users")
+
+    # Create promises for each user
+    user_promises = []
+    for user_id in user_ids {
+        user_promise = spawn load_dashboard_data(user_id)
+        append(user_promises, user_promise)
+    }
+
+    print("Waiting for all users to be processed...")
+
+    # Wait for all users
+    all_dashboards = await all(user_promises)
+
+    print("All users processed successfully")
+    return all_dashboards
+}
+
+user_batch = [101, 102, 103, 104, 105]
+batch_results = await process_user_batch(user_batch)
+print("Processed", len(batch_results), "user dashboards")
+
+# ============================================================================
+# Mixed Data Sources with Promise.all
+# ============================================================================
+
+print("4. Mixed Data Sources")
+print("=====================")
+
+async func fetch_weather() {
+    print("Fetching weather data...")
+    return {
+        "temperature": 72,
+        "condition": "sunny",
+        "humidity": 45
+    }
+}
+
+async func fetch_news() {
+    print("Fetching news headlines...")
+    return [
+        "Breaking: New technology announced",
+        "Sports: Local team wins championship",
+        "Weather: Sunny skies continue"
+    ]
+}
+
+async func fetch_stock_prices() {
+    print("Fetching stock prices...")
+    return {
+        "AAPL": 150.25,
+        "GOOGL": 2800.75,
+        "TSLA": 800.50
+    }
+}
+
+async func fetch_calendar() {
+    print("Fetching calendar events...")
+    return [
+        {"time": "09:00", "event": "Team meeting"},
+        {"time": "14:00", "event": "Client presentation"},
+        {"time": "16:30", "event": "Code review"}
+    ]
+}
+
+async func load_homepage_data() {
+    print("Loading homepage with mixed data sources...")
+
+    # Create promises for different data types
+    data_promises = [
+        spawn fetch_weather(),
+        spawn fetch_news(),
+        spawn fetch_stock_prices(),
+        spawn fetch_calendar()
+    ]
+
+    # Wait for all data
+    all_data = await all(data_promises)
+
+    # Organize into homepage structure
+    homepage = {
+        "weather": all_data[0],
+        "news": all_data[1],
+        "stocks": all_data[2],
+        "calendar": all_data[3],
+        "last_updated": "2024-01-15T10:45:00Z"
+    }
+
+    print("Homepage data loaded successfully")
+    return homepage
+}
+
+homepage_data = await load_homepage_data()
+print("Homepage ready with all data sections")
+
+# ============================================================================
+# Error Handling with Promise.all
+# ============================================================================
+
+print("5. Error Handling with Promise.all")
+print("===================================")
+
+async func reliable_operation(id) {
+    print("Reliable operation", id, "started")
+    return "Success " + str(id)
+}
+
+async func unreliable_operation(id, should_fail) {
+    print("Unreliable operation", id, "started (fail=" + str(should_fail) + ")")
+    if should_fail {
+        return "Failed operation " + str(id)
+    }
+    return "Success " + str(id)
+}
+
+async func test_mixed_reliability() {
+    print("Testing mixed reliable/unreliable operations...")
+
+    try {
+        # Mix of reliable and unreliable operations
+        mixed_promises = [
+            spawn reliable_operation(1),
+            spawn unreliable_operation(2, false),
+            spawn reliable_operation(3),
+            spawn unreliable_operation(4, true),
+            spawn reliable_operation(5)
+        ]
+
+        # Wait for all (some may fail)
+        all_results = await all(mixed_promises)
+
+        print("All operations completed:")
+        for i = 0; i < len(all_results); i++ {
+            print("- Operation " + str(i + 1) + ":", all_results[i])
+        }
+
+        return all_results
+    } catch e {
+        print("Error in promise.all:", e)
+        return []
+    }
+}
+
+mixed_results = await test_mixed_reliability()
+print("Mixed reliability test completed")
+
+# ============================================================================
+# Performance Comparison: Sequential vs Promise.all
+# ============================================================================
+
+print("6. Performance Comparison")
+print("==========================")
+
+async func simulation_task(task_id, duration_info) {
+    print("Task", task_id, "running (" + duration_info + ")")
+    # Simulate work with a simple loop
+    counter = 0
+    for i = 0; i < 500; i++ {
+        counter += i
+    }
+    print("Task", task_id, "completed")
+    return "Task " + str(task_id) + " result"
+}
+
+# Sequential approach
+async func sequential_approach() {
+    print("Sequential execution:")
+
+    result1 = await simulation_task(1, "sequential")
+    result2 = await simulation_task(2, "sequential")
+    result3 = await simulation_task(3, "sequential")
+    result4 = await simulation_task(4, "sequential")
+
+    return [result1, result2, result3, result4]
+}
+
+# Promise.all approach
+async func promise_all_approach() {
+    print("Promise.all execution:")
+
+    task_promises = [
+        spawn simulation_task(1, "parallel"),
+        spawn simulation_task(2, "parallel"),
+        spawn simulation_task(3, "parallel"),
+        spawn simulation_task(4, "parallel")
+    ]
+
+    return await all(task_promises)
+}
+
+print("Running sequential approach...")
+seq_results = await sequential_approach()
+print("Sequential completed with", len(seq_results), "results")
+
+print("\nRunning Promise.all approach...")
+parallel_results = await promise_all_approach()
+print("Promise.all completed with", len(parallel_results), "results")
+
+# ============================================================================
+# Nested Promise.all Operations
+# ============================================================================
+
+print("7. Nested Promise.all Operations")
+print("================================")
+
+async func fetch_category_data(category) {
+    print("Fetching data for category:", category)
+
+    # Create sub-promises for category details
+    sub_promises = [
+        spawn fetch_data(category + "-items"),
+        spawn fetch_data(category + "-metadata"),
+        spawn fetch_data(category + "-stats")
+    ]
+
+    # Wait for all sub-data
+    sub_results = await all(sub_promises)
+
+    return {
+        "category": category,
+        "items": sub_results[0],
+        "metadata": sub_results[1],
+        "stats": sub_results[2]
+    }
+}
+
+async func fetch_all_categories() {
+    print("Fetching all category data...")
+
+    categories = ["electronics", "books", "clothing"]
+
+    # Create promises for each category
+    category_promises = []
+    for category in categories {
+        category_promise = spawn fetch_category_data(category)
+        append(category_promises, category_promise)
+    }
+
+    # Wait for all categories
+    all_categories = await all(category_promises)
+
+    print("All categories loaded")
+    return all_categories
+}
+
+all_category_data = await fetch_all_categories()
+print("Nested Promise.all completed with", len(all_category_data), "categories")
+
+# ============================================================================
+# Promise.all with Method Calls
+# ============================================================================
+
+print("6. Promise.all with Method Calls")
+print("=================================")
+
+# Class with async methods for Promise.all testing
+class AsyncDataProcessor {
+    func init(name) {
+        this.name = name
+        this.operations = 0
+    }
+
+    async func process_dataset(const data, const config) {
+        print("Processing dataset:", data, "with config:", config, "on", this.name)
+
+        # Const parameter protection in Promise.all context
+        try {
+            data = "modified"  # Will fail
+        } catch e {
+            print("✓ Const data protected in Promise.all:", e)
+        }
+
+        this.operations += 1
+        return "Dataset " + data + " processed by " + this.name
+    }
+
+    async func analyze_results(const dataset_name) {
+        print("Analyzing results for:", dataset_name, "on", this.name)
+
+        try {
+            dataset_name = "changed"  # Will fail
+        } catch e {
+            print("✓ Const dataset_name protected:", e)
+        }
+
+        this.operations += 1
+        return "Analysis of " + dataset_name + " by " + this.name
+    }
+
+    func get_operations() {
+        return this.operations
+    }
+}
+
+async func method_call_promise_all_test() {
+    print("Creating processors for Promise.all with method calls...")
+
+    # Create multiple processor instances
+    processor1 = AsyncDataProcessor("ProcessorA")
+    processor2 = AsyncDataProcessor("ProcessorB")
+    processor3 = AsyncDataProcessor("ProcessorC")
+
+    # Create mixed promises with function calls AND method calls
+    mixed_promises = [
+        spawn fetch_data("ExternalAPI"),                    # Function call
+        spawn processor1.process_dataset("dataset1", {"mode": "fast"}),  # Method call
+        spawn processor2.process_dataset("dataset2", {"mode": "thorough"}), # Method call
+        spawn fetch_data("SpecialItem"),                    # Function call
+        spawn processor3.analyze_results("combined_data"), # Method call
+        spawn processor1.analyze_results("secondary_data") # Method call
+    ]
+
+    print("All function and method calls spawned for Promise.all...")
+
+    # Wait for all to complete
+    all_mixed_results = await all(mixed_promises)
+
+    print("Promise.all with mixed calls completed!")
+    print("Results:")
+    for i = 0; i < len(all_mixed_results); i += 1 {
+        print("- Result " + str(i + 1) + ":", all_mixed_results[i])
+    }
+
+    # Check processor statistics
+    stats1 = processor1.get_operations()
+    stats2 = processor2.get_operations()
+    stats3 = processor3.get_operations()
+
+    print("Processor operation counts:")
+    print("- ProcessorA:", stats1, "operations")
+    print("- ProcessorB:", stats2, "operations")
+    print("- ProcessorC:", stats3, "operations")
+
+    return all_mixed_results
+}
+
+method_all_results = await method_call_promise_all_test()
+print("Method call Promise.all test completed\n")
+
+print("")
+
+print("")
+print("=== Promise.all Pattern Demo Complete ===")
+print("✅ All Promise.all patterns demonstrated:")
+print("  • Basic function call Promise.all")
+print("  • Class method call Promise.all")
+print("  • Mixed function and method call Promise.all")
+print("  • Const parameter protection in all contexts")
+print("  • Parallel execution of both functions and methods")

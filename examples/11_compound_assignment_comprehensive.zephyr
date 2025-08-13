@@ -1,0 +1,620 @@
+# Zephyr Example 11: Compound Assignment Operators - Comprehensive Test
+# This example demonstrates all working compound assignment features
+
+print("=== Zephyr Compound Assignment Comprehensive Demo ===")
+print("")
+
+# ============================================================================
+# Basic Variable Compound Assignment
+# ============================================================================
+
+print("1. Basic Variable Compound Assignment")
+print("======================================")
+
+# Test all compound assignment operators
+x = 10
+print("x = 10")
+x += 5
+print("x += 5     => x =", x)  # 15
+
+y = 30
+print("y = 30")
+y -= 12
+print("y -= 12    => y =", y)  # 18
+
+z = 7
+print("z = 7")
+z *= 6
+print("z *= 6     => z =", z)  # 42
+
+w = 100
+print("w = 100")
+w /= 4
+print("w /= 4     => w =", w)  # 25
+
+print("")
+
+# ============================================================================
+# String Compound Operations
+# ============================================================================
+
+print("2. String Compound Operations")
+print("==============================")
+
+# String concatenation
+greeting = "Welcome"
+print("greeting = 'Welcome'")
+greeting += " to Zephyr!"
+print("greeting += ' to Zephyr!'  => greeting =", greeting)
+
+# String repetition
+separator = "-"
+print("separator = '-'")
+separator *= 25
+print("separator *= 25               => separator =", separator)
+
+# Building complex strings
+title = "RESULTS"
+title += " 2024"
+print("title += ' 2024'              => title =", title)
+title *= 2
+print("title *= 2                    => title =", title)
+
+print("")
+
+# ============================================================================
+# Increment/Decrement Operators
+# ============================================================================
+
+print("2. Increment/Decrement Operators")
+print("=================================")
+
+# Postfix operators (statement level)
+a = 8
+print("a = 8")
+a++
+print("After a++: a =", a)  # 9
+
+b = 12
+print("b = 12")
+b--
+print("After b--: b =", b)  # 11
+
+# Prefix operators
+c = 5
+print("c = 5")
+++c
+print("After ++c: c =", c)  # 6
+
+d = 20
+print("d = 20")
+--d
+print("After --d: d =", d)  # 19
+
+# Float increment/decrement
+float_num = 3.7
+print("float_num = 3.7")
+float_num++
+print("After float_num++: float_num =", float_num)  # 4.7
+
+print("")
+
+# ============================================================================
+# Class Member Compound Assignment
+# ============================================================================
+
+print("3. Class Member Compound Assignment")
+print("====================================")
+
+class Wallet {
+    func init(initial_amount) {
+        this.balance = initial_amount
+        this.transaction_count = 0
+        this.daily_limit = 500
+    }
+
+    func show_wallet() {
+        print("Wallet: $" + str(this.balance) + " | Transactions: " + str(this.transaction_count) + " | Limit: $" + str(this.daily_limit))
+    }
+
+    func add_money(amount) {
+        this.balance += amount
+        this.transaction_count += 1
+        print("Added $" + str(amount))
+    }
+
+    func spend_money(amount) {
+        this.balance -= amount
+        this.transaction_count += 1
+        print("Spent $" + str(amount))
+    }
+
+    func apply_bonus_multiplier() {
+        this.balance *= 1.1
+        print("Applied 10% bonus!")
+    }
+
+    func reset_daily_limit() {
+        this.daily_limit = 500
+        this.transaction_count = 0
+    }
+}
+
+wallet = Wallet(200)
+print("Initial wallet:")
+wallet.show_wallet()
+
+# Direct member compound assignment
+wallet.balance += 100
+print("\nAfter wallet.balance += 100:")
+wallet.show_wallet()
+
+wallet.balance *= 1.05
+print("\nAfter wallet.balance *= 1.05:")
+wallet.show_wallet()
+
+wallet.transaction_count += 3
+print("\nAfter wallet.transaction_count += 3:")
+wallet.show_wallet()
+
+# Method-based operations
+wallet.add_money(50)
+wallet.show_wallet()
+
+wallet.apply_bonus_multiplier()
+wallet.show_wallet()
+
+print("")
+
+# ============================================================================
+# this.member++ Inside Class Methods
+# ============================================================================
+
+print("4. this.member++ Inside Class Methods")
+print("======================================")
+
+class ScoreKeeper {
+    func init() {
+        this.points = 0
+        this.combo = 1
+        this.level = 1
+    }
+
+    func score_hit() {
+        this.points += 100 * this.combo
+        this.combo++  # Works perfectly inside methods!
+        print("Hit! Points: " + str(this.points) + ", Combo: " + str(this.combo))
+    }
+
+    func miss() {
+        this.combo = 1  # Reset combo
+        print("Miss! Combo reset to 1")
+    }
+
+    func level_up() {
+        this.level++    # Works inside methods!
+        this.points *= 1.2
+        print("Level up! New level: " + str(this.level))
+    }
+
+    func show_score() {
+        print("Score: " + str(this.points) + " | Level: " + str(this.level) + " | Combo: " + str(this.combo))
+    }
+}
+
+score_keeper = ScoreKeeper()
+print("Initial score:")
+score_keeper.show_score()
+
+score_keeper.score_hit()
+score_keeper.score_hit()
+score_keeper.miss()
+score_keeper.score_hit()
+score_keeper.level_up()
+score_keeper.show_score()
+
+print("")
+
+# ============================================================================
+# Collection Compound Assignment
+# ============================================================================
+
+print("5. Collection Compound Assignment")
+print("==================================")
+
+# List operations
+test_scores = [88, 94, 76, 91, 83]
+print("Initial test scores:", test_scores)
+
+# Apply grade adjustments
+test_scores[0] += 7        # Extra credit
+test_scores[1] *= 1.05     # 5% bonus
+test_scores[2] -= 4        # Penalty
+test_scores[3] /= 1.1      # Normalization
+print("After adjustments:", test_scores)
+
+# Dictionary operations
+resources = {"wood": 100, "stone": 75, "gold": 50}
+print("\nInitial resources:", resources)
+
+resources["wood"] += 25    # Gathered more wood
+resources["stone"] -= 20   # Used stone for building
+resources["gold"] *= 2     # Found treasure chest
+print("After resource changes:", resources)
+
+# String array operations
+status_messages = ["Ready", "Loading", "Complete"]
+print("\nInitial messages:", status_messages)
+
+status_messages[0] += "!"
+status_messages[1] += "..."
+status_messages[2] *= 2
+print("After message updates:", status_messages)
+
+print("")
+
+# ============================================================================
+# Nested Structure Operations
+# ============================================================================
+
+print("6. Nested Structure Operations")
+print("===============================")
+
+# Multi-level nested data
+company_data = {
+    "departments": [
+        {"name": "Engineering", "budget": 500000, "employees": 25},
+        {"name": "Marketing", "budget": 300000, "employees": 15}
+    ],
+    "totals": {"budget": 0, "employees": 0}
+}
+
+print("Initial company data:")
+print("Engineering:", company_data["departments"][0])
+print("Marketing:", company_data["departments"][1])
+
+# Budget adjustments
+company_data["departments"][0]["budget"] += 100000  # Engineering budget increase
+company_data["departments"][1]["budget"] *= 1.15    # Marketing 15% increase
+print("\nAfter budget adjustments:")
+print("Engineering budget:", company_data["departments"][0]["budget"])
+print("Marketing budget:", company_data["departments"][1]["budget"])
+
+# Employee count changes
+company_data["departments"][0]["employees"] += 5    # Hired 5 engineers
+company_data["departments"][1]["employees"] -= 2    # 2 marketers left
+print("\nAfter employee changes:")
+print("Engineering employees:", company_data["departments"][0]["employees"])
+print("Marketing employees:", company_data["departments"][1]["employees"])
+
+# Calculate totals
+company_data["totals"]["budget"] += company_data["departments"][0]["budget"]
+company_data["totals"]["budget"] += company_data["departments"][1]["budget"]
+company_data["totals"]["employees"] += company_data["departments"][0]["employees"]
+company_data["totals"]["employees"] += company_data["departments"][1]["employees"]
+print("\nCompany totals:", company_data["totals"])
+
+print("")
+
+# ============================================================================
+# Advanced Loop Integration
+# ============================================================================
+
+print("7. Advanced Loop Integration")
+print("=============================")
+
+# Fibonacci sequence with compound assignment
+print("Fibonacci sequence using compound assignment:")
+fib_a = 0
+fib_b = 1
+print("F(0) =", fib_a)
+print("F(1) =", fib_b)
+
+for i = 2; i <= 10; i++ {
+    fib_next = fib_a + fib_b
+    print("F(" + str(i) + ") =", fib_next)
+    fib_a = fib_b
+    fib_b = fib_next
+}
+
+# Prime number sieve simulation
+print("\nPrime checking with compound assignment:")
+numbers = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+prime_count = 0
+
+for i = 0; i < len(numbers); i++ {
+    num = numbers[i]
+    is_prime = true
+
+    # Simple primality test
+    if num > 2 {
+        # Check if even number (simple test without modulo)
+        half = num / 2
+        if half * 2 == num {
+            is_prime = false
+        }
+    }
+
+    if is_prime {
+        prime_count += 1
+        print(str(num) + " is prime")
+    }
+}
+print("Found " + str(prime_count) + " prime numbers")
+
+print("")
+
+# ============================================================================
+# Mathematical Applications
+# ============================================================================
+
+print("8. Mathematical Applications")
+print("=============================")
+
+# Vector operations simulation
+class Vector2D {
+    func init(x, y) {
+        this.x = x
+        this.y = y
+    }
+
+    func scale(factor) {
+        this.x *= factor
+        this.y *= factor
+    }
+
+    func translate(dx, dy) {
+        this.x += dx
+        this.y += dy
+    }
+
+    func magnitude_squared() {
+        return this.x * this.x + this.y * this.y
+    }
+
+    func show() {
+        print("Vector(" + str(this.x) + ", " + str(this.y) + ")")
+    }
+}
+
+vector = Vector2D(3.0, 4.0)
+print("Initial vector:")
+vector.show()
+
+vector.scale(2.5)
+print("After scaling by 2.5:")
+vector.show()
+
+vector.translate(10, -5)
+print("After translation (+10, -5):")
+vector.show()
+
+magnitude_sq = vector.magnitude_squared()
+print("Magnitude squared:", magnitude_sq)
+
+print("")
+
+# ============================================================================
+# String Processing and Pattern Generation
+# ============================================================================
+
+print("9. String Processing and Pattern Generation")
+print("============================================")
+
+# Document formatting
+document = ""
+document += "TITLE: Zephyr Documentation\n"
+document += "=" * 35
+document += "\n\n"
+
+sections = ["Introduction", "Features", "Examples", "Conclusion"]
+section_number = 1
+
+for section in sections {
+    document += str(section_number) + ". " + section + "\n"
+    document += "-" * (len(section) + 4)
+    document += "\n\n"
+    section_number++
+}
+
+print("Generated document structure:")
+print(document)
+
+# Pattern generation
+print("Pattern generation with compound assignment:")
+star_pattern = "*"
+for level = 1; level <= 5; level++ {
+    print("Level " + str(level) + ": " + star_pattern)
+    star_pattern *= 2
+    if level < 5 {
+        star_pattern += "|"
+    }
+}
+
+print("")
+
+# ============================================================================
+# Error Handling and Edge Cases
+# ============================================================================
+
+print("10. Error Handling and Edge Cases")
+print("==================================")
+
+# Division by zero handling
+print("Testing division by zero:")
+try {
+    error_test = 50
+    error_test /= 0
+} catch e {
+    print("✓ Caught division by zero:", e)
+}
+
+# Type mixing (should work)
+print("\nTesting type mixing:")
+mixed_val = 100        # integer
+mixed_val += 37.5      # becomes float
+print("100 + 37.5 =", mixed_val)
+mixed_val *= 2         # stays float
+print("After *= 2:", mixed_val)
+
+# Negative number handling
+negative_test = -15
+print("\nnegative_test = -15")
+negative_test += 25
+print("negative_test += 25  => negative_test =", negative_test)  # 10
+negative_test *= -3
+print("negative_test *= -3  => negative_test =", negative_test)  # -30
+
+# Zero edge cases
+zero_test = 0
+zero_test += 100
+print("\n0 += 100 =", zero_test)
+zero_test *= 0
+print("100 *= 0 =", zero_test)
+
+print("\n12. Performance and Scalability")
+print("==============================")
+
+# Large dataset processing
+print("Processing large dataset:")
+large_data = []
+dataset_size = 200
+
+# Build dataset
+for i = 1; i <= dataset_size; i++ {
+    append(large_data, i)
+}
+
+# Process with compound assignment
+total_sum = 0
+for i = 0; i < len(large_data); i++ {
+    large_data[i] *= 2      # Double each value
+    large_data[i] += 5      # Add constant
+    total_sum += large_data[i]
+}
+
+average_after_processing = total_sum / len(large_data)
+print("Processed " + str(len(large_data)) + " items")
+print("Average after processing:", average_after_processing)
+
+# String performance test
+long_string = ""
+repetitions = 100
+test_char = "X"
+
+print("\nString performance test:")
+for i = 1; i <= repetitions; i++ {
+    long_string += test_char
+}
+print("Built string of length:", len(long_string))
+
+print("\n📊 Final Comprehensive Example")
+print("==============================")
+
+# Complete application simulation: Task Management System
+class Task {
+    func init(name, priority) {
+        this.name = name
+        this.priority = priority
+        this.progress = 0
+        this.time_spent = 0
+    }
+
+    func work_on_task(hours) {
+        progress_increment = hours * 10
+        this.progress += progress_increment
+        this.time_spent += hours
+
+        if this.progress >= 100 {
+            this.progress = 100
+            print("✓ Task '" + this.name + "' completed!")
+        } else {
+            print("Worked on '" + this.name + "' for " + str(hours) + "h (Progress: " + str(this.progress) + "%)")
+        }
+    }
+
+    func increase_priority() {
+        this.priority += 1
+        print("Increased priority of '" + this.name + "' to " + str(this.priority))
+    }
+
+    func show_task() {
+        print("Task: " + this.name + " | Priority: " + str(this.priority) + " | Progress: " + str(this.progress) + "% | Time: " + str(this.time_spent) + "h")
+    }
+}
+
+class ProjectManager {
+    func init() {
+        this.total_hours = 0
+        this.completed_tasks = 0
+        this.efficiency_rating = 1.0
+    }
+
+    func process_work(task, hours) {
+        task.work_on_task(hours)
+        this.total_hours += hours
+
+        if task.progress >= 100 {
+            this.completed_tasks += 1
+            this.efficiency_rating *= 1.05  # 5% efficiency boost per completion
+        }
+    }
+
+    func show_stats() {
+        print("Project Stats: " + str(this.completed_tasks) + " tasks completed, " + str(this.total_hours) + "h total, efficiency: " + str(this.efficiency_rating))
+    }
+}
+
+# Simulate project management
+print("\nTask Management System Simulation:")
+task1 = Task("Implement Feature A", 3)
+task2 = Task("Fix Bug B", 5)
+task3 = Task("Write Documentation", 2)
+
+manager = ProjectManager()
+
+print("\nInitial tasks:")
+task1.show_task()
+task2.show_task()
+task3.show_task()
+manager.show_stats()
+
+print("\n--- Work Day 1 ---")
+manager.process_work(task1, 3)
+manager.process_work(task2, 2)
+manager.process_work(task3, 4)
+manager.show_stats()
+
+print("\n--- Work Day 2 ---")
+task2.increase_priority()
+manager.process_work(task1, 4)
+manager.process_work(task2, 5)
+manager.process_work(task3, 3)
+manager.show_stats()
+
+print("\n--- Work Day 3 ---")
+manager.process_work(task1, 2)
+manager.process_work(task2, 1)
+manager.process_work(task3, 2)
+manager.show_stats()
+
+print("\nFinal task status:")
+task1.show_task()
+task2.show_task()
+task3.show_task()
+
+print("\n✅ Example 11 Summary")
+print("====================")
+print("This example demonstrated:")
+print("• Variable compound assignment (+=, -=, *=, /=)")
+print("• Increment/decrement operators (++, --)")
+print("• String concatenation and repetition")
+print("• Class member compound assignment")
+print("• Collection element compound assignment")
+print("• Nested structure operations")
+print("• Integration with loops and methods")
+print("• Error handling and edge cases")
+print("• Real-world application simulation")
+print("")
+print("Compound assignment operators make Zephyr code")
+print("more concise, readable, and maintainable!")

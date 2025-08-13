@@ -1,0 +1,199 @@
+# Zephyr Enhanced Loop Constructs
+# This file demonstrates enhanced loop constructs including loop, where, enumerate, and zip
+# Includes proper use of exit() for critical loop validation failures
+
+print("=== Zephyr Enhanced Loops Demo ===")
+print("")
+
+# ============================================================================
+# Critical Loop System Validation
+# ============================================================================
+
+print("0. Critical Loop System Validation")
+print("===================================")
+
+# Function to validate loop system integrity
+func validate_loop_system() {
+    print("Validating loop system integrity...")
+
+    # Test basic for loop functionality
+    test_sum = 0
+    for i = 1; i <= 5; i++ {
+        test_sum += i
+    }
+
+    if test_sum != 15 {
+        print("FATAL ERROR: Basic for loop failed")
+        print("Expected sum: 15, Got:", test_sum)
+        print("Loop arithmetic is broken")
+        exit(500)
+    }
+
+    # Test for-each loop functionality
+    test_list = [1, 2, 3]
+    test_count = 0
+    for item in test_list {
+        test_count++
+    }
+
+    if test_count != 3 {
+        print("FATAL ERROR: For-each loop failed")
+        print("Expected count: 3, Got:", test_count)
+        print("Iterator system is broken")
+        exit(501)
+    }
+
+    # Test break functionality
+    break_test = 0
+    for i = 1; i <= 10; i++ {
+        break_test++
+        if i == 3 {
+            break
+        }
+    }
+
+    if break_test != 3 {
+        print("FATAL ERROR: Break statement failed")
+        print("Expected break at 3, Got:", break_test)
+        print("Control flow is compromised")
+        exit(502)
+    }
+
+    print("✓ Loop system validation passed")
+}
+
+# Function to validate data integrity during iteration
+func validate_iteration_data(data) {
+    if data == none {
+        print("FATAL ERROR: Iteration data is null")
+        print("Cannot iterate over null data")
+        exit(503)
+    }
+
+    if len(data) == 0 {
+        print("WARNING: Empty data set for iteration")
+        print("This might indicate data loading failure")
+        # In critical systems, you might want to exit here:
+        # exit(504)
+    }
+
+    # Check for data corruption in lists
+    if type(data) == "list" {
+        for i = 0; i < len(data); i++ {
+            item = data[i]
+            if item == none and i < len(data) - 1 {
+                print("FATAL ERROR: Null item found in data at index", i)
+                print("Data corruption detected during iteration")
+                exit(505)
+            }
+        }
+    }
+
+    print("✓ Iteration data validation passed")
+}
+
+# Run critical validations
+validate_loop_system()
+
+# Test data validation
+test_data = [1, 2, 3, 4, 5]
+validate_iteration_data(test_data)
+
+print("Loop System Exit Codes:")
+print("  500 - Basic for loop failed")
+print("  501 - For-each loop failed")
+print("  502 - Break statement failed")
+print("  503 - Iteration data is null")
+print("  504 - Empty data set (warning)")
+print("  505 - Data corruption detected")
+print("")
+
+# ============================================================================
+# Infinite Loop with Break
+# ============================================================================
+
+print("1. Infinite Loop with Break")
+print("============================")
+
+# Infinite loop with break
+i = 0
+loop {
+    print("Loop iteration:", i)
+    i = i + 1
+    if (i >= 3) {
+        break
+    }
+}
+
+# For-each loop with a where clause
+print("")
+
+# ============================================================================
+# For-each with Where Clause
+# ============================================================================
+
+print("2. For-each with Where Clause")
+print("==============================")
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print("Numbers greater than 7:")
+for n in numbers where n > 7 {
+    print(n)
+}
+
+print("")
+
+# ============================================================================
+# Enumerate a List
+# ============================================================================
+
+print("3. Enumerate a List")
+print("===================")
+fruits = ["apple", "banana", "cherry"]
+for (index, fruit) in enumerate(fruits) {
+    print("Fruit", index, "is", fruit)
+}
+
+print("")
+
+# ============================================================================
+# Zip Two Lists
+# ============================================================================
+
+print("4. Zip Two Lists")
+print("================")
+names = ["Alice", "Bob", "Charlie"]
+ages = [25, 30, 35]
+for (name, age) in zip(names, ages) {
+    print(name, "is", age, "years old")
+}
+
+print("")
+
+# ============================================================================
+# Zip Three Lists
+# ============================================================================
+
+print("5. Zip Three Lists")
+print("==================")
+countries = ["USA", "Canada", "Mexico"]
+for (name, age, country) in zip(names, ages, countries) {
+    print(name, "is", age, "years old and lives in", country)
+}
+
+print("")
+
+# ============================================================================
+# Dictionary Destructuring
+# ============================================================================
+
+print("6. Dictionary Destructuring")
+print("============================")
+person = {"name": "John", "age": 42, "city": "New York"}
+for (key, value) in person {
+    print(key, ":", value)
+}
+
+print("")
+
+print("")
+print("=== Enhanced Loops Demo Complete ===")

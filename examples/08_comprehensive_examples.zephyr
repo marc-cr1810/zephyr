@@ -1,0 +1,1252 @@
+# Zephyr Comprehensive Examples and User Tests
+# This file demonstrates real-world examples, user-provided scenarios, verification tests,
+# and proper use of exit() for business logic failures and data validation errors
+
+print("=== Zephyr Comprehensive Examples Demo ===")
+print("")
+
+# ============================================================================
+# Data Validation and Business Rules with Exit Handling
+# ============================================================================
+
+print("0. Data Validation and Business Rules")
+print("=====================================")
+
+# Example of critical data validation that should terminate the application
+func validate_user_data(user) {
+    if user == none {
+        print("FATAL ERROR: User data is null")
+        exit(100)
+    }
+
+    # Critical business rule: Users must have valid email
+    if not ("email" in user) {
+        print("FATAL ERROR: User missing required email field")
+        print("This violates core business requirements")
+        exit(101)
+    }
+
+    email = user["email"]
+    if email == none or email == "" {
+        print("FATAL ERROR: User email cannot be empty")
+        print("Email is required for all user operations")
+        exit(102)
+    }
+
+    # Critical business rule: Users must be 18+ for legal compliance
+    if "age" in user {
+        age = user["age"]
+        if age < 18 {
+            print("FATAL ERROR: User age", age, "violates legal requirements")
+            print("Application cannot process underage users")
+            exit(103)
+        }
+    }
+
+    # Critical validation: User ID must be valid for database operations
+    if "id" in user {
+        id = user["id"]
+        if id <= 0 {
+            print("FATAL ERROR: Invalid user ID:", id)
+            print("Database operations would fail with invalid ID")
+            exit(104)
+        }
+    }
+
+    print("✓ User data validation passed")
+}
+
+# Example of financial data validation requiring exit on failure
+func validate_financial_transaction(transaction) {
+    if transaction == none {
+        print("FATAL ERROR: Transaction data is null")
+        print("Financial operations cannot proceed")
+        exit(110)
+    }
+
+    if not ("amount" in transaction) {
+        print("FATAL ERROR: Transaction missing amount field")
+        exit(111)
+    }
+
+    amount = transaction["amount"]
+    if amount <= 0 {
+        print("FATAL ERROR: Invalid transaction amount:", amount)
+        print("Financial regulations require positive amounts")
+        exit(112)
+    }
+
+    # Critical: Amount must not exceed legal limits
+    if amount > 10000 {
+        print("FATAL ERROR: Transaction amount", amount, "exceeds legal limit")
+        print("Regulatory compliance violation - immediate shutdown required")
+        exit(113)
+    }
+
+    if not ("account_id" in transaction) {
+        print("FATAL ERROR: Transaction missing account_id")
+        print("Cannot process financial transaction without valid account")
+        exit(114)
+    }
+
+    print("✓ Financial transaction validation passed")
+}
+
+# Test with valid data
+print("Testing valid user data:")
+valid_user = {
+    "id": 12345,
+    "email": "user@example.com",
+    "age": 25,
+    "name": "Alice"
+}
+validate_user_data(valid_user)
+
+valid_transaction = {
+    "amount": 150.50,
+    "account_id": "ACC123",
+    "type": "transfer"
+}
+validate_financial_transaction(valid_transaction)
+
+# Test with invalid data (commented out to avoid actual exit)
+print("\nTesting invalid data scenarios:")
+print("(These would call exit(), but are commented out for demo)")
+
+# This would exit with code 101
+# invalid_user = {"name": "Bob", "age": 25}  # Missing email
+# validate_user_data(invalid_user)
+
+# This would exit with code 103
+# underage_user = {"email": "kid@example.com", "age": 16}
+# validate_user_data(underage_user)
+
+# This would exit with code 113
+# large_transaction = {"amount": 50000, "account_id": "ACC456"}
+# validate_financial_transaction(large_transaction)
+
+print("")
+
+# ============================================================================
+# Real-World Example: To-Do List Manager
+# ============================================================================
+
+print("1. Real-World Example: To-Do List Manager")
+print("==========================================")
+
+class TodoItem {
+    func init(title, description, priority) {
+        this.title = title
+        this.description = description
+        this.priority = priority
+        this.completed = false
+        this.created_at = "2024-01-01"
+        this.completed_at = none
+    }
+
+    func complete() {
+        this.completed = true
+        this.completed_at = "2024-01-02"
+        print("Completed task: " + this.title)
+    }
+
+    func get_info() {
+        status = this.completed ? "✓" : "○"
+        priority_str = this.priority == 1 ? "HIGH" : (this.priority == 2 ? "MED" : "LOW")
+        return status + " [" + priority_str + "] " + this.title
+    }
+}
+
+class TodoManager {
+    func init() {
+        this.tasks = []
+        this.next_id = 1
+    }
+
+    func add_task(title, description, priority) {
+        # Critical validation: Priority must be valid
+        if priority < 1 or priority > 3 {
+            print("FATAL ERROR: Invalid priority level:", priority)
+            print("Priority must be 1 (HIGH), 2 (MED), or 3 (LOW)")
+            print("Invalid priority could corrupt task management system")
+            exit(120)
+        }
+
+        # Critical validation: Title cannot be empty
+        if title == none or title == "" {
+            print("FATAL ERROR: Task title cannot be empty")
+            print("Empty titles violate data integrity requirements")
+            exit(121)
+        }
+
+        task = TodoItem(title, description, priority)
+        task.id = this.next_id
+        this.next_id = this.next_id + 1
+        append(this.tasks, task)
+        print("Added task: " + title)
+        return task
+    }
+
+    func get_priority_stats() {
+        high_count = 0
+        med_count = 0
+        low_count = 0
+
+        for i = 0; i < len(this.tasks); i = i + 1 {
+            priority = this.tasks[i].priority
+            if priority == 1 {
+                high_count = high_count + 1
+            } else if priority == 2 {
+                med_count = med_count + 1
+            } else {
+                low_count = low_count + 1
+            }
+        }
+
+        print("Priority distribution:")
+        print("  HIGH: " + str(high_count))
+        print("  MED:  " + str(med_count))
+        print("  LOW:  " + str(low_count))
+
+        # Use modulo to cycle through priority colors for display
+        total_tasks = len(this.tasks)
+        for i = 0; i < total_tasks; i = i + 1 {
+            color_index = i % 3  # Cycle through 3 colors
+            color = color_index == 0 ? "RED" : (color_index == 1 ? "YELLOW" : "GREEN")
+            print("Task " + str(i + 1) + " color: " + color)
+        }
+    }
+
+    func list_tasks() {
+        print("=== Todo List ===")
+        if len(this.tasks) == 0 {
+            print("No tasks found")
+        } else {
+            for task in this.tasks {
+                print(task.get_info())
+            }
+        }
+    }
+
+    func complete_task(task_id) {
+        # Critical validation: Task ID must be valid
+        if task_id <= 0 {
+            print("FATAL ERROR: Invalid task ID:", task_id)
+            print("Task ID must be a positive integer")
+            exit(122)
+        }
+
+        for task in this.tasks {
+            if task.id == task_id {
+                if task.completed {
+                    print("WARNING: Task", task_id, "is already completed")
+                    return
+                }
+                task.complete()
+                return
+            }
+        }
+
+        # In a real system, missing critical tasks might indicate data corruption
+        print("ERROR: Task not found with ID:", task_id)
+        print("This might indicate data corruption in production systems")
+        # In production, you might want to exit here:
+        # exit(123)
+    }
+
+    func get_pending_count() {
+        count = 0
+        for task in this.tasks {
+            if not task.completed {
+                count = count + 1
+            }
+        }
+        return count
+    }
+
+    func filter_by_priority(priority) {
+        filtered = []
+        for task in this.tasks {
+            if task.priority == priority {
+                append(filtered, task)
+            }
+        }
+        return filtered
+    }
+}
+
+# Test todo manager with validation
+print("Testing TodoManager with valid data:")
+todo_manager = TodoManager()
+todo_manager.add_task("Learn Zephyr", "Study the language features", 1)
+todo_manager.add_task("Write examples", "Create comprehensive examples", 2)
+todo_manager.add_task("Test features", "Verify all features work", 1)
+todo_manager.add_task("Documentation", "Update project docs", 3)
+
+# Test invalid scenarios (commented out to avoid actual exit)
+print("\nTesting TodoManager validation scenarios:")
+print("(These would call exit(), but are commented out for demo)")
+
+# This would exit with code 120
+# todo_manager.add_task("Invalid priority", "Description", 5)
+
+# This would exit with code 121
+# todo_manager.add_task("", "Empty title task", 2)
+
+# This would exit with code 122
+# todo_manager.complete_task(-1)
+
+print("\nInitial task list:")
+todo_manager.list_tasks()
+
+print("\nCompleting some tasks...")
+todo_manager.complete_task(1)
+todo_manager.complete_task(3)
+
+print("\nUpdated task list:")
+todo_manager.list_tasks()
+
+print("\nPending tasks:", todo_manager.get_pending_count())
+
+high_priority = todo_manager.filter_by_priority(1)
+print("High priority tasks:", len(high_priority))
+
+print("")
+
+# ============================================================================
+# Practical Modulo Patterns
+# ============================================================================
+
+print("2. Practical Modulo Patterns")
+print("=============================")
+
+# Pattern 1: Even/Odd checking
+print("Even/Odd checking:")
+for i = 1; i <= 10; i = i + 1 {
+    is_even = (i % 2) == 0
+    parity = is_even ? "even" : "odd"
+    print(str(i) + " is " + parity)
+}
+
+# Pattern 2: Circular indexing for arrays
+print("\nCircular array indexing:")
+colors = ["red", "green", "blue"]
+for i = 0; i < 10; i = i + 1 {
+    color_index = i % len(colors)  # Wrap around using modulo
+    current_color = colors[color_index]
+    print("Item " + str(i) + " uses color: " + current_color)
+}
+
+# Pattern 3: Progress indicators using modulo
+print("\nProgress indicator (using modulo for animation):")
+total_items = 47
+for processed = 1; processed <= total_items; processed = processed + 1 {
+    # Only show progress every 10 items
+    if processed % 10 == 0 {
+        percent = (processed * 100) / total_items
+        print("Progress: " + str(processed) + "/" + str(total_items) + " (" + str(percent) + "%)")
+    }
+}
+
+# Pattern 4: Time calculations
+print("\nTime calculations with modulo:")
+total_seconds = 3725  # 1 hour, 2 minutes, 5 seconds
+hours = total_seconds / 3600
+remaining_after_hours = total_seconds % 3600
+minutes = remaining_after_hours / 60
+seconds = remaining_after_hours % 60
+print("Total seconds: " + str(total_seconds))
+print("Time: " + str(hours) + "h " + str(minutes) + "m " + str(seconds) + "s")
+
+# Pattern 5: Grouping items using modulo
+print("\nGrouping items (3 per group using modulo):")
+items = ["apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew"]
+group_size = 3
+for i = 0; i < len(items); i = i + 1 {
+    if i % group_size == 0 {
+        print("Group " + str((i / group_size) + 1) + ":")
+    }
+    item_in_group = i % group_size + 1
+    print("  " + str(item_in_group) + ". " + items[i])
+}
+
+print("")
+
+# ============================================================================
+# Real-World Example: Simple Banking System
+# ============================================================================
+
+print("3. Real-World Example: Simple Banking System")
+print("=============================================")
+
+class BankAccount {
+    func init(account_number, owner_name, initial_balance) {
+        this.account_number = account_number
+        this.owner_name = owner_name
+        this.balance = initial_balance
+        this.transaction_history = []
+        this.is_active = true
+    }
+
+    func deposit(amount) {
+        if amount > 0 and this.is_active {
+            this.balance = this.balance + amount
+            transaction = {
+                "type": "deposit",
+                "amount": amount,
+                "balance": this.balance,
+                "timestamp": len(this.transaction_history) + 1
+            }
+            append(this.transaction_history, transaction)
+            print("Deposited $" + str(amount) + ". New balance: $" + str(this.balance))
+            return true
+        } else {
+            print("Invalid deposit amount or account inactive")
+            return false
+        }
+    }
+
+    func withdraw(amount) {
+        if amount > 0 and amount <= this.balance and this.is_active {
+            this.balance = this.balance - amount
+            transaction = {
+                "type": "withdrawal",
+                "amount": amount,
+                "balance": this.balance,
+                "timestamp": len(this.transaction_history) + 1
+            }
+            append(this.transaction_history, transaction)
+            print("Withdrew $" + str(amount) + ". New balance: $" + str(this.balance))
+            return true
+        } else {
+            print("Invalid withdrawal amount, insufficient funds, or account inactive")
+            return false
+        }
+    }
+
+    func transfer(target_account, amount) {
+        if this.withdraw(amount) {
+            if target_account.deposit(amount) {
+                print("Transfer of $" + str(amount) + " completed")
+                return true
+            } else {
+                # Rollback if target deposit failed
+                this.deposit(amount)
+                print("Transfer failed - deposit to target account failed")
+                return false
+            }
+        } else {
+            print("Transfer failed - withdrawal from source account failed")
+            return false
+        }
+    }
+
+    func get_balance() {
+        return this.balance
+    }
+
+    func get_statement() {
+        print("=== Account Statement ===")
+        print("Account: " + this.account_number)
+        print("Owner: " + this.owner_name)
+        print("Current Balance: $" + str(this.balance))
+        print("Status: " + (this.is_active ? "Active" : "Inactive"))
+        print("Transaction History:")
+        for transaction in this.transaction_history {
+            print("  " + transaction["type"] + ": $" + str(transaction["amount"]) +
+                  " (Balance: $" + str(transaction["balance"]) + ")")
+        }
+    }
+}
+
+class Bank {
+    func init(name) {
+        this.name = name
+        this.accounts = {}
+        this.next_account_number = 1000
+    }
+
+    func create_account(owner_name, initial_deposit) {
+        account_number = "ACC" + str(this.next_account_number)
+        this.next_account_number = this.next_account_number + 1
+
+        account = BankAccount(account_number, owner_name, initial_deposit)
+        this.accounts[account_number] = account
+
+        print("Created account " + account_number + " for " + owner_name)
+        return account
+    }
+
+    func get_account(account_number) {
+        account_keys = keys(this.accounts)
+        found = false
+        for key in account_keys {
+            if key == account_number {
+                found = true
+            }
+        }
+        if found {
+            return this.accounts[account_number]
+        } else {
+            print("Account not found: " + account_number)
+            return ""
+        }
+    }
+
+    func get_total_deposits() {
+        total = 0
+        for account_number in keys(this.accounts) {
+            account = this.accounts[account_number]
+            total = total + account.get_balance()
+        }
+        return total
+    }
+}
+
+# Test banking system
+first_bank = Bank("First National Bank")
+
+# Create accounts
+alice_account = first_bank.create_account("Alice Johnson", 1000)
+bob_account = first_bank.create_account("Bob Smith", 500)
+charlie_account = first_bank.create_account("Charlie Brown", 750)
+
+print("\nTesting banking operations...")
+
+# Test deposits and withdrawals
+alice_account.deposit(250)
+bob_account.withdraw(100)
+charlie_account.deposit(150)
+
+# Test transfers
+print("\nTesting transfers...")
+alice_account.transfer(bob_account, 200)
+charlie_account.transfer(alice_account, 300)
+
+# Print statements
+print("\nAccount statements:")
+alice_account.get_statement()
+print("")
+bob_account.get_statement()
+
+print("\nBank total deposits: $" + str(first_bank.get_total_deposits()))
+
+print("")
+
+# ============================================================================
+# Real-World Example: Library Management System
+# ============================================================================
+
+print("4. Real-World Example: Library Management System")
+print("=================================================")
+
+class Book {
+    func init(isbn, title, author, year) {
+        this.isbn = isbn
+        this.title = title
+        this.author = author
+        this.year = year
+        this.is_available = true
+        this.borrowed_by = none
+        this.due_date = none
+    }
+
+    func get_info() {
+        return this.title + " by " + this.author + " (" + str(this.year) + ")"
+    }
+
+    func borrow(member_name) {
+        if this.is_available {
+            this.is_available = false
+            this.borrowed_by = member_name
+            this.due_date = "2024-02-01"  # Simplified date
+            print("Book borrowed: " + this.get_info() + " by " + member_name)
+            return true
+        } else {
+            print("Book not available: " + this.get_info())
+            return false
+        }
+    }
+
+    func return_book() {
+        if not this.is_available {
+            borrower = this.borrowed_by
+            this.is_available = true
+            this.borrowed_by = none
+            this.due_date = none
+            print("Book returned: " + this.get_info() + " by " + borrower)
+            return true
+        } else {
+            print("Book was not borrowed: " + this.get_info())
+            return false
+        }
+    }
+}
+
+class Member {
+    func init(member_id, name, email) {
+        this.member_id = member_id
+        this.name = name
+        this.email = email
+        this.borrowed_books = []
+        this.is_active = true
+    }
+
+    func borrow_book(book) {
+        if this.is_active and book.borrow(this.name) {
+            append(this.borrowed_books, book)
+            return true
+        }
+        return false
+    }
+
+    func return_book(book) {
+        if book.return_book() {
+            # Remove from borrowed books list
+            new_list = []
+            for borrowed_book in this.borrowed_books {
+                if borrowed_book.isbn != book.isbn {
+                    append(new_list, borrowed_book)
+                }
+            }
+            this.borrowed_books = new_list
+            return true
+        }
+        return false
+    }
+
+    func get_borrowed_books() {
+        return this.borrowed_books
+    }
+}
+
+class Library {
+    func init(name) {
+        this.name = name
+        this.books = {}
+        this.members = {}
+        this.next_member_id = 1
+    }
+
+    func add_book(isbn, title, author, year) {
+        book = Book(isbn, title, author, year)
+        this.books[isbn] = book
+        print("Added book: " + book.get_info())
+        return book
+    }
+
+    func register_member(name, email) {
+        member_id = "MEM" + str(this.next_member_id)
+        this.next_member_id = this.next_member_id + 1
+
+        member = Member(member_id, name, email)
+        this.members[member_id] = member
+
+        print("Registered member: " + name + " (ID: " + member_id + ")")
+        return member
+    }
+
+    func find_book(isbn) {
+        book_keys = keys(this.books)
+        found = false
+        for key in book_keys {
+            if key == isbn {
+                found = true
+                break
+            }
+        }
+        if found {
+            return this.books[isbn]
+        }
+        return none
+    }
+
+    func find_member(member_id) {
+        member_keys = keys(this.members)
+        found = false
+        for key in member_keys {
+            if key == member_id {
+                found = true
+                break
+            }
+        }
+        if found {
+            return this.members[member_id]
+        }
+        return none
+    }
+
+    func search_books_by_author(author) {
+        found_books = []
+        for isbn in keys(this.books) {
+            book = this.books[isbn]
+            if book.author == author {
+                append(found_books, book)
+            }
+        }
+        return found_books
+    }
+
+    func get_available_books() {
+        available = []
+        for isbn in keys(this.books) {
+            book = this.books[isbn]
+            if book.is_available {
+                append(available, book)
+            }
+        }
+        return available
+    }
+
+    func get_library_stats() {
+        total_books = len(keys(this.books))
+        available_books = len(this.get_available_books())
+        total_members = len(keys(this.members))
+
+        print("=== Library Statistics ===")
+        print("Total books: " + str(total_books))
+        print("Available books: " + str(available_books))
+        print("Borrowed books: " + str(total_books - available_books))
+        print("Total members: " + str(total_members))
+    }
+}
+
+# Test library system
+city_library = Library("City Public Library")
+
+# Add books
+book1 = city_library.add_book("978-0-123456-78-9", "The Great Gatsby", "F. Scott Fitzgerald", 1925)
+book2 = city_library.add_book("978-0-234567-89-0", "To Kill a Mockingbird", "Harper Lee", 1960)
+book3 = city_library.add_book("978-0-345678-90-1", "1984", "George Orwell", 1949)
+book4 = city_library.add_book("978-0-456789-01-2", "Animal Farm", "George Orwell", 1945)
+
+# Register members
+alice_member = city_library.register_member("Alice Johnson", "alice@email.com")
+bob_member = city_library.register_member("Bob Smith", "bob@email.com")
+
+print("\nTesting library operations...")
+
+# Test borrowing
+alice_member.borrow_book(book1)
+alice_member.borrow_book(book3)
+bob_member.borrow_book(book2)
+
+# Test searching
+print("\nSearching for books by George Orwell:")
+orwell_books = city_library.search_books_by_author("George Orwell")
+for book in orwell_books {
+    status = book.is_available ? "Available" : "Borrowed"
+    print("  " + book.get_info() + " - " + status)
+}
+
+# Test returning
+print("\nReturning books...")
+alice_member.return_book(book1)
+
+# Print statistics
+print("")
+city_library.get_library_stats()
+
+print("")
+
+# ============================================================================
+# User Example: Data Processing Pipeline
+# ============================================================================
+
+print("5. User Example: Data Processing Pipeline")
+print("==========================================")
+
+class DataProcessor {
+    func init() {
+        this.raw_data = []
+        this.processed_data = []
+        this.filters = []
+        this.transformers = []
+    }
+
+    func add_data(data_point) {
+        append(this.raw_data, data_point)
+    }
+
+    func add_filter(filter_func) {
+        append(this.filters, filter_func)
+    }
+
+    func add_transformer(transform_func) {
+        append(this.transformers, transform_func)
+    }
+
+    func process() {
+        print("Starting data processing pipeline...")
+
+        # Start with raw data
+        current_data = this.raw_data
+        print("Initial data points: " + str(len(current_data)))
+
+        # Apply filters
+        for filter_func in this.filters {
+            filtered_data = []
+            for item in current_data {
+                if filter_func(item) {
+                    append(filtered_data, item)
+                }
+            }
+            current_data = filtered_data
+            print("After filter: " + str(len(current_data)) + " items")
+        }
+
+        # Apply transformers
+        for transform_func in this.transformers {
+            transformed_data = []
+            for item in current_data {
+                transformed_item = transform_func(item)
+                append(transformed_data, transformed_item)
+            }
+            current_data = transformed_data
+            print("After transformation: " + str(len(current_data)) + " items")
+        }
+
+        this.processed_data = current_data
+        print("Data processing complete!")
+        return this.processed_data
+    }
+
+    func get_results() {
+        return this.processed_data
+    }
+
+    func get_summary() {
+        if len(this.processed_data) == 0 {
+            return "No processed data available"
+        }
+
+        # Calculate summary statistics
+        total = 0
+        min_val = this.processed_data[0]
+        max_val = this.processed_data[0]
+
+        for value in this.processed_data {
+            total = total + value
+            if value < min_val {
+                min_val = value
+            }
+            if value > max_val {
+                max_val = value
+            }
+        }
+
+        average = total / len(this.processed_data)
+
+        return "Count: " + str(len(this.processed_data)) +
+               ", Min: " + str(min_val) +
+               ", Max: " + str(max_val) +
+               ", Average: " + str(average)
+    }
+}
+
+# Test data processing pipeline
+processor = DataProcessor()
+
+# Add sample data
+test_data = [1, 5, 3, 8, 2, 9, 4, 7, 6, 10, -1, 15, 0, 12, -3]
+for value in test_data {
+    processor.add_data(value)
+}
+
+print("Sample data added: " + str(test_data))
+
+# Add filters and transformers using lambdas
+processor.add_filter(x -> x >= 0)  # Filter out negative numbers
+processor.add_filter(x -> x <= 10)  # Filter out numbers greater than 10
+processor.add_transformer(x -> x * 2)  # Double each value
+processor.add_transformer(x -> x + 1)  # Add 1 to each value
+
+# Process the data
+results = processor.process()
+print("Final results: " + str(results))
+print("Summary: " + processor.get_summary())
+
+print("")
+
+# ============================================================================
+# User Question Examples
+# ============================================================================
+
+print("6. User Question Examples")
+print("==========================")
+
+# Example addressing common user questions
+class UserExamples {
+    func init() {
+        this.examples = {
+            "basic_syntax": "Demonstrates basic language syntax",
+            "data_structures": "Shows lists and dictionaries",
+            "functions": "Function definitions and calls",
+            "classes": "Object-oriented programming",
+            "lambdas": "Anonymous functions and closures"
+        }
+    }
+
+    func demonstrate_basic_operations() {
+        print("=== Basic Operations Example ===")
+
+        # Variables and arithmetic
+        x = 10
+        y = 20
+        result = x + y * 2
+        print("Arithmetic result: " + str(result))
+
+        # String operations
+        greeting = "Hello"
+        name = "User"
+        message = greeting + ", " + name + "!"
+        print("String result: " + message)
+
+        # Boolean operations
+        is_positive = result > 0
+        is_even = result % 2 == 0
+        print("Is positive: " + str(is_positive))
+        print("Is even: " + str(is_even))
+    }
+
+    func demonstrate_control_flow() {
+        print("=== Control Flow Example ===")
+
+        # Conditional statements
+        score = 85
+        grade = score >= 90 ? "A" : (score >= 80 ? "B" : "C")
+        print("Grade for score " + str(score) + ": " + grade)
+
+        # Loops
+        print("Counting to 5:")
+        for i = 1; i <= 5; i = i + 1 {
+            print("  Count: " + str(i))
+        }
+
+        # List iteration
+        colors = ["red", "green", "blue"]
+        print("Colors:")
+        for color in colors {
+            print("  Color: " + color)
+        }
+    }
+
+    func demonstrate_data_manipulation() {
+        print("=== Data Manipulation Example ===")
+
+        # Working with lists
+        numbers = [1, 2, 3, 4, 5]
+        print("Original numbers: " + str(numbers))
+
+        # Add elements
+        append(numbers, 6)
+        append(numbers, 7)
+        print("After adding: " + str(numbers))
+
+        # Remove element
+        removed = pop(numbers, 0)
+        print("Removed: " + str(removed))
+        print("After removing: " + str(numbers))
+
+        # Working with dictionaries
+        person = {"name": "John", "age": 30}
+        print("Original person: " + str(person))
+
+        # Modify dictionary
+        person["age"] = 31
+        person["city"] = "New York"
+        print("Modified person: " + str(person))
+
+        # Access dictionary values
+        print("Name: " + person["name"])
+        print("Age: " + str(person["age"]))
+    }
+
+    func demonstrate_function_usage() {
+        print("=== Function Usage Example ===")
+
+        # Define utility functions
+        func calculate_area(length, width) {
+            return length * width
+        }
+
+        func format_area(area) {
+            return "Area: " + str(area) + " square units"
+        }
+
+        # Use functions
+        room_area = calculate_area(12, 10)
+        formatted = format_area(room_area)
+        print(formatted)
+
+        # Lambda function
+        square = x -> x * x
+        squared_value = square(8)
+        print("8 squared: " + str(squared_value))
+    }
+}
+
+# Test user examples
+user_examples = UserExamples()
+user_examples.demonstrate_basic_operations()
+print("")
+user_examples.demonstrate_control_flow()
+print("")
+user_examples.demonstrate_data_manipulation()
+print("")
+user_examples.demonstrate_function_usage()
+
+print("")
+
+# ============================================================================
+# Final Verification Tests
+# ============================================================================
+
+print("7. Final Verification Tests")
+print("============================")
+
+class VerificationSuite {
+    func init() {
+        this.test_results = []
+        this.passed_tests = 0
+        this.failed_tests = 0
+    }
+
+    func run_test(test_name, test_func) {
+        print("Running test: " + test_name)
+        try {
+            result = test_func()
+            if result {
+                print("  ✓ PASSED")
+                this.passed_tests = this.passed_tests + 1
+                append(this.test_results, test_name + ": PASSED")
+            } else {
+                print("  ✗ FAILED")
+                this.failed_tests = this.failed_tests + 1
+                append(this.test_results, test_name + ": FAILED")
+            }
+        } catch e {
+            print("  ✗ ERROR: " + e)
+            this.failed_tests = this.failed_tests + 1
+            append(this.test_results, test_name + ": ERROR")
+        }
+    }
+
+    func test_basic_arithmetic() {
+        result = 2 + 3 * 4
+        return result == 14
+    }
+
+    func test_string_operations() {
+        str1 = "Hello"
+        str2 = "World"
+        combined = str1 + " " + str2
+        return combined == "Hello World"
+    }
+
+    func test_list_operations() {
+        list = [1, 2, 3]
+        append(list, 4)
+        return len(list) == 4 and list[3] == 4
+    }
+
+    func test_dictionary_operations() {
+        dict = {"key": "value"}
+        dict["new_key"] = "new_value"
+        return len(dict) == 2 and dict["new_key"] == "new_value"
+    }
+
+    func test_function_calls() {
+        func test_func(x) {
+            return x * 2
+        }
+        result = test_func(5)
+        return result == 10
+    }
+
+    func test_lambda_functions() {
+        multiply = (a, b) -> a * b
+        result = multiply(3, 4)
+        return result == 12
+    }
+
+    func test_class_functionality() {
+        class TestClass {
+            func init(value) {
+                this.value = value
+            }
+            func get_value() {
+                return this.value
+            }
+        }
+        obj = TestClass(42)
+        return obj.get_value() == 42
+    }
+
+    func run_all_tests() {
+        print("=== Running Verification Tests ===")
+
+        this.run_test("Basic Arithmetic", () -> this.test_basic_arithmetic())
+        this.run_test("String Operations", () -> this.test_string_operations())
+        this.run_test("List Operations", () -> this.test_list_operations())
+        this.run_test("Dictionary Operations", () -> this.test_dictionary_operations())
+        this.run_test("Function Calls", () -> this.test_function_calls())
+        this.run_test("Lambda Functions", () -> this.test_lambda_functions())
+        this.run_test("Class Functionality", () -> this.test_class_functionality())
+
+        this.print_summary()
+    }
+
+    func print_summary() {
+        print("\n=== Test Summary ===")
+        total_tests = this.passed_tests + this.failed_tests
+        print("Total tests: " + str(total_tests))
+        print("Passed: " + str(this.passed_tests))
+        print("Failed: " + str(this.failed_tests))
+
+        if this.failed_tests == 0 {
+            print("🎉 All tests passed!")
+        } else {
+            print("❌ Some tests failed")
+        }
+
+        print("\nDetailed results:")
+        for result in this.test_results {
+            print("  " + result)
+        }
+    }
+}
+
+# Run verification tests
+verification = VerificationSuite()
+verification.run_all_tests()
+
+print("")
+
+# ============================================================================
+# Basic Test Examples
+# ============================================================================
+
+print("8. Basic Test Examples")
+print("=======================")
+
+func run_basic_tests() {
+    print("=== Basic Tests ===")
+
+    # Simple variable assignment and arithmetic
+    x = 10
+    y = 20
+    z = x + y
+
+    print("x =", x)
+    print("y =", y)
+    print("z = x + y =", z)
+
+    # Verify the calculation
+    expected = 30
+    if z == expected {
+        print("✓ Basic arithmetic test passed")
+    } else {
+        print("✗ Basic arithmetic test failed")
+    }
+}
+
+run_basic_tests()
+
+print("")
+
+# ============================================================================
+# User-Provided Example Tests
+# ============================================================================
+
+print("9. User-Provided Example Tests")
+print("===============================")
+
+class UserExampleTester {
+    func test_chained_method_calls() {
+        print("=== Chained Method Call Tests ===")
+
+        # Test for the exact user example
+        class test_a {
+            func print_hello() {
+                print("hello")
+            }
+        }
+
+        class test_b {
+            func init() {
+                this.test = test_a()
+            }
+        }
+
+        example = test_b()
+        example.test.print_hello()
+        print("Testing completed - the chained method call worked!")
+    }
+
+    func test_method_return_values() {
+        print("=== Method Return Value Tests ===")
+
+        # Test with return values
+        class test_c {
+            func get_message() {
+                return "Message from test_c"
+            }
+        }
+
+        class test_d {
+            func init() {
+                this.inner = test_c()
+            }
+        }
+
+        example2 = test_d()
+        message = example2.inner.get_message()
+        print("Retrieved message:", message)
+    }
+
+    func test_deep_nesting() {
+        print("=== Deep Nesting Tests ===")
+
+        # Test deeper nesting
+        class Level1 {
+            func get_value() {
+                return "Level 1 value"
+            }
+        }
+
+        class Level2 {
+            func init() {
+                this.level1 = Level1()
+            }
+        }
+
+        class Level3 {
+            func init() {
+                this.level2 = Level2()
+            }
+        }
+
+        deep = Level3()
+        deep_value = deep.level2.level1.get_value()
+        print("Deep nested value:", deep_value)
+
+        print("All user example tests passed!")
+    }
+
+    func run_all_user_tests() {
+        this.test_chained_method_calls()
+        print("")
+        this.test_method_return_values()
+        print("")
+        this.test_deep_nesting()
+    }
+}
+
+user_tester = UserExampleTester()
+user_tester.run_all_user_tests()
+
+print("")
+
+print("")
+print("=== Comprehensive Examples Demo Complete ===")

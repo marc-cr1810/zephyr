@@ -1,0 +1,1487 @@
+# Zephyr Classes and Object-Oriented Programming
+# This file demonstrates class definitions, object instantiation, inheritance-like patterns,
+# complex object composition, and proper use of exit() for critical OOP system failures
+
+print("=== Zephyr Classes and Objects Demo ===")
+print("")
+
+# ============================================================================
+# Critical Class System Validation
+# ============================================================================
+
+print("0. Critical Class System Validation")
+print("====================================")
+
+# Function to validate class system integrity at startup
+func validate_class_system() {
+    print("Validating class system integrity...")
+
+    # Test basic class instantiation
+    class TestClass {
+        func init(value) {
+            this.value = value
+        }
+        func get_value() {
+            return this.value
+        }
+    }
+
+    try {
+        test_instance = TestClass(42)
+        if test_instance == none {
+            print("FATAL ERROR: Class instantiation failed")
+            print("Object creation returned null")
+            exit(400)
+        }
+
+        result = test_instance.get_value()
+        if result != 42 {
+            print("FATAL ERROR: Method invocation failed")
+            print("Expected: 42, Got:", result)
+            exit(401)
+        }
+
+        # Test member access
+        if test_instance.value != 42 {
+            print("FATAL ERROR: Member access failed")
+            print("Expected: 42, Got:", test_instance.value)
+            exit(402)
+        }
+
+    } catch e {
+        print("FATAL ERROR: Class system validation failed:", e)
+        print("Core OOP functionality is broken")
+        exit(403)
+    }
+
+    print("✓ Class system validation completed successfully")
+}
+
+# Validate this context integrity
+func validate_this_context() {
+    print("Validating 'this' context integrity...")
+
+    class ThisValidator {
+        func init() {
+            this.id = 12345
+        }
+
+        func validate_this() {
+            if this == none {
+                print("FATAL ERROR: 'this' context is null")
+                print("Object method context is corrupted")
+                exit(404)
+            }
+
+            if this.id != 12345 {
+                print("FATAL ERROR: 'this' context corruption detected")
+                print("Expected id: 12345, Found:", this.id)
+                exit(405)
+            }
+
+            return true
+        }
+    }
+
+    validator = ThisValidator()
+    validation_result = validator.validate_this()
+
+    if not validation_result {
+        print("FATAL ERROR: 'this' context validation failed")
+        exit(406)
+    }
+
+    print("✓ 'this' context validation completed")
+}
+
+# Run critical class system validations
+validate_class_system()
+validate_this_context()
+
+print("Class System Exit Codes:")
+print("  400 - Class instantiation failed")
+print("  401 - Method invocation failed")
+print("  402 - Member access failed")
+print("  403 - Core OOP functionality broken")
+print("  404 - 'this' context is null")
+print("  405 - 'this' context corruption")
+print("  406 - 'this' context validation failed")
+print("")
+
+# ============================================================================
+# Basic Class Definition and Instantiation
+# ============================================================================
+
+print("1. Basic Class Definition and Instantiation")
+print("============================================")
+
+# Simple class with constructor and methods
+class Greeter {
+    func init(name) {
+        this.name = name
+        this.greeting_count = 0
+    }
+
+    func say_hello() {
+        print("Hello, " + this.name + "!")
+        this.greeting_count = this.greeting_count + 1
+    }
+
+    func get_name() {
+        return this.name
+    }
+
+    func get_greeting_count() {
+        return this.greeting_count
+    }
+}
+
+# Create instances
+greeter1 = Greeter("World")
+greeter2 = Greeter("Alice")
+
+greeter1.say_hello()
+greeter2.say_hello()
+greeter1.say_hello()
+
+print("Greeter1 name:", greeter1.get_name())
+print("Greeter1 greeting count:", greeter1.get_greeting_count())
+print("Greeter2 greeting count:", greeter2.get_greeting_count())
+
+# Test additional basic class functionality
+class SimpleGreeter {
+    func init(name) {
+        this.name = name
+    }
+
+    func say_hello() {
+        print("Hello, " + this.name)
+    }
+
+    func get_name() {
+        return this.name
+    }
+}
+
+# Test multiple instances
+g1 = SimpleGreeter("World")
+g1.say_hello()
+
+g2 = SimpleGreeter("Alice")
+g2.say_hello()
+
+# Test method calls that return values
+name1 = g1.get_name()
+name2 = g2.get_name()
+print("First greeter name:", name1)
+print("Second greeter name:", name2)
+
+# Test direct member access
+print("Direct member access g1:", g1.name)
+print("Direct member access g2:", g2.name)
+
+print("")
+
+# ============================================================================
+# Member Variables and Data Encapsulation
+# ============================================================================
+
+print("2. Member Variables and Data Encapsulation")
+print("===========================================")
+
+class BankAccount {
+    func init(account_holder, initial_balance) {
+        # Critical validation for account creation
+        if account_holder == none or account_holder == "" {
+            print("FATAL ERROR: Account holder cannot be null or empty")
+            print("Banking regulations require valid account holder")
+            exit(410)
+        }
+
+        if initial_balance < 0 {
+            print("FATAL ERROR: Initial balance cannot be negative")
+            print("Account:", account_holder, "Balance:", initial_balance)
+            exit(411)
+        }
+
+        this.account_holder = account_holder
+        this.balance = initial_balance
+        this.transaction_history = []
+    }
+
+    func deposit(amount) {
+        # Critical validation: Check for balance corruption
+        if this.balance == none {
+            print("FATAL ERROR: Account balance corrupted to null")
+            print("Account:", this.account_holder)
+            print("Banking system integrity compromised")
+            exit(412)
+        }
+
+        if amount > 0 {
+            old_balance = this.balance
+            this.balance = this.balance + amount
+
+            # Validate balance update succeeded
+            if this.balance <= old_balance {
+                print("FATAL ERROR: Balance update failed")
+                print("Expected increase, but balance did not change correctly")
+                exit(413)
+            }
+
+            append(this.transaction_history, "Deposited " + str(amount))
+            print("Deposited $" + str(amount) + ". New balance: $" + str(this.balance))
+        } else {
+            print("Invalid deposit amount")
+        }
+    }
+
+    func withdraw(amount) {
+        # Critical validation: Check for balance corruption
+        if this.balance == none {
+            print("FATAL ERROR: Account balance corrupted to null")
+            print("Account:", this.account_holder)
+            print("Banking system integrity compromised")
+            exit(412)
+        }
+
+        if amount > 0 and amount <= this.balance {
+            old_balance = this.balance
+            this.balance = this.balance - amount
+
+            # Validate balance update succeeded
+            if this.balance >= old_balance {
+                print("FATAL ERROR: Balance withdrawal failed")
+                print("Expected decrease, but balance did not change correctly")
+                exit(413)
+            }
+
+            append(this.transaction_history, "Withdrew " + str(amount))
+            print("Withdrew $" + str(amount) + ". New balance: $" + str(this.balance))
+        } else {
+            print("Invalid withdrawal amount or insufficient funds")
+        }
+    }
+
+    func get_balance() {
+        # Critical validation before returning balance
+        if this.balance == none {
+            print("FATAL ERROR: Cannot retrieve null balance")
+            print("Account:", this.account_holder)
+            exit(412)
+        }
+        return this.balance
+    }
+
+    func get_statement() {
+        print("Account Statement for " + this.account_holder + ":")
+        print("Current Balance: $" + str(this.balance))
+        print("Transaction History:")
+        for transaction in this.transaction_history {
+            print("  - " + transaction)
+        }
+    }
+}
+
+# Test bank account
+account = BankAccount("John Doe", 1000)
+account.deposit(500)
+account.withdraw(200)
+account.withdraw(2000)  # Should fail
+account.get_statement()
+
+print("")
+
+# Additional exit codes for banking system
+print("Banking System Exit Codes:")
+print("  410 - Account holder null or empty")
+print("  411 - Initial balance negative")
+print("  412 - Account balance corrupted to null")
+print("  413 - Balance update failed")
+print("  414 - Transfer to null account")
+print("  415 - Target account balance is null")
+print("  416 - Source account balance is null")
+print("  417 - Source account balance validation failed")
+print("  418 - Target account balance validation failed")
+print("")
+
+# ============================================================================
+# Object Composition
+# ============================================================================
+
+print("3. Object Composition")
+print("======================")
+
+# Engine class for composition
+class Engine {
+    func init(horsepower, fuel_type) {
+        this.horsepower = horsepower
+        this.fuel_type = fuel_type
+        this.running = false
+        this.temperature = 20
+    }
+
+    func start() {
+        if not this.running {
+            this.running = true
+            this.temperature = 90
+            print("Engine started! " + str(this.horsepower) + "HP " + this.fuel_type + " engine")
+        } else {
+            print("Engine is already running")
+        }
+    }
+
+    func stop() {
+        if this.running {
+            this.running = false
+            this.temperature = 20
+            print("Engine stopped")
+        } else {
+            print("Engine is already stopped")
+        }
+    }
+
+    func get_status() {
+        status = this.running ? "running" : "stopped"
+        return "Engine: " + status + " at " + str(this.temperature) + "°C"
+    }
+}
+
+# Car class that contains an Engine
+class Car {
+    func init(make, model, engine_hp, fuel_type) {
+        this.make = make
+        this.model = model
+        this.fuel_level = 100
+        this.odometer = 0
+        this.speed = 0
+    }
+
+    func start() {
+        if this.fuel_level > 0 {
+            print(this.make + " " + this.model + " is ready to drive")
+        } else {
+            print("Cannot start - no fuel!")
+        }
+    }
+
+    func drive(distance) {
+        if this.fuel_level > 0 {
+            fuel_consumption = distance / 10
+            this.odometer = this.odometer + distance
+            this.fuel_level = this.fuel_level - fuel_consumption
+            this.speed = 60  # Simulate driving speed
+
+            print("Driving " + str(distance) + " km...")
+            print("Odometer: " + str(this.odometer) + " km")
+            print("Fuel level: " + str(this.fuel_level) + "%")
+
+            if this.fuel_level <= 0 {
+                this.fuel_level = 0
+                print("Out of fuel!")
+            }
+        } else {
+            print("Cannot drive - no fuel")
+        }
+    }
+
+    func stop() {
+        this.speed = 0
+        print(this.make + " " + this.model + " stopped")
+    }
+
+    func get_info() {
+        fuel_str = str(this.fuel_level)
+        odometer_str = str(this.odometer)
+        return this.make + " " + this.model + " | Fuel: " + fuel_str + "% | Odometer: " + odometer_str + "km"
+    }
+}
+
+# Test car with composition
+my_car = Car("Toyota", "Camry", 200, "Gasoline")
+print(my_car.get_info())
+
+my_car.start()
+my_car.drive(50)
+my_car.drive(80)
+my_car.stop()
+
+print(my_car.get_info())
+
+# Test calculator with method chaining
+class AdvancedCalculator {
+    func init(initial_value) {
+        this.value = initial_value
+    }
+
+    func add(x) {
+        this.value = this.value + x
+        return this.value
+    }
+
+    func multiply(x) {
+        this.value = this.value * x
+        return this.value
+    }
+
+    func get_value() {
+        return this.value
+    }
+
+    func reset() {
+        this.value = 0
+    }
+}
+
+# Test advanced calculator
+calc = AdvancedCalculator(10)
+print("Calculator initial value:", calc.get_value())
+
+result1 = calc.add(5)
+print("After adding 5:", result1)
+
+result2 = calc.multiply(2)
+print("After multiplying by 2:", result2)
+
+print("Calculator final value:", calc.get_value())
+
+print("")
+
+# ============================================================================
+# Complex Object Relationships
+# ============================================================================
+
+print("4. Complex Object Relationships")
+print("================================")
+
+# Person class that can own multiple cars
+class Person {
+    func init(name, age) {
+        this.name = name
+        this.age = age
+        this.cars = []
+        this.current_car_index = -1
+    }
+
+    func buy_car(make, model, engine_hp, fuel_type) {
+        new_car = Car(make, model, engine_hp, fuel_type)
+        append(this.cars, new_car)
+        print(this.name + " bought a " + make + " " + model)
+        if this.current_car_index == -1 {
+            this.current_car_index = len(this.cars) - 1
+            print("Set as current car")
+        }
+    }
+
+    func switch_car(index) {
+        if index >= 0 and index < len(this.cars) {
+            this.current_car = this.cars[index]
+            print(this.name + " switched to " + this.current_car.make + " " + this.current_car.model)
+        } else {
+            print("Invalid car index")
+        }
+    }
+
+    func drive_current_car(distance) {
+        if this.current_car_index >= 0 {
+            current_car = this.cars[this.current_car_index]
+            print(this.name + " is driving their " + current_car.make + " " + current_car.model)
+            current_car.start()
+            current_car.drive(distance)
+            current_car.stop()
+        } else {
+            print(this.name + " doesn't have a current car")
+        }
+    }
+
+    func list_cars() {
+        print(this.name + "'s cars:")
+        for i = 0; i < len(this.cars); i = i + 1 {
+            car = this.cars[i]
+            current_marker = i == this.current_car_index ? " (current)" : ""
+            print("  " + str(i) + ": " + car.make + " " + car.model + current_marker)
+        }
+    }
+}
+
+# Test complex relationships
+alice = Person("Alice", 30)
+alice.buy_car("Honda", "Civic", 180, "Gasoline")
+alice.buy_car("Tesla", "Model 3", 300, "Electric")
+
+alice.list_cars()
+alice.drive_current_car(25)
+
+alice.switch_car(1)
+alice.drive_current_car(40)
+
+# Test class without constructor
+class SimpleClass {
+    func greet() {
+        print("Hello from SimpleClass!")
+    }
+
+    func set_message(msg) {
+        this.message = msg
+    }
+
+    func get_message() {
+        return this.message
+    }
+}
+
+simple = SimpleClass()
+simple.greet()
+simple.set_message("Test message")
+print("Message:", simple.get_message())
+
+# Test minimal empty class
+class EmptyClass {
+}
+
+empty = EmptyClass()
+print("Empty class instance created:", type(empty))
+
+print("")
+
+# ============================================================================
+# Data Container Classes
+# ============================================================================
+
+print("5. Data Container Classes")
+print("==========================")
+
+class Matrix {
+    func init(rows, cols) {
+        this.rows = rows
+        this.cols = cols
+        this.data = []
+
+        # Initialize matrix with zeros
+        for i = 0; i < rows; i = i + 1 {
+            row = []
+            for j = 0; j < cols; j = j + 1 {
+                append(row, 0)
+            }
+            append(this.data, row)
+        }
+    }
+
+    func set(row, col, value) {
+        if row >= 0 and row < this.rows and col >= 0 and col < this.cols {
+            this.data[row][col] = value
+        } else {
+            print("Index out of bounds")
+        }
+    }
+
+    func get(row, col) {
+        if row >= 0 and row < this.rows and col >= 0 and col < this.cols {
+            return this.data[row][col]
+        } else {
+            print("Index out of bounds")
+            return 0
+        }
+    }
+
+    func display() {
+        print("Matrix " + str(this.rows) + "x" + str(this.cols) + ":")
+        for i = 0; i < this.rows; i = i + 1 {
+            row_str = "  ["
+            for j = 0; j < this.cols; j = j + 1 {
+                if j > 0 {
+                    row_str = row_str + ", "
+                }
+                row_str = row_str + str(this.data[i][j])
+            }
+            row_str = row_str + "]"
+            print(row_str)
+        }
+    }
+
+    func add(other_matrix) {
+        if this.rows != other_matrix.rows or this.cols != other_matrix.cols {
+            print("Cannot add matrices of different sizes")
+            return none
+        }
+
+        result = Matrix(this.rows, this.cols)
+        for i = 0; i < this.rows; i = i + 1 {
+            for j = 0; j < this.cols; j = j + 1 {
+                sum = this.get(i, j) + other_matrix.get(i, j)
+                result.set(i, j, sum)
+            }
+        }
+        return result
+    }
+}
+
+# Test matrix class
+m1 = Matrix(3, 3)
+m1.set(0, 0, 1)
+m1.set(0, 1, 2)
+m1.set(1, 0, 3)
+m1.set(1, 1, 4)
+m1.set(2, 2, 5)
+
+print("Matrix 1:")
+m1.display()
+
+m2 = Matrix(3, 3)
+m2.set(0, 0, 10)
+m2.set(0, 1, 20)
+m2.set(1, 1, 30)
+m2.set(2, 2, 40)
+
+print("Matrix 2:")
+m2.display()
+
+m3 = m1.add(m2)
+print("Matrix 1 + Matrix 2:")
+m3.display()
+
+print("")
+
+# ============================================================================
+# Classes with Lambda Integration
+# ============================================================================
+
+print("6. Classes with Lambda Integration")
+print("===================================")
+
+class EventHandler {
+    func init() {
+        this.event_handlers = {}
+        this.event_history = []
+    }
+
+    func register_handler(event_name, handler_func) {
+        this.event_handlers[event_name] = handler_func
+        print("Registered handler for event: " + event_name)
+    }
+
+    func trigger_event(event_name, data) {
+        append(this.event_history, event_name)
+
+        # Check if event handler exists
+        handler_keys = keys(this.event_handlers)
+        handler_exists = false
+        for key in handler_keys {
+            if key == event_name {
+                handler_exists = true
+            }
+        }
+
+        if handler_exists {
+            handler = this.event_handlers[event_name]
+            print("Triggering event: " + event_name)
+            handler(data)
+        } else {
+            print("No handler registered for event: " + event_name)
+        }
+    }
+
+    func get_event_count() {
+        return len(this.event_history)
+    }
+}
+
+# Test event handler with lambdas
+event_system = EventHandler()
+
+# Register lambda handlers
+event_system.register_handler("user_login", user -> {
+    print("User logged in: " + user)
+    print("Welcome back!")
+})
+
+event_system.register_handler("file_uploaded", filename -> {
+    print("File uploaded: " + filename)
+    print("Processing file...")
+})
+
+event_system.register_handler("error_occurred", error_msg -> {
+    print("ERROR: " + error_msg)
+    print("Please contact support")
+})
+
+# Trigger events
+event_system.trigger_event("user_login", "alice@example.com")
+event_system.trigger_event("file_uploaded", "document.pdf")
+event_system.trigger_event("error_occurred", "Database connection failed")
+event_system.trigger_event("unknown_event", "some data")
+
+print("Total events processed:", event_system.get_event_count())
+
+print("")
+
+# ============================================================================
+# Factory Pattern Example
+# ============================================================================
+
+print("7. Factory Pattern Example")
+print("============================")
+
+class ShapeFactory {
+    func init() {
+        this.shapes_created = 0
+    }
+
+    func create_rectangle(width, height) {
+        this.shapes_created = this.shapes_created + 1
+        return Rectangle(width, height)
+    }
+
+    func create_circle(radius) {
+        this.shapes_created = this.shapes_created + 1
+        return Circle(radius)
+    }
+
+    func get_creation_count() {
+        return this.shapes_created
+    }
+}
+
+class Rectangle {
+    func init(width, height) {
+        this.width = width
+        this.height = height
+        this.type = "Rectangle"
+    }
+
+    func area() {
+        return this.width * this.height
+    }
+
+    func perimeter() {
+        return 2 * (this.width + this.height)
+    }
+
+    func describe() {
+        return this.type + " (width: " + str(this.width) + ", height: " + str(this.height) + ")"
+    }
+}
+
+class Circle {
+    func init(radius) {
+        this.radius = radius
+        this.type = "Circle"
+        this.pi = 3.14159
+    }
+
+    func area() {
+        return this.pi * this.radius * this.radius
+    }
+
+    func circumference() {
+        return 2 * this.pi * this.radius
+    }
+
+    func describe() {
+        return this.type + " (radius: " + str(this.radius) + ")"
+    }
+}
+
+# Test factory pattern
+factory = ShapeFactory()
+
+rect = factory.create_rectangle(5, 10)
+circle = factory.create_circle(7)
+
+print(rect.describe())
+print("Area:", rect.area())
+print("Perimeter:", rect.perimeter())
+
+print(circle.describe())
+print("Area:", circle.area())
+print("Circumference:", circle.circumference())
+
+print("Shapes created by factory:", factory.get_creation_count())
+
+print("")
+
+# ============================================================================
+# Member Variables and Nested Object Access
+# ============================================================================
+
+print("8. Member Variables and Nested Object Access")
+print("=============================================")
+
+# Basic member variable examples
+class PersonProfile {
+    func init(name, age) {
+        this.name = name
+        this.age = age
+        this.email = ""
+        this.is_active = true
+        this.preferences = {"theme": "dark", "language": "en"}
+    }
+
+    func set_email(email) {
+        this.email = email
+    }
+
+    func update_preference(key, value) {
+        this.preferences[key] = value
+    }
+
+    func get_info() {
+        return this.name + " (" + str(this.age) + ") - " + this.email
+    }
+
+    func is_profile_complete() {
+        return this.email != "" and this.name != ""
+    }
+}
+
+# Test basic member variables
+profile = PersonProfile("Alice", 30)
+print("Initial profile info:", profile.get_info())
+print("Profile complete?", profile.is_profile_complete())
+
+profile.set_email("alice@example.com")
+print("After setting email:", profile.get_info())
+print("Profile complete?", profile.is_profile_complete())
+
+# Direct member access
+print("Direct name access:", profile.name)
+print("Direct age access:", profile.age)
+print("Direct email access:", profile.email)
+print("Direct is_active access:", profile.is_active)
+
+# Member dictionary access
+print("Theme preference:", profile.preferences["theme"])
+profile.update_preference("theme", "light")
+print("Updated theme preference:", profile.preferences["theme"])
+
+print("")
+
+# ============================================================================
+# Object Composition with Member Variables
+# ============================================================================
+
+print("9. Object Composition with Member Variables")
+print("============================================")
+
+class ContactInfo {
+    func init(street, city, zipcode) {
+        this.street = street
+        this.city = city
+        this.zipcode = zipcode
+        this.country = "USA"
+    }
+
+    func get_full_address() {
+        return this.street + ", " + this.city + " " + str(this.zipcode) + ", " + this.country
+    }
+
+    func update_address(street, city, zipcode) {
+        this.street = street
+        this.city = city
+        this.zipcode = zipcode
+    }
+}
+
+class PersonWithContact {
+    func init(name, age) {
+        this.name = name
+        this.age = age
+        this.contact = ContactInfo("123 Main St", "Anytown", 12345)
+        this.backup_contacts = []
+        this.emergency_contact = ""
+    }
+
+    func set_contact(street, city, zipcode) {
+        this.contact = ContactInfo(street, city, zipcode)
+    }
+
+    func add_backup_contact(street, city, zipcode) {
+        backup = ContactInfo(street, city, zipcode)
+        append(this.backup_contacts, backup)
+    }
+
+    func set_emergency_contact(name, contact_info) {
+        this.emergency_contact = PersonWithContact(name, 0)
+        this.emergency_contact.contact = contact_info
+    }
+
+    func get_main_address() {
+        return this.contact.get_full_address()
+    }
+
+    func get_backup_count() {
+        return len(this.backup_contacts)
+    }
+}
+
+# Test object composition
+person_with_contact = PersonWithContact("Bob", 25)
+print("Main address:", person_with_contact.get_main_address())
+
+person_with_contact.set_contact("456 Oak Ave", "Springfield", 67890)
+print("Updated address:", person_with_contact.get_main_address())
+
+person_with_contact.add_backup_contact("789 Pine St", "Riverside", 54321)
+person_with_contact.add_backup_contact("321 Elm St", "Hometown", 98765)
+print("Backup contacts added. Count:", person_with_contact.get_backup_count())
+
+# Test nested object access
+print("Direct access to street:", person_with_contact.contact.street)
+print("Direct access to city:", person_with_contact.contact.city)
+
+print("")
+
+# ============================================================================
+# Complex Nested Object Structures
+# ============================================================================
+
+print("10. Complex Nested Object Structures")
+print("=====================================")
+
+class Vehicle {
+    func init(make, model, year) {
+        this.make = make
+        this.model = model
+        this.year = year
+        this.engine_running = false
+        this.mileage = 0
+        this.maintenance_log = []
+    }
+
+    func start_engine() {
+        this.engine_running = true
+        print(str(this.year) + " " + this.make + " " + this.model + " engine started")
+    }
+
+    func stop_engine() {
+        this.engine_running = false
+        print(str(this.year) + " " + this.make + " " + this.model + " engine stopped")
+    }
+
+    func drive(miles) {
+        if this.engine_running {
+            this.mileage = this.mileage + miles
+            print("Drove " + str(miles) + " miles. Total mileage: " + str(this.mileage))
+        } else {
+            print("Cannot drive - engine is not running")
+        }
+    }
+
+    func add_maintenance(description) {
+        append(this.maintenance_log, description)
+        print("Added maintenance: " + description)
+    }
+
+    func is_running() {
+        return this.engine_running
+    }
+
+    func get_info() {
+        return str(this.year) + " " + this.make + " " + this.model + " (" + str(this.mileage) + " miles)"
+    }
+}
+
+class VehicleCollection {
+    func init(owner_name) {
+        this.owner_name = owner_name
+        this.vehicles = []
+        this.capacity = 10
+        this.total_value = 0
+    }
+
+    func add_vehicle(vehicle, value) {
+        if len(this.vehicles) < this.capacity {
+            append(this.vehicles, vehicle)
+            this.total_value = this.total_value + value
+            print("Added " + vehicle.make + " " + vehicle.model + " to " + this.owner_name + "'s collection")
+        } else {
+            print("Collection is full!")
+        }
+    }
+
+    func start_all_vehicles() {
+        print("Starting all vehicles in " + this.owner_name + "'s collection:")
+        for vehicle in this.vehicles {
+            vehicle.start_engine()
+        }
+    }
+
+    func get_vehicle_count() {
+        return len(this.vehicles)
+    }
+
+    func get_total_mileage() {
+        total = 0
+        for vehicle in this.vehicles {
+            total = total + vehicle.mileage
+        }
+        return total
+    }
+
+    func get_collection_info() {
+        return this.owner_name + "'s collection: " + str(len(this.vehicles)) + " vehicles, $" + str(this.total_value) + " total value"
+    }
+}
+
+# Test complex nested structures
+collection = VehicleCollection("John's Garage")
+car1 = Vehicle("Toyota", "Camry", 2020)
+car2 = Vehicle("Honda", "Civic", 2019)
+truck = Vehicle("Ford", "F-150", 2021)
+
+collection.add_vehicle(car1, 25000)
+collection.add_vehicle(car2, 22000)
+collection.add_vehicle(truck, 35000)
+
+print("Collection info:", collection.get_collection_info())
+print("Vehicle count:", collection.get_vehicle_count())
+
+collection.start_all_vehicles()
+
+# Test driving and mileage
+car1.drive(100)
+car2.drive(50)
+truck.drive(200)
+
+print("Total mileage across all vehicles:", collection.get_total_mileage())
+
+# Test maintenance logging
+car1.add_maintenance("Oil change")
+car1.add_maintenance("Tire rotation")
+truck.add_maintenance("Brake inspection")
+
+# Test nested member access
+first_vehicle = collection.vehicles[0]
+print("First vehicle make:", first_vehicle.make)
+print("First vehicle running?", first_vehicle.is_running())
+second_vehicle = collection.vehicles[1]
+print("Second vehicle mileage:", second_vehicle.mileage)
+
+print("")
+
+# ============================================================================
+# Member Variable Edge Cases and Patterns
+# ============================================================================
+
+print("11. Member Variable Edge Cases and Patterns")
+print("============================================")
+
+# Class demonstrating various member access patterns
+class TestNesting {
+    func init() {
+        this.message = "Hello from TestNesting"
+        this.data = {"values": [1, 2, 3], "config": {"enabled": true}}
+        this.nested_obj = VehicleCollection("Test Collection")
+    }
+
+    func print_hello() {
+        print("hello from method")
+    }
+
+    func get_message() {
+        return this.message
+    }
+
+    func modify_nested_data() {
+        # Modify nested dictionary and list
+        this.data["values"][0] = 999
+        this.data["config"]["enabled"] = false
+        print("Modified nested data")
+    }
+
+    func access_deep_nested() {
+        # Access deeply nested object members
+        if len(this.nested_obj.vehicles) > 0 {
+            first_vehicle = this.nested_obj.vehicles[0]
+            return first_vehicle.make
+        }
+        return "No vehicles"
+    }
+}
+
+class ContainerTest {
+    func init() {
+        this.test = TestNesting()
+        this.counter = 0
+        this.metadata = {"created": "2024", "version": 1.0}
+    }
+
+    func increment_counter() {
+        this.counter = this.counter + 1
+    }
+
+    func get_counter() {
+        return this.counter
+    }
+
+    func test_all_access_patterns() {
+        print("Testing various member access patterns:")
+
+        # Direct method call on nested object
+        this.test.print_hello()
+
+        # Method call returning value from nested object
+        msg = this.test.get_message()
+        print("Message from nested object:", msg)
+
+        # Direct member access on nested object
+        # print("Direct access to nested message:", this.test.message)
+
+        # Complex nested data access
+        # print("Nested data values:", this.test.data["values"])
+        # print("Nested config enabled:", this.test.data["config"]["enabled"])
+
+        # Modify nested data
+        # this.test.modify_nested_data()
+        # print("After modification - values:", this.test.data["values"])
+        # print("After modification - enabled:", this.test.data["config"]["enabled"])
+
+        # Test counter operations
+        this.increment_counter()
+        this.increment_counter()
+        print("Counter value:", this.get_counter())
+    }
+}
+
+# Test all patterns
+container = ContainerTest()
+container.test_all_access_patterns()
+
+# Add a vehicle to test deep nesting
+# test_car = Vehicle("Test", "Model", 2023)
+# container.test.nested_obj.add_vehicle(test_car, 30000)
+# deep_access = container.test.access_deep_nested()
+# print("Deep nested access result:", deep_access)
+
+print("")
+
+# ============================================================================
+# Advanced Member Access and Chaining
+# ============================================================================
+
+print("12. Advanced Member Access and Chaining")
+print("========================================")
+
+class DataContainer {
+    func init() {
+        this.items = [
+            {"name": "item1", "value": 100, "tags": ["important", "urgent"]},
+            {"name": "item2", "value": 200, "tags": ["normal", "pending"]},
+            {"name": "item3", "value": 300, "tags": ["low", "completed"]}
+        ]
+        this.metadata = {
+            "total_count": 3,
+            "categories": ["work", "personal", "urgent"],
+            "settings": {"auto_save": true, "notifications": false}
+        }
+        this.processors = [
+            PersonProfile("Processor1", 30),
+            PersonProfile("Processor2", 25)
+        ]
+    }
+
+    func get_item_name(index) {
+        return this.items[index]["name"]
+    }
+
+    func get_processor_info(index) {
+        return this.processors[index].get_info()
+    }
+}
+
+class ChainTester {
+    func init() {
+        this.container = DataContainer()
+        this.backup_data = {
+            "containers": [DataContainer(), DataContainer()],
+            "config": {"max_items": 10, "separators": {"line": "-" * 30, "section": "=" * 40}}
+        }
+    }
+
+    func test_chaining_patterns() {
+        print("Testing advanced chaining patterns:")
+
+        # Pattern 1: this.member.list[index].property
+        item_name = this.container.items[1]["name"]
+        print("Item name via chaining:", item_name)
+
+        # Pattern 2: this.member.list[index].method()
+        processor_info = this.container.processors[0].get_info()
+        print("Processor info via chaining:", processor_info)
+
+        # Pattern 3: this.dict[key].list[index].member
+        category = this.backup_data["containers"][0].metadata["categories"][1]
+        print("Category via deep chaining:", category)
+
+        # Pattern 4: String multiplication in chained context
+        separator = this.backup_data["config"]["separators"]["line"]
+        print("Separator from chained access:", separator)
+
+        # Pattern 5: Assignment with chaining
+        print("Before assignment:", this.container.items[0]["value"])
+        this.container.items[0]["value"] = 999
+        print("After assignment:", this.container.items[0]["value"])
+
+        # Pattern 6: Method call on indexed object
+        this.container.processors[1].set_email("processor2@example.com")
+        updated_info = this.container.processors[1].get_info()
+        print("Updated processor info:", updated_info)
+
+        # Pattern 7: Complex chained assignment
+        this.backup_data["containers"][1].metadata["settings"]["auto_save"] = false
+        print("Complex assignment completed")
+    }
+
+    func demonstrate_all_patterns() {
+        print("Demonstrating all supported chaining patterns:")
+
+        # Show that any combination of . and [] works
+        examples = [
+            "obj.member[index]",
+            "obj[key].member",
+            "obj.list[index].method()",
+            "obj[key][index].property",
+            "obj.member[index].submember[key]"
+        ]
+
+        for example in examples {
+            print("✓ Supported: " + example)
+        }
+
+        # Real examples with our data
+        print("\nReal examples:")
+        print("✓ container.items[0]['name'] =", this.container.items[0]["name"])
+        print("✓ container.processors[1].name =", this.container.processors[1].name)
+        print("✓ backup_data['containers'][0].metadata['total_count'] =",
+              this.backup_data["containers"][0].metadata["total_count"])
+    }
+}
+
+# Test all chaining functionality
+tester = ChainTester()
+tester.test_chaining_patterns()
+print("")
+tester.demonstrate_all_patterns()
+
+print("")
+
+# ============================================================================
+# Class Methods with Const Parameters
+# ============================================================================
+
+print("8. Class Methods with Const Parameters")
+print("=======================================")
+
+# Class demonstrating const parameters in methods
+class DataProcessor {
+    func init(name) {
+        this.name = name
+        this.processed_count = 0
+    }
+
+    # Method with single const parameter
+    func process_item(const item) {
+        print("Processing item:", item, "in processor:", this.name)
+        try {
+            item = "modified"  # Should fail
+            print("ERROR: const parameter was modified!")
+        } catch e {
+            print("✓ Const parameter protected:", e)
+        }
+        this.processed_count += 1
+        return "Processed: " + item
+    }
+
+    # Method with multiple const parameters
+    func combine_data(const source1, const source2, const operation) {
+        print("Combining data - source1:", source1, "source2:", source2, "operation:", operation)
+
+        try {
+            source1 = "changed1"  # Should fail
+            print("ERROR: first const parameter modified!")
+        } catch e {
+            print("✓ First const parameter protected:", e)
+        }
+
+        try {
+            source2 = "changed2"  # Should fail
+            print("ERROR: second const parameter modified!")
+        } catch e {
+            print("✓ Second const parameter protected:", e)
+        }
+
+        if operation == "concat" {
+            return source1 + " + " + source2
+        } else if operation == "merge" {
+            return source1 + "_" + source2
+        }
+        return source1
+    }
+
+    # Method with mixed const and regular parameters
+    func transform_data(const input, scale_factor, const config) {
+        print("Transforming data - input:", input, "scale:", scale_factor)
+
+        # Cannot modify const parameters
+        try {
+            input = "modified_input"
+            print("ERROR: const input modified!")
+        } catch e {
+            print("✓ Const input protected:", e)
+        }
+
+        try {
+            config = {"new": "config"}
+            print("ERROR: const config modified!")
+        } catch e {
+            print("✓ Const config protected:", e)
+        }
+
+        # Can modify regular parameter
+        scale_factor = scale_factor * 2
+        print("✓ Modified scale_factor to:", scale_factor)
+
+        return input + " (scaled by " + str(scale_factor) + ")"
+    }
+
+    func get_stats() {
+        return {"name": this.name, "processed": this.processed_count}
+    }
+}
+
+# Class with async methods and const parameters
+class AsyncDataProcessor {
+    func init(name) {
+        this.name = name
+        this.async_count = 0
+    }
+
+    # Async method with const parameters
+    async func async_process(const data, const settings) {
+        print("Async processing data:", data, "with settings:", settings)
+
+        try {
+            data = "async_modified"  # Should fail
+            print("ERROR: async const data modified!")
+        } catch e {
+            print("✓ Async const data protected:", e)
+        }
+
+        try {
+            settings = {"changed": true}  # Should fail
+            print("ERROR: async const settings modified!")
+        } catch e {
+            print("✓ Async const settings protected:", e)
+        }
+
+        this.async_count += 1
+        return "Async processed: " + data
+    }
+
+    # Mixed async const and regular parameters
+    async func async_transform(const base, multiplier) {
+        print("Async transform - base:", base, "multiplier:", multiplier)
+
+        try {
+            base = "modified_base"
+            print("ERROR: async const base modified!")
+        } catch e {
+            print("✓ Async const base protected:", e)
+        }
+
+        # Can modify regular parameter
+        multiplier = multiplier * 3
+        print("✓ Modified async multiplier to:", multiplier)
+
+        return base + " (async multiplied by " + str(multiplier) + ")"
+    }
+
+    func get_async_count() {
+        return this.async_count
+    }
+}
+
+# Test class methods with const parameters
+print("\n--- Testing class methods with const parameters ---")
+
+# Test synchronous methods
+processor = DataProcessor("SyncProcessor")
+
+result1 = processor.process_item("test_data")
+print("Process result:", result1)
+
+result2 = processor.combine_data("data1", "data2", "concat")
+print("Combine result:", result2)
+
+result3 = processor.transform_data("input", 5, {"mode": "production"})
+print("Transform result:", result3)
+
+stats = processor.get_stats()
+print("Processor stats:", stats)
+
+# Test asynchronous methods
+async_processor = AsyncDataProcessor("AsyncProcessor")
+
+async func test_async_methods() {
+    print("\nTesting async methods with const parameters...")
+
+    async_result1 = await async_processor.async_process("async_data", {"timeout": 30})
+    print("Async process result:", async_result1)
+
+    async_result2 = await async_processor.async_transform("base_value", 4)
+    print("Async transform result:", async_result2)
+
+    async_count = async_processor.get_async_count()
+    print("Async processor count:", async_count)
+
+    return [async_result1, async_result2]
+}
+
+async_results = await test_async_methods()
+print("Final async method results:", async_results)
+
+print("\n--- Testing Spawn with Method Calls ---")
+
+# NEW: Test spawn with async method calls
+print("\nTesting spawn with async method calls...")
+
+# Spawn async method calls for parallel execution
+promise1 = spawn async_processor.async_process("spawn_data_1", {"mode": "parallel"})
+promise2 = spawn async_processor.async_transform("spawn_base", 2)
+
+# Create another processor for more parallel tests
+processor2 = AsyncDataProcessor("SecondProcessor")
+promise3 = spawn processor2.async_process("spawn_data_2", {"mode": "test"})
+
+print("All async method calls spawned for parallel execution...")
+
+# Await the spawned method calls
+spawn_result1 = await promise1
+spawn_result2 = await promise2
+spawn_result3 = await promise3
+
+print("Spawn results:")
+print("- Spawn result 1:", spawn_result1)
+print("- Spawn result 2:", spawn_result2)
+print("- Spawn result 3:", spawn_result3)
+
+# Test Promise.all with spawned method calls
+print("\nTesting Promise.all with spawned method calls...")
+all_promises = [
+    spawn async_processor.async_process("all_data_1", {"batch": 1}),
+    spawn async_processor.async_process("all_data_2", {"batch": 2}),
+    spawn processor2.async_transform("all_base", 5)
+]
+
+all_spawn_results = await all(all_promises)
+print("Promise.all spawn results:", all_spawn_results)
+
+# Check final async counts
+final_count1 = async_processor.get_async_count()
+final_count2 = processor2.get_async_count()
+print("Final async counts - processor1:", final_count1, "processor2:", final_count2)
+
+print("")
+
+print("")
+print("=== Classes and Objects Demo Complete ===")

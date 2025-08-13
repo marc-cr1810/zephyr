@@ -1,0 +1,411 @@
+# Zephyr Async Class Methods Example
+# This file demonstrates async methods in classes with const parameters and spawn functionality
+
+print("=== Zephyr Async Class Methods Demo ===")
+print("")
+
+# ============================================================================
+# Basic Async Class Methods
+# ============================================================================
+
+print("1. Basic Async Class Methods")
+print("============================")
+
+# Simple class with async methods
+class AsyncGreeter {
+    func init(name) {
+        this.name = name
+        this.greeting_count = 0
+    }
+
+    # Basic async method with const parameter
+    async func async_greet(const message) {
+        print("Async greeting:", message, "from", this.name)
+
+        # Const parameter protection works in async methods
+        try {
+            message = "modified"  # Will fail
+        } catch e {
+            print("✓ Const parameter protected:", e)
+        }
+
+        this.greeting_count += 1
+        return "Async: Hello, " + this.name + " - " + message
+    }
+
+    # Regular method for comparison
+    func sync_greet(const message) {
+        print("Sync greeting:", message, "from", this.name)
+
+        try {
+            message = "modified"  # Will fail
+        } catch e {
+            print("✓ Const parameter protected:", e)
+        }
+
+        this.greeting_count += 1
+        return "Sync: Hello, " + this.name + " - " + message
+    }
+
+    func get_greeting_count() {
+        return this.greeting_count
+    }
+}
+
+# Test basic async methods
+greeter = AsyncGreeter("AsyncBot")
+
+# Direct await call
+async_result = await greeter.async_greet("Welcome!")
+print("Async result:", async_result)
+
+# Compare with sync method
+sync_result = greeter.sync_greet("Hello!")
+print("Sync result:", sync_result)
+
+print("Greeting count:", greeter.get_greeting_count())
+print("")
+
+# ============================================================================
+# Spawn with Class Methods
+# ============================================================================
+
+print("2. Spawn with Class Methods")
+print("===========================")
+
+# Test spawn with both async and sync methods
+print("Testing spawn with async method:")
+async_promise = spawn greeter.async_greet("Spawned async greeting")
+spawned_async_result = await async_promise
+print("Spawned async result:", spawned_async_result)
+
+print("Testing spawn with sync method:")
+sync_promise = spawn greeter.sync_greet("Spawned sync greeting")
+spawned_sync_result = await sync_promise
+print("Spawned sync result:", spawned_sync_result)
+
+print("Final greeting count:", greeter.get_greeting_count())
+print("")
+
+# ============================================================================
+# Multiple Const Parameters in Async Methods
+# ============================================================================
+
+print("3. Multiple Const Parameters in Async Methods")
+print("==============================================")
+
+class DataProcessor {
+    func init(processor_name) {
+        this.processor_name = processor_name
+        this.operations_count = 0
+    }
+
+    # Async method with multiple const parameters
+    async func process_multiple(const source, const target, const operation) {
+        print("Processing - source:", source, "target:", target, "operation:", operation)
+        print("Using processor:", this.processor_name)
+
+        # Test all const parameters
+        try {
+            source = "modified_source"
+            print("ERROR: source const modified!")
+        } catch e {
+            print("✓ Source const protected:", e)
+        }
+
+        try {
+            target = "modified_target"
+            print("ERROR: target const modified!")
+        } catch e {
+            print("✓ Target const protected:", e)
+        }
+
+        try {
+            operation = "modified_operation"
+            print("ERROR: operation const modified!")
+        } catch e {
+            print("✓ Operation const protected:", e)
+        }
+
+        this.operations_count += 1
+
+        if operation == "copy" {
+            return "Copied " + source + " to " + target
+        } else if operation == "move" {
+            return "Moved " + source + " to " + target
+        } else if operation == "merge" {
+            return "Merged " + source + " with " + target
+        }
+        return "Unknown operation"
+    }
+
+    # Mixed const and regular parameters
+    async func transform_data(const input_data, scale_factor, const config) {
+        print("Transforming data:", input_data, "scale:", scale_factor, "config:", config)
+
+        # Const parameter protection
+        try {
+            input_data = "modified_input"
+            print("ERROR: input_data const modified!")
+        } catch e {
+            print("✓ Input data const protected:", e)
+        }
+
+        try {
+            config = {"changed": true}
+            print("ERROR: config const modified!")
+        } catch e {
+            print("✓ Config const protected:", e)
+        }
+
+        # Regular parameter can be modified
+        original_scale = scale_factor
+        scale_factor = scale_factor * 2.5
+        print("✓ Modified scale_factor from", original_scale, "to", scale_factor)
+
+        this.operations_count += 1
+        return input_data + " (transformed by " + str(scale_factor) + ")"
+    }
+
+    func get_operations_count() {
+        return this.operations_count
+    }
+}
+
+# Test multiple const parameters
+processor = DataProcessor("MainProcessor")
+
+# Test with direct await
+multi_result = await processor.process_multiple("file1.txt", "file2.txt", "copy")
+print("Multi-const result:", multi_result)
+
+# Test mixed parameters
+mixed_result = await processor.transform_data("dataset.csv", 1.5, {"format": "json"})
+print("Mixed params result:", mixed_result)
+
+print("Operations count:", processor.get_operations_count())
+print("")
+
+# ============================================================================
+# Parallel Execution with Spawned Method Calls
+# ============================================================================
+
+print("4. Parallel Execution with Spawned Method Calls")
+print("================================================")
+
+async func parallel_method_test() {
+    print("Starting parallel method execution test...")
+
+    # Create multiple processor instances
+    proc1 = DataProcessor("Processor1")
+    proc2 = DataProcessor("Processor2")
+    proc3 = DataProcessor("Processor3")
+
+    # Spawn multiple method calls for parallel execution
+    promise1 = spawn proc1.process_multiple("data1", "output1", "copy")
+    promise2 = spawn proc2.process_multiple("data2", "output2", "move")
+    promise3 = spawn proc3.transform_data("dataset1", 2.0, {"quality": "high"})
+    promise4 = spawn proc1.transform_data("dataset2", 3.0, {"quality": "medium"})
+
+    print("All method calls spawned. Running in parallel...")
+    print("This message appears while methods execute concurrently")
+
+    # Await all results
+    result1 = await promise1
+    result2 = await promise2
+    result3 = await promise3
+    result4 = await promise4
+
+    print("All parallel method calls completed:")
+    print("- " + result1)
+    print("- " + result2)
+    print("- " + result3)
+    print("- " + result4)
+
+    # Check operation counts
+    count1 = proc1.get_operations_count()
+    count2 = proc2.get_operations_count()
+    count3 = proc3.get_operations_count()
+
+    print("Operation counts:")
+    print("- Processor1:", count1, "operations")
+    print("- Processor2:", count2, "operations")
+    print("- Processor3:", count3, "operations")
+
+    return [result1, result2, result3, result4]
+}
+
+parallel_results = await parallel_method_test()
+print("Parallel method test completed\n")
+
+# ============================================================================
+# Promise.all with Async Class Methods
+# ============================================================================
+
+print("5. Promise.all with Async Class Methods")
+print("=======================================")
+
+# Advanced class for Promise.all testing
+class BatchProcessor {
+    func init(batch_name) {
+        this.batch_name = batch_name
+        this.items_processed = 0
+    }
+
+    async func process_item(const item, const priority) {
+        print("Processing item:", item, "priority:", priority, "in batch:", this.batch_name)
+
+        # Const parameter protection
+        try {
+            item = "modified_item"
+        } catch e {
+            print("✓ Item const protected:", e)
+        }
+
+        try {
+            priority = "modified_priority"
+        } catch e {
+            print("✓ Priority const protected:", e)
+        }
+
+        this.items_processed += 1
+        return "Item " + item + " (priority: " + priority + ") processed by " + this.batch_name
+    }
+
+    async func finalize_batch(const batch_config) {
+        print("Finalizing batch:", this.batch_name, "with config:", batch_config)
+
+        try {
+            batch_config = {"changed": true}
+        } catch e {
+            print("✓ Batch config const protected:", e)
+        }
+
+        return "Batch " + this.batch_name + " finalized with " + str(this.items_processed) + " items"
+    }
+
+    func get_processed_count() {
+        return this.items_processed
+    }
+}
+
+async func promise_all_method_test() {
+    print("Starting Promise.all with method calls test...")
+
+    # Create multiple batch processors
+    batch1 = BatchProcessor("Batch-A")
+    batch2 = BatchProcessor("Batch-B")
+    batch3 = BatchProcessor("Batch-C")
+
+    # Create array of spawned method call promises
+    all_promises = [
+        spawn batch1.process_item("item1", "high"),
+        spawn batch2.process_item("item2", "medium"),
+        spawn batch3.process_item("item3", "low"),
+        spawn batch1.process_item("item4", "high"),
+        spawn batch2.finalize_batch({"mode": "fast"}),
+        spawn batch3.finalize_batch({"mode": "thorough"})
+    ]
+
+    print("All method calls spawned. Waiting for Promise.all...")
+
+    # Wait for all promises to resolve
+    all_results = await all(all_promises)
+
+    print("Promise.all completed! Results:")
+    for i = 0; i < len(all_results); i += 1 {
+        print("- Result " + str(i + 1) + ":", all_results[i])
+    }
+
+    # Check final counts
+    count1 = batch1.get_processed_count()
+    count2 = batch2.get_processed_count()
+    count3 = batch3.get_processed_count()
+
+    print("Final processing counts:")
+    print("- Batch-A processed:", count1, "items")
+    print("- Batch-B processed:", count2, "items")
+    print("- Batch-C processed:", count3, "items")
+
+    return all_results
+}
+
+promise_all_results = await promise_all_method_test()
+print("Promise.all method test completed\n")
+
+# ============================================================================
+# Mixed Function and Method Call Async Patterns
+# ============================================================================
+
+print("6. Mixed Function and Method Call Patterns")
+print("===========================================")
+
+# Standalone async function for mixing
+async func standalone_processor(const data) {
+    print("Standalone processing:", data)
+
+    try {
+        data = "modified"
+    } catch e {
+        print("✓ Standalone const protected:", e)
+    }
+
+    return "Standalone result: " + data
+}
+
+async func mixed_async_test() {
+    print("Testing mixed function and method call patterns...")
+
+    processor = DataProcessor("MixedProcessor")
+
+    # Mix function calls and method calls in Promise.all
+    mixed_promises = [
+        spawn standalone_processor("func_data_1"),                    # Function call
+        spawn processor.process_multiple("src", "dest", "merge"),     # Method call
+        spawn standalone_processor("func_data_2"),                    # Function call
+        spawn processor.transform_data("mixed_data", 4.0, {"type": "mixed"}) # Method call
+    ]
+
+    print("Mixed function and method calls spawned...")
+
+    mixed_results = await all(mixed_promises)
+
+    print("Mixed results:")
+    for i = 0; i < len(mixed_results); i += 1 {
+        result_type = i % 2 == 0 ? "Function" : "Method"
+        print("- " + result_type + " result:", mixed_results[i])
+    }
+
+    return mixed_results
+}
+
+mixed_results = await mixed_async_test()
+print("Mixed async test completed\n")
+
+print("7. Final Verification")
+print("=====================")
+# Create final test lambda
+final_lambda = async x -> x * 5
+final_check1 = await final_lambda(20)
+final_processor = DataProcessor("FinalProcessor")
+final_check2 = await final_processor.process_multiple("final_src", "final_dest", "copy")
+print("Final verification lambda result:", final_check1)
+print("Final verification method result:", final_check2)
+
+print("")
+
+print("")
+print("=== Async Class Methods Demo Complete ===")
+print("✅ All async class method patterns demonstrated:")
+print("  • Basic async methods with const parameters")
+print("  • Multiple const parameters in async methods")
+print("  • Mixed const and regular parameters")
+print("  • Spawn with async method calls")
+print("  • Spawn with sync method calls")
+print("  • Promise.all with spawned method calls")
+print("  • Mixed function and method call async patterns")
+print("  • Complete const parameter protection in all contexts")
+print("  • Class member variable access and modification")
+print("  • Parallel execution of object-oriented async code")
+print("")
+print("🎯 Key Achievement: Complete async programming support for OOP!")
