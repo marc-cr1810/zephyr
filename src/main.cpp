@@ -154,8 +154,9 @@ auto process_code(const std::string& code_to_process, zephyr::interpreter_t& int
             if (auto expr_stmt = dynamic_cast<zephyr::expression_statement_t*>(program_node->statements[0].get())) 
             {
                 std::shared_ptr<zephyr::object_t> result = interpreter.get_current_result();
-                if (result) 
-                { // Only print if there's a result (not nullptr)
+                // Only print if there's a result and it's not a NoneObject
+                if (result && result->get_type()->get_name() != "none") 
+                { 
                     std::cout << result->to_string() << std::endl;
                 }
             }
@@ -214,8 +215,9 @@ auto process_code_repl(const std::string& code_to_process, zephyr::interpreter_t
             if (auto expr_stmt = dynamic_cast<zephyr::expression_statement_t*>(program_node->statements[0].get())) 
             {
                 std::shared_ptr<zephyr::object_t> result = interpreter.get_current_result();
-                if (result) 
-                { // Only print if there's a result (not nullptr)
+                // Only print if there's a result and it's not a NoneObject
+                if (result && result->get_type()->get_name() != "none") 
+                { 
                     std::cout << result->to_string() << std::endl;
                 }
             }
