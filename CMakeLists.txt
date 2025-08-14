@@ -13,3 +13,10 @@ include_directories(include)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(zephyr ${SOURCES})
+
+add_custom_command(TARGET zephyr POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    $<TARGET_FILE:zephyr>
+    ${CMAKE_SOURCE_DIR}/bin/zephyr
+    COMMENT "Copying zephyr executable to project bin directory"
+)

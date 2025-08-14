@@ -25,5 +25,7 @@ This directory contains categorized documentation and annotated code samples for
 - [Async Class Methods](19_async_class_methods.md)
 - [Explicit Typing](20_explicit_typing.md)
 - [Exit Function](21_exit_function.md)
+- [Interfaces](22_interfaces.md)
+- [Built-in Functions](23_built_in_functions.md)
 
 See each file for detailed explanations and annotated code samples.

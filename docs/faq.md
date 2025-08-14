@@ -12,7 +12,7 @@ const pi = 3.14159
 ## How do I run a script?
 Build the interpreter and run:  
 ```bash
-./build/zephyr your_script.zephyr
+./bin/zephyr your_script.zephyr
 ```
 
 ## How do I handle errors?

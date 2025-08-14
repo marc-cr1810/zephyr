@@ -33,12 +33,12 @@ Zephyr is a concise, expressive scripting language designed for rapid developmen
 To run a Zephyr script, use the interpreter and provide the path to your `.zephyr` file:
 
 ```bash
-./build/zephyr path/to/script.zephyr
+./bin/zephyr path/to/script.zephyr
 ```
 
 **Example:**
 ```bash
-./build/zephyr examples/01_basic_features.zephyr
+./bin/zephyr examples/01_basic_features.zephyr
 ```
 
 You can run any example or your own script this way.
@@ -71,7 +71,7 @@ print("Hello, Zephyr!")
 
 Save this as `hello.zephyr` and run:
 ```bash
-./build/zephyr hello.zephyr
+./bin/zephyr hello.zephyr
 ```
 
 ---

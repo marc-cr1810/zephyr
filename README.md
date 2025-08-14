@@ -42,10 +42,10 @@ cd zephyr_lang
 make
 
 # Run the REPL
-./build/zephyr
+./bin/zephyr
 
 # Run a script file
-./build/zephyr examples/01_basic_features.zephyr
+./bin/zephyr examples/01_basic_features.zephyr
 ```
 
 ### System Requirements
@@ -219,9 +219,9 @@ Run the comprehensive test suite to verify all language features:
 bash test_all_examples.sh
 
 # Run individual examples
-./build/zephyr examples/01_basic_features.zephyr
-./build/zephyr examples/13_async_await_basic.zephyr
-./build/zephyr examples/20_explicit_typing.zephyr
+./bin/zephyr examples/01_basic_features.zephyr
+./bin/zephyr examples/13_async_await_basic.zephyr
+./bin/zephyr examples/20_explicit_typing.zephyr
 ```
 
 ## Development Tools

@@ -252,6 +252,20 @@ These files provide complete, organized demonstrations of Zephyr features with c
 - Real-world scenarios requiring immediate program termination
 - Production-level error handling and monitoring integration
 
+### 22_interfaces.zephyr
+**Defining and implementing interfaces for contract-based programming**
+- Basic interface definition with method signatures
+- Class implementation of one or more interfaces
+- Using interfaces as type annotations for variables and function parameters
+- Multiple interface implementation by a single class
+- Error handling for incomplete or incorrect interface implementations
+
+### 23_built_in_functions.zephyr
+**Comprehensive demonstration of all built-in functions**
+- Detailed examples for print, len, input, str, int, float, append, pop, keys, values, type, map, filter, reduce, enumerate, zip, and all.
+- Practical use cases and common scenarios for each function.
+- Demonstrates type conversions, list/dictionary manipulations, and asynchronous operations.
+
 ### 09_string_operations.zephyr
 **Advanced string manipulation and formatting**
 - String concatenation and basic operations
@@ -312,7 +326,11 @@ Follow this recommended sequence to master Zephyr:
 
 17. **Study `21_exit_function.zephyr`** - Learn proper error handling with exit codes and graceful shutdown patterns
 
-18. **Apply knowledge with `08_comprehensive_examples.zephyr`** - See real-world applications and complete examples
+18. **Explore `22_interfaces.zephyr`** - Understand how to define and implement interfaces for contract-based programming
+
+19. **Master `23_built_in_functions.zephyr`** - Learn the usage of all built-in functions with practical examples
+
+20. **Apply knowledge with `08_comprehensive_examples.zephyr`** - See real-world applications and complete examples
 
 ## Key Features Demonstrated
 
@@ -389,23 +407,26 @@ To run any example file, use the Zephyr interpreter:
 
 ```bash
 # Run individual example files
-./build/zephyr examples/01_basic_features.zephyr
-./build/zephyr examples/02_data_structures.zephyr
-./build/zephyr examples/03_functions_and_lambdas.zephyr
+./bin/zephyr examples/01_basic_features.zephyr
+./bin/zephyr examples/02_data_structures.zephyr
+./bin/zephyr examples/03_functions_and_lambdas.zephyr
 
 # Run async/await examples
-./build/zephyr examples/13_async_await_basic.zephyr
-./build/zephyr examples/14_async_parallel.zephyr
-./build/zephyr examples/15_async_promise_all.zephyr
+./bin/zephyr examples/13_async_await_basic.zephyr
+./bin/zephyr examples/14_async_parallel.zephyr
+./bin/zephyr examples/15_async_promise_all.zephyr
 
 # Run specific examples
-./build/zephyr examples/05_advanced_indexing.zephyr
-./build/zephyr examples/09_string_operations.zephyr
-./build/zephyr examples/10_compound_assignment.zephyr
-./build/zephyr examples/11_compound_assignment_comprehensive.zephyr
-./build/zephyr examples/12_lambda_dictionaries_nested.zephyr
+./bin/zephyr examples/05_advanced_indexing.zephyr
+./bin/zephyr examples/09_string_operations.zephyr
+./bin/zephyr examples/10_compound_assignment.zephyr
+./bin/zephyr examples/11_compound_assignment_comprehensive.zephyr
+./bin/zephyr examples/12_lambda_dictionaries_nested.zephyr
 
-./build/zephyr examples/08_comprehensive_examples.zephyr
+./bin/zephyr examples/08_comprehensive_examples.zephyr
+
+# Run interface example
+./bin/zephyr examples/22_interfaces.zephyr
 ```
 
 ## File Organization Benefits

@@ -45,6 +45,7 @@ examples=(
     "20_explicit_typing.zephyr"
     "21_exit_function.zephyr"
     "22_interfaces.zephyr"
+    "23_built_in_functions.zephyr"
 )
 
 # Counters
@@ -61,12 +62,12 @@ for example in "${examples[@]}"; do
     echo -n "Testing $example... "
 
     # Run the example and capture output
-    if ./build/zephyr "$example_path" > /dev/null 2>&1; then
+    if ./bin/zephyr "$example_path" > /dev/null 2>&1; then
         echo "✅ PASSED"
         ((passed_tests++))
     else
         echo "❌ FAILED"
-        echo "   Error running: ./build/zephyr $example_path"
+        echo "   Error running: ./bin/zephyr $example_path"
         ((failed_tests++))
     fi
 done

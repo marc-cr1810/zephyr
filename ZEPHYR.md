@@ -1550,7 +1550,7 @@ This will create an executable named `zephyr` in the `build` directory.
 To run a Zephyr script, pass the path to the script file as a command-line argument to the interpreter:
 
 ```bash
-./build/zephyr your_script.zephyr
+./bin/zephyr your_script.zephyr
 ```
 
 The project includes comprehensive example scripts in the `examples/` directory that demonstrate all language features:

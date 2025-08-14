@@ -1,0 +1,571 @@
+# Zephyr Built-in Functions Example
+# This file demonstrates the usage of all built-in functions in Zephyr.
+
+print("=== Zephyr Built-in Functions Demo ===")
+print("")
+
+# ============================================================================
+# 1. print(value1, value2, ...)
+# ============================================================================
+
+print("1. print(value1, value2, ...)")
+print("==============================")
+
+# Prints the string representation of one or more values to the console.
+# Values are separated by spaces, and a newline character is added at the end.
+
+print("Hello, Zephyr!")
+
+x = 10
+y = "Built-in Functions"
+print("Value of x:", x, "and y:", y)
+
+my_list = [1, 2, 3, "test", true]
+print("List content:", my_list)
+
+print("")
+
+# ============================================================================
+# 2. len(collection)
+# ============================================================================
+
+print("2. len(collection)")
+print("====================")
+
+# Returns the number of items in a string, list, or dictionary.
+
+my_string = "Zephyr Language"
+print("Length of string '" + my_string + "':", len(my_string)) # Output: 15
+
+my_numbers = [10, 20, 30, 40, 50]
+print("Number of elements in list:", len(my_numbers)) # Output: 5
+
+my_dict = {"name": "Alice", "age": 30, "city": "New York"}
+print("Number of key-value pairs in dictionary:", len(my_dict)) # Output: 3
+
+# Attempting to use len() on an unsupported type will cause a runtime error.
+# try {
+#     len(123) # This would cause a runtime error
+# } catch e {
+#     print("Caught expected error for len(123):", e)
+# }
+
+print("")
+
+# ============================================================================
+# 3. input(prompt)
+# ============================================================================
+
+print("3. input(prompt)")
+print("==================")
+
+# Reads a single line of text from standard input. An optional prompt string
+# can be displayed to the user before reading input. The function returns
+# the read line as a string.
+
+# Note: This will pause execution and wait for user input in the console.
+# user_name = input("Please enter your name: ")
+# print("Hello, " + user_name + "! Welcome to the demo.")
+
+# user_age_str = input("How old are you? ")
+# user_age = int(user_age_str) # Convert input string to integer
+# print("You are " + str(user_age) + " years old.")
+
+print("Input function demonstration skipped for automated testing. Uncomment to try.")
+
+print("")
+
+# ============================================================================
+# 4. str(value)
+# ============================================================================
+
+print("4. str(value)")
+print("===============")
+
+# Converts any Zephyr value to its string representation. Useful for explicit
+# type conversion, especially when concatenating values of different types with strings.
+
+num_val = 12345
+str_num_val = str(num_val)
+print("Number " + str(num_val) + " converted to string: " + str_num_val + " (Type: " + type(str_num_val) + ")")
+
+bool_val = true
+str_bool_val = str(bool_val)
+print("Boolean " + str(bool_val) + " converted to string: " + str_bool_val + " (Type: " + type(str_bool_val) + ")")
+
+list_val = ["a", 1, false]
+str_list_val = str(list_val)
+print("List " + str(list_val) + " converted to string: " + str_list_val + " (Type: " + type(str_list_val) + ")")
+
+print("")
+
+# ============================================================================
+# 5. int(value)
+# ============================================================================
+
+print("5. int(value)")
+print("===============")
+
+# Converts a given value to an integer. Supports floats, strings, and booleans.
+
+float_to_int = int(3.99)
+print("Float 3.99 to int:", float_to_int) # Output: 3
+
+string_to_int = int("789")
+print("String '789' to int:", string_to_int) # Output: 789
+
+bool_true_to_int = int(true)
+print("Boolean true to int:", bool_true_to_int) # Output: 1
+
+bool_false_to_int = int(false)
+print("Boolean false to int:", bool_false_to_int) # Output: 0
+
+# Attempting to convert an invalid string will cause a runtime error.
+# try {
+#     int("hello") # This would cause a runtime error
+# } catch e {
+#     print("Caught expected error for int('hello'):", e)
+# }
+
+print("")
+
+# ============================================================================
+# 6. float(value)
+# ============================================================================
+
+print("6. float(value)")
+print("=================")
+
+# Converts a given value to a floating-point number. Supports integers, strings, and booleans.
+
+int_to_float = float(100)
+print("Int 100 to float:", int_to_float) # Output: 100.0
+
+string_to_float = float("123.45")
+print("String '123.45' to float:", string_to_float) # Output: 123.45
+
+bool_true_to_float = float(true)
+print("Boolean true to float:", bool_true_to_float) # Output: 1.0
+
+bool_false_to_float = float(false)
+print("Boolean false to float:", bool_false_to_float) # Output: 0.0
+
+# Attempting to convert an invalid string will cause a runtime error.
+# try {
+#     float("abc") # This would cause a runtime error
+# } catch e {
+#     print("Caught expected error for float('abc'):", e)
+# }
+
+print("")
+
+# ============================================================================
+# 7. append(list, item)
+# ============================================================================
+
+print("7. append(list, item)")
+print("=======================")
+
+# Adds an item to the end of the specified list. Modifies the list in-place.
+
+shopping_list = ["apples", "bananas"]
+print("Original shopping list:", shopping_list)
+
+append(shopping_list, "oranges")
+print("After appending 'oranges':", shopping_list)
+
+append(shopping_list, 123)
+print("After appending 123:", shopping_list)
+
+# Attempting to append to a non-list will cause a runtime error.
+# try {
+#     append("not_a_list", "item")
+# } catch e {
+#     print("Caught expected error for append to non-list:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 8. pop(list, index)
+# ============================================================================
+
+print("8. pop(list, index)")
+print("=====================")
+
+# Removes and returns an item from a list at a given index. If index is not
+# provided, it removes and returns the last item. Supports negative indexing.
+
+colors = ["red", "green", "blue", "yellow", "purple"]
+print("Original colors list:", colors)
+
+popped_last = pop(colors)
+print("Popped last item:", popped_last)
+print("List after pop():", colors)
+
+popped_second = pop(colors, 1) # Pop item at index 1 (green)
+print("Popped item at index 1:", popped_second)
+print("List after pop(1):", colors)
+
+popped_negative = pop(colors, -1) # Pop last item using negative index
+print("Popped item with negative index (-1):", popped_negative)
+print("List after pop(-1):", colors)
+
+# Attempting to pop from an empty list or out of range index will cause a runtime error.
+# try {
+#     pop([])
+# } catch e {
+#     print("Caught expected error for pop from empty list:", e)
+# }
+# try {
+#     pop([1,2,3], 10)
+# } catch e {
+#     print("Caught expected error for pop out of range:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 9. keys(dictionary)
+# ============================================================================
+
+print("9. keys(dictionary)")
+print("=====================")
+
+# Returns a new list containing all the keys present in the given dictionary.
+
+user_data = {"id": 101, "username": "zephyr_dev", "status": "active"}
+print("User data dictionary:", user_data)
+
+all_keys = keys(user_data)
+print("All keys in user_data:", all_keys) # Order may vary
+
+# Iterate over keys
+print("Iterating over keys:")
+for k in keys(user_data) {
+    print("  Key: " + k + ", Value: " + str(user_data[k]))
+}
+
+# Attempting to use keys() on a non-dictionary will cause a runtime error.
+# try {
+#     keys([1,2,3])
+# } catch e {
+#     print("Caught expected error for keys on non-dict:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 10. values(dictionary)
+# ============================================================================
+
+print("10. values(dictionary)")
+print("========================")
+
+# Returns a new list containing all the values present in the given dictionary.
+
+product_info = {"name": "Laptop", "price": 1200.0, "in_stock": true}
+print("Product info dictionary:", product_info)
+
+all_values = values(product_info)
+print("All values in product_info:", all_values) # Order may vary
+
+# Iterate over values
+print("Iterating over values:")
+for v in values(product_info) {
+    print("  Value: " + str(v))
+}
+
+# Attempting to use values() on a non-dictionary will cause a runtime error.
+# try {
+#     values("a_string")
+# } catch e {
+#     print("Caught expected error for values on non-dict:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 11. type(value)
+# ============================================================================
+
+print("11. type(value)")
+print("=================")
+
+# Returns the name of the type of a given value as a string.
+
+print("Type of 10:", type(10)) # Output: int
+print("Type of 3.14:", type(3.14)) # Output: float
+print("Type of 'hello':", type("hello")) # Output: string
+print("Type of true:", type(true)) # Output: bool
+print("Type of [1, 2]:", type([1, 2])) # Output: list
+print("Type of {}:")
+
+func my_custom_func() {}
+print("Type of my_custom_func:", type(my_custom_func)) # Output: function
+
+my_lambda_expr = x -> x * x
+print("Type of my_lambda_expr:", type(my_lambda_expr)) # Output: lambda
+
+print("")
+
+# ============================================================================
+# 12. map(list, func)
+# ============================================================================
+
+print("12. map(list, func)")
+print("=====================")
+
+# Applies a function to every item in the list and returns a new list
+# containing the results. The original list remains unchanged.
+
+numbers_to_map = [1, 2, 3, 4, 5]
+print("Original numbers for map:", numbers_to_map)
+
+# Using a lambda to double each number
+doubled_numbers = map(numbers_to_map, x -> x * 2)
+print("Doubled numbers:", doubled_numbers) # Output: [2, 4, 6, 8, 10]
+
+# Using a function to convert numbers to strings with a prefix
+func format_number(num) {
+    return "Num_" + str(num)
+}
+formatted_numbers = map(numbers_to_map, format_number)
+print("Formatted numbers:", formatted_numbers) # Output: ["Num_1", "Num_2", "Num_3", "Num_4", "Num_5"]
+
+# Attempting to map with a non-list or non-callable function will cause a runtime error.
+# try {
+#     map(123, x -> x * 2)
+# } catch e {
+#     print("Caught expected error for map with non-list:", e)
+# }
+# try {
+#     map([1,2,3], "not_a_func")
+# } catch e {
+#     print("Caught expected error for map with non-callable:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 13. filter(list, func)
+# ============================================================================
+
+print("13. filter(list, func)")
+print("========================")
+
+# Returns a new list containing only the items from the original list for which
+# the function returns a "truthy" value. The original list remains unchanged.
+
+numbers_to_filter = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print("Original numbers for filter:", numbers_to_filter)
+
+# Using a lambda to filter even numbers
+even_numbers_filtered = filter(numbers_to_filter, x -> x % 2 == 0)
+print("Even numbers:", even_numbers_filtered) # Output: [2, 4, 6, 8, 10]
+
+# Using a function to filter strings longer than 5 characters
+words_to_filter = ["apple", "banana", "cat", "dogfood", "elephant"]
+print("Original words for filter:", words_to_filter)
+func is_long_word(word) {
+    return len(word) > 5
+}
+long_words_filtered = filter(words_to_filter, is_long_word)
+print("Long words:", long_words_filtered) # Output: ["banana", "dogfood", "elephant"]
+
+# Attempting to filter with a non-list or non-callable function will cause a runtime error.
+# try {
+#     filter("a_string", x -> true)
+# } catch e {
+#     print("Caught expected error for filter with non-list:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 14. reduce(list, func, initial)
+# ============================================================================
+
+print("14. reduce(list, func, initial)")
+print("=================================")
+
+# Reduces a list to a single value by iteratively applying a function to an
+# accumulator and each element. An optional initial value can be provided.
+
+numbers_to_reduce = [1, 2, 3, 4, 5]
+print("Original numbers for reduce:", numbers_to_reduce)
+
+# Summing all numbers with an initial value of 0
+sum_func = (acc, current) -> acc + current
+total_sum = reduce(numbers_to_reduce, sum_func, 0)
+print("Total sum (initial 0):", total_sum) # Output: 15
+
+# Summing all numbers without an initial value (uses first element as initial)
+total_sum_no_initial = reduce(numbers_to_reduce, sum_func)
+print("Total sum (no initial):", total_sum_no_initial) # Output: 15
+
+# Concatenating strings
+words_to_reduce = ["Hello", "World", "Zephyr"]
+print("Original words for reduce:", words_to_reduce)
+concat_func = (acc, current) -> acc + " " + current
+sentence = reduce(words_to_reduce, concat_func, "")
+print("Concatenated sentence:", sentence) # Output: " Hello World Zephyr"
+
+# Finding the maximum number
+max_func = (acc, current) -> acc > current ? acc : current
+max_val = reduce(numbers_to_reduce, max_func)
+print("Maximum value:", max_val) # Output: 5
+
+# Attempting to reduce an empty list without an initial value will cause a runtime error.
+# try {
+#     reduce([], sum_func)
+# } catch e {
+#     print("Caught expected error for reduce empty list no initial:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 15. enumerate(list)
+# ============================================================================
+
+print("15. enumerate(list)")
+print("=====================")
+
+# Returns a new list of (index, value) pairs for each item in the input list.
+
+items_to_enumerate = ["alpha", "beta", "gamma", "delta"]
+print("Original items for enumerate:", items_to_enumerate)
+
+indexed_items = enumerate(items_to_enumerate)
+print("Indexed items:", indexed_items) # Output: [[0, "alpha"], [1, "beta"], [2, "gamma"], [3, "delta"]]
+
+# Iterate using destructuring assignment in a for-each loop
+print("Iterating with enumerate and destructuring:")
+for (idx, val) in enumerate(items_to_enumerate) {
+    print("  Index: " + str(idx) + ", Value: " + val)
+}
+
+# Attempting to enumerate a non-list will cause a runtime error.
+# try {
+#     enumerate("a_string")
+# } catch e {
+#     print("Caught expected error for enumerate on non-list:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 16. zip(list1, list2, ...)
+# ============================================================================
+
+print("16. zip(list1, list2, ...)")
+print("============================")
+
+# Returns a new list of lists, where the i-th sublist contains the i-th element
+# from each of the argument lists. The resulting list is truncated to the length
+# of the shortest input list.
+
+names_zip = ["Alice", "Bob", "Charlie"]
+ages_zip = [25, 30, 35]
+print("Names:", names_zip)
+print("Ages:", ages_zip)
+
+combined_data = zip(names_zip, ages_zip)
+print("Combined data (names, ages):", combined_data) # Output: [["Alice", 25], ["Bob", 30], ["Charlie", 35]]
+
+scores_zip = [90, 85, 92]
+countries_zip = ["USA", "Canada", "Mexico"]
+print("Scores:", scores_zip)
+print("Countries:", countries_zip)
+
+all_info = zip(names_zip, ages_zip, scores_zip, countries_zip)
+print("All info (names, ages, scores, countries):", all_info)
+# Output: [["Alice", 25, 90, "USA"], ["Bob", 30, 85, "Canada"], ["Charlie", 35, 92, "Mexico"]]
+
+# Example with lists of different lengths (truncates to shortest)
+short_list = [1, 2]
+long_list = ["a", "b", "c", "d"]
+print("Short list:", short_list)
+print("Long list:", long_list)
+zipped_different_lengths = zip(short_list, long_list)
+print("Zipped different lengths:", zipped_different_lengths) # Output: [[1, "a"], [2, "b"]]
+
+# Attempting to zip with non-list arguments or less than 2 arguments will cause a runtime error.
+# try {
+#     zip([1,2,3], "not_a_list")
+# } catch e {
+#     print("Caught expected error for zip with non-list arg:", e)
+# }
+# try {
+#     zip([1,2,3])
+# } catch e {
+#     print("Caught expected error for zip with less than 2 args:", e)
+# }
+
+print("")
+
+# ============================================================================
+# 17. all(promises)
+# ============================================================================
+
+print("17. all(promises)")
+print("===================")
+
+# Takes a list of Promise objects and waits for all of them to resolve.
+# Returns a new list containing their resolved values in the same order.
+# If any Promise rejects, all() rejects with the reason of the first rejection.
+
+async func async_task(id, delay_ms) {
+    print("  Async task " + str(id) + " started (simulating " + str(delay_ms) + "ms delay)")
+    # In a real scenario, this would involve actual async work
+    return "Result_from_task_" + str(id)
+}
+
+async func run_all_promises_example() {
+    print("Running all() promises example...")
+
+    # Create multiple promises by spawning async tasks
+    promise_a = spawn async_task(1, 100)
+    promise_b = spawn async_task(2, 50)
+    promise_c = spawn async_task(3, 120)
+
+    # Put promises into a list
+    all_tasks = [promise_a, promise_b, promise_c]
+
+    print("All async tasks spawned. Waiting for all() to complete...")
+
+    # Await the resolution of all promises
+    results_from_all = await all(all_tasks)
+
+    print("All() resolved! Results:", results_from_all)
+    # Expected output order matches input order of promises
+
+    print("\nTesting all() with a failing promise...")
+    async func failing_task(id, should_fail) {
+        print("  Failing task " + str(id) + " started (should_fail: " + str(should_fail) + ")")
+        if should_fail {
+            return "Error: Task " + str(id) + " failed!"
+        }
+        return "Success: Task " + str(id) + " completed."
+    }
+
+    try {
+        fail_promise1 = spawn failing_task(1, false)
+        fail_promise2 = spawn failing_task(2, true) # This one will fail
+        fail_promise3 = spawn failing_task(3, false)
+
+        fail_tasks = [fail_promise1, fail_promise2, fail_promise3]
+        fail_results = await all(fail_tasks)
+        print("This line should NOT be printed if a promise failed:", fail_results)
+    } catch e {
+        print("Caught expected error from all() due to failing promise:", e)
+    }
+}
+
+# Execute the async example
+await run_all_promises_example()
+
+print("")
+
+print("=== Zephyr Built-in Functions Demo Complete ===")

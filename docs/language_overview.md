@@ -14,6 +14,7 @@ Zephyr is a modern, expressive scripting language designed for clarity, flexibil
 - **Lists & Dictionaries:** Flexible collections for storing and manipulating data.
 - **Functions & Lambdas:** Define reusable code blocks and anonymous functions; supports async and const parameters.
 - **Object-Oriented Programming:** Create classes and objects for structured, modular code.
+
 - **Control Flow:** Direct program execution with conditionals, switches, and loops.
 - **Error Handling:** Catch and handle runtime errors gracefully.
 - **Asynchronous Programming:** Write non-blocking code with async/await and parallel execution.
@@ -82,6 +83,7 @@ Zephyr is a modern, expressive scripting language designed for clarity, flexibil
 - **Composition:** Build complex objects from simpler ones.
 - **Method Chaining:** Call multiple methods in sequence.
 - **Inheritance-like Patterns:** Share behavior via composition.
+- **Interfaces:** Define contracts for classes, promoting polymorphism and type safety.
 
 ---
 
