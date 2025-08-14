@@ -116,10 +116,11 @@ user_id : UserId = 12345
 user_name : UserName = "Alice"
 user_info : UserData = {"id": user_id, "name": user_name}
 tags : StringList = ["admin", "user", "active"]
-```
 tags : StringList = ["admin", "vip"]
+```
 
 # Complex aliases
+```
 type Point = dict  # Could be enhanced to {x: int, y: int}
 type PointList = list
 ```
@@ -168,8 +169,10 @@ class Rectangle : Drawable, Comparable {
         return my_area > other_area ? 1 : (my_area < other_area ? -1 : 0)
     }
 }
+```
 
 # Interface types in function parameters
+```
 func render_shape(shape : Drawable) : string {
     return "Rendering: " + shape.draw()
 }

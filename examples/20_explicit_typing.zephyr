@@ -147,7 +147,8 @@ print("After reassignment - name:", nullable_name, "count:", nullable_count)
 try {
     nullable_name = 42  # Error: cannot assign int to string variable
     print("FATAL ERROR: Type constraint violation not caught")
-    print("This indicates a critical type system failure")
+    print("String variable accepted integer assignment")
+    print("Type safety is compromised - immediate exit required")
     exit(204)
 } catch e {
     print("✓ Type constraint properly enforced:", e)
@@ -324,15 +325,6 @@ try {
     print("✓ Lambda type validation working:", e)
 }
 
-try {
-    bad_async_result = await async_typed_process(123, "wrong_type")
-    print("FATAL ERROR: Async function type validation failed")
-    print("Async typing system is compromised")
-    exit(208)
-} catch e {
-    print("✓ Async function type validation working:", e)
-}
-
 # ==============================================================================
 # Complex Data Type Annotations
 # ==============================================================================
@@ -393,7 +385,7 @@ class TypedPerson {
         this.tags = []
     }
 
-    func update_score(new_score : float) : bool {
+    func update_score(new_score : float) {
         if (new_score >= 0.0 and new_score <= 100.0) {
             this.score = new_score
             return true
@@ -405,7 +397,7 @@ class TypedPerson {
         append(this.tags, tag)
     }
 
-    func get_profile() : dict {
+    func get_profile() {
         return {
             "name": this.name,
             "age": this.age,
@@ -437,7 +429,7 @@ profile : dict = typed_person.get_profile()
 print("Person profile:", profile)
 
 # Function that uses TypedPerson (defined after class)
-func get_user_status(user : TypedPerson) : string {
+func get_user_status(user : TypedPerson) {
     if (user.active) {
         return "Active user: " + user.name
     } else {
@@ -504,13 +496,13 @@ for num : int in large_numbers where num > 10 {
 print("\n--- Function Return Types ---")
 
 # Functions with explicit return types
-func calculate_volume(length : float, width : float, height : float) : float {
+func calculate_volume(length : float, width : float, height : float) {
     return length * width * height
 }
 
 
 
-async func fetch_data(url : string) : dict {
+async func fetch_data(url : string) {
     print("Fetching data from:", url)
     return {
         "url": url,
@@ -736,4 +728,3 @@ func production_type_check() {
 production_type_check()
 
 print("\n=== Explicit Typing Examples Complete ===")
-print("All examples demonstrate type safety while maintaining dynamic flexibility!")

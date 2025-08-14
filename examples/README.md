@@ -434,7 +434,7 @@ When adding new examples:
 
 ## Example Statistics
 
-- **21 main organized files** covering all language aspects including async/await and error handling
+- **22 main organized files** covering all language aspects including async/await and error handling
 - **Comprehensive coverage** of syntax, data structures, functions, classes, string operations, compound assignment, asynchronous programming, and exit handling
 - **Advanced patterns** including chaining, design patterns, compound operators, async workflows, graceful shutdown, and real-world applications
 - **Modern features** like string multiplication, mixed member/index chaining, compound assignment operators, async/await programming, and proper exit handling

@@ -46,6 +46,7 @@ statement
     | functionDefinition
     | asyncFunctionDefinition
     | classDefinition
+    | interfaceDefinition
     | returnStatement
     | ifStatement
     | whileStatement
@@ -123,7 +124,15 @@ asyncFunctionDefinition
     ;
 
 classDefinition
-    : CLASS NAME LBRACE (memberVariableDeclaration | functionDefinition | asyncFunctionDefinition)* RBRACE
+    : CLASS NAME (COLON NAME (COMMA NAME)*)? LBRACE (memberVariableDeclaration | functionDefinition | asyncFunctionDefinition)* RBRACE
+    ;
+
+interfaceDefinition
+    : INTERFACE NAME LBRACE functionSignature* RBRACE
+    ;
+
+functionSignature
+    : FUNC NAME LPAREN ( typedParameter (COMMA typedParameter)*)? RPAREN (COLON NAME)?
     ;
 
 memberVariableDeclaration
@@ -351,6 +360,7 @@ DEFAULT: 'default';
 FUNC: 'func';
 RETURN: 'return';
 CLASS: 'class';
+INTERFACE: 'interface';
 THIS: 'this';
 TRY: 'try';
 CATCH: 'catch';

@@ -44,6 +44,7 @@ examples=(
     "19_async_class_methods.zephyr"
     "20_explicit_typing.zephyr"
     "21_exit_function.zephyr"
+    "22_interfaces.zephyr"
 )
 
 # Counters

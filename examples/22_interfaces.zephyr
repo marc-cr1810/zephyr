@@ -1,0 +1,233 @@
+# Zephyr Interfaces
+# This file demonstrates the interface feature in Zephyr
+
+print("=== Zephyr Interfaces Demo ===")
+print("")
+
+# ============================================================================
+# 1. Basic Interface Definition
+# ============================================================================
+
+print("1. Basic Interface Definition")
+print("==============================")
+
+# An interface defines a contract for a class. It specifies a set of methods
+# that a class must implement.
+
+interface Drawable {
+    func draw()
+    func get_area()
+}
+
+interface Loggable {
+    func log(message)
+}
+
+print("✓ Interfaces 'Drawable' and 'Loggable' defined successfully.")
+print("")
+
+
+# ============================================================================
+# 2. Class Implementation of Interfaces
+# ============================================================================
+
+print("2. Class Implementation of Interfaces")
+print("======================================")
+
+# A class can implement one or more interfaces by listing them after the class
+# name, separated by commas. The class must implement all the methods defined
+# in the interfaces it implements.
+
+class Rectangle : Drawable {
+    width : float
+    height : float
+
+    func init(w : float, h : float) {
+        this.width = w
+        this.height = h
+    }
+
+    func draw() {
+        return "Rectangle(" + str(this.width) + "x" + str(this.height) + ")"
+    }
+
+    func get_area() {
+        return this.width * this.height
+    }
+}
+
+class Circle : Drawable {
+    radius : float
+
+    func init(r : float) {
+        this.radius = r
+    }
+
+    func draw() {
+        return "Circle(r=" + str(this.radius) + ")"
+    }
+
+    func get_area() {
+        return 3.14159 * this.radius * this.radius
+    }
+}
+
+rect = Rectangle(10.0, 5.0)
+circl = Circle(7.0)
+
+print("Rectangle draw:", rect.draw())
+print("Rectangle area:", rect.get_area())
+print("Circle draw:", circl.draw())
+print("Circle area:", circl.get_area())
+print("✓ Classes implementing 'Drawable' created successfully.")
+print("")
+
+
+# ============================================================================
+# 3. Using Interfaces as Types
+# ============================================================================
+
+print("3. Using Interfaces as Types")
+print("=============================")
+
+# Interfaces can be used as type annotations for variables and function
+# parameters. This allows for writing more generic code that can work with
+# any object that implements a specific interface.
+
+func render_shape(shape : Drawable) {
+    print("Rendering shape:", shape.draw())
+    print("Shape area:", shape.get_area())
+}
+
+print("Rendering Rectangle:")
+render_shape(rect)
+
+print("\nRendering Circle:")
+render_shape(circl)
+
+drawable_shape : Drawable = Rectangle(3.0, 4.0)
+print("\nDrawable shape (Rectangle):")
+render_shape(drawable_shape)
+
+drawable_shape = Circle(5.0)
+print("\nDrawable shape (Circle):")
+render_shape(drawable_shape)
+print("✓ Interfaces used as types successfully.")
+print("")
+
+
+# ============================================================================
+# 4. Multiple Interface Implementation
+# ============================================================================
+
+print("4. Multiple Interface Implementation")
+print("=====================================")
+
+# A class can implement multiple interfaces.
+
+class AdvancedRectangle : Drawable, Loggable {
+    width : float
+    height : float
+
+    func init(w : float, h : float) {
+        this.width = w
+        this.height = h
+    }
+
+    func draw() {
+        return "AdvancedRectangle(" + str(this.width) + "x" + str(this.height) + ")"
+    }
+
+    func get_area() {
+        return this.width * this.height
+    }
+
+    func log(message) {
+        print("[LOG] AdvancedRectangle:", message)
+    }
+}
+
+adv_rect = AdvancedRectangle(15.0, 8.0)
+adv_rect.log("Creating advanced rectangle.")
+render_shape(adv_rect)
+adv_rect.log("Advanced rectangle rendered.")
+print("✓ Class implementing multiple interfaces created successfully.")
+print("")
+
+
+# ============================================================================
+# 5. Edge Cases and Error Handling
+# ============================================================================
+
+print("5. Edge Cases and Error Handling")
+print("=================================")
+
+# Attempting to implement a non-existent interface
+try {
+    class InvalidClass : NonExistentInterface {
+        func test() {}
+    }
+} catch e {
+    print("✓ Caught error for non-existent interface:", e)
+}
+
+# Attempting to implement an interface without all its methods
+try {
+    class IncompleteRectangle : Drawable {
+        width : float
+        height : float
+
+        func init(w : float, h : float) {
+            this.width = w
+            this.height = h
+        }
+
+        func draw() {
+            return "IncompleteRectangle"
+        }
+        # Missing get_area()
+    }
+} catch e {
+    print("✓ Caught error for incomplete implementation:", e)
+}
+
+# Attempting to implement an interface with wrong method signature
+try {
+    class WrongSignatureRectangle : Drawable {
+        width : float
+        height : float
+
+        func init(w : float, h : float) {
+            this.width = w
+            this.height = h
+        }
+
+        func draw(extra_param) { # Extra parameter
+            return "WrongSignatureRectangle"
+        }
+
+        func get_area() {
+            return this.width * this.height
+        }
+    }
+} catch e {
+    print("✓ Caught error for wrong method signature:", e)
+}
+
+print("✓ Edge cases and error handling tested successfully.")
+print("")
+
+
+# ============================================================================
+# 6. Summary
+# ============================================================================
+
+print("6. Summary")
+print("===========")
+print("✓ Interfaces provide a way to define contracts for classes.")
+print("✓ A class can implement one or more interfaces.")
+print("✓ Interfaces can be used as types for variables and parameters.")
+print("✓ The compiler checks for correct interface implementation.")
+print("")
+
+print("=== Interfaces Demo Complete ===")

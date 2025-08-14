@@ -329,4 +329,9 @@ auto optional_index_access_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
+auto interface_definition_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
 } // namespace zephyr

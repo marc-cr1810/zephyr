@@ -2,6 +2,9 @@
 #include "objects/objects.hpp"
 #include "objects/function_object.hpp"
 #include "objects/lambda_object.hpp"
+#include "objects/class_object.hpp"
+#include "objects/interface_object.hpp"
+#include "objects/class_instance_object.hpp"
 #include "types/types.hpp"
 #include "async_scheduler.hpp"
 #include <iostream>
@@ -1861,9 +1864,21 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 
                 if (actual_type != expected_type)
                 {
-                    throw runtime_error_with_location_t("Type mismatch for parameter '" + param.name + 
-                                           "': expected " + param.type_name + 
-                                           ", got " + args[i]->get_type()->get_name(), node.line, node.column, node.function_name.length());
+                    bool is_interface = false;
+                    if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(args[i])) {
+                        auto class_obj = class_instance->m_class_obj;
+                        for (const auto& interface_name : class_obj->get_interfaces()) {
+                            if (interface_name == expected_type) {
+                                is_interface = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!is_interface) {
+                        throw runtime_error_with_location_t("Type mismatch for parameter '" + param.name + 
+                                               "': expected " + param.type_name + 
+                                               ", got " + args[i]->get_type()->get_name(), node.line, node.column, node.function_name.length());
+                    }
                 }
             }
             
@@ -2901,8 +2916,51 @@ auto interpreter_t::clone_statement(statement_t* stmt) -> std::unique_ptr<statem
         );
     }
     
+    // Handle function definitions
+    if (auto func_def = dynamic_cast<function_definition_t*>(stmt)) {
+        auto cloned_body = clone_block(func_def->body.get());
+        return std::make_unique<function_definition_t>(
+            func_def->function_name,
+            func_def->parameters,
+            std::move(cloned_body),
+            func_def->is_async,
+            func_def->line, func_def->column, func_def->end_line, func_def->end_column
+        );
+    }
+
+    // Handle compound member assignment
+    if (auto compound_member_assignment = dynamic_cast<compound_member_assignment_t*>(stmt)) {
+        auto cloned_object = clone_expression(compound_member_assignment->object.get());
+        auto cloned_value = clone_expression(compound_member_assignment->value.get());
+        return std::make_unique<compound_member_assignment_t>(
+            std::move(cloned_object),
+            compound_member_assignment->member_name,
+            std::move(cloned_value),
+            compound_member_assignment->operator_token,
+            compound_member_assignment->line, compound_member_assignment->column, compound_member_assignment->end_line, compound_member_assignment->end_column
+        );
+    }
+
+    // Handle class definitions
+    if (auto class_def = dynamic_cast<class_definition_t*>(stmt)) {
+        auto cloned_class_def = std::make_unique<class_definition_t>(
+            class_def->class_name,
+            class_def->interfaces,
+            std::vector<std::unique_ptr<member_variable_declaration_t>>(),
+            std::vector<std::unique_ptr<function_definition_t>>(),
+            class_def->line, class_def->column, class_def->end_line, class_def->end_column
+        );
+        for (const auto& member : class_def->member_variables) {
+            cloned_class_def->member_variables.push_back(std::unique_ptr<member_variable_declaration_t>(static_cast<member_variable_declaration_t*>(clone_statement(member.get()).release())));
+        }
+        for (const auto& method : class_def->methods) {
+            cloned_class_def->methods.push_back(std::unique_ptr<function_definition_t>(static_cast<function_definition_t*>(clone_statement(method.get()).release())));
+        }
+        return cloned_class_def;
+    }
+
     // For unsupported statement types, throw an error
-    throw std::runtime_error("Unsupported statement type in lambda cloning - please simplify lambda body");
+    throw std::runtime_error("Unsupported statement type in lambda cloning: " + std::string(typeid(*stmt).name()));
 }
 
 auto interpreter_t::clone_block(block_t* block) -> std::unique_ptr<block_t>
@@ -2927,13 +2985,46 @@ auto interpreter_t::visit(class_definition_t& node) -> void
 {
     // Create a new class object
     auto class_obj = std::make_shared<class_object_t>(node.class_name);
+
+    // Check and process interfaces
+    for (const auto& interface_name : node.interfaces) {
+        auto interface_obj_val = resolve_variable(interface_name);
+        auto interface_obj = std::dynamic_pointer_cast<interface_object_t>(interface_obj_val);
+        if (!interface_obj) {
+            throw runtime_error_with_location_t("'" + interface_name + "' is not an interface.", node.line, node.column, node.class_name.length());
+        }
+
+        class_obj->add_interface(interface_name);
+
+        for (const auto& interface_method : interface_obj->get_methods()) {
+            bool method_found = false;
+            for (const auto& class_method : node.methods) {
+                if (class_method->function_name == interface_method.name) {
+                    if (class_method->parameters.size() != interface_method.parameters.size()) {
+                        throw runtime_error_with_location_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' has different number of parameters than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                    }
+                    for (size_t i = 0; i < class_method->parameters.size(); ++i) {
+                        const auto& class_param = class_method->parameters[i];
+                        const auto& interface_param = interface_method.parameters[i];
+                        if (class_param.type_name != interface_param.type_name) {
+                            throw runtime_error_with_location_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' parameter '" + class_param.name + "' has different type than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                        }
+                    }
+                    method_found = true;
+                    break;
+                }
+            }
+            if (!method_found) {
+                throw runtime_error_with_location_t("Class '" + node.class_name + "' does not implement method '" + interface_method.name + "' from interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+            }
+        }
+    }
     
     // Add all methods to the class
     for (auto& method : node.methods)
     {
-        // Create a shared_ptr from the unique_ptr without releasing ownership prematurely
-        std::shared_ptr<function_definition_t> shared_method(method.release());
-        class_obj->add_method(shared_method->function_name, shared_method);
+        auto cloned_method = clone_statement(method.get());
+        class_obj->add_method(method->function_name, std::shared_ptr<function_definition_t>(static_cast<function_definition_t*>(cloned_method.release())));
     }
     
     // Add all member variables to the class
@@ -2963,6 +3054,23 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.class_name] = class_obj;
     m_current_result = class_obj;
+}
+
+auto interpreter_t::visit(interface_definition_t& node) -> void
+{
+    // Create a new interface object
+    auto interface_obj = std::make_shared<interface_object_t>(node.interface_name);
+
+    // Add all methods to the interface
+    for (auto& method : node.methods)
+    {
+        interface_obj->add_method(method);
+    }
+
+    // Store the interface in the current scope
+    auto& current_scope = m_scope_stack.back();
+    current_scope[node.interface_name] = interface_obj;
+    m_current_result = interface_obj;
 }
 
 auto interpreter_t::visit(method_call_t& node) -> void
@@ -3025,9 +3133,21 @@ auto interpreter_t::visit(method_call_t& node) -> void
                 
                 if (actual_type != expected_type)
                 {
-                    throw std::runtime_error("Type mismatch for parameter '" + param.name + 
-                                           "': expected " + param.type_name + 
-                                           ", got " + args[i]->get_type()->get_name());
+                    bool is_interface = false;
+                    if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(args[i])) {
+                        auto class_obj = class_instance->m_class_obj;
+                        for (const auto& interface_name : class_obj->get_interfaces()) {
+                            if (interface_name == expected_type) {
+                                is_interface = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!is_interface) {
+                        throw std::runtime_error("Type mismatch for parameter '" + param.name + 
+                                               "'': expected " + param.type_name + 
+                                               ", got " + args[i]->get_type()->get_name());
+                    }
                 }
             }
             
@@ -3280,6 +3400,16 @@ auto interpreter_t::validate_type_constraint(const std::string& variable_name, v
             return; // Allow assignment between function and lambda types
         }
         
+        // Check if a class instance is assigned to an interface
+        if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(value)) {
+            auto class_obj = class_instance->m_class_obj;
+            for (const auto& interface_name : class_obj->get_interfaces()) {
+                if (interface_name == expected_type) {
+                    return; // Type matches interface
+                }
+            }
+        }
+
         // Check if normalized types match
         if (normalized_actual != normalized_expected)
         {

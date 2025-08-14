@@ -49,6 +49,7 @@ public:
     auto visit(ternary_expression_t& node) -> void override;
     auto visit(lambda_expression_t& node) -> void override;
     auto visit(class_definition_t& node) -> void override;
+    auto visit(interface_definition_t& node) -> void override;
     auto visit(method_call_t& node) -> void override;
     auto visit(member_access_t& node) -> void override;
     auto visit(this_expression_t& node) -> void override;

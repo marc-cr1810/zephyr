@@ -56,7 +56,12 @@ public:
     auto get_member_variable_info(const std::string& var_name) const -> member_variable_info_t;
 
 public:
+    void add_interface(const std::string& interface_name);
+    const std::vector<std::string>& get_interfaces() const;
+
+public:
     std::string m_class_name;
+    std::vector<std::string> m_interfaces;
     std::map<std::string, std::shared_ptr<function_definition_t>> m_methods;
     std::vector<member_variable_info_t> m_member_variables;
 

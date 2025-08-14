@@ -71,6 +71,7 @@ enum class token_type_e
     func,
     return_token,
     class_token,
+    interface_token,
     this_token,
     try_token,
     catch_token,

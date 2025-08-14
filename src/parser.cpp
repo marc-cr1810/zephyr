@@ -39,6 +39,8 @@ std::string token_type_to_string(token_type_e type) {
         case token_type_e::or_op: return "or_op ||";
         case token_type_e::not_op: return "not_op !";
         case token_type_e::name: return "name";
+        case token_type_e::class_token: return "class";
+        case token_type_e::interface_token: return "interface";
         case token_type_e::number: return "number";
         case token_type_e::string: return "string";
         case token_type_e::true_token: return "true";
@@ -159,6 +161,8 @@ std::unique_ptr<statement_t> parser_t::statement() {
         return function_definition();
     } else if (m_current_token.type == token_type_e::class_token) {
         return class_definition();
+    } else if (m_current_token.type == token_type_e::interface_token) {
+        return interface_definition();
     } else if (m_current_token.type == token_type_e::return_token) {
         return return_statement();
     } else if (m_current_token.type == token_type_e::if_token) {
@@ -1241,19 +1245,8 @@ std::unique_ptr<function_definition_t> parser_t::function_definition() {
 
     std::vector<parameter_t> parameters = parse_parameter_list();
 
-    // Parse optional return type annotation
-    std::string return_type_name = "";
-    bool has_return_type = false;
-    if (m_current_token.type == token_type_e::colon) {
-        eat(token_type_e::colon);
-        return_type_name = m_current_token.text;
-        has_return_type = true;
-        eat(token_type_e::name);
-    }
-
     auto body = block();
     return std::make_unique<function_definition_t>(name_token.text, parameters, std::move(body), is_async,
-                                               return_type_name, has_return_type,
                                                func_token.line, func_token.column, m_current_token.line, m_current_token.column);
 }
 
@@ -1760,6 +1753,18 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
     std::string class_name = m_current_token.text;
     eat(token_type_e::name);
 
+    std::vector<std::string> interfaces;
+    if (m_current_token.type == token_type_e::colon) {
+        eat(token_type_e::colon);
+        interfaces.push_back(m_current_token.text);
+        eat(token_type_e::name);
+        while (m_current_token.type == token_type_e::comma) {
+            eat(token_type_e::comma);
+            interfaces.push_back(m_current_token.text);
+            eat(token_type_e::name);
+        }
+    }
+
     eat(token_type_e::lbrace);
 
     // Parse member variable declarations first
@@ -1797,13 +1802,103 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
 
     return std::make_unique<class_definition_t>(
         class_name,
+        std::move(interfaces),
         std::move(member_variables),
         std::move(methods),
         class_token.line,
         class_token.column,
-        end_token.end_line,
-        end_token.end_column
+        end_token.line,
+        end_token.column
     );
+}
+
+std::unique_ptr<interface_definition_t> parser_t::interface_definition() {
+    token_t interface_token = m_current_token;
+    eat(token_type_e::interface_token);
+
+    std::string interface_name = m_current_token.text;
+    eat(token_type_e::name);
+
+    eat(token_type_e::lbrace);
+
+    std::vector<function_signature_t> methods;
+    while (m_current_token.type == token_type_e::func) {
+        methods.push_back(function_signature());
+    }
+
+    token_t end_token = m_current_token;
+    eat(token_type_e::rbrace);
+
+    return std::make_unique<interface_definition_t>(
+        interface_name,
+        std::move(methods),
+        interface_token.line,
+        interface_token.column,
+        end_token.line,
+        end_token.column
+    );
+}
+
+function_signature_t parser_t::function_signature() {
+    eat(token_type_e::func);
+    token_t name_token = m_current_token;
+    eat(token_type_e::name);
+
+    eat(token_type_e::lparen);
+    std::vector<parameter_t> parameters;
+    if (m_current_token.type != token_type_e::rparen) {
+        bool is_const = false;
+        if (m_current_token.type == token_type_e::const_token) {
+            is_const = true;
+            eat(token_type_e::const_token);
+        }
+        std::string param_name = m_current_token.text;
+        eat(token_type_e::name);
+        std::string type_name = "";
+        bool has_explicit_type = false;
+        if (m_current_token.type == token_type_e::colon) {
+            eat(token_type_e::colon);
+            type_name = m_current_token.text;
+            has_explicit_type = true;
+            eat(token_type_e::name);
+        }
+        parameters.push_back({param_name, is_const, type_name, has_explicit_type});
+
+        while (m_current_token.type == token_type_e::comma) {
+            eat(token_type_e::comma);
+            is_const = false;
+            if (m_current_token.type == token_type_e::const_token) {
+                is_const = true;
+                eat(token_type_e::const_token);
+            }
+            param_name = m_current_token.text;
+            eat(token_type_e::name);
+            type_name = "";
+            has_explicit_type = false;
+            if (m_current_token.type == token_type_e::colon) {
+                eat(token_type_e::colon);
+                type_name = m_current_token.text;
+                has_explicit_type = true;
+                eat(token_type_e::name);
+            }
+            parameters.push_back({param_name, is_const, type_name, has_explicit_type});
+        }
+    }
+    eat(token_type_e::rparen);
+
+    std::string return_type_name = "";
+    bool has_return_type = false;
+    if (m_current_token.type == token_type_e::colon) {
+        eat(token_type_e::colon);
+        return_type_name = m_current_token.text;
+        has_return_type = true;
+        eat(token_type_e::name);
+    }
+
+    return function_signature_t{
+        name_token.text,
+        std::move(parameters)
+    };
 }
 
 std::unique_ptr<method_call_t> parser_t::method_call(std::unique_ptr<expression_t> object, std::string method_name, token_t method_token) {

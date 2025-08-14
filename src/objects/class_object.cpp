@@ -53,6 +53,16 @@ auto class_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<
     throw std::runtime_error("Operation not supported for classes");
 }
 
+void class_object_t::add_interface(const std::string& interface_name)
+{
+    m_interfaces.push_back(interface_name);
+}
+
+const std::vector<std::string>& class_object_t::get_interfaces() const
+{
+    return m_interfaces;
+}
+
 auto class_object_t::add_method(const std::string& method_name, std::shared_ptr<function_definition_t> method) -> void
 {
     validate_method_name(method_name);

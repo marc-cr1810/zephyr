@@ -185,6 +185,7 @@ auto lexer_t::get_next_token() -> token_t
         if (identifier == "func") return { token_type_e::func, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
         if (identifier == "return") return { token_type_e::return_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
         if (identifier == "class") return { token_type_e::class_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
+        if (identifier == "interface") return { token_type_e::interface_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
         if (identifier == "this") return { token_type_e::this_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
         if (identifier == "try") return { token_type_e::try_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
         if (identifier == "catch") return { token_type_e::catch_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };

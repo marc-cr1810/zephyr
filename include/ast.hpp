@@ -15,6 +15,7 @@ class case_statement_t;
 class ternary_expression_t;
 class lambda_expression_t;
 class class_definition_t;
+class interface_definition_t;
 class method_call_t;
 class member_access_t;
 class optional_method_call_t;
@@ -142,6 +143,7 @@ public:
     virtual auto visit(program_t& node) -> void = 0;
     virtual auto visit(lambda_expression_t& node) -> void = 0;
     virtual auto visit(class_definition_t& node) -> void = 0;
+    virtual auto visit(interface_definition_t& node) -> void = 0;
     virtual auto visit(method_call_t& node) -> void = 0;
     virtual auto visit(member_access_t& node) -> void = 0;
     virtual auto visit(this_expression_t& node) -> void = 0;
@@ -1160,8 +1162,8 @@ public:
 class function_definition_t : public statement_t
 {
 public:
-    function_definition_t(const std::string& function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, bool is_async, const std::string& return_type_name, bool has_return_type, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), is_async(is_async), return_type_name(return_type_name), has_return_type(has_return_type)
+    function_definition_t(const std::string& function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, bool is_async, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), is_async(is_async)
     {
     }
 
@@ -1172,8 +1174,6 @@ public:
     std::vector<parameter_t> parameters;
     std::unique_ptr<block_t> body;
     bool is_async;
-    std::string return_type_name;
-    bool has_return_type;
 };
 
 class lambda_expression_t : public expression_t
@@ -1199,11 +1199,32 @@ public:
     bool is_async;
 };
 
+struct function_signature_t
+{
+    std::string name;
+    std::vector<parameter_t> parameters;
+};
+
+class interface_definition_t : public statement_t
+{
+public:
+    interface_definition_t(const std::string& interface_name, std::vector<function_signature_t> methods, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), interface_name(interface_name), methods(std::move(methods))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::string interface_name;
+    std::vector<function_signature_t> methods;
+};
+
 class class_definition_t : public statement_t
 {
 public:
-    class_definition_t(const std::string& class_name, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), class_name(class_name), member_variables(std::move(member_variables)), methods(std::move(methods))
+    class_definition_t(const std::string& class_name, std::vector<std::string> interfaces, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), class_name(class_name), interfaces(std::move(interfaces)), member_variables(std::move(member_variables)), methods(std::move(methods))
     {
     }
 
@@ -1211,6 +1232,7 @@ public:
 
 public:
     std::string class_name;
+    std::vector<std::string> interfaces;
     std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables;
     std::vector<std::unique_ptr<function_definition_t>> methods;
 };
