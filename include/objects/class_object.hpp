@@ -64,6 +64,7 @@ public:
     std::vector<std::string> m_interfaces;
     std::map<std::string, std::shared_ptr<function_definition_t>> m_methods;
     std::vector<member_variable_info_t> m_member_variables;
+    bool m_has_invalid_init = false;
 
 private:
     auto validate_method_name(const std::string& method_name) const -> void;

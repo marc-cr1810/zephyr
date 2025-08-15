@@ -6,10 +6,13 @@ namespace zephyr
 {
 
 lambda_object_t::lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<expression_t> body_expr, 
+                                const std::string& return_type_name, bool has_explicit_return_type,
                                 std::map<std::string, std::shared_ptr<object_t>> captured, bool async)
     : m_parameters(std::move(params))
     , m_body_block(nullptr)
     , m_body_expression(body_expr)
+    , m_return_type_name(return_type_name)
+    , m_has_explicit_return_type(has_explicit_return_type)
     , m_is_block_body(false)
     , m_is_async(async)
     , m_captured_variables(std::move(captured))
@@ -19,10 +22,13 @@ lambda_object_t::lambda_object_t(std::vector<parameter_t> params, std::shared_pt
 }
 
 lambda_object_t::lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<block_t> body_blk,
+                                const std::string& return_type_name, bool has_explicit_return_type,
                                 std::map<std::string, std::shared_ptr<object_t>> captured, bool async)
     : m_parameters(std::move(params))
     , m_body_block(body_blk)
     , m_body_expression(nullptr)
+    , m_return_type_name(return_type_name)
+    , m_has_explicit_return_type(has_explicit_return_type)
     , m_is_block_body(true)
     , m_is_async(async)
     , m_captured_variables(std::move(captured))

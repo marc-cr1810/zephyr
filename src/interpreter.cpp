@@ -1793,7 +1793,7 @@ auto interpreter_t::visit(loop_statement_t& node) -> void
 auto interpreter_t::visit(function_definition_t& node) -> void
 {
     // Note: function_object_t constructor expects a unique_ptr to body
-    auto func_obj = std::make_shared<function_object_t>(node.parameters, std::move(node.body), node.is_async);
+    auto func_obj = std::make_shared<function_object_t>(node.parameters, std::move(node.body), node.return_type_name, node.has_explicit_return_type, node.is_async);
     auto& current_scope = m_scope_stack.back();
     current_scope[node.function_name] = func_obj;
     m_current_result = func_obj;
@@ -1893,6 +1893,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         
         // Push function scope
         m_scope_stack.push_back(function_scope);
+        m_expected_return_types.push_back(func->m_return_type_name);
         
         try
         {
@@ -1907,9 +1908,24 @@ auto interpreter_t::visit(function_call_t& node) -> void
             // Function returned a value
             m_current_result = return_val.value;
         }
+        catch (const std::runtime_error& e)
+        {
+            // Pop function scope and re-throw
+            m_scope_stack.pop_back();
+            m_expected_return_types.pop_back();
+            for (const auto& param : func->m_parameters)
+            {
+                if (param.is_const)
+                {
+                    m_const_variables.erase(param.name);
+                }
+            }
+            throw;
+        }
         
         // Pop function scope
         m_scope_stack.pop_back();
+        m_expected_return_types.pop_back();
         
         // Remove const parameters from tracking when leaving function scope
         for (const auto& param : func->m_parameters)
@@ -2026,6 +2042,10 @@ auto interpreter_t::visit(function_call_t& node) -> void
     auto class_obj = std::dynamic_pointer_cast<class_object_t>(func_obj);
     if (class_obj)
     {
+        if (class_obj->m_has_invalid_init) {
+            throw runtime_error_with_location_t("init method cannot return a value.", node.line, node.column, 1);
+        }
+
         // Create a new instance of this class
         auto instance = std::make_shared<class_instance_t>(class_obj);
         
@@ -2033,6 +2053,10 @@ auto interpreter_t::visit(function_call_t& node) -> void
         if (class_obj->has_method("init"))
         {
             auto init_method = class_obj->get_method("init");
+            if (init_method && contains_return_with_value(init_method->body.get())) {
+                throw runtime_error_with_location_t("init method cannot return a value.", node.line, node.column, 1);
+            }
+
             if (init_method)
             {
                 // Check parameter count
@@ -2128,10 +2152,29 @@ auto interpreter_t::visit(return_statement_t& node) -> void
     if (node.return_value)
     {
         node.return_value->accept(*this);
+        if (!m_expected_return_types.empty()) {
+            std::string expected_type = m_expected_return_types.back();
+            if (!expected_type.empty()) {
+                std::string actual_type = m_current_result->get_type()->get_name();
+                if (actual_type != expected_type) {
+                    // Allow returning none from a function with a return type
+                    if (actual_type == "none") {
+                        throw return_value_t{m_current_result};
+                    }
+                    throw runtime_error_with_location_t("Type mismatch in return statement: expected " + expected_type + ", got " + actual_type, node.line, node.column, 1);
+                }
+            }
+        }
         throw return_value_t{m_current_result};
     }
     else
     {
+        if (!m_expected_return_types.empty()) {
+            std::string expected_type = m_expected_return_types.back();
+            if (!expected_type.empty() && expected_type != "none") {
+                throw runtime_error_with_location_t("Type mismatch in return statement: expected " + expected_type + ", got none", node.line, node.column, 1);
+            }
+        }
         throw return_value_t{std::make_shared<none_object_t>()};
     }
 }
@@ -2301,7 +2344,7 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
         // Clone the block body to allow function reuse
         auto cloned_body = clone_block(node.body_block.get());
         std::shared_ptr<block_t> shared_body(cloned_body.release());
-        auto lambda_obj = std::make_shared<lambda_object_t>(node.parameters, shared_body, captured_vars, node.is_async);
+        auto lambda_obj = std::make_shared<lambda_object_t>(node.parameters, shared_body, node.return_type_name, node.has_explicit_return_type, captured_vars, node.is_async);
         m_current_result = lambda_obj;
     }
     else
@@ -2312,7 +2355,7 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
         // Clone the expression to allow function reuse
         auto cloned_expr = clone_expression(node.body_expression.get());
         std::shared_ptr<expression_t> shared_expr(cloned_expr.release());
-        auto lambda_obj = std::make_shared<lambda_object_t>(node.parameters, shared_expr, captured_vars, node.is_async);
+        auto lambda_obj = std::make_shared<lambda_object_t>(node.parameters, shared_expr, node.return_type_name, node.has_explicit_return_type, captured_vars, node.is_async);
         m_current_result = lambda_obj;
     }
 }
@@ -2523,7 +2566,7 @@ auto interpreter_t::clone_expression(expression_t* expr) -> std::unique_ptr<expr
             return std::make_unique<lambda_expression_t>(
                 lambda_expr->parameters,
                 std::move(cloned_block),
-                lambda_expr->is_async,
+                lambda_expr->return_type_name, lambda_expr->has_explicit_return_type, lambda_expr->is_async,
                 lambda_expr->line, lambda_expr->column, lambda_expr->end_line, lambda_expr->end_column
             );
         } else {
@@ -2532,7 +2575,7 @@ auto interpreter_t::clone_expression(expression_t* expr) -> std::unique_ptr<expr
             return std::make_unique<lambda_expression_t>(
                 lambda_expr->parameters,
                 std::move(cloned_expr),
-                lambda_expr->is_async,
+                lambda_expr->return_type_name, lambda_expr->has_explicit_return_type, lambda_expr->is_async,
                 lambda_expr->line, lambda_expr->column, lambda_expr->end_line, lambda_expr->end_column
             );
         }
@@ -2923,7 +2966,7 @@ auto interpreter_t::clone_statement(statement_t* stmt) -> std::unique_ptr<statem
             func_def->function_name,
             func_def->parameters,
             std::move(cloned_body),
-            func_def->is_async,
+            func_def->return_type_name, func_def->has_explicit_return_type, func_def->is_async,
             func_def->line, func_def->column, func_def->end_line, func_def->end_column
         );
     }
@@ -3023,6 +3066,9 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     // Add all methods to the class
     for (auto& method : node.methods)
     {
+        if (method->function_name == "init" && contains_return_with_value(method->body.get())) {
+            class_obj->m_has_invalid_init = true;
+        }
         auto cloned_method = clone_statement(method.get());
         class_obj->add_method(method->function_name, std::shared_ptr<function_definition_t>(static_cast<function_definition_t*>(cloned_method.release())));
     }
@@ -3054,6 +3100,78 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.class_name] = class_obj;
     m_current_result = class_obj;
+}
+
+auto interpreter_t::contains_return_with_value(block_t* block) -> bool
+{
+    if (!block) {
+        return false;
+    }
+
+    for (const auto& stmt : block->statements) {
+        if (auto return_stmt = dynamic_cast<return_statement_t*>(stmt.get())) {
+            if (return_stmt->return_value) {
+                return true;
+            }
+        } else if (auto if_stmt = dynamic_cast<if_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(if_stmt->then_block.get())) {
+                return true;
+            }
+            if (if_stmt->else_block && contains_return_with_value(if_stmt->else_block.get())) {
+                return true;
+            }
+        } else if (auto while_stmt = dynamic_cast<while_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(while_stmt->body.get())) {
+                return true;
+            }
+        } else if (auto for_stmt = dynamic_cast<for_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(for_stmt->body.get())) {
+                return true;
+            }
+        } else if (auto for_each_stmt = dynamic_cast<for_each_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(for_each_stmt->body.get())) {
+                return true;
+            }
+        } else if (auto do_while_stmt = dynamic_cast<do_while_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(do_while_stmt->body.get())) {
+                return true;
+            }
+        } else if (auto do_until_stmt = dynamic_cast<do_until_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(do_until_stmt->body.get())) {
+                return true;
+            }
+        } else if (auto loop_stmt = dynamic_cast<loop_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(loop_stmt->body.get())) {
+                return true;
+            }
+        } else if (auto switch_stmt = dynamic_cast<switch_statement_t*>(stmt.get())) {
+            for (const auto& case_stmt : switch_stmt->cases) {
+                for (const auto& case_block_stmt : case_stmt->statements) {
+                    if (auto return_stmt = dynamic_cast<return_statement_t*>(case_block_stmt.get())) {
+                        if (return_stmt->return_value) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            for (const auto& default_stmt : switch_stmt->default_statements) {
+                 if (auto return_stmt = dynamic_cast<return_statement_t*>(default_stmt.get())) {
+                    if (return_stmt->return_value) {
+                        return true;
+                    }
+                }
+            }
+        } else if (auto try_catch_stmt = dynamic_cast<try_catch_statement_t*>(stmt.get())) {
+            if (contains_return_with_value(try_catch_stmt->try_block.get())) {
+                return true;
+            }
+            if (contains_return_with_value(try_catch_stmt->catch_block.get())) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 auto interpreter_t::visit(interface_definition_t& node) -> void
@@ -3162,6 +3280,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
         
         // Push method scope
         m_scope_stack.push_back(method_scope);
+        m_expected_return_types.push_back(method->return_type_name);
         
         try
         {
@@ -3176,9 +3295,24 @@ auto interpreter_t::visit(method_call_t& node) -> void
             // Method returned a value
             m_current_result = return_val.value;
         }
+        catch (const std::runtime_error& e)
+        {
+            // Pop method scope and re-throw
+            m_scope_stack.pop_back();
+            m_expected_return_types.pop_back();
+            for (const auto& param : method->parameters)
+            {
+                if (param.is_const)
+                {
+                    m_const_variables.erase(param.name);
+                }
+            }
+            throw;
+        }
         
         // Pop method scope
         m_scope_stack.pop_back();
+        m_expected_return_types.pop_back();
         
         // Remove const parameters from tracking when leaving method scope
         for (const auto& param : method->parameters)

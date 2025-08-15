@@ -271,11 +271,11 @@ lambdaParameters
     ;
 
 lambdaExpression
-    : lambdaParameters ARROW (expression | block)
+    : lambdaParameters (COLON NAME)? ARROW (expression | block)
     ;
 
 asyncLambdaExpression
-    : ASYNC lambdaParameters ARROW (expression | block)
+    : ASYNC lambdaParameters (COLON NAME)? ARROW (expression | block)
 
 listLiteral
     : LBRACKET (expression (COMMA expression)*)? RBRACKET

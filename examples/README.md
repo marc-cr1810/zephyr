@@ -266,6 +266,11 @@ These files provide complete, organized demonstrations of Zephyr features with c
 - Practical use cases and common scenarios for each function.
 - Demonstrates type conversions, list/dictionary manipulations, and asynchronous operations.
 
+### 24_explicit_typing_and_init_restrictions.zephyr
+**Demonstrates explicit return types and init method restrictions**
+- Explicit return types for functions, class methods, and lambdas.
+- Restrictions on `init` methods, which cannot have a return type or return a value.
+
 ### 09_string_operations.zephyr
 **Advanced string manipulation and formatting**
 - String concatenation and basic operations

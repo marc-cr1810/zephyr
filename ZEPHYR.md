@@ -323,18 +323,18 @@ print("Config:", config)
 ### Lambda Functions with Explicit Typing
 
 ```gemini
-# Lambda with explicitly typed parameters
-multiply : lambda = (a : int, b : int) -> a * b
+# Lambda with explicitly typed parameters and return type
+multiply : lambda = (a : int, b : int) : int -> a * b
 result : int = multiply(6, 7)
 print("Multiply result:", result)
 
-# Lambda with mixed typing
-process : lambda = (data : string, count) -> data * count
+# Lambda with mixed typing and explicit return type
+process : lambda = (data : string, count) : string -> data * count
 result2 : string = process("Hi", 3)
 print("Process result:", result2)
 
-# Lambda with const typed parameters
-formatter : lambda = (const template : string, const value : int) -> {
+# Lambda with const typed parameters and explicit return type
+formatter : lambda = (const template : string, const value : int) : string -> {
     # template = "changed"  # Would error: const parameter
     return template + ": " + str(value)
 }
@@ -342,8 +342,8 @@ formatter : lambda = (const template : string, const value : int) -> {
 formatted : string = formatter("Score", 95)
 print("Formatted:", formatted)
 
-# Async lambda with typed parameters
-async_processor : lambda = async (input : string, delay : int) -> {
+# Async lambda with typed parameters and explicit return type
+async_processor : lambda = async (input : string, delay : int) : string -> {
     print("Processing", input, "with delay", delay)
     return "Processed: " + input
 }
@@ -353,9 +353,9 @@ print("Async lambda result:", async_result)
 
 # Lambda functions in data structures with typing
 math_ops : list = [
-    (a : int, b : int) -> a + b,
-    (a : int, b : int) -> a - b,
-    (a : int, b : int) -> a * b
+    (a : int, b : int) : int -> a + b,
+    (a : int, b : int) : int -> a - b,
+    (a : int, b : int) : int -> a * b
 ]
 
 # Using typed lambdas from collections
@@ -1575,9 +1575,10 @@ The project includes comprehensive example scripts in the `examples/` directory 
 *   `18_optional_chaining.zephyr` - Demonstrates optional chaining (`?.`, `?[]`) and direct dictionary member access (`dict.key`)
 *   `19_async_class_methods.zephyr` - Async class methods with spawn and const parameters
 *   `20_explicit_typing.zephyr` - Optional explicit typing system for enhanced type safety
-
-
-## Development & Tooling
+*   `21_exit_function.zephyr` - Comprehensive exit() function usage and error handling patterns
+*   `22_interfaces.zephyr` - Defining and implementing interfaces for contract-based programming
+*   `23_built_in_functions.zephyr` - Comprehensive demonstration of all built-in functions
+*   `24_explicit_typing_and_init_restrictions.zephyr` - Demonstrates explicit return types and init method restrictions
 
 ### Parser Synchronization
 

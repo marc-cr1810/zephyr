@@ -1162,8 +1162,8 @@ public:
 class function_definition_t : public statement_t
 {
 public:
-    function_definition_t(const std::string& function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, bool is_async, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), is_async(is_async)
+    function_definition_t(const std::string& function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, const std::string& return_type_name, bool has_explicit_return_type, bool is_async, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), return_type_name(return_type_name), has_explicit_return_type(has_explicit_return_type), is_async(is_async)
     {
     }
 
@@ -1173,19 +1173,21 @@ public:
     std::string function_name;
     std::vector<parameter_t> parameters;
     std::unique_ptr<block_t> body;
+    std::string return_type_name;
+    bool has_explicit_return_type;
     bool is_async;
 };
 
 class lambda_expression_t : public expression_t
 {
 public:
-    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<expression_t> body_expression, bool is_async, int line, int column, int end_line, int end_column)
-        : expression_t(line, column, end_line, end_column), parameters(std::move(parameters)), body_expression(std::move(body_expression)), body_block(nullptr), is_block_body(false), is_async(is_async)
+    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<expression_t> body_expression, const std::string& return_type_name, bool has_explicit_return_type, bool is_async, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), parameters(std::move(parameters)), body_expression(std::move(body_expression)), body_block(nullptr), return_type_name(return_type_name), has_explicit_return_type(has_explicit_return_type), is_block_body(false), is_async(is_async)
     {
     }
 
-    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<block_t> body_block, bool is_async, int line, int column, int end_line, int end_column)
-        : expression_t(line, column, end_line, end_column), parameters(std::move(parameters)), body_expression(nullptr), body_block(std::move(body_block)), is_block_body(true), is_async(is_async)
+    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<block_t> body_block, const std::string& return_type_name, bool has_explicit_return_type, bool is_async, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), parameters(std::move(parameters)), body_expression(nullptr), body_block(std::move(body_block)), return_type_name(return_type_name), has_explicit_return_type(has_explicit_return_type), is_block_body(true), is_async(is_async)
     {
     }
 
@@ -1195,6 +1197,8 @@ public:
     std::vector<parameter_t> parameters;
     std::unique_ptr<expression_t> body_expression;
     std::unique_ptr<block_t> body_block;
+    std::string return_type_name;
+    bool has_explicit_return_type;
     bool is_block_body;
     bool is_async;
 };
@@ -1203,6 +1207,8 @@ struct function_signature_t
 {
     std::string name;
     std::vector<parameter_t> parameters;
+    std::string return_type_name;
+    bool has_explicit_return_type;
 };
 
 class interface_definition_t : public statement_t

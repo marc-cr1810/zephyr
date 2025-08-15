@@ -110,6 +110,7 @@ private:
     auto clone_expression(expression_t* expr) -> std::unique_ptr<expression_t>;
     auto clone_statement(statement_t* stmt) -> std::unique_ptr<statement_t>;
     auto clone_block(block_t* block) -> std::unique_ptr<block_t>;
+    auto contains_return_with_value(block_t* block) -> bool;
 
 private:
     // Private member variables
@@ -119,6 +120,7 @@ private:
     std::string m_source_code;
     std::map<std::string, std::string> m_type_constraints;
     std::set<std::string> m_const_variables;
+    std::vector<std::string> m_expected_return_types;
 
 protected:
     // Protected methods

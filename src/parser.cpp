@@ -1243,10 +1243,63 @@ std::unique_ptr<function_definition_t> parser_t::function_definition() {
     token_t name_token = m_current_token;
     eat(token_type_e::name);
 
-    std::vector<parameter_t> parameters = parse_parameter_list();
+    if (name_token.text == "init" && m_current_token.type == token_type_e::colon) {
+        throw parsing_error_t("init method cannot have an explicit return type", m_current_token.line, m_current_token.column);
+    }
+
+    eat(token_type_e::lparen);
+    std::vector<parameter_t> parameters;
+    if (m_current_token.type != token_type_e::rparen) {
+        bool is_const = false;
+        if (m_current_token.type == token_type_e::const_token) {
+            is_const = true;
+            eat(token_type_e::const_token);
+        }
+        std::string param_name = m_current_token.text;
+        eat(token_type_e::name);
+        std::string type_name = "";
+        bool has_explicit_type = false;
+        if (m_current_token.type == token_type_e::colon) {
+            eat(token_type_e::colon);
+            type_name = m_current_token.text;
+            has_explicit_type = true;
+            eat(token_type_e::name);
+        }
+        parameters.push_back({param_name, is_const, type_name, has_explicit_type});
+
+        while (m_current_token.type == token_type_e::comma) {
+            eat(token_type_e::comma);
+            is_const = false;
+            if (m_current_token.type == token_type_e::const_token) {
+                is_const = true;
+                eat(token_type_e::const_token);
+            }
+            param_name = m_current_token.text;
+            eat(token_type_e::name);
+            type_name = "";
+            has_explicit_type = false;
+            if (m_current_token.type == token_type_e::colon) {
+                eat(token_type_e::colon);
+                type_name = m_current_token.text;
+                has_explicit_type = true;
+                eat(token_type_e::name);
+            }
+            parameters.push_back({param_name, is_const, type_name, has_explicit_type});
+        }
+    }
+    eat(token_type_e::rparen);
+
+    std::string return_type_name = "";
+    bool has_explicit_return_type = false;
+    if (m_current_token.type == token_type_e::colon) {
+        eat(token_type_e::colon);
+        return_type_name = m_current_token.text;
+        has_explicit_return_type = true;
+        eat(token_type_e::name);
+    }
 
     auto body = block();
-    return std::make_unique<function_definition_t>(name_token.text, parameters, std::move(body), is_async,
+    return std::make_unique<function_definition_t>(name_token.text, std::move(parameters), std::move(body), return_type_name, has_explicit_return_type, is_async,
                                                func_token.line, func_token.column, m_current_token.line, m_current_token.column);
 }
 
@@ -1705,7 +1758,6 @@ std::unique_ptr<lambda_expression_t> parser_t::lambda_function() {
     token_t start_token = m_current_token;
     bool is_async = false;
 
-    // Check for async keyword
     if (m_current_token.type == token_type_e::async) {
         is_async = true;
         eat(token_type_e::async);
@@ -1713,16 +1765,23 @@ std::unique_ptr<lambda_expression_t> parser_t::lambda_function() {
 
     std::vector<parameter_t> parameters = parse_parameter_list();
 
-    // Parse arrow
+    std::string return_type_name = "";
+    bool has_explicit_return_type = false;
+    if (m_current_token.type == token_type_e::colon) {
+        eat(token_type_e::colon);
+        return_type_name = m_current_token.text;
+        has_explicit_return_type = true;
+        eat(token_type_e::name);
+    }
+
     eat(token_type_e::arrow);
 
-    // Parse body (expression or block)
     if (m_current_token.type == token_type_e::lbrace) {
         auto body_block = block();
         return std::make_unique<lambda_expression_t>(
             std::move(parameters),
             std::move(body_block),
-            is_async,
+            return_type_name, has_explicit_return_type, is_async,
             start_token.line,
             start_token.column,
             body_block->end_line,
@@ -1733,7 +1792,7 @@ std::unique_ptr<lambda_expression_t> parser_t::lambda_function() {
         return std::make_unique<lambda_expression_t>(
             std::move(parameters),
             std::move(body_expr),
-            is_async,
+            return_type_name, has_explicit_return_type, is_async,
             start_token.line,
             start_token.column,
             body_expr->end_line,
@@ -1897,7 +1956,9 @@ function_signature_t parser_t::function_signature() {
 
     return function_signature_t{
         name_token.text,
-        std::move(parameters)
+        std::move(parameters),
+        return_type_name,
+        has_return_type
     };
 }
 

@@ -46,6 +46,7 @@ examples=(
     "21_exit_function.zephyr"
     "22_interfaces.zephyr"
     "23_built_in_functions.zephyr"
+    "24_explicit_typing_and_init_restrictions.zephyr"
 )
 
 # Counters

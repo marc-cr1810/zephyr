@@ -26,11 +26,13 @@ public:
     auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
 
-    explicit function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, bool async = false);
+    explicit function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, const std::string& return_type_name, bool has_explicit_return_type, bool async = false);
 
 public:
     std::vector<parameter_t> m_parameters;
     std::unique_ptr<block_t> m_body;
+    std::string m_return_type_name;
+    bool m_has_explicit_return_type;
     bool m_is_async;
 
 private:

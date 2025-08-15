@@ -1,0 +1,101 @@
+# 24_explicit_typing_and_init_restrictions.zephyr
+# This example demonstrates explicit return types and init method restrictions.
+
+print("=== Explicit Return Types and Init Method Restrictions ===")
+
+# ==============================================================================
+# Explicit Return Types
+# ==============================================================================
+
+print("\n--- Testing Explicit Return Types ---")
+
+# 1. Function with explicit return type
+func add(a : int, b : int) : int {
+    return a + b
+}
+print("Function add(2, 3):", add(2, 3)) # Expected: 5
+
+# 2. Interface with explicit return types
+interface Calculable {
+    func calculate(x : int) : int
+}
+
+# 3. Class implementing the interface
+class Calculator : Calculable {
+    func calculate(x : int) : int {
+        return x * x
+    }
+
+    async func async_calculate(x : int) : int {
+        return x + 10
+    }
+}
+
+calc = Calculator()
+print("Class method calculate(5):", calc.calculate(5)) # Expected: 25
+
+async_result = await calc.async_calculate(15)
+print("Async class method async_calculate(15):", async_result) # Expected: 25
+
+# 4. Lambda with explicit return type
+square = (x : int) : int -> x * x
+print("Lambda square(6):", square(6)) # Expected: 36
+
+# 5. Async lambda with explicit return type
+async_add = async (a : int, b : int) : int -> a + b
+lambda_result = await async_add(10, 20)
+print("Async lambda async_add(10, 20):", lambda_result) # Expected: 30
+
+# 6. Test for type mismatch error
+func string_returner() : string {
+    return 123 # This should cause a runtime error
+}
+
+try {
+    string_returner()
+} catch e {
+    print("Caught expected error for return type mismatch:", e)
+}
+
+# ==============================================================================
+# Init Method Restrictions
+# ==============================================================================
+
+print("\n--- Testing init Method Restrictions ---")
+
+# 1. Class with an init method that has an explicit return type.
+# This should fail at parse time, so it is commented out.
+#
+# class InvalidInitReturnType {
+#     func init() : int {
+#         return 123
+#     }
+# }
+
+# 2. Class with an init method that returns a value.
+# This should throw a runtime error when the class is instantiated.
+class InvalidInitReturnValue {
+    func init() {
+        return 123
+    }
+}
+
+try {
+    instance = InvalidInitReturnValue()
+} catch e {
+    print("Caught expected error for init returning a value:", e)
+}
+
+# 3. Class with a valid init method.
+class ValidInit {
+    name : string
+    func init(name : string) {
+        this.name = name
+        # No return statement with a value
+    }
+}
+
+instance = ValidInit("test")
+print("Successfully created instance of ValidInit with name:", instance.name)
+
+print("\n=== Tests Complete ===")

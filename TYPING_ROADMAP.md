@@ -10,6 +10,7 @@
 - ✅ **Function Parameter Typing**: `func add(a : int, b : int)`
 - ✅ **Function Return Types**: `func calculate() : float`
 - ✅ **Lambda Parameter Typing**: `(a : int, b : int) -> a + b`
+- ✅ **Lambda Return Types**: `(a : int, b : int) : int -> a + b`
 - ✅ **For-Each Loop Variable Typing**: `for item : string in list`
 - ✅ **Const Loop Variables**: `for const item : int in numbers`
 - ✅ **Class Member Variable Typing**: `name : string = "Unknown"`
@@ -181,7 +182,7 @@ func render_shape(shape : Drawable) : string {
 **Implementation Requirements**:
 - Interface declaration syntax
 - Interface implementation validation
-- Method signature compatibility checking
+- Method signature compatibility checking (including return types)
 - Interface inheritance support
 - Dynamic interface checking
 
