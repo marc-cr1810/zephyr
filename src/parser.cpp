@@ -1,10 +1,8 @@
 #include "parser.hpp"
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <memory>
 #include "ast.hpp"
-#include "objects/objects.hpp"
 
 namespace zephyr
 {
@@ -573,10 +571,10 @@ std::unique_ptr<expression_t> parser_t::factor() {
         if (next_token.type == token_type_e::name || next_token.type == token_type_e::lparen || next_token.type == token_type_e::const_token) {
             // Handle different async lambda patterns:
             // async x -> expr
-            // async const x -> expr  
+            // async const x -> expr
             // async (x, y) -> expr
             // async (const a, const b) -> expr
-            
+
             if (next_token.type == token_type_e::name) {
                 // Pattern: async x -> expr
                 token_t third_token = m_lexer.peek_after(next_token);

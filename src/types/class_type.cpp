@@ -1,5 +1,5 @@
 #include "types/class_type.hpp"
-#include "objects/objects.hpp"
+#include "objects/object.hpp"
 #include <stdexcept>
 
 namespace zephyr
@@ -19,7 +19,7 @@ auto class_type_t::get_instance(const std::string& class_name) -> std::shared_pt
     if (it != s_instances.end()) {
         return it->second;
     }
-    
+
     auto instance = std::shared_ptr<class_type_t>(new class_type_t(class_name));
     s_instances[class_name] = instance;
     return instance;
@@ -71,7 +71,7 @@ auto class_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object
     {
         return false;
     }
-    
+
     // Instance equality is pointer equality
     return self.get() == other.get();
 }
