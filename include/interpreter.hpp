@@ -192,8 +192,8 @@ public:
 class runtime_error_with_location_t : public std::runtime_error
 {
 public:
-    runtime_error_with_location_t(const std::string& message, int line, int column, int length)
-        : std::runtime_error(message), line(line), column(column), length(length)
+    runtime_error_with_location_t(const std::string& message, int line, int column, int length, const std::string& error_name = "Error")
+        : std::runtime_error(message), line(line), column(column), length(length), error_name(error_name)
     {
     }
 
@@ -201,6 +201,7 @@ public:
     int line;
     int column;
     int length;
+    std::string error_name;
 };
 
 }

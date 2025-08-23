@@ -1,6 +1,7 @@
 #include "types/interface_type.hpp"
 #include "objects/objects.hpp"
 #include <stdexcept>
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -78,7 +79,7 @@ auto interface_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<ob
 
 auto interface_type_t::throw_unsupported_operation(const std::string& operation) const -> void
 {
-    throw std::runtime_error("Unsupported operation '" + operation + "' for interface type '" + m_interface_name + "'");
+    throw type_error_t("Unsupported operation '" + operation + "' for interface type '" + m_interface_name + "'", 0, 0, 1);
 }
 
 }

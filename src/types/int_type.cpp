@@ -1,6 +1,6 @@
 #include "types/int_type.hpp"
 #include "objects/objects.hpp"
-#include <stdexcept>
+#include "errors.hpp"
 #include <cmath>
 
 namespace zephyr
@@ -22,7 +22,7 @@ auto int_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> o
     {
         return std::make_shared<float_object_t>(static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value()) + other_float->get_value());
     }
-    throw std::runtime_error("Unsupported operand types for +");
+    throw type_error_t("Unsupported operand types for +", 0, 0, 1);
 }
 
 auto int_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -35,7 +35,7 @@ auto int_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object
     {
         return std::make_shared<float_object_t>(static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value()) - other_float->get_value());
     }
-    throw std::runtime_error("Unsupported operand types for -");
+    throw type_error_t("Unsupported operand types for -", 0, 0, 1);
 }
 
 auto int_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -63,7 +63,7 @@ auto int_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object
         }
         return std::make_shared<string_object_t>(result);
     }
-    throw std::runtime_error("Unsupported operand types for *");
+    throw type_error_t("Unsupported operand types for *", 0, 0, 1);
 }
 
 auto int_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -72,7 +72,7 @@ auto int_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_int->get_value() == 0)
         {
-            throw std::runtime_error("Division by zero");
+            throw zero_division_error_t("Division by zero", 0, 0, 1);
         }
         return std::make_shared<int_object_t>(std::static_pointer_cast<int_object_t>(self)->get_value() / other_int->get_value());
     }
@@ -80,11 +80,11 @@ auto int_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_float->get_value() == 0.0)
         {
-            throw std::runtime_error("Division by zero");
+            throw zero_division_error_t("Division by zero", 0, 0, 1);
         }
         return std::make_shared<float_object_t>(static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value()) / other_float->get_value());
     }
-    throw std::runtime_error("Unsupported operand types for /");
+    throw type_error_t("Unsupported operand types for /", 0, 0, 1);
 }
 
 auto int_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -93,7 +93,7 @@ auto int_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_int->get_value() == 0)
         {
-            throw std::runtime_error("Modulo by zero");
+            throw zero_division_error_t("Modulo by zero", 0, 0, 1);
         }
         return std::make_shared<int_object_t>(std::static_pointer_cast<int_object_t>(self)->get_value() % other_int->get_value());
     }
@@ -101,12 +101,12 @@ auto int_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_float->get_value() == 0.0)
         {
-            throw std::runtime_error("Modulo by zero");
+            throw zero_division_error_t("Modulo by zero", 0, 0, 1);
         }
         double left_val = static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value());
         return std::make_shared<float_object_t>(fmod(left_val, other_float->get_value()));
     }
-    throw std::runtime_error("Unsupported operand types for %");
+    throw type_error_t("Unsupported operand types for %", 0, 0, 1);
 }
 
 auto int_type_t::get_name() const -> std::string
@@ -126,7 +126,7 @@ auto int_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         return false;
     }
-    
+
     auto self_int = std::static_pointer_cast<int_object_t>(self);
     auto other_int = std::static_pointer_cast<int_object_t>(other);
     return self_int->get_value() == other_int->get_value();
@@ -135,7 +135,7 @@ auto int_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t
 auto int_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> int
 {
     int self_value = std::static_pointer_cast<int_object_t>(self)->get_value();
-    
+
     if (auto other_int = std::dynamic_pointer_cast<int_object_t>(other))
     {
         int other_value = other_int->get_value();
@@ -153,7 +153,7 @@ auto int_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<object_
     }
     else
     {
-        throw std::runtime_error("Cannot compare int with " + other->get_type()->get_name());
+        throw type_error_t("Cannot compare int with " + other->get_type()->get_name(), 0, 0, 1);
     }
 }
 

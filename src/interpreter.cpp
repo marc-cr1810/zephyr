@@ -6,6 +6,7 @@
 #include "objects/interface_object.hpp"
 #include "objects/class_instance_object.hpp"
 #include "async_scheduler.hpp"
+#include "errors.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -32,7 +33,7 @@ auto print_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
 auto len_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("len() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("len() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto obj = args[0];
@@ -48,7 +49,7 @@ auto len_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
         auto dict_obj = std::static_pointer_cast<dictionary_object_t>(obj);
         return std::make_shared<int_object_t>(static_cast<int>(dict_obj->get_elements().size()));
     } else {
-        throw std::runtime_error("len() argument must be a string, list, or dictionary, not '" + type_name + "'");
+        throw type_error_t("len() argument must be a string, list, or dictionary, not '" + type_name + "'", 0, 0, 1);
     }
 }
 
@@ -59,7 +60,7 @@ auto input_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
     if (args.size() == 1) {
         prompt = args[0]->to_string();
     } else if (args.size() > 1) {
-        throw std::runtime_error("input() takes at most 1 argument (" + std::to_string(args.size()) + " given)");
+                        throw type_error_t("input() takes at most 1 argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     std::cout << prompt;
@@ -72,7 +73,7 @@ auto input_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
 auto str_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("str() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("str() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     return std::make_shared<string_object_t>(args[0]->to_string());
@@ -82,7 +83,7 @@ auto str_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("int() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("int() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto obj = args[0];
@@ -99,13 +100,13 @@ auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
             int value = std::stoi(str_obj->get_value());
             return std::make_shared<int_object_t>(value);
         } catch (const std::exception&) {
-            throw std::runtime_error("invalid literal for int(): '" + str_obj->get_value() + "'");
+            throw value_error_t("invalid literal for int(): '" + str_obj->get_value() + "'", 0, 0, 1);
         }
     } else if (type_name == "bool") {
         auto bool_obj = std::static_pointer_cast<boolean_object_t>(obj);
         return std::make_shared<int_object_t>(bool_obj->m_value ? 1 : 0);
     } else {
-        throw std::runtime_error("int() argument must be a string, number, or bool, not '" + type_name + "'");
+        throw type_error_t("int() argument must be a string, number, or bool, not '" + type_name + "'", 0, 0, 1);
     }
 }
 
@@ -113,7 +114,7 @@ auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto float_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("float() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+                throw type_error_t("float() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto obj = args[0];
@@ -130,13 +131,13 @@ auto float_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
             double value = std::stod(str_obj->get_value());
             return std::make_shared<float_object_t>(value);
         } catch (const std::exception&) {
-            throw std::runtime_error("could not convert string to float: '" + str_obj->get_value() + "'");
+            throw value_error_t("could not convert string to float: '" + str_obj->get_value() + "'", 0, 0, 1);
         }
     } else if (type_name == "bool") {
         auto bool_obj = std::static_pointer_cast<boolean_object_t>(obj);
         return std::make_shared<float_object_t>(bool_obj->m_value ? 1.0 : 0.0);
     } else {
-        throw std::runtime_error("float() argument must be a string, number, or bool, not '" + type_name + "'");
+        throw type_error_t("float() argument must be a string, number, or bool, not '" + type_name + "'", 0, 0, 1);
     }
 }
 
@@ -144,14 +145,14 @@ auto float_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
 auto append_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 2) {
-        throw std::runtime_error("append() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("append() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto list_obj = args[0];
     auto item = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw std::runtime_error("append() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
+        throw type_error_t("append() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -164,17 +165,17 @@ auto append_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() < 1 || args.size() > 2) {
-        throw std::runtime_error("pop() takes 1 or 2 arguments (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("pop() takes 1 or 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto list_obj = args[0];
     if (list_obj->get_type()->get_name() != "list") {
-        throw std::runtime_error("pop() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
+        throw type_error_t("pop() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
     if (list->get_elements().empty()) {
-        throw std::runtime_error("pop from empty list");
+        throw index_error_t("pop from empty list", 0, 0, 1);
     }
 
     int index = static_cast<int>(list->get_elements().size()) - 1; // Default to last element
@@ -182,7 +183,7 @@ auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
     if (args.size() == 2) {
         auto index_obj = args[1];
         if (index_obj->get_type()->get_name() != "int") {
-            throw std::runtime_error("pop() index must be an integer, not '" + index_obj->get_type()->get_name() + "'");
+            throw type_error_t("pop() index must be an integer, not '" + index_obj->get_type()->get_name() + "'", 0, 0, 1);
         }
         auto int_obj = std::static_pointer_cast<int_object_t>(index_obj);
         index = int_obj->get_value();
@@ -193,7 +194,7 @@ auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
         }
 
         if (index < 0 || index >= static_cast<int>(list->get_elements().size())) {
-            throw std::runtime_error("pop index out of range");
+            throw index_error_t("pop index out of range", 0, 0, 1);
         }
     }
 
@@ -206,12 +207,12 @@ auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto keys_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("keys() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("keys() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto dict_obj = args[0];
     if (dict_obj->get_type()->get_name() != "dictionary") {
-        throw std::runtime_error("keys() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'");
+        throw type_error_t("keys() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto dict = std::static_pointer_cast<dictionary_object_t>(dict_obj);
@@ -228,12 +229,12 @@ auto keys_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sh
 auto values_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("values() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("values() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto dict_obj = args[0];
     if (dict_obj->get_type()->get_name() != "dictionary") {
-        throw std::runtime_error("values() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'");
+        throw type_error_t("values() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto dict = std::static_pointer_cast<dictionary_object_t>(dict_obj);
@@ -250,7 +251,7 @@ auto values_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto type_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("type() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("type() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     return std::make_shared<string_object_t>(args[0]->get_type()->get_name());
@@ -260,19 +261,19 @@ auto type_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sh
 auto map_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 2) {
-        throw std::runtime_error("map() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("map() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto list_obj = args[0];
     auto func_obj = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw std::runtime_error("map() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
+        throw type_error_t("map() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto func_type = func_obj->get_type()->get_name();
     if (func_type != "function" && func_type != "lambda" && func_type != "builtin_function") {
-        throw std::runtime_error("map() second argument must be a function, not '" + func_type + "'");
+        throw type_error_t("map() second argument must be a function, not '" + func_type + "'", 0, 0, 1);
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -292,19 +293,19 @@ auto map_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto filter_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 2) {
-        throw std::runtime_error("filter() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("filter() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto list_obj = args[0];
     auto func_obj = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw std::runtime_error("filter() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
+        throw type_error_t("filter() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto func_type = func_obj->get_type()->get_name();
     if (func_type != "function" && func_type != "lambda" && func_type != "builtin_function") {
-        throw std::runtime_error("filter() second argument must be a function, not '" + func_type + "'");
+        throw type_error_t("filter() second argument must be a function, not '" + func_type + "'", 0, 0, 1);
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -325,24 +326,24 @@ auto filter_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto reduce_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() < 2 || args.size() > 3) {
-        throw std::runtime_error("reduce() takes 2 or 3 arguments (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("reduce() takes 2 or 3 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto list_obj = args[0];
     auto func_obj = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw std::runtime_error("reduce() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
+        throw type_error_t("reduce() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto func_type = func_obj->get_type()->get_name();
     if (func_type != "function" && func_type != "lambda" && func_type != "builtin_function") {
-        throw std::runtime_error("reduce() second argument must be a function, not '" + func_type + "'");
+        throw type_error_t("reduce() second argument must be a function, not '" + func_type + "'", 0, 0, 1);
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
     if (list->get_elements().empty() && args.size() < 3) {
-        throw std::runtime_error("reduce() of empty sequence with no initial value");
+        throw value_error_t("reduce() of empty sequence with no initial value", 0, 0, 1);
     }
 
     std::shared_ptr<object_t> accumulator;
@@ -364,12 +365,12 @@ auto reduce_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto enumerate_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("enumerate() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+                throw type_error_t("enumerate() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto list_obj = args[0];
     if (list_obj->get_type()->get_name() != "list") {
-        throw std::runtime_error("enumerate() argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
+        throw type_error_t("enumerate() argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -390,7 +391,7 @@ auto enumerate_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> st
 auto zip_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() < 2) {
-        throw std::runtime_error("zip() requires at least 2 arguments (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("zip() requires at least 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     std::vector<std::shared_ptr<list_object_t>> lists;
@@ -399,7 +400,7 @@ auto zip_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
     // Validate all arguments are lists and find minimum length
     for (const auto& arg : args) {
         if (arg->get_type()->get_name() != "list") {
-            throw std::runtime_error("zip() arguments must be lists, not '" + arg->get_type()->get_name() + "'");
+            throw type_error_t("zip() arguments must be lists, not '" + arg->get_type()->get_name() + "'", 0, 0, 1);
         }
 
         auto list = std::static_pointer_cast<list_object_t>(arg);
@@ -424,12 +425,12 @@ auto zip_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto all_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw std::runtime_error("all() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("all() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     auto list_obj = args[0];
     if (list_obj->get_type()->get_name() != "list") {
-        throw std::runtime_error("all() argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
+        throw type_error_t("all() argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -441,7 +442,7 @@ auto all_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
             auto promise = std::static_pointer_cast<promise_object_t>(element);
             promises.push_back(promise);
         } else {
-            throw std::runtime_error("all() list must contain only Promise objects");
+            throw type_error_t("all() list must contain only Promise objects", 0, 0, 1);
         }
     }
 
@@ -461,10 +462,10 @@ auto exit_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sh
             auto int_obj = std::static_pointer_cast<int_object_t>(code_obj);
             exit_code = int_obj->get_value();
         } else {
-            throw std::runtime_error("exit() argument must be an integer, not '" + code_obj->get_type()->get_name() + "'");
+            throw type_error_t("exit() argument must be an integer, not '" + code_obj->get_type()->get_name() + "'", 0, 0, 1);
         }
     } else if (args.size() > 1) {
-        throw std::runtime_error("exit() takes at most 1 argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("exit() takes at most 1 argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
     }
 
     std::exit(exit_code);
@@ -602,7 +603,7 @@ auto interpreter_t::visit(name_t& node) -> void
             return;
         }
     }
-    throw runtime_error_with_location_t("Undefined variable: " + node.name, node.line, node.column, node.name.length());
+    throw name_error_t("Undefined variable: " + node.name, node.line, node.column, node.name.length());
 }
 
 auto interpreter_t::visit(binary_op_t& node) -> void
@@ -612,32 +613,25 @@ auto interpreter_t::visit(binary_op_t& node) -> void
     node.right->accept(*this);
     auto right = m_current_result;
 
-    try {
-        if (node.operator_token == '+')
-        {
-            m_current_result = left->add(right);
-        }
-        else if (node.operator_token == '-')
-        {
-            m_current_result = left->subtract(right);
-        }
-        else if (node.operator_token == '*')
-        {
-            m_current_result = left->multiply(right);
-        }
-        else if (node.operator_token == '/')
-        {
-            m_current_result = left->divide(right);
-        }
-        else if (node.operator_token == '%')
-        {
-            m_current_result = left->modulo(right);
-        }
-    }
-    catch (const std::runtime_error& e)
+    if (node.operator_token == '+')
     {
-        // Re-throw with location information for better error reporting
-        throw runtime_error_with_location_t(e.what(), node.line, node.column, 1);
+        m_current_result = left->add(right);
+    }
+    else if (node.operator_token == '-')
+    {
+        m_current_result = left->subtract(right);
+    }
+    else if (node.operator_token == '*')
+    {
+        m_current_result = left->multiply(right);
+    }
+    else if (node.operator_token == '/')
+    {
+        m_current_result = left->divide(right);
+    }
+    else if (node.operator_token == '%')
+    {
+        m_current_result = left->modulo(right);
     }
 }
 
@@ -806,7 +800,7 @@ auto interpreter_t::visit(comparison_op_t& node) -> void
         }
         else
         {
-            throw std::runtime_error("Cannot compare objects of different types or unsupported types");
+            throw type_error_t("Cannot compare objects of different types or unsupported types", node.line, node.column, 1);
         }
     }
 
@@ -922,14 +916,7 @@ auto interpreter_t::visit(index_access_t& node) -> void
     node.index->accept(*this);
     auto index_obj = m_current_result;
 
-    try {
-        m_current_result = list_obj->get_item(index_obj);
-    }
-    catch (const std::runtime_error& e)
-    {
-        // Re-throw with location information for better error reporting
-        throw runtime_error_with_location_t(e.what(), node.line, node.column, 1);
-    }
+    m_current_result = list_obj->get_item(index_obj);
 }
 
 auto interpreter_t::visit(optional_index_access_t& node) -> void
@@ -1153,7 +1140,7 @@ auto interpreter_t::visit(assignment_t& node) -> void
     // Check if variable is const before assignment
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw runtime_error_with_location_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
     }
 
     node.value->accept(*this);
@@ -1249,7 +1236,7 @@ auto interpreter_t::visit(compound_assignment_t& node) -> void
     // Check if variable is const before assignment
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw runtime_error_with_location_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
     }
 
     // Get current value
@@ -1293,7 +1280,7 @@ auto interpreter_t::visit(compound_assignment_t& node) -> void
             return;
         }
     }
-    throw runtime_error_with_location_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+    throw name_error_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
 }
 
 auto interpreter_t::visit(compound_member_assignment_t& node) -> void
@@ -1316,7 +1303,7 @@ auto interpreter_t::visit(increment_decrement_t& node) -> void
     // Check if variable is const before increment/decrement
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw runtime_error_with_location_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
     }
 
     // Find variable in scope
@@ -1333,7 +1320,7 @@ auto interpreter_t::visit(increment_decrement_t& node) -> void
 
     if (!var_ptr)
     {
-        throw runtime_error_with_location_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw name_error_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
     }
 
     auto current_value = *var_ptr;
@@ -1372,7 +1359,7 @@ auto interpreter_t::visit(increment_decrement_t& node) -> void
     }
     else
     {
-        throw std::runtime_error("Cannot apply increment/decrement to non-numeric type");
+        throw type_error_t("Cannot apply increment/decrement to non-numeric type", node.line, node.column, 1);
     }
 }
 
@@ -1381,7 +1368,7 @@ auto interpreter_t::visit(increment_decrement_expression_t& node) -> void
     // Check if variable is const before increment/decrement
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw runtime_error_with_location_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
     }
 
     // Find variable in scope
@@ -1398,7 +1385,7 @@ auto interpreter_t::visit(increment_decrement_expression_t& node) -> void
 
     if (!var_ptr)
     {
-        throw runtime_error_with_location_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw name_error_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
     }
 
     auto current_value = *var_ptr;
@@ -1463,7 +1450,7 @@ auto interpreter_t::visit(increment_decrement_expression_t& node) -> void
     }
     else
     {
-        throw std::runtime_error("Cannot apply increment/decrement to non-numeric type");
+        throw type_error_t("Cannot apply increment/decrement to non-numeric type", node.line, node.column, 1);
     }
 }
 
@@ -1815,7 +1802,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
     if (!func_obj)
     {
-        throw runtime_error_with_location_t("Undefined function: " + node.function_name, node.line, node.column, node.function_name.length());
+        throw name_error_t("Undefined function: " + node.function_name, node.line, node.column, node.function_name.length());
     }
 
     std::vector<std::shared_ptr<object_t>> args;
@@ -1839,7 +1826,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         // Check parameter count
         if (args.size() != func->m_parameters.size())
         {
-            throw runtime_error_with_location_t("Function '" + node.function_name + "' expects " +
+            throw type_error_t("Function '" + node.function_name + "' expects " +
                                    std::to_string(func->m_parameters.size()) + " arguments, got " +
                                    std::to_string(args.size()), node.line, node.column, node.function_name.length());
         }
@@ -1875,7 +1862,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                         }
                     }
                     if (!is_interface) {
-                        throw runtime_error_with_location_t("Type mismatch for parameter '" + param.name +
+                        throw type_error_t("Type mismatch for parameter '" + param.name +
                                                "': expected " + param.type_name +
                                                ", got " + args[i]->get_type()->get_name(), node.line, node.column, node.function_name.length());
                     }
@@ -1945,7 +1932,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         // Check parameter count
         if (args.size() != lambda->m_parameters.size())
         {
-            throw runtime_error_with_location_t("Lambda function expects " +
+            throw type_error_t("Lambda function expects " +
                                    std::to_string(lambda->m_parameters.size()) + " arguments, got " +
                                    std::to_string(args.size()), node.line, node.column, 1);
         }
@@ -1976,7 +1963,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
                 if (actual_type != expected_type)
                 {
-                    throw runtime_error_with_location_t("Type mismatch for parameter '" + param.name +
+                    throw type_error_t("Type mismatch for parameter '" + param.name +
                                            "': expected " + param.type_name +
                                            ", got " + args[i]->get_type()->get_name(), node.line, node.column, 1);
                 }
@@ -2014,7 +2001,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 }
                 else
                 {
-                    throw std::runtime_error("Lambda body expression is null - possible AST corruption");
+                    throw runtime_error_with_location_t("Lambda body expression is null - possible AST corruption", 0, 0, 1, "InternalError");
                 }
             }
         }
@@ -2043,7 +2030,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
     if (class_obj)
     {
         if (class_obj->m_has_invalid_init) {
-            throw runtime_error_with_location_t("init method cannot return a value.", node.line, node.column, 1);
+            throw type_error_t("init method cannot return a value.", node.line, node.column, 1);
         }
 
         // Create a new instance of this class
@@ -2054,7 +2041,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         {
             auto init_method = class_obj->get_method("init");
             if (init_method && contains_return_with_value(init_method->body.get())) {
-                throw runtime_error_with_location_t("init method cannot return a value.", node.line, node.column, 1);
+                throw type_error_t("init method cannot return a value.", node.line, node.column, 1);
             }
 
             if (init_method)
@@ -2062,7 +2049,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 // Check parameter count
                 if (args.size() != init_method->parameters.size())
                 {
-                    throw runtime_error_with_location_t("Constructor for class '" + class_obj->m_class_name + "' expects " +
+                    throw type_error_t("Constructor for class '" + class_obj->m_class_name + "' expects " +
                                            std::to_string(init_method->parameters.size()) + " arguments, got " +
                                            std::to_string(args.size()), node.line, node.column, 1);
                 }
@@ -2090,7 +2077,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
                         if (actual_type != expected_type)
                         {
-                            throw runtime_error_with_location_t("Type mismatch for parameter '" + param.name +
+                            throw type_error_t("Type mismatch for parameter '" + param.name +
                                                    "': expected " + param.type_name +
                                                    ", got " + args[i]->get_type()->get_name(), node.line, node.column, 1);
                         }
@@ -2134,7 +2121,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         else if (!args.empty())
         {
             // No init method but arguments provided
-            throw runtime_error_with_location_t("Class '" + class_obj->m_class_name + "' has no constructor but " +
+            throw type_error_t("Class '" + class_obj->m_class_name + "' has no constructor but " +
                                     std::to_string(args.size()) + " arguments were provided", node.line, node.column, 1);
         }
 
@@ -2144,7 +2131,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
     }
 
     // If we get here, it's not a callable object
-    throw runtime_error_with_location_t("Object is not callable", node.line, node.column, 1);
+    throw type_error_t("Object is not callable", node.line, node.column, 1);
 }
 
 auto interpreter_t::visit(return_statement_t& node) -> void
@@ -2161,7 +2148,7 @@ auto interpreter_t::visit(return_statement_t& node) -> void
                     if (actual_type == "none") {
                         throw return_value_t{m_current_result};
                     }
-                    throw runtime_error_with_location_t("Type mismatch in return statement: expected " + expected_type + ", got " + actual_type, node.line, node.column, 1);
+                    throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got " + actual_type, node.line, node.column, 1);
                 }
             }
         }
@@ -2172,7 +2159,7 @@ auto interpreter_t::visit(return_statement_t& node) -> void
         if (!m_expected_return_types.empty()) {
             std::string expected_type = m_expected_return_types.back();
             if (!expected_type.empty() && expected_type != "none") {
-                throw runtime_error_with_location_t("Type mismatch in return statement: expected " + expected_type + ", got none", node.line, node.column, 1);
+                throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got none", node.line, node.column, 1);
             }
         }
         throw return_value_t{std::make_shared<none_object_t>()};
@@ -2210,7 +2197,7 @@ auto interpreter_t::visit(list_destructuring_assignment_t& node) -> void
 
     if (!list_obj)
     {
-        throw runtime_error_with_location_t("Cannot destructure non-list value", node.line, node.column, 1);
+        throw value_error_t("Cannot destructure non-list value", node.line, node.column, 1);
     }
 
     auto& current_scope = m_scope_stack.back();
@@ -2339,7 +2326,7 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
     if (node.is_block_body)
     {
         if (!node.body_block) {
-            throw runtime_error_with_location_t("Lambda block body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.", node.line, node.column, 1);
+            throw runtime_error_with_location_t("Lambda block body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.", 0, 0, 1, "InternalError");
         }
         // Clone the block body to allow function reuse
         auto cloned_body = clone_block(node.body_block.get());
@@ -2350,7 +2337,7 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
     else
     {
         if (!node.body_expression) {
-            throw std::runtime_error("Lambda expression body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.");
+            throw runtime_error_with_location_t("Lambda expression body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.", 0, 0, 1, "InternalError");
         }
         // Clone the expression to allow function reuse
         auto cloned_expr = clone_expression(node.body_expression.get());
@@ -2545,13 +2532,13 @@ auto interpreter_t::clone_expression(expression_t* expr) -> std::unique_ptr<expr
 
     // Handle method calls
     if (auto method_call = dynamic_cast<method_call_t*>(expr)) {
-        auto object_clone = clone_expression(method_call->object.get());
+        auto cloned_object = clone_expression(method_call->object.get());
         std::vector<std::unique_ptr<expression_t>> cloned_args;
         for (const auto& arg : method_call->arguments) {
             cloned_args.push_back(clone_expression(arg.get()));
         }
         return std::make_unique<method_call_t>(
-            std::move(object_clone),
+            std::move(cloned_object),
             method_call->method_name,
             std::move(cloned_args),
             method_call->line, method_call->column, method_call->end_line, method_call->end_column
@@ -2717,7 +2704,7 @@ auto interpreter_t::clone_expression(expression_t* expr) -> std::unique_ptr<expr
     }
 
     // For unsupported expression types, throw an error
-    throw std::runtime_error("Unsupported expression type in lambda cloning - please simplify lambda body");
+    throw runtime_error_with_location_t("Unsupported expression type in lambda cloning - please simplify lambda body", 0, 0, 1, "InternalError");
 }
 
 auto interpreter_t::clone_statement(statement_t* stmt) -> std::unique_ptr<statement_t>
@@ -3003,7 +2990,7 @@ auto interpreter_t::clone_statement(statement_t* stmt) -> std::unique_ptr<statem
     }
 
     // For unsupported statement types, throw an error
-    throw std::runtime_error("Unsupported statement type in lambda cloning: " + std::string(typeid(*stmt).name()));
+    throw runtime_error_with_location_t("Unsupported statement type in lambda cloning: " + std::string(typeid(*stmt).name()), 0, 0, 1, "InternalError");
 }
 
 auto interpreter_t::clone_block(block_t* block) -> std::unique_ptr<block_t>
@@ -3034,7 +3021,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
         auto interface_obj_val = resolve_variable(interface_name);
         auto interface_obj = std::dynamic_pointer_cast<interface_object_t>(interface_obj_val);
         if (!interface_obj) {
-            throw runtime_error_with_location_t("'" + interface_name + "' is not an interface.", node.line, node.column, node.class_name.length());
+            throw type_error_t("'" + interface_name + "' is not an interface.", node.line, node.column, node.class_name.length());
         }
 
         class_obj->add_interface(interface_name);
@@ -3044,13 +3031,13 @@ auto interpreter_t::visit(class_definition_t& node) -> void
             for (const auto& class_method : node.methods) {
                 if (class_method->function_name == interface_method.name) {
                     if (class_method->parameters.size() != interface_method.parameters.size()) {
-                        throw runtime_error_with_location_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' has different number of parameters than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                        throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' has different number of parameters than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
                     }
                     for (size_t i = 0; i < class_method->parameters.size(); ++i) {
                         const auto& class_param = class_method->parameters[i];
                         const auto& interface_param = interface_method.parameters[i];
                         if (class_param.type_name != interface_param.type_name) {
-                            throw runtime_error_with_location_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' parameter '" + class_param.name + "' has different type than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                            throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' parameter '" + class_param.name + "' has different type than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
                         }
                     }
                     method_found = true;
@@ -3058,7 +3045,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
                 }
             }
             if (!method_found) {
-                throw runtime_error_with_location_t("Class '" + node.class_name + "' does not implement method '" + interface_method.name + "' from interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                throw type_error_t("Class '" + node.class_name + "' does not implement method '" + interface_method.name + "' from interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
             }
         }
     }
@@ -3210,22 +3197,22 @@ auto interpreter_t::visit(method_call_t& node) -> void
         // Check if the method exists in the class
         if (!class_instance->has_method(node.method_name))
         {
-            throw std::runtime_error("Method '" + node.method_name + "' not found in class '" +
-                                   class_instance->m_class_obj->m_class_name + "'");
+            throw attribute_error_t("Method '" + node.method_name + "' not found in class '" +
+                                   class_instance->m_class_obj->m_class_name + "'", node.line, node.column, node.method_name.length());
         }
 
         auto method = class_instance->get_method(node.method_name);
         if (!method)
         {
-            throw std::runtime_error("Method '" + node.method_name + "' is null");
+            throw attribute_error_t("Method '" + node.method_name + "' is null", node.line, node.column, node.method_name.length());
         }
 
         // Check parameter count
         if (args.size() != method->parameters.size())
         {
-            throw std::runtime_error("Method '" + node.method_name + "' expects " +
+            throw type_error_t("Method '" + node.method_name + "' expects " +
                                    std::to_string(method->parameters.size()) + " arguments, got " +
-                                   std::to_string(args.size()));
+                                   std::to_string(args.size()), node.line, node.column, node.method_name.length());
         }
 
         // Create new scope for method
@@ -3262,9 +3249,9 @@ auto interpreter_t::visit(method_call_t& node) -> void
                         }
                     }
                     if (!is_interface) {
-                        throw std::runtime_error("Type mismatch for parameter '" + param.name +
-                                               "'': expected " + param.type_name +
-                                               ", got " + args[i]->get_type()->get_name());
+                        throw type_error_t("Type mismatch for parameter '" + param.name +
+                                                   "': expected " + param.type_name +
+                                                   ", got " + args[i]->get_type()->get_name(), node.line, node.column, node.method_name.length());
                     }
                 }
             }
@@ -3333,17 +3320,7 @@ auto interpreter_t::visit(member_access_t& node) -> void
 {
     node.object->accept(*this);
     auto obj = m_current_result;
-    try {
-        m_current_result = obj->get_type()->get_member(obj, node.member_name);
-    } catch (const std::runtime_error& e) {
-        // Fallback to object-based member access for custom classes
-        try {
-            m_current_result = obj->get_member(node.member_name);
-        } catch (const std::runtime_error& member_error) {
-            // Re-throw with location information for better error reporting
-            throw runtime_error_with_location_t(member_error.what(), node.line, node.column, node.member_name.length());
-        }
-    }
+    m_current_result = obj->get_type()->get_member(obj, node.member_name);
 }
 
 auto interpreter_t::visit(this_expression_t& node) -> void
@@ -3358,7 +3335,7 @@ auto interpreter_t::visit(this_expression_t& node) -> void
             return;
         }
     }
-    throw std::runtime_error("'this' not available in current context");
+    throw name_error_t("'this' not available in current context", node.line, node.column, 4);
 }
 
 auto interpreter_t::visit(member_assignment_t& node) -> void
@@ -3368,17 +3345,7 @@ auto interpreter_t::visit(member_assignment_t& node) -> void
     node.value->accept(*this);
     auto value = m_current_result;
 
-    try {
-        obj->get_type()->set_member(obj, node.member_name, value);
-    } catch (const std::runtime_error& e) {
-        // Fallback to object-based member assignment for custom classes
-        try {
-            obj->set_member(node.member_name, value);
-        } catch (const std::runtime_error& assignment_error) {
-            // Re-throw with location information for better error reporting
-            throw runtime_error_with_location_t(assignment_error.what(), node.line, node.column, node.member_name.length());
-        }
-    }
+    obj->get_type()->set_member(obj, node.member_name, value);
     m_current_result = value;
 }
 
@@ -3464,7 +3431,7 @@ auto interpreter_t::push_scope(const std::map<std::string, value_t>& scope) -> v
 auto interpreter_t::pop_scope() -> std::map<std::string, value_t>
 {
     if (m_scope_stack.empty()) {
-        throw std::runtime_error("Cannot pop from empty scope stack");
+        throw runtime_error_with_location_t("Cannot pop from empty scope stack", 0, 0, 1, "InternalError");
     }
     auto scope = m_scope_stack.back();
     m_scope_stack.pop_back();
@@ -3480,7 +3447,7 @@ auto interpreter_t::enter_function_scope() -> void
 auto interpreter_t::exit_function_scope() -> void
 {
     if (m_scope_stack.size() <= 1) {
-        throw std::runtime_error("Cannot exit global scope");
+        throw runtime_error_with_location_t("Cannot exit global scope", 0, 0, 1, "InternalError");
     }
     m_scope_stack.pop_back();
 }
@@ -3542,14 +3509,9 @@ auto interpreter_t::validate_type_constraint(const std::string& variable_name, v
         // Check if normalized types match
         if (normalized_actual != normalized_expected)
         {
-            throw std::runtime_error("Type error: Cannot assign " + actual_type + " to " + expected_type + " variable '" + variable_name + "'");
+            throw type_error_t("Type error: Cannot assign " + actual_type + " to " + expected_type + " variable '" + variable_name + "'", 0, 0, 1);
         }
     }
-}
-
-auto interpreter_t::handle_runtime_error(const std::string& message, int line, int column) -> void
-{
-    throw runtime_error_with_location_t(message, line, column, 1);
 }
 
 auto interpreter_t::resolve_variable(const std::string& variable_name) -> value_t
@@ -3562,7 +3524,7 @@ auto interpreter_t::resolve_variable(const std::string& variable_name) -> value_
             return scope[variable_name];
         }
     }
-    throw std::runtime_error("Undefined variable: " + variable_name);
+    throw name_error_t("Undefined variable: " + variable_name, 0, 0, variable_name.length());
 }
 
 auto interpreter_t::set_variable(const std::string& variable_name, value_t value) -> void
@@ -3585,17 +3547,6 @@ auto interpreter_t::set_variable(const std::string& variable_name, value_t value
     validate_type_constraint(variable_name, value);
     current_scope[variable_name] = value;
 }
-
-auto interpreter_t::handle_const_assignment_error(const std::string& variable_name, int line, int column) -> void
-{
-    handle_runtime_error("Cannot assign to const variable: " + variable_name, line, column);
-}
-
-auto interpreter_t::handle_type_error(const std::string& variable_name, const std::string& expected_type, const std::string& actual_type, int line, int column) -> void
-{
-    handle_runtime_error("Type error: Cannot assign " + actual_type + " to " + expected_type + " variable '" + variable_name + "'", line, column);
-}
-
 
 
 // Static member definitions

@@ -1,6 +1,7 @@
 #include "types/builtin_function_type.hpp"
 #include "objects/object.hpp"
 #include <stdexcept>
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -13,27 +14,27 @@ auto builtin_function_type_t::get_instance() -> std::shared_ptr<builtin_function
 
 auto builtin_function_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation for builtin functions");
+    throw type_error_t("Unsupported operation for builtin functions", 0, 0, 1);
 }
 
 auto builtin_function_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation for builtin functions");
+    throw type_error_t("Unsupported operation for builtin functions", 0, 0, 1);
 }
 
 auto builtin_function_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation for builtin functions");
+    throw type_error_t("Unsupported operation for builtin functions", 0, 0, 1);
 }
 
 auto builtin_function_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation for builtin functions");
+    throw type_error_t("Unsupported operation for builtin functions", 0, 0, 1);
 }
 
 auto builtin_function_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation for builtin functions");
+    throw type_error_t("Unsupported operation for builtin functions", 0, 0, 1);
 }
 
 auto builtin_function_type_t::get_name() const -> std::string

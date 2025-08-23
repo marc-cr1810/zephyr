@@ -1,5 +1,6 @@
 #include "objects/builtin_function_object.hpp"
 #include "types/builtin_function_type.hpp"
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -61,7 +62,7 @@ auto builtin_function_object_t::validate_function_pointer() const -> void
 {
     if (!m_func_ptr)
     {
-        throw std::runtime_error("Builtin function pointer cannot be null");
+        throw value_error_t("Builtin function pointer cannot be null", 0, 0, 1);
     }
 }
 
@@ -69,13 +70,13 @@ auto builtin_function_object_t::validate_function_name() const -> void
 {
     if (m_name.empty())
     {
-        throw std::runtime_error("Builtin function name cannot be empty");
+        throw value_error_t("Builtin function name cannot be empty", 0, 0, 1);
     }
 }
 
 auto builtin_function_object_t::throw_unsupported_operation(const std::string& operation) const -> void
 {
-    throw std::runtime_error("Operation " + operation + " not supported for builtin function '" + m_name + "'");
+    throw type_error_t("Operation " + operation + " not supported for builtin function '" + m_name + "'", 0, 0, 1);
 }
 
 } // namespace zephyr

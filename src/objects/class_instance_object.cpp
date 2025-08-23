@@ -2,6 +2,7 @@
 #include "objects/class_object.hpp"
 #include "objects/none_object.hpp"
 #include "types/class_type.hpp"
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -24,34 +25,34 @@ auto class_instance_t::to_string() const -> std::string
 
 auto class_instance_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for class instances");
+    throw type_error_t("Operation not supported for class instances", 0, 0, 1);
 }
 
 auto class_instance_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for class instances");
+    throw type_error_t("Operation not supported for class instances", 0, 0, 1);
 }
 
 auto class_instance_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for class instances");
+    throw type_error_t("Operation not supported for class instances", 0, 0, 1);
 }
 
 auto class_instance_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for class instances");
+    throw type_error_t("Operation not supported for class instances", 0, 0, 1);
 }
 
 auto class_instance_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for class instances");
+    throw type_error_t("Operation not supported for class instances", 0, 0, 1);
 }
 
 auto class_instance_t::call_method(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     // Method execution should be handled by the interpreter
     // This method should not be called directly - similar to function_object_t
-    throw std::runtime_error("Method call should be handled by interpreter");
+    throw type_error_t("Method call should be handled by interpreter", 0, 0, 1);
 }
 
 auto class_instance_t::has_member(const std::string& name) const -> bool
@@ -69,7 +70,7 @@ auto class_instance_t::get_member(const std::string& member_name) -> std::shared
         return it->second;
     }
     
-    throw std::runtime_error("Member '" + member_name + "' not found in class instance");
+    throw attribute_error_t("Member '" + member_name + "' not found in class instance", 0, 0, 1);
 }
 
 auto class_instance_t::set_member(const std::string& member_name, std::shared_ptr<object_t> value) -> void
@@ -100,9 +101,9 @@ auto class_instance_t::set_member(const std::string& member_name, std::shared_pt
                     
                     if (actual_type != expected_type)
                     {
-                        throw std::runtime_error("Type mismatch for member '" + member_name + 
+                        throw type_error_t("Type mismatch for member '" + member_name + 
                                                "': expected " + expected_type + 
-                                               ", got " + actual_type);
+                                               ", got " + actual_type, 0, 0, 1);
                     }
                 }
                 break;
@@ -137,7 +138,7 @@ auto class_instance_t::validate_member_access(const std::string& name) const -> 
 {
     if (name.empty())
     {
-        throw std::runtime_error("Member name cannot be empty");
+        throw value_error_t("Member name cannot be empty", 0, 0, 1);
     }
 }
 
@@ -147,7 +148,7 @@ auto class_instance_t::validate_member_assignment(const std::string& name) const
     
     if (is_member_const(name))
     {
-        throw std::runtime_error("Cannot modify const member '" + name + "'");
+        throw type_error_t("Cannot modify const member '" + name + "'", 0, 0, 1);
     }
 }
 

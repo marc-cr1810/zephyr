@@ -1,6 +1,5 @@
 #include "types/none_type.hpp"
-#include "objects/objects.hpp"
-#include <stdexcept>
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -13,27 +12,27 @@ auto none_type_t::get_instance() -> std::shared_ptr<none_type_t>
 
 auto none_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation: none + " + other->get_type()->get_name());
+    throw type_error_t("Unsupported operation: none + " + other->get_type()->get_name(), 0, 0, 1);
 }
 
 auto none_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation: none - " + other->get_type()->get_name());
+    throw type_error_t("Unsupported operation: none - " + other->get_type()->get_name(), 0, 0, 1);
 }
 
 auto none_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation: none * " + other->get_type()->get_name());
+    throw type_error_t("Unsupported operation: none * " + other->get_type()->get_name(), 0, 0, 1);
 }
 
 auto none_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation: none / " + other->get_type()->get_name());
+    throw type_error_t("Unsupported operation: none / " + other->get_type()->get_name(), 0, 0, 1);
 }
 
 auto none_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Unsupported operation for none");
+    throw type_error_t("Unsupported operation for none", 0, 0, 1);
 }
 
 auto none_type_t::get_name() const -> std::string

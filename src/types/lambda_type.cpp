@@ -1,6 +1,7 @@
 #include "types/lambda_type.hpp"
 #include "objects/objects.hpp"
 #include <stdexcept>
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -68,7 +69,7 @@ auto lambda_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<objec
 
 auto lambda_type_t::throw_unsupported_operation(const std::string& operation) const -> void
 {
-    throw std::runtime_error("Unsupported operation '" + operation + "' for lambda functions");
+    throw type_error_t("Unsupported operation '" + operation + "' for lambda functions", 0, 0, 1);
 }
 
 auto lambda_type_t::format_lambda_string(std::shared_ptr<object_t> self) const -> std::string

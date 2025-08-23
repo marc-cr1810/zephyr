@@ -2,6 +2,7 @@
 #include "objects/class_instance_object.hpp"
 #include "types/function_type.hpp"
 #include "ast.hpp"
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -25,32 +26,32 @@ auto class_object_t::call(const std::vector<std::shared_ptr<object_t>>& args) ->
 {
     // Class instantiation should be handled by the interpreter
     // This method should not be called directly - similar to function_object_t
-    throw std::runtime_error("Class instantiation should be handled by interpreter");
+    throw type_error_t("Class instantiation should be handled by interpreter", 0, 0, 1);
 }
 
 auto class_object_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for classes");
+    throw type_error_t("Operation not supported for classes", 0, 0, 1);
 }
 
 auto class_object_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for classes");
+    throw type_error_t("Operation not supported for classes", 0, 0, 1);
 }
 
 auto class_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for classes");
+    throw type_error_t("Operation not supported for classes", 0, 0, 1);
 }
 
 auto class_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for classes");
+    throw type_error_t("Operation not supported for classes", 0, 0, 1);
 }
 
 auto class_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for classes");
+    throw type_error_t("Operation not supported for classes", 0, 0, 1);
 }
 
 void class_object_t::add_interface(const std::string& interface_name)
@@ -82,7 +83,7 @@ auto class_object_t::add_member_variable(const member_variable_info_t& var_info)
     {
         if (existing.name == var_info.name)
         {
-            throw std::runtime_error("Member variable '" + var_info.name + "' already defined in class '" + m_class_name + "'");
+            throw attribute_error_t("Member variable '" + var_info.name + "' already defined in class '" + m_class_name + "'", 0, 0, 1);
         }
     }
     
@@ -113,31 +114,19 @@ auto class_object_t::has_member_variable(const std::string& var_name) const -> b
             return true;
         }
     }
-    return false;
-}
-
-auto class_object_t::get_member_variable_info(const std::string& var_name) const -> member_variable_info_t
-{
-    for (const auto& var : m_member_variables)
-    {
-        if (var.name == var_name)
-        {
-            return var;
-        }
-    }
-    throw std::runtime_error("Member variable '" + var_name + "' not found in class '" + m_class_name + "'");
+    throw attribute_error_t("Member variable '" + var_name + "' not found in class '" + m_class_name + "'", 0, 0, 1);
 }
 
 auto class_object_t::validate_method_name(const std::string& method_name) const -> void
 {
     if (method_name.empty())
     {
-        throw std::runtime_error("Method name cannot be empty in class '" + m_class_name + "'");
+        throw value_error_t("Method name cannot be empty in class '" + m_class_name + "'", 0, 0, 1);
     }
     
     if (m_methods.find(method_name) != m_methods.end())
     {
-        throw std::runtime_error("Method '" + method_name + "' already defined in class '" + m_class_name + "'");
+        throw attribute_error_t("Method '" + method_name + "' already defined in class '" + m_class_name + "'", 0, 0, 1);
     }
 }
 
@@ -145,7 +134,7 @@ auto class_object_t::validate_member_variable_name(const std::string& var_name) 
 {
     if (var_name.empty())
     {
-        throw std::runtime_error("Member variable name cannot be empty in class '" + m_class_name + "'");
+        throw value_error_t("Member variable name cannot be empty in class '" + m_class_name + "'", 0, 0, 1);
     }
 }
 

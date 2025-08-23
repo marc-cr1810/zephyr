@@ -3,6 +3,7 @@
 #include "types/int_type.hpp"
 #include <string>
 #include <stdexcept>
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -68,7 +69,7 @@ auto int_object_t::check_division_by_zero(std::shared_ptr<object_t> other) const
 {
     if (!other)
     {
-        throw std::runtime_error("Cannot divide by null object");
+        throw value_error_t("Cannot divide by null object", 0, 0, 1);
     }
     
     auto type_name = other->get_type()->get_name();
@@ -78,7 +79,7 @@ auto int_object_t::check_division_by_zero(std::shared_ptr<object_t> other) const
         auto int_obj = std::static_pointer_cast<int_object_t>(other);
         if (int_obj->get_value() == 0)
         {
-            throw std::runtime_error("Division by zero");
+            throw zero_division_error_t("Division by zero", 0, 0, 1);
         }
     }
     else if (type_name == "float")
@@ -86,7 +87,7 @@ auto int_object_t::check_division_by_zero(std::shared_ptr<object_t> other) const
         auto float_obj = std::static_pointer_cast<float_object_t>(other);
         if (float_obj->get_value() == 0.0)
         {
-            throw std::runtime_error("Division by zero");
+            throw zero_division_error_t("Division by zero", 0, 0, 1);
         }
     }
 }

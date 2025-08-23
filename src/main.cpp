@@ -6,49 +6,15 @@
 #include "parser.hpp"
 #include "interpreter.hpp"
 #include "ast.hpp"
+#include "errors.hpp"
 
 // ANSI escape codes for colors
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 // Function to print errors in red with context
-auto print_error(const std::string& message, const std::string& source_code, int line, int column, const std::string& filename = "", int length = 1) -> void
+auto print_error(const std::string& message, const std::string& error_type, const std::string& source_code, int line, int column, const std::string& filename = "", int length = 1) -> void
 {
-    // Determine error type based on message content
-    std::string error_type = "Error";
-    if (message.find("Undefined variable") != std::string::npos ||
-        message.find("Variable not found") != std::string::npos) {
-        error_type = "NameError";
-    } else if (message.find("Undefined function") != std::string::npos) {
-        error_type = "NameError";
-    } else if (message.find("Type mismatch") != std::string::npos ||
-               message.find("expected") != std::string::npos && message.find("got") != std::string::npos) {
-        error_type = "TypeError";
-    } else if (message.find("expects") != std::string::npos && message.find("arguments") != std::string::npos) {
-        error_type = "TypeError";
-    } else if (message.find("Division by zero") != std::string::npos ||
-               message.find("Modulo by zero") != std::string::npos) {
-        error_type = "ZeroDivisionError";
-    } else if (message.find("Index out of bounds") != std::string::npos ||
-               message.find("out of range") != std::string::npos) {
-        error_type = "IndexError";
-    } else if (message.find("Key") != std::string::npos && message.find("not found") != std::string::npos) {
-        error_type = "KeyError";
-    } else if (message.find("Member") != std::string::npos && message.find("not found") != std::string::npos) {
-        error_type = "AttributeError";
-    } else if (message.find("not supported") != std::string::npos ||
-               message.find("Operation not supported") != std::string::npos ||
-               message.find("not callable") != std::string::npos) {
-        error_type = "TypeError";
-    } else if (message.find("Cannot assign to const") != std::string::npos) {
-        error_type = "TypeError";
-    } else if (message.find("Cannot destructure") != std::string::npos) {
-        error_type = "ValueError";
-    } else if (message.find("Unexpected") != std::string::npos ||
-               message.find("Expected") != std::string::npos) {
-        error_type = "SyntaxError";
-    }
-
     // Python-style traceback header
     std::cerr << "Traceback (most recent call last):" << std::endl;
 
@@ -170,17 +136,17 @@ auto process_code(const std::string& code_to_process, zephyr::interpreter_t& int
         {
             return false; // Incomplete input
         }
-        print_error(e.what(), full_source_code, e.line, e.column, filename);
+        print_error(e.what(), "SyntaxError", full_source_code, e.line, e.column, filename);
         return false; // Error occurred
     }
     catch (const zephyr::runtime_error_with_location_t& e)
     {
-        print_error(e.what(), full_source_code, e.line, e.column, filename, e.length);
+        print_error(e.what(), e.error_name, full_source_code, e.line, e.column, filename, e.length);
         return false; // Error occurred
     }
     catch (const std::runtime_error& e)
     {
-        print_error(e.what(), full_source_code, 0, 0, filename);
+        print_error(e.what(), "Error", full_source_code, 0, 0, filename);
         return false; // Error occurred
     }
     return true; // Success
@@ -238,17 +204,17 @@ auto process_code_repl(const std::string& code_to_process, zephyr::interpreter_t
         {
             return false; // Incomplete input - don't clear accumulated_input
         }
-        print_error(e.what(), full_source_code, e.line, e.column);
+        print_error(e.what(), "SyntaxError", full_source_code, e.line, e.column);
         return true; // Parsing error occurred - clear accumulated_input
     }
     catch (const zephyr::runtime_error_with_location_t& e)
     {
-        print_error(e.what(), full_source_code, e.line, e.column, "", e.length);
+        print_error(e.what(), e.error_name, full_source_code, e.line, e.column, "", e.length);
         return true; // Runtime error occurred - clear accumulated_input
     }
     catch (const std::runtime_error& e)
     {
-        print_error(e.what(), full_source_code, 0, 0);
+        print_error(e.what(), "Error", full_source_code, 0, 0);
         return true; // Runtime error occurred - clear accumulated_input
     }
     return true; // Success
@@ -287,14 +253,14 @@ auto run_from_file(const std::string& filename) -> int
 {
     if (filename.rfind(".zephyr") == std::string::npos)
     {
-        print_error("File must have a .zephyr extension.", "", 0, 0);
+        print_error("File must have a .zephyr extension.", "Error", "", 0, 0);
         return 1;
     }
 
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        print_error("Could not open file " + filename, "", 0, 0);
+        print_error("Could not open file " + filename, "Error", "", 0, 0);
         return 1;
     }
 
@@ -311,7 +277,7 @@ auto main(int argc, char* argv[]) -> int
 {
     if (argc > 2)
     {
-        print_error("Usage: " + std::string(argv[0]) + " [file.gemini]", "", 0, 0);
+        print_error("Usage: " + std::string(argv[0]) + " [file.gemini]", "Error", "", 0, 0);
         return 1;
     }
 

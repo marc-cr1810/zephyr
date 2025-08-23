@@ -1,6 +1,7 @@
 #include "objects/lambda_object.hpp"
 #include "types/lambda_type.hpp"
 #include "ast.hpp"
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -128,7 +129,7 @@ auto lambda_object_t::copy_captured_variables(const std::map<std::string, std::s
     {
         if (pair.first.empty())
         {
-            throw std::runtime_error("Captured variable name cannot be empty");
+            throw value_error_t("Captured variable name cannot be empty", 0, 0, 1);
         }
     }
 }

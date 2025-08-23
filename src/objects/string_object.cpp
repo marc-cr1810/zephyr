@@ -1,5 +1,6 @@
 #include "objects/string_object.hpp"
 #include "types/string_type.hpp"
+#include "errors.hpp"
 
 namespace zephyr
 {
@@ -52,13 +53,13 @@ auto string_object_t::is_truthy() const -> bool
 auto string_object_t::get_item(std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
     // Implementation would go here for string indexing
-    throw std::runtime_error("String indexing not yet implemented");
+    throw index_error_t("String indexing not yet implemented", 0, 0, 1);
 }
 
 auto string_object_t::set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
     // Implementation would go here for string item setting
-    throw std::runtime_error("String item setting not supported");
+    throw type_error_t("String item setting not supported", 0, 0, 1);
 }
 
 auto string_object_t::get_value() const -> const std::string&
@@ -75,7 +76,7 @@ auto string_object_t::check_bounds(int index) const -> void
 {
     if (index < 0 || index >= static_cast<int>(m_value.length()))
     {
-        throw std::runtime_error("String index out of bounds");
+        throw index_error_t("String index out of bounds", 0, 0, 1);
     }
 }
 
