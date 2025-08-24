@@ -79,7 +79,7 @@ auto class_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object
 
 auto class_type_t::throw_unsupported_operation(const std::string& operation) const -> void
 {
-    throw type_error_t("Unsupported operation '" + operation + "' for class type '" + m_class_name + "'", 0, 0, 1);
+    throw type_error_t("Unsupported operation '" + operation + "' for class type '" + m_class_name + "'");
 }
 
 }

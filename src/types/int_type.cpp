@@ -22,7 +22,7 @@ auto int_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> o
     {
         return std::make_shared<float_object_t>(static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value()) + other_float->get_value());
     }
-    throw type_error_t("Unsupported operand types for +", 0, 0, 1);
+    throw type_error_t("Unsupported operand types for +");
 }
 
 auto int_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -35,7 +35,7 @@ auto int_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object
     {
         return std::make_shared<float_object_t>(static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value()) - other_float->get_value());
     }
-    throw type_error_t("Unsupported operand types for -", 0, 0, 1);
+    throw type_error_t("Unsupported operand types for -");
 }
 
 auto int_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -63,7 +63,7 @@ auto int_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object
         }
         return std::make_shared<string_object_t>(result);
     }
-    throw type_error_t("Unsupported operand types for *", 0, 0, 1);
+    throw type_error_t("Unsupported operand types for *");
 }
 
 auto int_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -72,7 +72,7 @@ auto int_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_int->get_value() == 0)
         {
-            throw zero_division_error_t("Division by zero", 0, 0, 1);
+            throw zero_division_error_t("Division by zero");
         }
         return std::make_shared<int_object_t>(std::static_pointer_cast<int_object_t>(self)->get_value() / other_int->get_value());
     }
@@ -80,11 +80,11 @@ auto int_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_float->get_value() == 0.0)
         {
-            throw zero_division_error_t("Division by zero", 0, 0, 1);
+            throw zero_division_error_t("Division by zero");
         }
         return std::make_shared<float_object_t>(static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value()) / other_float->get_value());
     }
-    throw type_error_t("Unsupported operand types for /", 0, 0, 1);
+    throw type_error_t("Unsupported operand types for /");
 }
 
 auto int_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -93,7 +93,7 @@ auto int_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_int->get_value() == 0)
         {
-            throw zero_division_error_t("Modulo by zero", 0, 0, 1);
+            throw zero_division_error_t("Modulo by zero");
         }
         return std::make_shared<int_object_t>(std::static_pointer_cast<int_object_t>(self)->get_value() % other_int->get_value());
     }
@@ -101,12 +101,12 @@ auto int_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         if (other_float->get_value() == 0.0)
         {
-            throw zero_division_error_t("Modulo by zero", 0, 0, 1);
+            throw zero_division_error_t("Modulo by zero");
         }
         double left_val = static_cast<double>(std::static_pointer_cast<int_object_t>(self)->get_value());
         return std::make_shared<float_object_t>(fmod(left_val, other_float->get_value()));
     }
-    throw type_error_t("Unsupported operand types for %", 0, 0, 1);
+    throw type_error_t("Unsupported operand types for %");
 }
 
 auto int_type_t::get_name() const -> std::string
@@ -153,7 +153,7 @@ auto int_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<object_
     }
     else
     {
-        throw type_error_t("Cannot compare int with " + other->get_type()->get_name(), 0, 0, 1);
+        throw type_error_t("Cannot compare int with " + other->get_type()->get_name());
     }
 }
 

@@ -50,34 +50,34 @@ auto lambda_object_t::to_string() const -> std::string
 
 auto lambda_object_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for lambda functions");
+    throw type_error_t("Operation not supported for lambda functions");
 }
 
 auto lambda_object_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for lambda functions");
+    throw type_error_t("Operation not supported for lambda functions");
 }
 
 auto lambda_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for lambda functions");
+    throw type_error_t("Operation not supported for lambda functions");
 }
 
 auto lambda_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for lambda functions");
+    throw type_error_t("Operation not supported for lambda functions");
 }
 
 auto lambda_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw std::runtime_error("Operation not supported for lambda functions");
+    throw type_error_t("Operation not supported for lambda functions");
 }
 
 auto lambda_object_t::call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     // Lambda execution is handled directly in the interpreter's visit(function_call_t&) method
     // This method should not be called directly
-    throw std::runtime_error("Lambda call should be handled by interpreter");
+    throw type_error_t("Lambda call should be handled by interpreter");
 }
 
 auto lambda_object_t::format_parameters() const -> std::string
@@ -116,7 +116,7 @@ auto lambda_object_t::validate_parameters() const -> void
     {
         if (param.name.empty())
         {
-            throw std::runtime_error("Lambda parameter name cannot be empty");
+            throw value_error_t("Lambda parameter name cannot be empty");
         }
     }
 }
@@ -129,7 +129,7 @@ auto lambda_object_t::copy_captured_variables(const std::map<std::string, std::s
     {
         if (pair.first.empty())
         {
-            throw value_error_t("Captured variable name cannot be empty", 0, 0, 1);
+            throw value_error_t("Captured variable name cannot be empty");
         }
     }
 }

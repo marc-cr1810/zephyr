@@ -2,9 +2,11 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "interpreter.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
-#include "interpreter.hpp"
+#include "error_context.hpp"
+
 #include "ast.hpp"
 #include "errors.hpp"
 
@@ -141,7 +143,7 @@ auto process_code(const std::string& code_to_process, zephyr::interpreter_t& int
     }
     catch (const zephyr::runtime_error_with_location_t& e)
     {
-        print_error(e.what(), e.error_name, full_source_code, e.line, e.column, filename, e.length);
+        print_error(e.what(), e.error_name(), full_source_code, e.line(), e.column(), filename, e.length());
         return false; // Error occurred
     }
     catch (const std::runtime_error& e)
@@ -209,7 +211,7 @@ auto process_code_repl(const std::string& code_to_process, zephyr::interpreter_t
     }
     catch (const zephyr::runtime_error_with_location_t& e)
     {
-        print_error(e.what(), e.error_name, full_source_code, e.line, e.column, "", e.length);
+        print_error(e.what(), e.error_name(), full_source_code, e.line(), e.column(), "", e.length());
         return true; // Runtime error occurred - clear accumulated_input
     }
     catch (const std::runtime_error& e)

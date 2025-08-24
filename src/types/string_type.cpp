@@ -31,13 +31,13 @@ auto string_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     } catch (...) {
         std::string self_type = self ? self->get_type()->get_name() : "null";
         std::string other_type = other ? other->get_type()->get_name() : "null";
-        throw type_error_t("Unsupported operand types for +: " + self_type + " + " + other_type, 0, 0, 1);
+        throw type_error_t("Unsupported operand types for +: " + self_type + " + " + other_type);
     }
 }
 
 auto string_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for strings", 0, 0, 1);
+    throw type_error_t("Unsupported operation for strings");
 }
 
 auto string_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
@@ -58,17 +58,17 @@ auto string_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<obj
         }
         return std::make_shared<string_object_t>(result);
     }
-    throw type_error_t("Unsupported operand types for *", 0, 0, 1);
+    throw type_error_t("Unsupported operand types for *");
 }
 
 auto string_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for strings", 0, 0, 1);
+    throw type_error_t("Unsupported operation for strings");
 }
 
 auto string_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for strings", 0, 0, 1);
+    throw type_error_t("Unsupported operation for strings");
 }
 
 auto string_type_t::get_name() const -> std::string
@@ -103,23 +103,23 @@ auto string_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<obj
         const std::string& str_value = self_str->get_value();
         if (idx < 0 || idx >= static_cast<int>(str_value.length()))
         {
-            throw index_error_t("String index out of bounds", 0, 0, 1);
+            throw index_error_t("String index out of bounds");
         }
         return std::make_shared<string_object_t>(std::string(1, str_value[idx]));
     }
-    throw type_error_t("String index must be an integer", 0, 0, 1);
+    throw type_error_t("String index must be an integer");
 }
 
 auto string_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
-    throw type_error_t("Strings are immutable and do not support item assignment", 0, 0, 1);
+    throw type_error_t("Strings are immutable and do not support item assignment");
 }
 
 auto string_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> int
 {
     if (other->get_type()->get_name() != "string")
     {
-        throw type_error_t("Cannot compare string with " + other->get_type()->get_name(), 0, 0, 1);
+        throw type_error_t("Cannot compare string with " + other->get_type()->get_name());
     }
     
     auto self_str = std::static_pointer_cast<string_object_t>(self);

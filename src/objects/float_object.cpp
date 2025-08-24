@@ -70,7 +70,7 @@ auto float_object_t::check_division_by_zero(std::shared_ptr<object_t> other) con
 {
     if (!other)
     {
-        throw value_error_t("Cannot divide by null object", 0, 0, 1);
+        throw value_error_t("Cannot divide by null object");
     }
     
     auto type_name = other->get_type()->get_name();
@@ -80,7 +80,7 @@ auto float_object_t::check_division_by_zero(std::shared_ptr<object_t> other) con
         auto float_obj = std::static_pointer_cast<float_object_t>(other);
         if (float_obj->get_value() == 0.0)
         {
-            throw zero_division_error_t("Division by zero", 0, 0, 1);
+            throw zero_division_error_t("Division by zero");
         }
     }
     else if (type_name == "int")
@@ -88,7 +88,7 @@ auto float_object_t::check_division_by_zero(std::shared_ptr<object_t> other) con
         auto int_obj = std::static_pointer_cast<int_object_t>(other);
         if (int_obj->get_value() == 0)
         {
-            throw zero_division_error_t("Division by zero", 0, 0, 1);
+            throw zero_division_error_t("Division by zero");
         }
     }
 }

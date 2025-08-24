@@ -84,7 +84,7 @@ auto dictionary_object_t::get_item(std::shared_ptr<object_t> index) -> std::shar
     }
     else
     {
-        throw key_error_t("Key '" + key_str + "' not found in dictionary", 0, 0, 1);
+        throw key_error_t("Key '" + key_str + "' not found in dictionary");
     }
 }
 
@@ -113,7 +113,7 @@ auto dictionary_object_t::key_to_string(std::shared_ptr<object_t> key) const -> 
 {
     if (!key)
     {
-        throw type_error_t("Dictionary key cannot be null", 0, 0, 1);
+        throw type_error_t("Dictionary key cannot be null");
     }
     
     auto type_name = key->get_type()->get_name();

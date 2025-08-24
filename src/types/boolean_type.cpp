@@ -14,27 +14,27 @@ auto boolean_type_t::get_instance() -> std::shared_ptr<boolean_type_t>
 
 auto boolean_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for booleans", 0, 0, 1);
+    throw type_error_t("Unsupported operation for booleans");
 }
 
 auto boolean_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for booleans", 0, 0, 1);
+    throw type_error_t("Unsupported operation for booleans");
 }
 
 auto boolean_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for booleans", 0, 0, 1);
+    throw type_error_t("Unsupported operation for booleans");
 }
 
 auto boolean_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for booleans", 0, 0, 1);
+    throw type_error_t("Unsupported operation for booleans");
 }
 
 auto boolean_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for booleans", 0, 0, 1);
+    throw type_error_t("Unsupported operation for booleans");
 }
 
 auto boolean_type_t::get_name() const -> std::string
@@ -64,7 +64,7 @@ auto boolean_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<obj
 {
     if (other->get_type()->get_name() != "bool")
     {
-        throw type_error_t("Cannot compare bool with " + other->get_type()->get_name(), 0, 0, 1);
+        throw type_error_t("Cannot compare bool with " + other->get_type()->get_name());
     }
     
     auto self_bool = std::static_pointer_cast<boolean_object_t>(self);

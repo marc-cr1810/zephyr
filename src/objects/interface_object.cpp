@@ -33,27 +33,27 @@ const std::vector<function_signature_t>& interface_object_t::get_methods() const
 
 auto interface_object_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for interfaces", 0, 0, 1);
+    throw type_error_t("Operation not supported for interfaces");
 }
 
 auto interface_object_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for interfaces", 0, 0, 1);
+    throw type_error_t("Operation not supported for interfaces");
 }
 
 auto interface_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for interfaces", 0, 0, 1);
+    throw type_error_t("Operation not supported for interfaces");
 }
 
 auto interface_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for interfaces", 0, 0, 1);
+    throw type_error_t("Operation not supported for interfaces");
 }
 
 auto interface_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for interfaces", 0, 0, 1);
+    throw type_error_t("Operation not supported for interfaces");
 }
 
 }

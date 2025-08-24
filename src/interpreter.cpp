@@ -1,4 +1,5 @@
 #include "interpreter.hpp"
+#include "error_context.hpp"
 #include "objects/objects.hpp"
 #include "objects/function_object.hpp"
 #include "objects/lambda_object.hpp"
@@ -33,7 +34,7 @@ auto print_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
 auto len_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw type_error_t("len() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("len() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto obj = args[0];
@@ -49,7 +50,7 @@ auto len_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
         auto dict_obj = std::static_pointer_cast<dictionary_object_t>(obj);
         return std::make_shared<int_object_t>(static_cast<int>(dict_obj->get_elements().size()));
     } else {
-        throw type_error_t("len() argument must be a string, list, or dictionary, not '" + type_name + "'", 0, 0, 1);
+        throw type_error_t("len() argument must be a string, list, or dictionary, not '" + type_name + "'");
     }
 }
 
@@ -60,7 +61,7 @@ auto input_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
     if (args.size() == 1) {
         prompt = args[0]->to_string();
     } else if (args.size() > 1) {
-                        throw type_error_t("input() takes at most 1 argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+                        throw type_error_t("input() takes at most 1 argument (" + std::to_string(args.size()) + " given)");
     }
 
     std::cout << prompt;
@@ -73,7 +74,7 @@ auto input_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
 auto str_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw type_error_t("str() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("str() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     return std::make_shared<string_object_t>(args[0]->to_string());
@@ -83,7 +84,7 @@ auto str_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw type_error_t("int() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("int() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto obj = args[0];
@@ -100,13 +101,13 @@ auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
             int value = std::stoi(str_obj->get_value());
             return std::make_shared<int_object_t>(value);
         } catch (const std::exception&) {
-            throw value_error_t("invalid literal for int(): '" + str_obj->get_value() + "'", 0, 0, 1);
+            throw value_error_t("invalid literal for int(): '" + str_obj->get_value() + "'");
         }
     } else if (type_name == "bool") {
         auto bool_obj = std::static_pointer_cast<boolean_object_t>(obj);
         return std::make_shared<int_object_t>(bool_obj->m_value ? 1 : 0);
     } else {
-        throw type_error_t("int() argument must be a string, number, or bool, not '" + type_name + "'", 0, 0, 1);
+        throw type_error_t("int() argument must be a string, number, or bool, not '" + type_name + "'");
     }
 }
 
@@ -114,7 +115,7 @@ auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto float_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-                throw type_error_t("float() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+                throw type_error_t("float() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto obj = args[0];
@@ -131,13 +132,13 @@ auto float_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
             double value = std::stod(str_obj->get_value());
             return std::make_shared<float_object_t>(value);
         } catch (const std::exception&) {
-            throw value_error_t("could not convert string to float: '" + str_obj->get_value() + "'", 0, 0, 1);
+            throw value_error_t("could not convert string to float: '" + str_obj->get_value() + "'");
         }
     } else if (type_name == "bool") {
         auto bool_obj = std::static_pointer_cast<boolean_object_t>(obj);
         return std::make_shared<float_object_t>(bool_obj->m_value ? 1.0 : 0.0);
     } else {
-        throw type_error_t("float() argument must be a string, number, or bool, not '" + type_name + "'", 0, 0, 1);
+        throw type_error_t("float() argument must be a string, number, or bool, not '" + type_name + "'");
     }
 }
 
@@ -145,14 +146,14 @@ auto float_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::s
 auto append_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 2) {
-        throw type_error_t("append() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("append() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)");
     }
 
     auto list_obj = args[0];
     auto item = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw type_error_t("append() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("append() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -165,17 +166,17 @@ auto append_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() < 1 || args.size() > 2) {
-        throw type_error_t("pop() takes 1 or 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("pop() takes 1 or 2 arguments (" + std::to_string(args.size()) + " given)");
     }
 
     auto list_obj = args[0];
     if (list_obj->get_type()->get_name() != "list") {
-        throw type_error_t("pop() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("pop() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
     if (list->get_elements().empty()) {
-        throw index_error_t("pop from empty list", 0, 0, 1);
+        throw index_error_t("pop from empty list");
     }
 
     int index = static_cast<int>(list->get_elements().size()) - 1; // Default to last element
@@ -183,7 +184,7 @@ auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
     if (args.size() == 2) {
         auto index_obj = args[1];
         if (index_obj->get_type()->get_name() != "int") {
-            throw type_error_t("pop() index must be an integer, not '" + index_obj->get_type()->get_name() + "'", 0, 0, 1);
+            throw type_error_t("pop() index must be an integer, not '" + index_obj->get_type()->get_name() + "'");
         }
         auto int_obj = std::static_pointer_cast<int_object_t>(index_obj);
         index = int_obj->get_value();
@@ -194,7 +195,7 @@ auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
         }
 
         if (index < 0 || index >= static_cast<int>(list->get_elements().size())) {
-            throw index_error_t("pop index out of range", 0, 0, 1);
+            throw index_error_t("pop index out of range");
         }
     }
 
@@ -207,12 +208,12 @@ auto pop_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto keys_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw type_error_t("keys() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("keys() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto dict_obj = args[0];
     if (dict_obj->get_type()->get_name() != "dictionary") {
-        throw type_error_t("keys() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("keys() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'");
     }
 
     auto dict = std::static_pointer_cast<dictionary_object_t>(dict_obj);
@@ -229,12 +230,12 @@ auto keys_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sh
 auto values_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw type_error_t("values() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("values() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto dict_obj = args[0];
     if (dict_obj->get_type()->get_name() != "dictionary") {
-        throw type_error_t("values() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("values() argument must be a dictionary, not '" + dict_obj->get_type()->get_name() + "'");
     }
 
     auto dict = std::static_pointer_cast<dictionary_object_t>(dict_obj);
@@ -251,7 +252,7 @@ auto values_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto type_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw type_error_t("type() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("type() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     return std::make_shared<string_object_t>(args[0]->get_type()->get_name());
@@ -261,19 +262,19 @@ auto type_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sh
 auto map_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 2) {
-        throw type_error_t("map() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("map() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)");
     }
 
     auto list_obj = args[0];
     auto func_obj = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw type_error_t("map() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("map() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
     }
 
     auto func_type = func_obj->get_type()->get_name();
     if (func_type != "function" && func_type != "lambda" && func_type != "builtin_function") {
-        throw type_error_t("map() second argument must be a function, not '" + func_type + "'", 0, 0, 1);
+        throw type_error_t("map() second argument must be a function, not '" + func_type + "'");
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -293,19 +294,19 @@ auto map_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto filter_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 2) {
-        throw type_error_t("filter() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("filter() takes exactly 2 arguments (" + std::to_string(args.size()) + " given)");
     }
 
     auto list_obj = args[0];
     auto func_obj = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw type_error_t("filter() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("filter() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
     }
 
     auto func_type = func_obj->get_type()->get_name();
     if (func_type != "function" && func_type != "lambda" && func_type != "builtin_function") {
-        throw type_error_t("filter() second argument must be a function, not '" + func_type + "'", 0, 0, 1);
+        throw type_error_t("filter() second argument must be a function, not '" + func_type + "'");
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -326,24 +327,24 @@ auto filter_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto reduce_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() < 2 || args.size() > 3) {
-        throw type_error_t("reduce() takes 2 or 3 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("reduce() takes 2 or 3 arguments (" + std::to_string(args.size()) + " given)");
     }
 
     auto list_obj = args[0];
     auto func_obj = args[1];
 
     if (list_obj->get_type()->get_name() != "list") {
-        throw type_error_t("reduce() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("reduce() first argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
     }
 
     auto func_type = func_obj->get_type()->get_name();
     if (func_type != "function" && func_type != "lambda" && func_type != "builtin_function") {
-        throw type_error_t("reduce() second argument must be a function, not '" + func_type + "'", 0, 0, 1);
+        throw type_error_t("reduce() second argument must be a function, not '" + func_type + "'");
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
     if (list->get_elements().empty() && args.size() < 3) {
-        throw value_error_t("reduce() of empty sequence with no initial value", 0, 0, 1);
+        throw value_error_t("reduce() of empty sequence with no initial value");
     }
 
     std::shared_ptr<object_t> accumulator;
@@ -365,12 +366,12 @@ auto reduce_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::
 auto enumerate_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-                throw type_error_t("enumerate() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+                throw type_error_t("enumerate() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto list_obj = args[0];
     if (list_obj->get_type()->get_name() != "list") {
-        throw type_error_t("enumerate() argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("enumerate() argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -391,7 +392,7 @@ auto enumerate_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> st
 auto zip_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() < 2) {
-        throw type_error_t("zip() requires at least 2 arguments (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("zip() requires at least 2 arguments (" + std::to_string(args.size()) + " given)");
     }
 
     std::vector<std::shared_ptr<list_object_t>> lists;
@@ -400,7 +401,7 @@ auto zip_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
     // Validate all arguments are lists and find minimum length
     for (const auto& arg : args) {
         if (arg->get_type()->get_name() != "list") {
-            throw type_error_t("zip() arguments must be lists, not '" + arg->get_type()->get_name() + "'", 0, 0, 1);
+            throw type_error_t("zip() arguments must be lists, not '" + arg->get_type()->get_name() + "'");
         }
 
         auto list = std::static_pointer_cast<list_object_t>(arg);
@@ -425,12 +426,12 @@ auto zip_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto all_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-        throw type_error_t("all() takes exactly one argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("all() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto list_obj = args[0];
     if (list_obj->get_type()->get_name() != "list") {
-        throw type_error_t("all() argument must be a list, not '" + list_obj->get_type()->get_name() + "'", 0, 0, 1);
+        throw type_error_t("all() argument must be a list, not '" + list_obj->get_type()->get_name() + "'");
     }
 
     auto list = std::static_pointer_cast<list_object_t>(list_obj);
@@ -442,7 +443,7 @@ auto all_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
             auto promise = std::static_pointer_cast<promise_object_t>(element);
             promises.push_back(promise);
         } else {
-            throw type_error_t("all() list must contain only Promise objects", 0, 0, 1);
+            throw type_error_t("all() list must contain only Promise objects");
         }
     }
 
@@ -462,10 +463,10 @@ auto exit_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sh
             auto int_obj = std::static_pointer_cast<int_object_t>(code_obj);
             exit_code = int_obj->get_value();
         } else {
-            throw type_error_t("exit() argument must be an integer, not '" + code_obj->get_type()->get_name() + "'", 0, 0, 1);
+            throw type_error_t("exit() argument must be an integer, not '" + code_obj->get_type()->get_name() + "'");
         }
     } else if (args.size() > 1) {
-        throw type_error_t("exit() takes at most 1 argument (" + std::to_string(args.size()) + " given)", 0, 0, 1);
+        throw type_error_t("exit() takes at most 1 argument (" + std::to_string(args.size()) + " given)");
     }
 
     std::exit(exit_code);
@@ -529,21 +530,41 @@ auto interpreter_t::get_builtins() -> const std::map<std::string, value_t>&
 // AST Visitor Methods Implementation
 auto interpreter_t::visit(number_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
     m_current_result = std::make_shared<int_object_t>(node.value);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(float_literal_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
     m_current_result = std::make_shared<float_object_t>(node.value);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(string_literal_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
     m_current_result = std::make_shared<string_object_t>(node.value);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(fstring_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     std::string result;
     for (auto& part : node.parts)
     {
@@ -555,20 +576,36 @@ auto interpreter_t::visit(fstring_t& node) -> void
         }
     }
     m_current_result = std::make_shared<string_object_t>(result);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(boolean_literal_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
     m_current_result = std::make_shared<boolean_object_t>(node.value);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(none_literal_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
     m_current_result = std::make_shared<none_object_t>();
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(list_literal_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     auto list_obj = std::make_shared<list_object_t>();
     for (auto& element : node.elements)
     {
@@ -576,10 +613,16 @@ auto interpreter_t::visit(list_literal_t& node) -> void
         list_obj->get_elements_mutable().push_back(m_current_result);
     }
     m_current_result = list_obj;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(dictionary_literal_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     auto dict_obj = std::make_shared<dictionary_object_t>();
     for (auto& pair : node.key_value_pairs)
     {
@@ -590,24 +633,37 @@ auto interpreter_t::visit(dictionary_literal_t& node) -> void
         dict_obj->set_item(key, value);
     }
     m_current_result = dict_obj;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(name_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.name.length(); // Length is name length
+
     for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it)
     {
         auto& scope = *it;
         if (scope.find(node.name) != scope.end())
         {
             m_current_result = scope[node.name];
+            zephyr::get_current_error_location() = saved_location; // Restore before returning
             return;
         }
     }
-    throw name_error_t("Undefined variable: " + node.name, node.line, node.column, node.name.length());
+    throw name_error_t("Undefined variable: " + node.name); // No 0,0,1 needed
+    zephyr::get_current_error_location() = saved_location; // Restore after throwing (unreachable, but good practice)
 }
 
 auto interpreter_t::visit(binary_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = 1; // Operator token is usually 1 char
+
     node.left->accept(*this);
     auto left = m_current_result;
     node.right->accept(*this);
@@ -633,10 +689,16 @@ auto interpreter_t::visit(binary_op_t& node) -> void
     {
         m_current_result = left->modulo(right);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(comparison_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.operator_token.length(); // Length is operator token length
+
     node.left->accept(*this);
     auto left = m_current_result;
     node.right->accept(*this);
@@ -800,74 +862,113 @@ auto interpreter_t::visit(comparison_op_t& node) -> void
         }
         else
         {
-            throw type_error_t("Cannot compare objects of different types or unsupported types", node.line, node.column, 1);
+            throw type_error_t("Cannot compare objects of different types or unsupported types");
         }
     }
 
     m_current_result = std::make_shared<boolean_object_t>(result);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(logical_and_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.left->accept(*this);
     auto left = m_current_result;
 
     if (!left->is_truthy())
     {
         m_current_result = left;
+        zephyr::get_current_error_location() = saved_location; // Restore before returning
         return;
     }
 
     node.right->accept(*this);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(logical_or_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.left->accept(*this);
     auto left = m_current_result;
 
     if (left->is_truthy())
     {
         m_current_result = left;
+        zephyr::get_current_error_location() = saved_location; // Restore before returning
         return;
     }
 
     node.right->accept(*this);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(nullish_coalescing_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.left->accept(*this);
     auto left = m_current_result;
 
     if (left->get_type()->get_name() != "none")
     {
         m_current_result = left;
+        zephyr::get_current_error_location() = saved_location; // Restore before returning
         return;
     }
 
     node.right->accept(*this);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(pipe_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Placeholder implementation
     node.left->accept(*this);
     auto left = m_current_result;
     node.right->accept(*this);
     auto right = m_current_result;
     m_current_result = right;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(logical_not_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.expression->accept(*this);
     auto operand = m_current_result;
     m_current_result = std::make_shared<boolean_object_t>(!operand->is_truthy());
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(unary_op_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = 1; // Operator token is usually 1 char
+
     node.expression->accept(*this);
     auto operand = m_current_result;
 
@@ -907,26 +1008,39 @@ auto interpreter_t::visit(unary_op_t& node) -> void
 
         m_current_result = std::make_shared<boolean_object_t>(!is_truthy);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(index_access_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.object->accept(*this);
     auto list_obj = m_current_result;
     node.index->accept(*this);
     auto index_obj = m_current_result;
 
     m_current_result = list_obj->get_item(index_obj);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(optional_index_access_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.object->accept(*this);
     auto list_obj = m_current_result;
 
     if (list_obj->get_type()->get_name() == "none")
     {
         m_current_result = std::make_shared<none_object_t>();
+        zephyr::get_current_error_location() = saved_location; // Restore before returning
         return;
     }
 
@@ -941,16 +1055,23 @@ auto interpreter_t::visit(optional_index_access_t& node) -> void
         // For optional access, return none instead of error
         m_current_result = std::make_shared<none_object_t>();
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(optional_member_access_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.object->accept(*this);
     auto obj = m_current_result;
 
     if (obj->get_type()->get_name() == "none")
     {
         m_current_result = std::make_shared<none_object_t>();
+        zephyr::get_current_error_location() = saved_location; // Restore before returning
         return;
     }
 
@@ -965,16 +1086,23 @@ auto interpreter_t::visit(optional_member_access_t& node) -> void
             m_current_result = std::make_shared<none_object_t>();
         }
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(optional_method_call_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.object->accept(*this);
     auto obj = m_current_result;
 
     if (obj->get_type()->get_name() == "none")
     {
         m_current_result = std::make_shared<none_object_t>();
+        zephyr::get_current_error_location() = saved_location; // Restore before returning
         return;
     }
 
@@ -994,6 +1122,7 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
         {
             // For optional calls, if method doesn't exist, return none instead of error
             m_current_result = std::make_shared<none_object_t>();
+            zephyr::get_current_error_location() = saved_location; // Restore before returning
             return;
         }
 
@@ -1001,6 +1130,7 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
         if (!method)
         {
             m_current_result = std::make_shared<none_object_t>();
+            zephyr::get_current_error_location() = saved_location; // Restore before returning
             return;
         }
 
@@ -1009,6 +1139,7 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
         {
             // For optional calls, parameter mismatch returns none instead of error
             m_current_result = std::make_shared<none_object_t>();
+            zephyr::get_current_error_location() = saved_location; // Restore before returning
             return;
         }
 
@@ -1047,6 +1178,7 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
                     {
                         // For optional calls, type mismatch returns none instead of error
                         m_current_result = std::make_shared<none_object_t>();
+                        zephyr::get_current_error_location() = saved_location; // Restore before returning
                         return;
                     }
                 }
@@ -1108,6 +1240,7 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
             }
         }
 
+        zephyr::get_current_error_location() = saved_location; // Restore before returning
         return;  // Important: return here for class instances, don't fall through
     }
 
@@ -1118,10 +1251,16 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
         // For optional calls, any error returns none
         m_current_result = std::make_shared<none_object_t>();
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(ternary_expression_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.condition->accept(*this);
     auto condition = m_current_result;
 
@@ -1133,14 +1272,20 @@ auto interpreter_t::visit(ternary_expression_t& node) -> void
     {
         node.false_expression->accept(*this);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(assignment_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     // Check if variable is const before assignment
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name);
     }
 
     node.value->accept(*this);
@@ -1152,10 +1297,16 @@ auto interpreter_t::visit(assignment_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = value;
     m_current_result = value;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(const_declaration_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     node.value->accept(*this);
     auto value = m_current_result;
 
@@ -1165,10 +1316,16 @@ auto interpreter_t::visit(const_declaration_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = value;
     m_current_result = value;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(typed_declaration_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     node.value->accept(*this);
     auto value = m_current_result;
 
@@ -1181,10 +1338,16 @@ auto interpreter_t::visit(typed_declaration_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = value;
     m_current_result = value;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(typed_const_declaration_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     node.value->accept(*this);
     auto value = m_current_result;
 
@@ -1200,27 +1363,45 @@ auto interpreter_t::visit(typed_const_declaration_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = value;
     m_current_result = value;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(empty_declaration_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = std::make_shared<none_object_t>();
     m_current_result = std::make_shared<none_object_t>();
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(empty_typed_declaration_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     // Store the type constraint
     m_type_constraints[node.variable_name] = node.type_name;
 
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = std::make_shared<none_object_t>();
     m_current_result = std::make_shared<none_object_t>();
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(member_variable_declaration_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     if (node.value)
     {
         node.value->accept(*this);
@@ -1229,14 +1410,20 @@ auto interpreter_t::visit(member_variable_declaration_t& node) -> void
     {
         m_current_result = std::make_shared<none_object_t>();
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(compound_assignment_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     // Check if variable is const before assignment
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name);
     }
 
     // Get current value
@@ -1277,33 +1464,52 @@ auto interpreter_t::visit(compound_assignment_t& node) -> void
 
             scope[node.variable_name] = result_value;
             m_current_result = result_value;
+            zephyr::get_current_error_location() = saved_location; // Restore before returning
             return;
         }
     }
-    throw name_error_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+    throw name_error_t("Undefined variable: " + node.variable_name);
+    zephyr::get_current_error_location() = saved_location; // Restore after throwing (unreachable, but good practice)
 }
 
 auto interpreter_t::visit(compound_member_assignment_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Placeholder implementation
     node.object->accept(*this);
     node.value->accept(*this);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(compound_indexed_assignment_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Placeholder implementation
     node.object->accept(*this);
     node.index->accept(*this);
     node.value->accept(*this);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(increment_decrement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     // Check if variable is const before increment/decrement
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name);
     }
 
     // Find variable in scope
@@ -1320,7 +1526,7 @@ auto interpreter_t::visit(increment_decrement_t& node) -> void
 
     if (!var_ptr)
     {
-        throw name_error_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw name_error_t("Undefined variable: " + node.variable_name);
     }
 
     auto current_value = *var_ptr;
@@ -1359,16 +1565,22 @@ auto interpreter_t::visit(increment_decrement_t& node) -> void
     }
     else
     {
-        throw type_error_t("Cannot apply increment/decrement to non-numeric type", node.line, node.column, 1);
+        throw type_error_t("Cannot apply increment/decrement to non-numeric type");
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(increment_decrement_expression_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.variable_name.length();
+
     // Check if variable is const before increment/decrement
     if (m_const_variables.find(node.variable_name) != m_const_variables.end())
     {
-        throw type_error_t("Cannot assign to const variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw type_error_t("Cannot assign to const variable: " + node.variable_name);
     }
 
     // Find variable in scope
@@ -1385,7 +1597,7 @@ auto interpreter_t::visit(increment_decrement_expression_t& node) -> void
 
     if (!var_ptr)
     {
-        throw name_error_t("Undefined variable: " + node.variable_name, node.line, node.column, node.variable_name.length());
+        throw name_error_t("Undefined variable: " + node.variable_name);
     }
 
     auto current_value = *var_ptr;
@@ -1450,24 +1662,42 @@ auto interpreter_t::visit(increment_decrement_expression_t& node) -> void
     }
     else
     {
-        throw type_error_t("Cannot apply increment/decrement to non-numeric type", node.line, node.column, 1);
+        throw type_error_t("Cannot apply increment/decrement to non-numeric type");
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(member_increment_decrement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Placeholder implementation
     m_current_result = std::make_shared<none_object_t>();
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(indexed_increment_decrement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Placeholder implementation
     m_current_result = std::make_shared<none_object_t>();
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(indexed_assignment_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.object->accept(*this);
     auto list_obj = m_current_result;
     node.index->accept(*this);
@@ -1477,23 +1707,41 @@ auto interpreter_t::visit(indexed_assignment_t& node) -> void
 
     list_obj->set_item(index_obj, value_obj);
     m_current_result = value_obj;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(expression_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.expression->accept(*this);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(block_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     for (auto& statement : node.statements)
     {
         statement->accept(*this);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(if_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.condition->accept(*this);
     auto condition = m_current_result;
 
@@ -1505,10 +1753,16 @@ auto interpreter_t::visit(if_statement_t& node) -> void
     {
         node.else_block->accept(*this);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(while_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     while (true)
     {
         node.condition->accept(*this);
@@ -1532,10 +1786,16 @@ auto interpreter_t::visit(while_statement_t& node) -> void
             continue;
         }
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(do_while_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     do
     {
         try
@@ -1559,10 +1819,16 @@ auto interpreter_t::visit(do_while_statement_t& node) -> void
             break;
         }
     } while (true);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(do_until_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     do
     {
         try
@@ -1586,10 +1852,16 @@ auto interpreter_t::visit(do_until_statement_t& node) -> void
             break;
         }
     } while (true);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(for_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Create new scope for loop
     m_scope_stack.push_back(std::map<std::string, value_t>());
 
@@ -1638,10 +1910,16 @@ auto interpreter_t::visit(for_statement_t& node) -> void
     }
 
     m_scope_stack.pop_back();
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(for_each_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.collection->accept(*this);
     auto collection = m_current_result;
 
@@ -1756,10 +2034,16 @@ auto interpreter_t::visit(for_each_statement_t& node) -> void
     }
 
     m_scope_stack.pop_back();
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(loop_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     while (true)
     {
         try
@@ -1775,19 +2059,31 @@ auto interpreter_t::visit(loop_statement_t& node) -> void
             continue;
         }
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(function_definition_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.function_name.length();
+
     // Note: function_object_t constructor expects a unique_ptr to body
     auto func_obj = std::make_shared<function_object_t>(node.parameters, std::move(node.body), node.return_type_name, node.has_explicit_return_type, node.is_async);
     auto& current_scope = m_scope_stack.back();
     current_scope[node.function_name] = func_obj;
     m_current_result = func_obj;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(function_call_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.function_name.length();
+
     // Find function in scope
     std::shared_ptr<object_t> func_obj = nullptr;
     for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it)
@@ -1802,7 +2098,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
     if (!func_obj)
     {
-        throw name_error_t("Undefined function: " + node.function_name, node.line, node.column, node.function_name.length());
+        throw name_error_t("Undefined function: " + node.function_name);
     }
 
     std::vector<std::shared_ptr<object_t>> args;
@@ -1816,6 +2112,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
     if (func_obj->get_type()->get_name() == "builtin_function")
     {
         m_current_result = func_obj->call(args);
+        zephyr::get_current_error_location() = saved_location;
         return;
     }
 
@@ -1828,7 +2125,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         {
             throw type_error_t("Function '" + node.function_name + "' expects " +
                                    std::to_string(func->m_parameters.size()) + " arguments, got " +
-                                   std::to_string(args.size()), node.line, node.column, node.function_name.length());
+                                   std::to_string(args.size()));
         }
 
         // Create new scope for function
@@ -1864,7 +2161,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                     if (!is_interface) {
                         throw type_error_t("Type mismatch for parameter '" + param.name +
                                                "': expected " + param.type_name +
-                                               ", got " + args[i]->get_type()->get_name(), node.line, node.column, node.function_name.length());
+                                               ", got " + args[i]->get_type()->get_name());
                     }
                 }
             }
@@ -1922,6 +2219,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 m_const_variables.erase(param.name);
             }
         }
+        zephyr::get_current_error_location() = saved_location;
         return;
     }
 
@@ -1934,7 +2232,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         {
             throw type_error_t("Lambda function expects " +
                                    std::to_string(lambda->m_parameters.size()) + " arguments, got " +
-                                   std::to_string(args.size()), node.line, node.column, 1);
+                                   std::to_string(args.size()));
         }
 
         // Create new scope for lambda
@@ -1965,7 +2263,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 {
                     throw type_error_t("Type mismatch for parameter '" + param.name +
                                            "': expected " + param.type_name +
-                                           ", got " + args[i]->get_type()->get_name(), node.line, node.column, 1);
+                                           ", got " + args[i]->get_type()->get_name());
                 }
             }
 
@@ -2001,7 +2299,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 }
                 else
                 {
-                    throw runtime_error_with_location_t("Lambda body expression is null - possible AST corruption", 0, 0, 1, "InternalError");
+                    throw internal_error_t("Lambda body expression is null - possible AST corruption");
                 }
             }
         }
@@ -2022,6 +2320,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 m_const_variables.erase(param.name);
             }
         }
+        zephyr::get_current_error_location() = saved_location;
         return;
     }
 
@@ -2030,7 +2329,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
     if (class_obj)
     {
         if (class_obj->m_has_invalid_init) {
-            throw type_error_t("init method cannot return a value.", node.line, node.column, 1);
+            throw type_error_t("init method cannot return a value.");
         }
 
         // Create a new instance of this class
@@ -2041,7 +2340,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         {
             auto init_method = class_obj->get_method("init");
             if (init_method && contains_return_with_value(init_method->body.get())) {
-                throw type_error_t("init method cannot return a value.", node.line, node.column, 1);
+                throw type_error_t("init method cannot return a value.");
             }
 
             if (init_method)
@@ -2051,7 +2350,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 {
                     throw type_error_t("Constructor for class '" + class_obj->m_class_name + "' expects " +
                                            std::to_string(init_method->parameters.size()) + " arguments, got " +
-                                           std::to_string(args.size()), node.line, node.column, 1);
+                                           std::to_string(args.size()));
                 }
 
                 // Create new scope for init method
@@ -2079,7 +2378,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                         {
                             throw type_error_t("Type mismatch for parameter '" + param.name +
                                                    "': expected " + param.type_name +
-                                                   ", got " + args[i]->get_type()->get_name(), node.line, node.column, 1);
+                                                   ", got " + args[i]->get_type()->get_name());
                         }
                     }
 
@@ -2122,20 +2421,26 @@ auto interpreter_t::visit(function_call_t& node) -> void
         {
             // No init method but arguments provided
             throw type_error_t("Class '" + class_obj->m_class_name + "' has no constructor but " +
-                                    std::to_string(args.size()) + " arguments were provided", node.line, node.column, 1);
+                                    std::to_string(args.size()) + " arguments were provided");
         }
 
         // Return the created instance
         m_current_result = instance;
+        zephyr::get_current_error_location() = saved_location;
         return;
     }
 
     // If we get here, it's not a callable object
-    throw type_error_t("Object is not callable", node.line, node.column, 1);
+    throw type_error_t("Object is not callable");
 }
 
 auto interpreter_t::visit(return_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1; // Assuming return_statement_t has end_column
+
     if (node.return_value)
     {
         node.return_value->accept(*this);
@@ -2148,7 +2453,7 @@ auto interpreter_t::visit(return_statement_t& node) -> void
                     if (actual_type == "none") {
                         throw return_value_t{m_current_result};
                     }
-                    throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got " + actual_type, node.line, node.column, 1);
+                    throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got " + actual_type);
                 }
             }
         }
@@ -2159,25 +2464,43 @@ auto interpreter_t::visit(return_statement_t& node) -> void
         if (!m_expected_return_types.empty()) {
             std::string expected_type = m_expected_return_types.back();
             if (!expected_type.empty() && expected_type != "none") {
-                throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got none", node.line, node.column, 1);
+                throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got none");
             }
         }
         throw return_value_t{std::make_shared<none_object_t>()};
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(break_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     throw break_exception_t{};
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(continue_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     throw continue_exception_t{};
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(try_catch_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     try
     {
         node.try_block->accept(*this);
@@ -2188,16 +2511,22 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
         current_scope[node.exception_variable_name] = std::make_shared<string_object_t>(e.what());
         node.catch_block->accept(*this);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(list_destructuring_assignment_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.assigned_expression->accept(*this);
     auto list_obj = std::dynamic_pointer_cast<list_object_t>(m_current_result);
 
     if (!list_obj)
     {
-        throw value_error_t("Cannot destructure non-list value", node.line, node.column, 1);
+        throw value_error_t("Cannot destructure non-list value");
     }
 
     auto& current_scope = m_scope_stack.back();
@@ -2206,10 +2535,16 @@ auto interpreter_t::visit(list_destructuring_assignment_t& node) -> void
     {
         current_scope[node.variable_names[i]] = elements[i];
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(switch_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.expression->accept(*this);
     auto switch_value = m_current_result;
 
@@ -2283,27 +2618,45 @@ auto interpreter_t::visit(switch_statement_t& node) -> void
             stmt->accept(*this);
         }
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(case_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // This shouldn't be called directly - handled by switch_statement
     for (auto& stmt : node.statements)
     {
         stmt->accept(*this);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(program_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     for (auto& statement : node.statements)
     {
         statement->accept(*this);
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(lambda_expression_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Capture current scope variables for closure with safer approach
     std::map<std::string, std::shared_ptr<object_t>> captured_vars;
 
@@ -2326,7 +2679,7 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
     if (node.is_block_body)
     {
         if (!node.body_block) {
-            throw runtime_error_with_location_t("Lambda block body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.", 0, 0, 1, "InternalError");
+            throw internal_error_t("Lambda block body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.");
         }
         // Clone the block body to allow function reuse
         auto cloned_body = clone_block(node.body_block.get());
@@ -2337,7 +2690,7 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
     else
     {
         if (!node.body_expression) {
-            throw runtime_error_with_location_t("Lambda expression body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.", 0, 0, 1, "InternalError");
+            throw internal_error_t("Lambda expression body is null - AST reuse detected. Functions returning lambdas cannot be called multiple times.");
         }
         // Clone the expression to allow function reuse
         auto cloned_expr = clone_expression(node.body_expression.get());
@@ -2345,6 +2698,7 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
         auto lambda_obj = std::make_shared<lambda_object_t>(node.parameters, shared_expr, node.return_type_name, node.has_explicit_return_type, captured_vars, node.is_async);
         m_current_result = lambda_obj;
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::clone_expression(expression_t* expr) -> std::unique_ptr<expression_t>
@@ -2704,7 +3058,7 @@ auto interpreter_t::clone_expression(expression_t* expr) -> std::unique_ptr<expr
     }
 
     // For unsupported expression types, throw an error
-    throw runtime_error_with_location_t("Unsupported expression type in lambda cloning - please simplify lambda body", 0, 0, 1, "InternalError");
+    throw internal_error_t("Unsupported expression type in lambda cloning - please simplify lambda body");
 }
 
 auto interpreter_t::clone_statement(statement_t* stmt) -> std::unique_ptr<statement_t>
@@ -2990,7 +3344,7 @@ auto interpreter_t::clone_statement(statement_t* stmt) -> std::unique_ptr<statem
     }
 
     // For unsupported statement types, throw an error
-    throw runtime_error_with_location_t("Unsupported statement type in lambda cloning: " + std::string(typeid(*stmt).name()), 0, 0, 1, "InternalError");
+    throw internal_error_t("Unsupported statement type in lambda cloning: " + std::string(typeid(*stmt).name()));
 }
 
 auto interpreter_t::clone_block(block_t* block) -> std::unique_ptr<block_t>
@@ -3013,6 +3367,11 @@ auto interpreter_t::clone_block(block_t* block) -> std::unique_ptr<block_t>
 
 auto interpreter_t::visit(class_definition_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.class_name.length();
+
     // Create a new class object
     auto class_obj = std::make_shared<class_object_t>(node.class_name);
 
@@ -3021,7 +3380,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
         auto interface_obj_val = resolve_variable(interface_name);
         auto interface_obj = std::dynamic_pointer_cast<interface_object_t>(interface_obj_val);
         if (!interface_obj) {
-            throw type_error_t("'" + interface_name + "' is not an interface.", node.line, node.column, node.class_name.length());
+            throw type_error_t("'" + interface_name + "' is not an interface.");
         }
 
         class_obj->add_interface(interface_name);
@@ -3031,13 +3390,13 @@ auto interpreter_t::visit(class_definition_t& node) -> void
             for (const auto& class_method : node.methods) {
                 if (class_method->function_name == interface_method.name) {
                     if (class_method->parameters.size() != interface_method.parameters.size()) {
-                        throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' has different number of parameters than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                        throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' has different number of parameters than in interface '" + interface_name + "'.");
                     }
                     for (size_t i = 0; i < class_method->parameters.size(); ++i) {
                         const auto& class_param = class_method->parameters[i];
                         const auto& interface_param = interface_method.parameters[i];
                         if (class_param.type_name != interface_param.type_name) {
-                            throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' parameter '" + class_param.name + "' has different type than in interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                            throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' parameter '" + class_param.name + "' has different type than in interface '" + interface_name + "'.");
                         }
                     }
                     method_found = true;
@@ -3045,7 +3404,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
                 }
             }
             if (!method_found) {
-                throw type_error_t("Class '" + node.class_name + "' does not implement method '" + interface_method.name + "' from interface '" + interface_name + "'.", node.line, node.column, node.class_name.length());
+                throw type_error_t("Class '" + node.class_name + "' does not implement method '" + interface_method.name + "' from interface '" + interface_name + "'.");
             }
         }
     }
@@ -3087,6 +3446,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.class_name] = class_obj;
     m_current_result = class_obj;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::contains_return_with_value(block_t* block) -> bool
@@ -3163,6 +3523,11 @@ auto interpreter_t::contains_return_with_value(block_t* block) -> bool
 
 auto interpreter_t::visit(interface_definition_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.interface_name.length();
+
     // Create a new interface object
     auto interface_obj = std::make_shared<interface_object_t>(node.interface_name);
 
@@ -3176,10 +3541,16 @@ auto interpreter_t::visit(interface_definition_t& node) -> void
     auto& current_scope = m_scope_stack.back();
     current_scope[node.interface_name] = interface_obj;
     m_current_result = interface_obj;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(method_call_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.method_name.length();
+
     node.object->accept(*this);
     auto obj = m_current_result;
 
@@ -3198,13 +3569,13 @@ auto interpreter_t::visit(method_call_t& node) -> void
         if (!class_instance->has_method(node.method_name))
         {
             throw attribute_error_t("Method '" + node.method_name + "' not found in class '" +
-                                   class_instance->m_class_obj->m_class_name + "'", node.line, node.column, node.method_name.length());
+                                   class_instance->m_class_obj->m_class_name + "'");
         }
 
         auto method = class_instance->get_method(node.method_name);
         if (!method)
         {
-            throw attribute_error_t("Method '" + node.method_name + "' is null", node.line, node.column, node.method_name.length());
+            throw attribute_error_t("Method '" + node.method_name + "' is null");
         }
 
         // Check parameter count
@@ -3212,7 +3583,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
         {
             throw type_error_t("Method '" + node.method_name + "' expects " +
                                    std::to_string(method->parameters.size()) + " arguments, got " +
-                                   std::to_string(args.size()), node.line, node.column, node.method_name.length());
+                                   std::to_string(args.size()));
         }
 
         // Create new scope for method
@@ -3251,7 +3622,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
                     if (!is_interface) {
                         throw type_error_t("Type mismatch for parameter '" + param.name +
                                                    "': expected " + param.type_name +
-                                                   ", got " + args[i]->get_type()->get_name(), node.line, node.column, node.method_name.length());
+                                                   ", got " + args[i]->get_type()->get_name());
                     }
                 }
             }
@@ -3309,22 +3680,35 @@ auto interpreter_t::visit(method_call_t& node) -> void
                 m_const_variables.erase(param.name);
             }
         }
+        zephyr::get_current_error_location() = saved_location;
         return;
     }
 
     // If not a class instance, fall back to the default behavior
     m_current_result = obj->call_method(node.method_name, args);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(member_access_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.member_name.length();
+
     node.object->accept(*this);
     auto obj = m_current_result;
     m_current_result = obj->get_type()->get_member(obj, node.member_name);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(this_expression_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Find 'this' in scope
     for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it)
     {
@@ -3332,14 +3716,21 @@ auto interpreter_t::visit(this_expression_t& node) -> void
         if (scope.find("this") != scope.end())
         {
             m_current_result = scope["this"];
+            zephyr::get_current_error_location() = saved_location; // Restore before returning
             return;
         }
     }
-    throw name_error_t("'this' not available in current context", node.line, node.column, 4);
+    throw name_error_t("'this' not available in current context");
+    zephyr::get_current_error_location() = saved_location; // Restore after throwing (unreachable, but good practice)
 }
 
 auto interpreter_t::visit(member_assignment_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.member_name.length();
+
     node.object->accept(*this);
     auto obj = m_current_result;
     node.value->accept(*this);
@@ -3347,10 +3738,16 @@ auto interpreter_t::visit(member_assignment_t& node) -> void
 
     obj->get_type()->set_member(obj, node.member_name, value);
     m_current_result = value;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(in_expression_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.element->accept(*this);
     auto left = m_current_result;
     node.container_expression->accept(*this);
@@ -3410,10 +3807,16 @@ auto interpreter_t::visit(in_expression_t& node) -> void
         }
     }
     m_current_result = std::make_shared<boolean_object_t>(result);
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(await_expression_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     node.expression->accept(*this);
     auto promise_obj = std::dynamic_pointer_cast<promise_object_t>(m_current_result);
 
@@ -3421,6 +3824,7 @@ auto interpreter_t::visit(await_expression_t& node) -> void
     {
         m_current_result = promise_obj->m_result;
     }
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::push_scope(const std::map<std::string, value_t>& scope) -> void
@@ -3431,7 +3835,7 @@ auto interpreter_t::push_scope(const std::map<std::string, value_t>& scope) -> v
 auto interpreter_t::pop_scope() -> std::map<std::string, value_t>
 {
     if (m_scope_stack.empty()) {
-        throw runtime_error_with_location_t("Cannot pop from empty scope stack", 0, 0, 1, "InternalError");
+        throw internal_error_t("Cannot pop from empty scope stack");
     }
     auto scope = m_scope_stack.back();
     m_scope_stack.pop_back();
@@ -3447,13 +3851,18 @@ auto interpreter_t::enter_function_scope() -> void
 auto interpreter_t::exit_function_scope() -> void
 {
     if (m_scope_stack.size() <= 1) {
-        throw runtime_error_with_location_t("Cannot exit global scope", 0, 0, 1, "InternalError");
+        throw internal_error_t("Cannot exit global scope");
     }
     m_scope_stack.pop_back();
 }
 
 auto interpreter_t::visit(spawn_expression_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
     // Create a promise for the spawned expression
     auto promise_obj = std::make_shared<promise_object_t>();
 
@@ -3464,6 +3873,7 @@ auto interpreter_t::visit(spawn_expression_t& node) -> void
     promise_obj->resolve(m_current_result);
 
     m_current_result = promise_obj;
+    zephyr::get_current_error_location() = saved_location;
 }
 
 auto interpreter_t::validate_type_constraint(const std::string& variable_name, value_t value) -> void
@@ -3509,7 +3919,7 @@ auto interpreter_t::validate_type_constraint(const std::string& variable_name, v
         // Check if normalized types match
         if (normalized_actual != normalized_expected)
         {
-            throw type_error_t("Type error: Cannot assign " + actual_type + " to " + expected_type + " variable '" + variable_name + "'", 0, 0, 1);
+            throw type_error_t("Type error: Cannot assign " + actual_type + " to " + expected_type + " variable '" + variable_name + "'");
         }
     }
 }
@@ -3524,7 +3934,7 @@ auto interpreter_t::resolve_variable(const std::string& variable_name) -> value_
             return scope[variable_name];
         }
     }
-    throw name_error_t("Undefined variable: " + variable_name, 0, 0, variable_name.length());
+    throw name_error_t("Undefined variable: " + variable_name);
 }
 
 auto interpreter_t::set_variable(const std::string& variable_name, value_t value) -> void

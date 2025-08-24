@@ -14,27 +14,27 @@ auto dictionary_type_t::get_instance() -> std::shared_ptr<dictionary_type_t>
 
 auto dictionary_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for dictionaries", 0, 0, 1);
+    throw type_error_t("Operation not supported for dictionaries");
 }
 
 auto dictionary_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for dictionaries", 0, 0, 1);
+    throw type_error_t("Operation not supported for dictionaries");
 }
 
 auto dictionary_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for dictionaries", 0, 0, 1);
+    throw type_error_t("Operation not supported for dictionaries");
 }
 
 auto dictionary_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for dictionaries", 0, 0, 1);
+    throw type_error_t("Unsupported operation for dictionaries");
 }
 
 auto dictionary_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for dictionaries", 0, 0, 1);
+    throw type_error_t("Unsupported operation for dictionaries");
 }
 
 auto dictionary_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
@@ -49,10 +49,10 @@ auto dictionary_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr
         }
         else
         {
-            throw key_error_t("Key '" + index_string->get_value() + "' not found in dictionary.", 0, 0, 1);
+            throw key_error_t("Key '" + index_string->get_value() + "' not found in dictionary.");
         }
     }
-    throw type_error_t("Dictionary key must be a string.", 0, 0, 1);
+    throw type_error_t("Dictionary key must be a string.");
 }
 
 auto dictionary_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
@@ -65,7 +65,7 @@ auto dictionary_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr
     }
     else
     {
-        throw type_error_t("Dictionary key must be a string.", 0, 0, 1);
+        throw type_error_t("Dictionary key must be a string.");
     }
 }
 
@@ -111,7 +111,7 @@ auto dictionary_type_t::get_member(std::shared_ptr<object_t> self, const std::st
     {
         return elements.at(name);
     }
-    throw attribute_error_t("Dictionary has no member '" + name + "'", 0, 0, 1);
+    throw attribute_error_t("Dictionary has no member '" + name + "'");
 }
 
 auto dictionary_type_t::set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void

@@ -22,27 +22,27 @@ auto list_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> 
         new_elements.insert(new_elements.end(), other_elements.begin(), other_elements.end());
         return std::make_shared<list_object_t>(new_elements);
     }
-    throw type_error_t("Unsupported operand types for list concatenation", 0, 0, 1);
+    throw type_error_t("Unsupported operand types for list concatenation");
 }
 
 auto list_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for lists", 0, 0, 1);
+    throw type_error_t("Unsupported operation for lists");
 }
 
 auto list_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for lists", 0, 0, 1);
+    throw type_error_t("Unsupported operation for lists");
 }
 
 auto list_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for lists", 0, 0, 1);
+    throw type_error_t("Unsupported operation for lists");
 }
 
 auto list_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Unsupported operation for lists", 0, 0, 1);
+    throw type_error_t("Unsupported operation for lists");
 }
 
 auto list_type_t::get_name() const -> std::string
@@ -95,11 +95,11 @@ auto list_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<objec
         const auto& elements = self_list->get_elements();
         if (idx < 0 || idx >= static_cast<int>(elements.size()))
         {
-            throw index_error_t("List index out of bounds", 0, 0, 1);
+            throw index_error_t("List index out of bounds");
         }
         return elements[idx];
     }
-    throw type_error_t("List index must be an integer", 0, 0, 1);
+    throw type_error_t("List index must be an integer");
 }
 
 auto list_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
@@ -111,12 +111,12 @@ auto list_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<objec
         auto& elements = self_list->get_elements_mutable();
         if (idx < 0 || idx >= static_cast<int>(elements.size()))
         {
-            throw index_error_t("List index out of bounds", 0, 0, 1);
+            throw index_error_t("List index out of bounds");
         }
         elements[idx] = value;
         return;
     }
-    throw type_error_t("List index must be an integer", 0, 0, 1);
+    throw type_error_t("List index must be an integer");
 }
 
 auto list_type_t::contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> item) -> bool

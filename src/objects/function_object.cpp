@@ -30,32 +30,32 @@ auto function_object_t::call(const std::vector<std::shared_ptr<object_t>>& args)
 {
     // Function execution is handled directly in the interpreter's visit(function_call_t&) method
     // This method should not be called directly
-    throw type_error_t("Function call should be handled by interpreter", 0, 0, 1);
+    throw type_error_t("Function call should be handled by interpreter");
 }
 
 auto function_object_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions", 0, 0, 1);
+    throw type_error_t("Operation not supported for functions");
 }
 
 auto function_object_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions", 0, 0, 1);
+    throw type_error_t("Operation not supported for functions");
 }
 
 auto function_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions", 0, 0, 1);
+    throw type_error_t("Operation not supported for functions");
 }
 
 auto function_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions", 0, 0, 1);
+    throw type_error_t("Operation not supported for functions");
 }
 
 auto function_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions", 0, 0, 1);
+    throw type_error_t("Operation not supported for functions");
 }
 
 auto function_object_t::format_parameters() const -> std::string
@@ -94,7 +94,7 @@ auto function_object_t::validate_parameters() const -> void
     {
         if (param.name.empty())
         {
-            throw value_error_t("Function parameter name cannot be empty", 0, 0, 1);
+            throw value_error_t("Function parameter name cannot be empty");
         }
     }
 }
