@@ -1,4 +1,15 @@
-# Bitwise Operations
+# Zephyr Bitwise Operations Example
+# This file demonstrates bitwise operations in Zephyr
+
+print("=== Zephyr Bitwise Operations Demo ===")
+print("")
+
+# ============================================================================
+# 1. Bitwise Operations
+# ============================================================================
+
+print("1. Bitwise Operations")
+print("======================")
 
 # AND operator (&)
 print("10 & 3 =", 10 & 3)   # Expected: 2 (1010 & 0011 = 0010)
@@ -28,6 +39,15 @@ print("20 >> 2 =", 20 >> 2) # Expected: 5 (10100 >> 2 = 0101)
 print("1 & 2 | 4 =", 1 & 2 | 4) # Expected: 4 ( (1&2) | 4 = 0 | 4 = 4 )
 print("~1 & 2 =", ~1 & 2)       # Expected: -2 ( ~1 = -2, -2 & 2 = -2 )
 print("1 << 2 & 3 =", 1 << 2 & 3) # Expected: 0 ( (1<<2) & 3 = 4 & 3 = 0 )
+
+print("")
+
+# ============================================================================
+# 2. Error Handling
+# ============================================================================
+
+print("2. Error Handling")
+print("==================")
 
 # Error Handling: Non-integer operands
 try {
@@ -60,3 +80,6 @@ try {
 } catch e {
     print("Caught error:", e)
 }
+
+print("")
+print("=== Zephyr Bitwise Operations Demo Complete ===")

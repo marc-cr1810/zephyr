@@ -211,16 +211,31 @@ logicalOrExpression
     ;
 
 logicalAndExpression
-    : unary ( (AND | AND_OP) unary )*
+    : bitwiseOrExpression ( (AND | AND_OP) bitwiseOrExpression )*
     ;
 
-unary
-    : (NOT | NOT_OP | MINUS | PLUS | AWAIT | SPAWN) unary
-    | comparison
+bitwiseOrExpression
+    : bitwiseXorExpression (BIT_OR bitwiseXorExpression)*
+    ;
+
+bitwiseXorExpression
+    : bitwiseAndExpression (BIT_XOR bitwiseAndExpression)*
+    ;
+
+bitwiseAndExpression
+    : equalityExpression (BIT_AND equalityExpression)*
+    ;
+
+equalityExpression
+    : comparison ( (EQ | NE) comparison )*
     ;
 
 comparison
-    : additiveExpression ( (EQ | NE | LT | LE | GT | GE) additiveExpression )*
+    : shiftExpression ( (LT | LE | GT | GE) shiftExpression )*
+    ;
+
+shiftExpression
+    : additiveExpression ( (LSHIFT | RSHIFT) additiveExpression )*
     ;
 
 additiveExpression
@@ -229,12 +244,12 @@ additiveExpression
 
 // Multiplicative expressions - handles string multiplication
 term
-    : unaryFactor ( (MUL | DIV) unaryFactor )*
+    : unary ( (MUL | DIV) unary )*
     ;
 
 // Unary expressions - handles negative number literals and expressions
-unaryFactor
-    : (MINUS | PLUS) unaryFactor
+unary
+    : (NOT | NOT_OP | MINUS | PLUS | AWAIT | SPAWN | TILDE) unary
     | factor
     ;
 
@@ -323,6 +338,14 @@ DIV: '/';
 QUESTION: '?';
 COLON: ':';
 ARROW: '->';
+
+// Bitwise operators
+BIT_AND: '&';
+BIT_OR: '|';
+BIT_XOR: '^';
+TILDE: '~';
+LSHIFT: '<<';
+RSHIFT: '>>';
 
 // Nullish Coalescing Operator
 NULLISH_COALESCING: '??';

@@ -41,6 +41,7 @@ Zephyr supports a range of modern scripting language features:
     *   **Comparison:** `==`, `!=`, `<`, `<=`, `>`, `>=`
     *   **Membership:** `in`
     *   **Logical:** `and`, `or`, `not`, `&&`, `||`, `!`
+    *   **Bitwise:** `&` (AND), `|` (OR), `^` (XOR), `~` (NOT), `<<` (Left Shift), `>>` (Right Shift)
     *   The `or` operator returns the value of the first operand if it is "truthy", otherwise it returns the value of the second operand. Values considered "falsy" are `none`, `0` (integer), `0.0` (float), empty strings (`""`), empty lists (`[]`), and empty dictionaries (`{}`). All other values are considered "truthy".
     *   **Nullish Coalescing:** `??`
         *   The `??` operator returns the value of the first operand if it is not `none`, otherwise it returns the value of the second operand. This differs from the `or` operator by only checking for `none` (nullish) values, rather than any "falsy" values (like `0`, `""`, `[]`, `{}`).

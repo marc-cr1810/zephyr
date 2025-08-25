@@ -271,6 +271,13 @@ These files provide complete, organized demonstrations of Zephyr features with c
 - Explicit return types for functions, class methods, and lambdas.
 - Restrictions on `init` methods, which cannot have a return type or return a value.
 
+### 25_bitwise_operations.zephyr
+**Bitwise operations and their precedence**
+- Bitwise AND (`&`), OR (`|`), XOR (`^`), NOT (`~`)
+- Left Shift (`<<`), Right Shift (`>>`)
+- Operator precedence with other arithmetic and logical operators
+- Error handling for invalid bitwise operations
+
 ### 09_string_operations.zephyr
 **Advanced string manipulation and formatting**
 - String concatenation and basic operations
@@ -335,7 +342,9 @@ Follow this recommended sequence to master Zephyr:
 
 19. **Master `23_built_in_functions.zephyr`** - Learn the usage of all built-in functions with practical examples
 
-20. **Apply knowledge with `08_comprehensive_examples.zephyr`** - See real-world applications and complete examples
+21. **Study `25_bitwise_operations.zephyr`** - Learn about bitwise operations and their precedence
+
+22. **Apply knowledge with `08_comprehensive_examples.zephyr`** - See real-world applications and complete examples
 
 ## Key Features Demonstrated
 
