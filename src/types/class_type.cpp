@@ -2,6 +2,7 @@
 #include "objects/object.hpp"
 #include <stdexcept>
 #include "errors.hpp"
+#include "objects/class_instance_object.hpp"
 
 namespace zephyr
 {
@@ -75,6 +76,27 @@ auto class_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object
 
     // Instance equality is pointer equality
     return self.get() == other.get();
+}
+
+auto class_type_t::get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>
+{
+    auto instance = std::dynamic_pointer_cast<class_instance_t>(self);
+    if (instance)
+    {
+        return instance->get_member(name);
+    }
+    throw type_error_t("Cannot access member on non-class instance");
+}
+
+auto class_type_t::set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void
+{
+    auto instance = std::dynamic_pointer_cast<class_instance_t>(self);
+    if (instance)
+    {
+        instance->set_member(name, value);
+        return;
+    }
+    throw type_error_t("Cannot set member on non-class instance");
 }
 
 auto class_type_t::throw_unsupported_operation(const std::string& operation) const -> void
