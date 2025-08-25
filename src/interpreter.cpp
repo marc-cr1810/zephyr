@@ -3876,6 +3876,150 @@ auto interpreter_t::visit(spawn_expression_t& node) -> void
     zephyr::get_current_error_location() = saved_location;
 }
 
+// New bitwise visit methods start here
+auto interpreter_t::visit(bitwise_and_op_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
+    node.left->accept(*this);
+    auto left = m_current_result;
+    node.right->accept(*this);
+    auto right = m_current_result;
+
+    if (left->get_type()->get_name() != "int" || right->get_type()->get_name() != "int") {
+        throw type_error_t("Bitwise AND operator can only be applied to integers.");
+    }
+
+    auto left_int = std::static_pointer_cast<int_object_t>(left);
+    auto right_int = std::static_pointer_cast<int_object_t>(right);
+
+    m_current_result = std::make_shared<int_object_t>(left_int->get_value() & right_int->get_value());
+    zephyr::get_current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(bitwise_or_op_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
+    node.left->accept(*this);
+    auto left = m_current_result;
+    node.right->accept(*this);
+    auto right = m_current_result;
+
+    if (left->get_type()->get_name() != "int" || right->get_type()->get_name() != "int") {
+        throw type_error_t("Bitwise OR operator can only be applied to integers.");
+    }
+
+    auto left_int = std::static_pointer_cast<int_object_t>(left);
+    auto right_int = std::static_pointer_cast<int_object_t>(right);
+
+    m_current_result = std::make_shared<int_object_t>(left_int->get_value() | right_int->get_value());
+    zephyr::get_current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(bitwise_xor_op_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
+    node.left->accept(*this);
+    auto left = m_current_result;
+    node.right->accept(*this);
+    auto right = m_current_result;
+
+    if (left->get_type()->get_name() != "int" || right->get_type()->get_name() != "int") {
+        throw type_error_t("Bitwise XOR operator can only be applied to integers.");
+    }
+
+    auto left_int = std::static_pointer_cast<int_object_t>(left);
+    auto right_int = std::static_pointer_cast<int_object_t>(right);
+
+    m_current_result = std::make_shared<int_object_t>(left_int->get_value() ^ right_int->get_value());
+    zephyr::get_current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(bitwise_not_op_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
+    node.expression->accept(*this);
+    auto operand = m_current_result;
+
+    if (operand->get_type()->get_name() != "int") {
+        throw type_error_t("Bitwise NOT operator can only be applied to integers.");
+    }
+
+    auto int_obj = std::static_pointer_cast<int_object_t>(operand);
+
+    m_current_result = std::make_shared<int_object_t>(~int_obj->get_value());
+    zephyr::get_current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(left_shift_op_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
+    node.left->accept(*this);
+    auto left = m_current_result;
+    node.right->accept(*this);
+    auto right = m_current_result;
+
+    if (left->get_type()->get_name() != "int" || right->get_type()->get_name() != "int") {
+        throw type_error_t("Bitwise left shift operator can only be applied to integers.");
+    }
+
+    auto left_int = std::static_pointer_cast<int_object_t>(left);
+    auto right_int = std::static_pointer_cast<int_object_t>(right);
+
+    if (right_int->get_value() < 0) {
+        throw value_error_t("Shift amount cannot be negative.");
+    }
+
+    m_current_result = std::make_shared<int_object_t>(left_int->get_value() << right_int->get_value());
+    zephyr::get_current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(right_shift_op_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = node.end_column - node.column + 1;
+
+    node.left->accept(*this);
+    auto left = m_current_result;
+    node.right->accept(*this);
+    auto right = m_current_result;
+
+    if (left->get_type()->get_name() != "int" || right->get_type()->get_name() != "int") {
+        throw type_error_t("Bitwise right shift operator can only be applied to integers.");
+    }
+
+    auto left_int = std::static_pointer_cast<int_object_t>(left);
+    auto right_int = std::static_pointer_cast<int_object_t>(right);
+
+    if (right_int->get_value() < 0) {
+        throw value_error_t("Shift amount cannot be negative.");
+    }
+
+    m_current_result = std::make_shared<int_object_t>(left_int->get_value() >> right_int->get_value());
+    zephyr::get_current_error_location() = saved_location;
+}
+
 auto interpreter_t::validate_type_constraint(const std::string& variable_name, value_t value) -> void
 {
     // Check if the variable has a type constraint

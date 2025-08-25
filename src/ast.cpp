@@ -333,4 +333,34 @@ auto interface_definition_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
+auto bitwise_and_op_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto bitwise_or_op_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto bitwise_xor_op_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto bitwise_not_op_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto left_shift_op_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto right_shift_op_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
 } // namespace zephyr

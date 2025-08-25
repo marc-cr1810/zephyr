@@ -234,6 +234,8 @@ auto lexer_t::get_next_token() -> token_t
         if (two_char == "%=") return make_token(token_type_e::modulo_assign, "%=");
         if (two_char == "++") return make_token(token_type_e::increment, "++");
         if (two_char == "--") return make_token(token_type_e::decrement, "--");
+        if (two_char == "<<") return make_token(token_type_e::left_shift, "<<");
+        if (two_char == ">>") return make_token(token_type_e::right_shift, ">>");
     }
 
     // Single-character operators
@@ -252,6 +254,10 @@ auto lexer_t::get_next_token() -> token_t
         case '*': return make_token(token_type_e::mul, "*");
         case '/': return make_token(token_type_e::div, "/");
         case '%': return make_token(token_type_e::modulo, "%");
+        case '&': return make_token(token_type_e::bitwise_and, "&");
+        case '|': return make_token(token_type_e::bitwise_or, "|");
+        case '^': return make_token(token_type_e::bitwise_xor, "^");
+        case '~': return make_token(token_type_e::bitwise_not, "~");
         case '=': return make_token(token_type_e::assign, "=");
         case '<': return make_token(token_type_e::lt, "<");
         case '>': return make_token(token_type_e::gt, ">");

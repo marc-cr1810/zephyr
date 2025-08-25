@@ -1,0 +1,62 @@
+# Bitwise Operations
+
+# AND operator (&)
+print("10 & 3 =", 10 & 3)   # Expected: 2 (1010 & 0011 = 0010)
+print("5 & 12 =", 5 & 12)   # Expected: 4 (0101 & 1100 = 0100)
+
+# OR operator (|)
+print("10 | 3 =", 10 | 3)   # Expected: 11 (1010 | 0011 = 1011)
+print("5 | 12 =", 5 | 12)   # Expected: 13 (0101 | 1100 = 1101)
+
+# XOR operator (^)
+print("10 ^ 3 =", 10 ^ 3)   # Expected: 9 (1010 ^ 0011 = 1001)
+print("5 ^ 12 =", 5 ^ 12)   # Expected: 9 (0101 ^ 1100 = 1001)
+
+# NOT operator (~)
+print("~10 =", ~10)         # Expected: -11 (Two's complement)
+print("~-5 =", ~-5)         # Expected: 4
+
+# Left Shift operator (<<)
+print("5 << 1 =", 5 << 1)   # Expected: 10 (0101 << 1 = 1010)
+print("5 << 2 =", 5 << 2)   # Expected: 20 (0101 << 2 = 10100)
+
+# Right Shift operator (>>)
+print("10 >> 1 =", 10 >> 1) # Expected: 5 (1010 >> 1 = 0101)
+print("20 >> 2 =", 20 >> 2) # Expected: 5 (10100 >> 2 = 0101)
+
+# Operator Precedence (should work correctly)
+print("1 & 2 | 4 =", 1 & 2 | 4) # Expected: 4 ( (1&2) | 4 = 0 | 4 = 4 )
+print("~1 & 2 =", ~1 & 2)       # Expected: -2 ( ~1 = -2, -2 & 2 = -2 )
+print("1 << 2 & 3 =", 1 << 2 & 3) # Expected: 0 ( (1<<2) & 3 = 4 & 3 = 0 )
+
+# Error Handling: Non-integer operands
+try {
+    print("10 & 3.5 =", 10 & 3.5)
+} catch e {
+    print("Caught error:", e)
+}
+
+try {
+    print("5 | true =", 5 | true)
+} catch e {
+    print("Caught error:", e)
+}
+
+try {
+    print("~'abc' =", ~"abc")
+} catch e {
+    print("Caught error:", e)
+}
+
+# Error Handling: Negative shift amount
+try {
+    print("10 << -1 =", 10 << -1)
+} catch e {
+    print("Caught error:", e)
+}
+
+try {
+    print("20 >> -2 =", 20 >> -2)
+} catch e {
+    print("Caught error:", e)
+}

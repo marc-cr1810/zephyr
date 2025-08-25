@@ -93,6 +93,12 @@ public:
     auto visit(in_expression_t& node) -> void override;
     auto visit(await_expression_t& node) -> void override;
     auto visit(spawn_expression_t& node) -> void override;
+    auto visit(bitwise_and_op_t& node) -> void override;
+    auto visit(bitwise_or_op_t& node) -> void override;
+    auto visit(bitwise_xor_op_t& node) -> void override;
+    auto visit(bitwise_not_op_t& node) -> void override;
+    auto visit(left_shift_op_t& node) -> void override;
+    auto visit(right_shift_op_t& node) -> void override;
 
 public:
     // Public member variables

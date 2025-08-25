@@ -79,6 +79,13 @@ class continue_statement_t;
 class try_catch_statement_t;
 class in_expression_t;
 
+class bitwise_and_op_t;
+class bitwise_or_op_t;
+class bitwise_xor_op_t;
+class bitwise_not_op_t;
+class left_shift_op_t;
+class right_shift_op_t;
+
 // Visitor pattern for AST traversal
 class ast_visitor_t
 {
@@ -151,6 +158,12 @@ public:
     virtual auto visit(in_expression_t& node) -> void = 0;
     virtual auto visit(await_expression_t& node) -> void = 0;
     virtual auto visit(spawn_expression_t& node) -> void = 0;
+    virtual auto visit(bitwise_and_op_t& node) -> void = 0;
+    virtual auto visit(bitwise_or_op_t& node) -> void = 0;
+    virtual auto visit(bitwise_xor_op_t& node) -> void = 0;
+    virtual auto visit(bitwise_not_op_t& node) -> void = 0;
+    virtual auto visit(left_shift_op_t& node) -> void = 0;
+    virtual auto visit(right_shift_op_t& node) -> void = 0;
 };
 
 // Base class for all AST nodes
@@ -654,6 +667,96 @@ public:
 public:
     std::unique_ptr<expression_t> element;
     std::unique_ptr<expression_t> container_expression;
+};
+
+// Bitwise operations
+class bitwise_and_op_t : public expression_t
+{
+public:
+    bitwise_and_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), left(std::move(left)), right(std::move(right))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::unique_ptr<expression_t> left;
+    std::unique_ptr<expression_t> right;
+};
+
+class bitwise_or_op_t : public expression_t
+{
+public:
+    bitwise_or_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), left(std::move(left)), right(std::move(right))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::unique_ptr<expression_t> left;
+    std::unique_ptr<expression_t> right;
+};
+
+class bitwise_xor_op_t : public expression_t
+{
+public:
+    bitwise_xor_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), left(std::move(left)), right(std::move(right))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::unique_ptr<expression_t> left;
+    std::unique_ptr<expression_t> right;
+};
+
+class bitwise_not_op_t : public expression_t
+{
+public:
+    bitwise_not_op_t(std::unique_ptr<expression_t> expression, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), expression(std::move(expression))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::unique_ptr<expression_t> expression;
+};
+
+class left_shift_op_t : public expression_t
+{
+public:
+    left_shift_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), left(std::move(left)), right(std::move(right))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::unique_ptr<expression_t> left;
+    std::unique_ptr<expression_t> right;
+};
+
+class right_shift_op_t : public expression_t
+{
+public:
+    right_shift_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), left(std::move(left)), right(std::move(right))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::unique_ptr<expression_t> left;
+    std::unique_ptr<expression_t> right;
 };
 
 // Assignment operations

@@ -449,7 +449,7 @@ std::unique_ptr<expression_t> parser_t::logical_or_expression() {
 }
 
 std::unique_ptr<expression_t> parser_t::logical_and_expression() {
-    auto node = comparison();
+    auto node = bitwise_or_expression();
     while (m_current_token.type == token_type_e::and_token || m_current_token.type == token_type_e::and_op) {
         token_t op_token = m_current_token;
         if (m_current_token.type == token_type_e::and_token) {
@@ -457,7 +457,53 @@ std::unique_ptr<expression_t> parser_t::logical_and_expression() {
         } else {
             eat(token_type_e::and_op);
         }
-        node = std::make_unique<logical_and_op_t>(std::move(node), comparison(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+        node = std::make_unique<logical_and_op_t>(std::move(node), bitwise_or_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+    }
+    return node;
+}
+
+// New bitwise parsing functions start here
+std::unique_ptr<expression_t> parser_t::bitwise_or_expression() {
+    auto node = bitwise_xor_expression();
+    while (m_current_token.type == token_type_e::bitwise_or) {
+        token_t op_token = m_current_token;
+        eat(token_type_e::bitwise_or);
+        node = std::make_unique<bitwise_or_op_t>(std::move(node), bitwise_xor_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+    }
+    return node;
+}
+
+std::unique_ptr<expression_t> parser_t::bitwise_xor_expression() {
+    auto node = bitwise_and_expression();
+    while (m_current_token.type == token_type_e::bitwise_xor) {
+        token_t op_token = m_current_token;
+        eat(token_type_e::bitwise_xor);
+        node = std::make_unique<bitwise_xor_op_t>(std::move(node), bitwise_and_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+    }
+    return node;
+}
+
+std::unique_ptr<expression_t> parser_t::bitwise_and_expression() {
+    auto node = bitwise_shift_expression();
+    while (m_current_token.type == token_type_e::bitwise_and) {
+        token_t op_token = m_current_token;
+        eat(token_type_e::bitwise_and);
+        node = std::make_unique<bitwise_and_op_t>(std::move(node), bitwise_shift_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+    }
+    return node;
+}
+
+std::unique_ptr<expression_t> parser_t::bitwise_shift_expression() {
+    auto node = comparison(); // Calls the next higher precedence
+    while (m_current_token.type == token_type_e::left_shift || m_current_token.type == token_type_e::right_shift) {
+        token_t op_token = m_current_token;
+        if (m_current_token.type == token_type_e::left_shift) {
+            eat(token_type_e::left_shift);
+            node = std::make_unique<left_shift_op_t>(std::move(node), comparison(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+        } else {
+            eat(token_type_e::right_shift);
+            node = std::make_unique<right_shift_op_t>(std::move(node), comparison(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+        }
     }
     return node;
 }
@@ -538,7 +584,8 @@ std::unique_ptr<expression_t> parser_t::term() {
 
 std::unique_ptr<expression_t> parser_t::unary_factor() {
     if (m_current_token.type == token_type_e::minus || m_current_token.type == token_type_e::plus ||
-        m_current_token.type == token_type_e::not_token || m_current_token.type == token_type_e::not_op) {
+        m_current_token.type == token_type_e::not_token || m_current_token.type == token_type_e::not_op ||
+        m_current_token.type == token_type_e::bitwise_not) {
         token_t op_token = m_current_token;
         char op_char = ' ';
         if (m_current_token.type == token_type_e::not_token) {
@@ -553,6 +600,9 @@ std::unique_ptr<expression_t> parser_t::unary_factor() {
         } else if (m_current_token.type == token_type_e::plus) {
             eat(token_type_e::plus);
             op_char = '+';
+        } else if (m_current_token.type == token_type_e::bitwise_not) {
+            eat(token_type_e::bitwise_not);
+            return std::make_unique<bitwise_not_op_t>(unary_factor(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
         }
         return std::make_unique<unary_op_t>(op_char, unary_factor(), op_token.line, op_token.column, m_current_token.line, m_current_token.column); // Unary operators can be chained
     } else if (m_current_token.type == token_type_e::increment || m_current_token.type == token_type_e::decrement) {

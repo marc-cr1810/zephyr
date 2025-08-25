@@ -27,6 +27,10 @@ private:
     auto logical_or_expression() -> std::unique_ptr<expression_t>;
     auto nullish_coalescing_expression() -> std::unique_ptr<expression_t>;
     auto logical_and_expression() -> std::unique_ptr<expression_t>;
+    auto bitwise_or_expression() -> std::unique_ptr<expression_t>;
+    auto bitwise_xor_expression() -> std::unique_ptr<expression_t>;
+    auto bitwise_and_expression() -> std::unique_ptr<expression_t>;
+    auto bitwise_shift_expression() -> std::unique_ptr<expression_t>;
     auto unary() -> std::unique_ptr<expression_t>;
     auto comparison() -> std::unique_ptr<expression_t>;
     auto additive_expression() -> std::unique_ptr<expression_t>;
