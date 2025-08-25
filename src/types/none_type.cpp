@@ -1,5 +1,6 @@
 #include "types/none_type.hpp"
-#include "errors.hpp"
+#include "objects/none_object.hpp"
+#include "objects/object.hpp"
 
 namespace zephyr
 {

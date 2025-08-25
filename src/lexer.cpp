@@ -1,6 +1,8 @@
 #include "lexer.hpp"
 #include <cctype>
 #include <stdexcept>
+#include "errors.hpp"
+#include "error_context.hpp"
 #include <iostream>
 
 namespace zephyr
@@ -70,7 +72,8 @@ auto lexer_t::get_next_token() -> token_t
                 m_position++;
                 if (m_position >= m_source.length())
                 {
-                    throw std::runtime_error("Unterminated string literal");
+                    zephyr::get_current_error_location() = {m_line, m_column, 1};
+                    throw zephyr::syntax_error_t("Unterminated string literal");
                 }
                 char escaped_char = m_source[m_position];
                 switch (escaped_char)
@@ -80,7 +83,8 @@ auto lexer_t::get_next_token() -> token_t
                     case '\'': str_value += '\''; break;
                     case '"': str_value += '"'; break;
                     case '\\': str_value += '\\'; break;
-                    default: throw std::runtime_error("Unknown escape sequence: \\" + std::string(1, escaped_char));
+                    default: zephyr::get_current_error_location() = {m_line, m_column, 1};
+                             throw zephyr::syntax_error_t("Unknown escape sequence: \\" + std::string(1, escaped_char));
                 }
             }
             else
@@ -91,7 +95,8 @@ auto lexer_t::get_next_token() -> token_t
         }
         if (m_position >= m_source.length())
         {
-            throw std::runtime_error("Unterminated string literal");
+            zephyr::get_current_error_location() = {m_line, m_column, 1};
+            throw zephyr::syntax_error_t("Unterminated string literal");
         }
         m_position++; // Consume the closing quote
         return { token_type_e::fstring, str_value, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(str_value.length()) - 1 };
@@ -109,7 +114,8 @@ auto lexer_t::get_next_token() -> token_t
                 m_position++;
                 if (m_position >= m_source.length())
                 {
-                    throw std::runtime_error("Unterminated string literal");
+                    zephyr::get_current_error_location() = {m_line, m_column, 1};
+                    throw zephyr::syntax_error_t("Unterminated string literal");
                 }
                 char escaped_char = m_source[m_position];
                 switch (escaped_char)
@@ -119,7 +125,8 @@ auto lexer_t::get_next_token() -> token_t
                     case '\'': str_value += '\''; break;
                     case '"': str_value += '"'; break;
                     case '\\': str_value += '\\'; break;
-                    default: throw std::runtime_error("Unknown escape sequence: \\" + std::string(1, escaped_char));
+                    default: zephyr::get_current_error_location() = {m_line, m_column, 1};
+                             throw zephyr::syntax_error_t("Unknown escape sequence: \\" + std::string(1, escaped_char));
                 }
             }
             else
@@ -130,7 +137,8 @@ auto lexer_t::get_next_token() -> token_t
         }
         if (m_position >= m_source.length())
         {
-            throw std::runtime_error("Unterminated string literal");
+            zephyr::get_current_error_location() = {m_line, m_column, 1};
+            throw zephyr::syntax_error_t("Unterminated string literal");
         }
         m_position++; // Consume the closing quote
         return { token_type_e::string, str_value, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(str_value.length()) - 1 };
@@ -252,7 +260,8 @@ auto lexer_t::get_next_token() -> token_t
         case ':': return make_token(token_type_e::colon, ":");
         case '?': return make_token(token_type_e::question, "?");
         default:
-            throw std::runtime_error("Unexpected character: " + std::string(1, current_char));
+            zephyr::get_current_error_location() = {m_line, m_column, 1};
+            throw zephyr::syntax_error_t("Unexpected character: " + std::string(1, current_char));
     }
 }
 

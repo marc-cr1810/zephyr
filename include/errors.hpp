@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interpreter.hpp"
+#include "runtime_error.hpp"
 
 namespace zephyr
 {
