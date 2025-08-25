@@ -131,14 +131,14 @@ auto process_code(const std::string& code_to_process, zephyr::interpreter_t& int
         return true;
 
     }
-    catch (const zephyr::parsing_error_t& e)
+    catch (const zephyr::syntax_error_t& e)
     {
         // Check if the error is due to unexpected EOF, meaning more input is needed
         if (std::string(e.what()).find("Unexpected end of file") != std::string::npos)
         {
             return false; // Incomplete input
         }
-        print_error(e.what(), "SyntaxError", full_source_code, e.line, e.column, filename);
+        print_error(e.what(), e.error_name(), full_source_code, e.line(), e.column(), filename, e.length());
         return false; // Error occurred
     }
     catch (const zephyr::runtime_error_with_location_t& e)
@@ -199,14 +199,14 @@ auto process_code_repl(const std::string& code_to_process, zephyr::interpreter_t
         return true;
 
     }
-    catch (const zephyr::parsing_error_t& e)
+    catch (const zephyr::syntax_error_t& e)
     {
         // Check if the error is due to unexpected EOF, meaning more input is needed
         if (std::string(e.what()).find("Unexpected end of file") != std::string::npos)
         {
             return false; // Incomplete input - don't clear accumulated_input
         }
-        print_error(e.what(), "SyntaxError", full_source_code, e.line, e.column);
+        print_error(e.what(), e.error_name(), full_source_code, e.line(), e.column());
         return true; // Parsing error occurred - clear accumulated_input
     }
     catch (const zephyr::runtime_error_with_location_t& e)

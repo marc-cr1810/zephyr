@@ -4,6 +4,20 @@
 
 namespace zephyr
 {
+    class syntax_error_t : public runtime_error_with_location_t
+    {
+    public:
+        syntax_error_t(const std::string& message)
+            : runtime_error_with_location_t(message, "SyntaxError") {}
+    };
+
+    class internal_error_t : public runtime_error_with_location_t
+    {
+    public:
+        internal_error_t(const std::string& message)
+            : runtime_error_with_location_t(message, "InternalError") {}
+    };
+
     class name_error_t : public runtime_error_with_location_t
     {
     public:
@@ -51,12 +65,5 @@ namespace zephyr
     public:
         value_error_t(const std::string& message)
             : runtime_error_with_location_t(message, "ValueError") {}
-    };
-
-    class internal_error_t : public runtime_error_with_location_t
-    {
-    public:
-        internal_error_t(const std::string& message)
-            : runtime_error_with_location_t(message, "InternalError") {}
     };
 }

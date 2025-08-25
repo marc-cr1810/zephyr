@@ -8,19 +8,7 @@
 namespace zephyr
 {
 
-// Custom exception for parsing errors
-class parsing_error_t : public std::runtime_error
-{
-public:
-    parsing_error_t(const std::string& message, int line, int column)
-        : std::runtime_error(message), line(line), column(column)
-    {
-    }
 
-public:
-    int line;
-    int column;
-};
 
 class parser_t
 {
