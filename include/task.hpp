@@ -1,14 +1,13 @@
 #pragma once
 
 #include "objects/objects.hpp"
-#include "ast.hpp"
 #include <memory>
 #include <functional>
 #include <vector>
 
 namespace zephyr
 {
-    enum class task_state_e 
+    enum class task_state_e
     {
         pending,
         running,
@@ -17,7 +16,7 @@ namespace zephyr
         failed
     };
 
-    class task_t 
+    class task_t
     {
     public:
         auto execute() -> void;
@@ -25,12 +24,12 @@ namespace zephyr
         auto resume(std::shared_ptr<object_t> value) -> void;
         auto complete(std::shared_ptr<object_t> value) -> void;
         auto fail(const std::string& error) -> void;
-        
+
         auto is_ready() const -> bool;
         auto is_completed() const -> bool;
         auto is_failed() const -> bool;
         auto is_suspended() const -> bool;
-        
+
         auto add_dependency(std::shared_ptr<task_t> dependency) -> void;
         auto has_completed_dependencies() const -> bool;
 
@@ -43,13 +42,13 @@ namespace zephyr
         std::shared_ptr<promise_object_t> m_promise;
         std::shared_ptr<object_t> m_result;
         std::string m_error_message;
-        
+
         // Function to execute
         std::function<std::shared_ptr<object_t>()> m_execution_function;
-        
+
         // Continuation function (for await resumption)
         std::function<void(std::shared_ptr<object_t>)> m_continuation;
-        
+
         // Dependencies (tasks this task is awaiting)
         std::vector<std::shared_ptr<task_t>> m_dependencies;
 

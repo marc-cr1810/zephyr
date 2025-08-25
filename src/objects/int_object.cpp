@@ -2,7 +2,6 @@
 #include "objects/float_object.hpp"
 #include "types/int_type.hpp"
 #include <string>
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr
@@ -71,9 +70,9 @@ auto int_object_t::check_division_by_zero(std::shared_ptr<object_t> other) const
     {
         throw value_error_t("Cannot divide by null object");
     }
-    
+
     auto type_name = other->get_type()->get_name();
-    
+
     if (type_name == "int")
     {
         auto int_obj = std::static_pointer_cast<int_object_t>(other);

@@ -1,6 +1,5 @@
 #include "types/function_type.hpp"
 #include "objects/objects.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr
@@ -53,7 +52,7 @@ auto function_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<obj
     {
         return false;
     }
-    
+
     // Function equality is pointer equality
     return self.get() == other.get();
 }

@@ -1,6 +1,5 @@
 #include "interpreter.hpp"
 #include "error_context.hpp"
-#include "objects/objects.hpp"
 #include "objects/function_object.hpp"
 #include "objects/lambda_object.hpp"
 #include "objects/class_object.hpp"
@@ -8,6 +7,7 @@
 #include "objects/class_instance_object.hpp"
 #include "async_scheduler.hpp"
 #include "errors.hpp"
+#include "types/type.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <string>

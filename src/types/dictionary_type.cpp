@@ -1,6 +1,5 @@
 #include "types/dictionary_type.hpp"
 #include "objects/objects.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr

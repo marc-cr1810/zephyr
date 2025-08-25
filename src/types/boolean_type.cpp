@@ -1,6 +1,5 @@
 #include "types/boolean_type.hpp"
 #include "objects/objects.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr
@@ -54,7 +53,7 @@ auto boolean_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<obje
     {
         return false;
     }
-    
+
     auto self_bool = std::static_pointer_cast<boolean_object_t>(self);
     auto other_bool = std::static_pointer_cast<boolean_object_t>(other);
     return self_bool->m_value == other_bool->m_value;
@@ -66,10 +65,10 @@ auto boolean_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<obj
     {
         throw type_error_t("Cannot compare bool with " + other->get_type()->get_name());
     }
-    
+
     auto self_bool = std::static_pointer_cast<boolean_object_t>(self);
     auto other_bool = std::static_pointer_cast<boolean_object_t>(other);
-    
+
     if (self_bool->m_value == other_bool->m_value)
     {
         return 0;

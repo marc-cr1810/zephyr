@@ -1,5 +1,4 @@
 #include "parser.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 #include "error_context.hpp"
 #include <string>

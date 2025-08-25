@@ -1,10 +1,8 @@
 #include "objects/dictionary_object.hpp"
 #include "objects/string_object.hpp"
 #include "objects/int_object.hpp"
-#include "objects/none_object.hpp"
 #include "types/dictionary_type.hpp"
 #include <sstream>
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr
@@ -29,7 +27,7 @@ auto dictionary_object_t::to_string() const -> std::string
     std::stringstream ss;
     ss << "{";
     bool first = true;
-    
+
     for (const auto& pair : m_elements)
     {
         if (!first)
@@ -39,7 +37,7 @@ auto dictionary_object_t::to_string() const -> std::string
         ss << pair.first << ": " << pair.second->to_string();
         first = false;
     }
-    
+
     ss << "}";
     return ss.str();
 }
@@ -77,7 +75,7 @@ auto dictionary_object_t::is_truthy() const -> bool
 auto dictionary_object_t::get_item(std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
     auto key_str = key_to_string(index);
-    
+
     if (has_key(key_str))
     {
         return m_elements[key_str];
@@ -115,9 +113,9 @@ auto dictionary_object_t::key_to_string(std::shared_ptr<object_t> key) const -> 
     {
         throw type_error_t("Dictionary key cannot be null");
     }
-    
+
     auto type_name = key->get_type()->get_name();
-    
+
     if (type_name == "string")
     {
         auto str_obj = std::static_pointer_cast<string_object_t>(key);
@@ -144,12 +142,12 @@ auto dictionary_object_t::get_keys() const -> std::vector<std::string>
 {
     std::vector<std::string> keys;
     keys.reserve(m_elements.size());
-    
+
     for (const auto& pair : m_elements)
     {
         keys.push_back(pair.first);
     }
-    
+
     return keys;
 }
 
@@ -157,12 +155,12 @@ auto dictionary_object_t::get_values() const -> std::vector<std::shared_ptr<obje
 {
     std::vector<std::shared_ptr<object_t>> values;
     values.reserve(m_elements.size());
-    
+
     for (const auto& pair : m_elements)
     {
         values.push_back(pair.second);
     }
-    
+
     return values;
 }
 

@@ -1,9 +1,7 @@
 #include "lexer.hpp"
 #include <cctype>
-#include <stdexcept>
 #include "errors.hpp"
 #include "error_context.hpp"
-#include <iostream>
 
 namespace zephyr
 {

@@ -1,9 +1,7 @@
 #pragma once
 
 #include "ast.hpp"
-#include "objects/objects.hpp"
-#include "error_context.hpp"
-#include "runtime_error.hpp"
+#include "objects/object.hpp"
 #include <map>
 #include <string>
 #include <memory>

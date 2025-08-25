@@ -1,12 +1,10 @@
 #include "objects/promise_object.hpp"
-#include "objects/string_object.hpp"
-#include "objects/none_object.hpp"
 #include "types/promise_type.hpp"
 
 namespace zephyr
 {
 
-promise_object_t::promise_object_t() 
+promise_object_t::promise_object_t()
     : m_state(promise_state_e::pending), m_result(nullptr), m_error_message("")
 {
 }
@@ -17,10 +15,10 @@ auto promise_object_t::resolve(std::shared_ptr<object_t> value) -> void
     {
         return; // Promise already resolved
     }
-    
+
     m_state = promise_state_e::fulfilled;
     m_result = value;
-    
+
     // Execute all pending then callbacks
     for (const auto& callback : m_then_callbacks)
     {
@@ -35,10 +33,10 @@ auto promise_object_t::reject(const std::string& error) -> void
     {
         return; // Promise already resolved
     }
-    
+
     m_state = promise_state_e::rejected;
     m_error_message = error;
-    
+
     // Execute all pending catch callbacks
     for (const auto& callback : m_catch_callbacks)
     {

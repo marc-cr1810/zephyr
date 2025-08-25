@@ -1,8 +1,8 @@
 #pragma once
 
+#include "error_context.hpp"
 #include <stdexcept>
 #include <string>
-#include "error_context.hpp"
 
 namespace zephyr
 {

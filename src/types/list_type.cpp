@@ -1,6 +1,5 @@
 #include "types/list_type.hpp"
 #include "objects/objects.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr
@@ -62,18 +61,18 @@ auto list_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_
     {
         return false;
     }
-    
+
     auto self_list = std::static_pointer_cast<list_object_t>(self);
     auto other_list = std::static_pointer_cast<list_object_t>(other);
-    
+
     const auto& self_elements = self_list->get_elements();
     const auto& other_elements = other_list->get_elements();
-    
+
     if (self_elements.size() != other_elements.size())
     {
         return false;
     }
-    
+
     for (size_t i = 0; i < self_elements.size(); ++i)
     {
         if (self_elements[i]->get_type()->get_name() != other_elements[i]->get_type()->get_name())
@@ -81,7 +80,7 @@ auto list_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -123,7 +122,7 @@ auto list_type_t::contains(std::shared_ptr<object_t> self, std::shared_ptr<objec
 {
     auto self_list = std::static_pointer_cast<list_object_t>(self);
     const auto& elements = self_list->get_elements();
-    
+
     for (const auto& element : elements)
     {
         if (element->get_type()->equals(element, item))

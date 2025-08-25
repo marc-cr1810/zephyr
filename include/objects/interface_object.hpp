@@ -3,7 +3,6 @@
 #include "object.hpp"
 #include "ast.hpp"
 #include <string>
-#include <map>
 #include <vector>
 
 namespace zephyr

@@ -1,6 +1,5 @@
 #include "objects/interface_object.hpp"
 #include "types/interface_type.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr

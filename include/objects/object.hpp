@@ -2,7 +2,6 @@
 
 #include <string>
 #include <memory>
-#include <stdexcept>
 #include "errors.hpp"
 #include <vector>
 

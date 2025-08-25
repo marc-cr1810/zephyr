@@ -1,7 +1,6 @@
 #pragma once
 
 #include "type.hpp"
-#include <stdexcept>
 
 namespace zephyr
 {

@@ -1,6 +1,5 @@
 #include "types/class_type.hpp"
 #include "objects/object.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 #include "objects/class_instance_object.hpp"
 

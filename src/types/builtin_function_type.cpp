@@ -1,6 +1,5 @@
 #include "types/builtin_function_type.hpp"
 #include "objects/object.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr

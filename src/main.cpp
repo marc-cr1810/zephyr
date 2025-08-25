@@ -8,6 +8,7 @@
 
 #include "ast.hpp"
 #include "errors.hpp"
+#include "types/type.hpp"
 
 // ANSI escape codes for colors
 #define ANSI_COLOR_RED     "\x1b[31m"

@@ -2,7 +2,6 @@
 #include "objects/int_object.hpp"
 #include "objects/none_object.hpp"
 #include "types/list_type.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr
@@ -26,7 +25,7 @@ auto list_object_t::to_string() const -> std::string
 {
     std::string result = "[";
     bool first = true;
-    
+
     for (const auto& element : m_elements)
     {
         if (!first)
@@ -36,7 +35,7 @@ auto list_object_t::to_string() const -> std::string
         first = false;
         result += element->to_string();
     }
-    
+
     result += "]";
     return result;
 }
@@ -77,16 +76,16 @@ auto list_object_t::get_item(std::shared_ptr<object_t> index) -> std::shared_ptr
     {
         throw type_error_t("List index cannot be null");
     }
-    
+
     auto int_index = std::dynamic_pointer_cast<int_object_t>(index);
     if (!int_index)
     {
         throw type_error_t("List indices must be integers, not '" + index->get_type()->get_name() + "'");
     }
-    
+
     int idx = normalize_index(int_index->get_value());
     check_bounds(idx);
-    
+
     return m_elements[idx];
 }
 
@@ -96,21 +95,21 @@ auto list_object_t::set_item(std::shared_ptr<object_t> index, std::shared_ptr<ob
     {
         throw type_error_t("List index cannot be null");
     }
-    
+
     if (!value)
     {
         throw value_error_t("List value cannot be null");
     }
-    
+
     auto int_index = std::dynamic_pointer_cast<int_object_t>(index);
     if (!int_index)
     {
         throw type_error_t("List indices must be integers, not '" + index->get_type()->get_name() + "'");
     }
-    
+
     int idx = normalize_index(int_index->get_value());
     check_bounds(idx);
-    
+
     m_elements[idx] = value;
 }
 
@@ -133,7 +132,7 @@ auto list_object_t::check_bounds(int index) const -> void
 {
     if (index < 0 || index >= static_cast<int>(m_elements.size()))
     {
-        throw index_error_t("List index " + std::to_string(index) + " out of range [0, " + 
+        throw index_error_t("List index " + std::to_string(index) + " out of range [0, " +
                                 std::to_string(m_elements.size()) + ")");
     }
 }
@@ -163,10 +162,10 @@ auto list_object_t::pop_element(int index) -> std::shared_ptr<object_t>
     {
         throw index_error_t("Cannot pop from empty list");
     }
-    
+
     int idx = normalize_index(index);
     check_bounds(idx);
-    
+
     auto result = m_elements[idx];
     m_elements.erase(m_elements.begin() + idx);
     return result;

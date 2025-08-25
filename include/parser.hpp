@@ -3,7 +3,6 @@
 #include "lexer.hpp"
 #include "ast.hpp"
 #include <memory>
-#include <stdexcept>
 
 namespace zephyr
 {

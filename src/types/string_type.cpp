@@ -1,6 +1,5 @@
 #include "types/string_type.hpp"
 #include "objects/objects.hpp"
-#include <stdexcept>
 #include "errors.hpp"
 
 namespace zephyr
@@ -18,13 +17,13 @@ auto string_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     {
         return std::make_shared<string_object_t>(std::static_pointer_cast<string_object_t>(self)->get_value() + other_string->get_value());
     }
-    
+
     // Handle none values in string concatenation
     if (!other || other->get_type()->get_name() == "none")
     {
         return std::make_shared<string_object_t>(std::static_pointer_cast<string_object_t>(self)->get_value() + "none");
     }
-    
+
     // Try to convert other type to string for concatenation
     try {
         return std::make_shared<string_object_t>(std::static_pointer_cast<string_object_t>(self)->get_value() + other->to_string());
@@ -88,7 +87,7 @@ auto string_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<objec
     {
         return false;
     }
-    
+
     auto self_str = std::static_pointer_cast<string_object_t>(self);
     auto other_str = std::static_pointer_cast<string_object_t>(other);
     return self_str->get_value() == other_str->get_value();
@@ -121,13 +120,13 @@ auto string_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<obje
     {
         throw type_error_t("Cannot compare string with " + other->get_type()->get_name());
     }
-    
+
     auto self_str = std::static_pointer_cast<string_object_t>(self);
     auto other_str = std::static_pointer_cast<string_object_t>(other);
-    
+
     const std::string& self_value = self_str->get_value();
     const std::string& other_value = other_str->get_value();
-    
+
     if (self_value < other_value) return -1;
     if (self_value > other_value) return 1;
     return 0;
