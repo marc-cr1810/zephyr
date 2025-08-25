@@ -1,7 +1,7 @@
 #include "async_scheduler.hpp"
 #include "objects/none_object.hpp"
 #include "objects/list_object.hpp"
-#include <stdexcept>
+#include "errors.hpp"
 #include <algorithm>
 
 namespace zephyr
@@ -75,14 +75,14 @@ auto async_scheduler_t::has_pending_tasks() const -> bool
 auto async_scheduler_t::await_promise(std::shared_ptr<promise_object_t> promise) -> std::shared_ptr<object_t>
 {
     if (!promise) {
-        throw std::runtime_error("Cannot await null promise");
+        throw value_error_t("Cannot await null promise");
     }
 
     // For immediate execution mode, just return the promise result
     if (promise->is_fulfilled()) {
         return promise->m_result;
     } else if (promise->is_rejected()) {
-        throw std::runtime_error("Promise rejected: " + promise->m_error_message);
+        throw value_error_t("Promise rejected: " + promise->m_error_message);
     } else {
         // Promise is still pending - for now, we'll return none
         // In a full implementation, this would suspend the current task
@@ -142,7 +142,7 @@ auto async_scheduler_t::all(const std::vector<std::shared_ptr<promise_object_t>>
 auto async_scheduler_t::register_task(std::shared_ptr<task_t> task) -> void
 {
     if (!task) {
-        throw std::runtime_error("Cannot register null task");
+        throw value_error_t("Cannot register null task");
     }
 
     validate_task(task);
@@ -257,11 +257,11 @@ auto async_scheduler_t::execute_task(std::shared_ptr<task_t> task) -> void
 auto async_scheduler_t::validate_task(std::shared_ptr<task_t> task) -> void
 {
     if (!task) {
-        throw std::runtime_error("Task cannot be null");
+        throw value_error_t("Task cannot be null");
     }
 
     if (m_all_tasks.find(task->m_task_id) != m_all_tasks.end()) {
-        throw std::runtime_error("Task with ID " + std::to_string(task->m_task_id) + " already exists");
+        throw value_error_t("Task with ID " + std::to_string(task->m_task_id) + " already exists");
     }
 }
 

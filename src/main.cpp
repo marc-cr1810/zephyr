@@ -5,7 +5,6 @@
 #include "interpreter.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
-#include "error_context.hpp"
 
 #include "ast.hpp"
 #include "errors.hpp"
