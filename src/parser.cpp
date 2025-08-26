@@ -508,7 +508,7 @@ std::unique_ptr<expression_t> parser_t::shift_expression() {
 }
 
 std::unique_ptr<expression_t> parser_t::comparison() {
-    auto node = additive_expression();
+    auto node = shift_expression(); // Changed from additive_expression()
     while (m_current_token.type == token_type_e::eq || m_current_token.type == token_type_e::ne ||
            m_current_token.type == token_type_e::lt || m_current_token.type == token_type_e::le ||
            m_current_token.type == token_type_e::gt || m_current_token.type == token_type_e::ge ||
@@ -516,10 +516,10 @@ std::unique_ptr<expression_t> parser_t::comparison() {
         token_t op_token = m_current_token;
         if (m_current_token.type == token_type_e::in) {
             eat(token_type_e::in);
-            node = std::make_unique<in_expression_t>(std::move(node), additive_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+            node = std::make_unique<in_expression_t>(std::move(node), shift_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column); // Changed from additive_expression()
         } else {
             eat(m_current_token.type);
-            node = std::make_unique<comparison_op_t>(std::move(node), additive_expression(), op_token.text, op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+            node = std::make_unique<comparison_op_t>(std::move(node), shift_expression(), op_token.text, op_token.line, op_token.column, m_current_token.line, m_current_token.column); // Changed from additive_expression()
         }
     }
     return node;
@@ -570,7 +570,9 @@ std::unique_ptr<expression_t> parser_t::power() {
 
 std::unique_ptr<expression_t> parser_t::unary() {
     if (m_current_token.type == token_type_e::not_token || m_current_token.type == token_type_e::not_op ||
-        m_current_token.type == token_type_e::minus || m_current_token.type == token_type_e::plus) {
+        m_current_token.type == token_type_e::minus || m_current_token.type == token_type_e::plus ||
+        m_current_token.type == token_type_e::bitwise_not)
+    {
         token_t op_token = m_current_token;
         char op_char = ' ';
         if (m_current_token.type == token_type_e::not_token) {
@@ -585,6 +587,9 @@ std::unique_ptr<expression_t> parser_t::unary() {
         } else if (m_current_token.type == token_type_e::plus) {
             eat(token_type_e::plus);
             op_char = '+';
+        } else if (m_current_token.type == token_type_e::bitwise_not) { // Handle bitwise_not
+            eat(token_type_e::bitwise_not);
+            return std::make_unique<bitwise_not_op_t>(unary(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
         }
         return std::make_unique<unary_op_t>(op_char, unary(), op_token.line, op_token.column, m_current_token.line, m_current_token.column); // Unary operators can be chained
     }
