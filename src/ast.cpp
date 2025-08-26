@@ -53,6 +53,11 @@ auto binary_op_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
+auto power_op_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
 auto comparison_op_t::accept(ast_visitor_t& visitor) -> void
 {
     visitor.visit(*this);

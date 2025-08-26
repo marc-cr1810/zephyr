@@ -35,6 +35,7 @@ public:
     auto visit(dictionary_literal_t& node) -> void override;
     auto visit(name_t& node) -> void override;
     auto visit(binary_op_t& node) -> void override;
+    auto visit(power_op_t& node) -> void override;
     auto visit(comparison_op_t& node) -> void override;
     auto visit(logical_and_op_t& node) -> void override;
     auto visit(logical_or_op_t& node) -> void override;

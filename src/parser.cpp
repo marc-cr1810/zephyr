@@ -483,51 +483,28 @@ std::unique_ptr<expression_t> parser_t::bitwise_xor_expression() {
 }
 
 std::unique_ptr<expression_t> parser_t::bitwise_and_expression() {
-    auto node = bitwise_shift_expression();
+    auto node = comparison();
     while (m_current_token.type == token_type_e::bitwise_and) {
         token_t op_token = m_current_token;
         eat(token_type_e::bitwise_and);
-        node = std::make_unique<bitwise_and_op_t>(std::move(node), bitwise_shift_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+        node = std::make_unique<bitwise_and_op_t>(std::move(node), shift_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
     }
     return node;
 }
 
-std::unique_ptr<expression_t> parser_t::bitwise_shift_expression() {
-    auto node = comparison(); // Calls the next higher precedence
+std::unique_ptr<expression_t> parser_t::shift_expression() {
+    auto node = additive_expression(); // Calls the next higher precedence
     while (m_current_token.type == token_type_e::left_shift || m_current_token.type == token_type_e::right_shift) {
         token_t op_token = m_current_token;
         if (m_current_token.type == token_type_e::left_shift) {
             eat(token_type_e::left_shift);
-            node = std::make_unique<left_shift_op_t>(std::move(node), comparison(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+            node = std::make_unique<left_shift_op_t>(std::move(node), additive_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
         } else {
             eat(token_type_e::right_shift);
-            node = std::make_unique<right_shift_op_t>(std::move(node), comparison(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+            node = std::make_unique<right_shift_op_t>(std::move(node), additive_expression(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
         }
     }
     return node;
-}
-
-std::unique_ptr<expression_t> parser_t::unary() {
-    if (m_current_token.type == token_type_e::not_token || m_current_token.type == token_type_e::not_op ||
-        m_current_token.type == token_type_e::minus || m_current_token.type == token_type_e::plus) {
-        token_t op_token = m_current_token;
-        char op_char = ' ';
-        if (m_current_token.type == token_type_e::not_token) {
-            eat(token_type_e::not_token);
-            op_char = '!'; // Represent 'not' as '!' for unary_op_t
-        } else if (m_current_token.type == token_type_e::not_op) {
-            eat(token_type_e::not_op);
-            op_char = '!';
-        } else if (m_current_token.type == token_type_e::minus) {
-            eat(token_type_e::minus);
-            op_char = '-';
-        } else if (m_current_token.type == token_type_e::plus) {
-            eat(token_type_e::plus);
-            op_char = '+';
-        }
-        return std::make_unique<unary_op_t>(op_char, unary(), op_token.line, op_token.column, m_current_token.line, m_current_token.column); // Unary operators can be chained
-    }
-    return unary_factor();
 }
 
 std::unique_ptr<expression_t> parser_t::comparison() {
@@ -535,7 +512,7 @@ std::unique_ptr<expression_t> parser_t::comparison() {
     while (m_current_token.type == token_type_e::eq || m_current_token.type == token_type_e::ne ||
            m_current_token.type == token_type_e::lt || m_current_token.type == token_type_e::le ||
            m_current_token.type == token_type_e::gt || m_current_token.type == token_type_e::ge ||
-           m_current_token.type == token_type_e::in) {
+           m_current_token.type == token_type_e::is_token || m_current_token.type == token_type_e::in) {
         token_t op_token = m_current_token;
         if (m_current_token.type == token_type_e::in) {
             eat(token_type_e::in);
@@ -563,7 +540,7 @@ std::unique_ptr<expression_t> parser_t::additive_expression() {
 }
 
 std::unique_ptr<expression_t> parser_t::term() {
-    auto node = unary_factor();
+    auto node = power();
     while (m_current_token.type == token_type_e::mul || m_current_token.type == token_type_e::div || m_current_token.type == token_type_e::modulo) {
         token_t op_token = m_current_token;
         if (m_current_token.type == token_type_e::mul) {
@@ -573,7 +550,7 @@ std::unique_ptr<expression_t> parser_t::term() {
         } else {
             eat(token_type_e::modulo);
         }
-        auto right_operand = unary_factor();
+        auto right_operand = power();
         int end_line = right_operand->end_line;
         int end_column = right_operand->end_column;
         node = std::make_unique<binary_op_t>(std::move(node), std::move(right_operand), op_token.text[0], op_token.line, op_token.column, end_line, end_column);
@@ -581,10 +558,19 @@ std::unique_ptr<expression_t> parser_t::term() {
     return node;
 }
 
-std::unique_ptr<expression_t> parser_t::unary_factor() {
-    if (m_current_token.type == token_type_e::minus || m_current_token.type == token_type_e::plus ||
-        m_current_token.type == token_type_e::not_token || m_current_token.type == token_type_e::not_op ||
-        m_current_token.type == token_type_e::bitwise_not) {
+std::unique_ptr<expression_t> parser_t::power() {
+    auto node = unary();
+    while (m_current_token.type == token_type_e::power) {
+        token_t op_token = m_current_token;
+        eat(token_type_e::power);
+        node = std::make_unique<power_op_t>(std::move(node), unary(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
+    }
+    return node;
+}
+
+std::unique_ptr<expression_t> parser_t::unary() {
+    if (m_current_token.type == token_type_e::not_token || m_current_token.type == token_type_e::not_op ||
+        m_current_token.type == token_type_e::minus || m_current_token.type == token_type_e::plus) {
         token_t op_token = m_current_token;
         char op_char = ' ';
         if (m_current_token.type == token_type_e::not_token) {
@@ -599,23 +585,8 @@ std::unique_ptr<expression_t> parser_t::unary_factor() {
         } else if (m_current_token.type == token_type_e::plus) {
             eat(token_type_e::plus);
             op_char = '+';
-        } else if (m_current_token.type == token_type_e::bitwise_not) {
-            eat(token_type_e::bitwise_not);
-            return std::make_unique<bitwise_not_op_t>(unary_factor(), op_token.line, op_token.column, m_current_token.line, m_current_token.column);
         }
-        return std::make_unique<unary_op_t>(op_char, unary_factor(), op_token.line, op_token.column, m_current_token.line, m_current_token.column); // Unary operators can be chained
-    } else if (m_current_token.type == token_type_e::increment || m_current_token.type == token_type_e::decrement) {
-        // Prefix increment/decrement expression
-        token_t op_token = m_current_token;
-        bool is_increment = (m_current_token.type == token_type_e::increment);
-        eat(m_current_token.type);
-        if (m_current_token.type != token_type_e::name) {
-            zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
-            throw zephyr::syntax_error_t("Expected variable name after " + op_token.text);
-        }
-        token_t name_token = m_current_token;
-        eat(token_type_e::name);
-        return std::make_unique<increment_decrement_expression_t>(name_token.text, is_increment, true, op_token.line, op_token.column, name_token.line, name_token.column + name_token.text.length() - 1);
+        return std::make_unique<unary_op_t>(op_char, unary(), op_token.line, op_token.column, m_current_token.line, m_current_token.column); // Unary operators can be chained
     }
     return factor();
 }
@@ -660,13 +631,13 @@ std::unique_ptr<expression_t> parser_t::factor() {
         // Await expression
         token_t await_token = m_current_token;
         eat(token_type_e::await);
-        auto expr = unary_factor();
+        auto expr = unary();
         return std::make_unique<await_expression_t>(std::move(expr), await_token.line, await_token.column, expr->end_line, expr->end_column);
     } else if (token.type == token_type_e::spawn) {
         // Spawn expression
         token_t spawn_token = m_current_token;
         eat(token_type_e::spawn);
-        auto expr = unary_factor();
+        auto expr = unary();
         return std::make_unique<spawn_expression_t>(std::move(expr), spawn_token.line, spawn_token.column, expr->end_line, expr->end_column);
     } else if (token.type == token_type_e::number) {
         eat(token_type_e::number);

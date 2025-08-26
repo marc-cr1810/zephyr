@@ -692,6 +692,41 @@ auto interpreter_t::visit(binary_op_t& node) -> void
     zephyr::get_current_error_location() = saved_location;
 }
 
+auto interpreter_t::visit(power_op_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
+    zephyr::get_current_error_location().line = node.line;
+    zephyr::get_current_error_location().column = node.column;
+    zephyr::get_current_error_location().length = 2;
+
+    node.left->accept(*this);
+    auto left = m_current_result;
+    node.right->accept(*this);
+    auto right = m_current_result;
+
+    auto left_type = left->get_type()->get_name();
+    auto right_type = right->get_type()->get_name();
+
+    if (left_type == "int" && right_type == "int")
+    {
+        auto left_int = std::static_pointer_cast<int_object_t>(left);
+        auto right_int = std::static_pointer_cast<int_object_t>(right);
+        m_current_result = std::make_shared<int_object_t>(static_cast<int>(std::pow(left_int->get_value(), right_int->get_value())));
+    }
+    else if ((left_type == "int" || left_type == "float") && (right_type == "int" || right_type == "float"))
+    {
+        double left_val = (left_type == "int") ? static_cast<double>(std::static_pointer_cast<int_object_t>(left)->get_value()) : std::static_pointer_cast<float_object_t>(left)->get_value();
+        double right_val = (right_type == "int") ? static_cast<double>(std::static_pointer_cast<int_object_t>(right)->get_value()) : std::static_pointer_cast<float_object_t>(right)->get_value();
+        m_current_result = std::make_shared<float_object_t>(std::pow(left_val, right_val));
+    }
+    else
+    {
+        throw type_error_t("Unsupported operand types for **: " + left_type + " and " + right_type);
+    }
+
+    zephyr::get_current_error_location() = saved_location;
+}
+
 auto interpreter_t::visit(comparison_op_t& node) -> void
 {
     zephyr::error_location_context_t saved_location = zephyr::get_current_error_location();
@@ -748,6 +783,10 @@ auto interpreter_t::visit(comparison_op_t& node) -> void
         {
             result = left.get() == right.get(); // Pointer comparison for objects
         }
+    }
+    else if (node.operator_token == "is")
+    {
+        result = (left.get() == right.get());
     }
     else if (node.operator_token == "!=")
     {
@@ -2716,6 +2755,16 @@ auto interpreter_t::clone_expression(expression_t* expr) -> std::unique_ptr<expr
             std::move(right_clone),
             binary_op->operator_token,
             binary_op->line, binary_op->column, binary_op->end_line, binary_op->end_column
+        );
+    }
+
+    if (auto power_op = dynamic_cast<power_op_t*>(expr)) {
+        auto left_clone = clone_expression(power_op->left.get());
+        auto right_clone = clone_expression(power_op->right.get());
+        return std::make_unique<power_op_t>(
+            std::move(left_clone),
+            std::move(right_clone),
+            power_op->line, power_op->column, power_op->end_line, power_op->end_column
         );
     }
 

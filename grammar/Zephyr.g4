@@ -186,7 +186,7 @@ block
 // 4. Multiplicative (*, /) - supports string multiplication
 // 5. Additive (+, -)
 // 6. Comparison (<, >, <=, >=)
-// 7. Equality (==, !=)
+// 7. Equality (==, !=, is)
 // 8. Logical AND (&&, and)
 // 9. Logical OR (||, or)
 // 10. Ternary (?:)
@@ -227,7 +227,7 @@ bitwiseAndExpression
     ;
 
 equalityExpression
-    : comparison ( (EQ | NE) comparison )*
+    : comparison ( (EQ | NE | IS) comparison )*
     ;
 
 comparison
@@ -242,9 +242,12 @@ additiveExpression
     : term ( (PLUS | MINUS) term )*
     ;
 
-// Multiplicative expressions - handles string multiplication
 term
-    : unary ( (MUL | DIV) unary )*
+    : power ( (MUL | DIV) power )*
+    ;
+
+power
+    : unary (POWER unary)*
     ;
 
 // Unary expressions - handles negative number literals and expressions
@@ -335,6 +338,7 @@ PLUS: '+';
 MINUS: '-';
 MUL: '*';
 DIV: '/';
+POWER: '**';
 QUESTION: '?';
 COLON: ':';
 ARROW: '->';
@@ -358,6 +362,7 @@ LT: '<';
 LE: '<=';
 GT: '>';
 GE: '>=';
+IS: 'is';
 
 // Logical operators
 AND: 'and';

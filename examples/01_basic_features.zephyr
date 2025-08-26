@@ -251,11 +251,17 @@ print("Pattern with variable: \"*\" * 5 =", pattern)
 reverse_pattern = 4 * "ABC"
 print("Reverse multiplication: 4 * \"ABC\" =", reverse_pattern)
 
+# Power operator (**)
+print("2 ** 3:", 2 ** 3)
+print("3 ** 2:", 3 ** 2)
+print("2.5 ** 2:", 2.5 ** 2)
+
 print("")
 
 # ============================================================================
 # Comparison Operations
 # ============================================================================
+
 
 print("3. Comparison Operations")
 print("=========================")
@@ -266,6 +272,15 @@ print("x < y:", x < y)
 print("x <= 10:", x <= 10)
 print("y > x:", y > x)
 print("y >= 20:", y >= 20)
+
+# Identity operator (is)
+class A {}
+a = A()
+b = a
+c = A()
+
+print("a is b:", a is b)
+print("a is c:", a is c)
 
 print("")
 

@@ -39,6 +39,7 @@ class list_literal_t;
 class dictionary_literal_t;
 class name_t;
 class binary_op_t;
+class power_op_t;
 class comparison_op_t;
 class logical_and_op_t;
 class logical_or_op_t;
@@ -100,6 +101,7 @@ public:
     virtual auto visit(dictionary_literal_t& node) -> void = 0;
     virtual auto visit(name_t& node) -> void = 0;
     virtual auto visit(binary_op_t& node) -> void = 0;
+    virtual auto visit(power_op_t& node) -> void = 0;
     virtual auto visit(comparison_op_t& node) -> void = 0;
     virtual auto visit(logical_and_op_t& node) -> void = 0;
     virtual auto visit(logical_or_op_t& node) -> void = 0;
@@ -382,6 +384,21 @@ public:
     std::unique_ptr<expression_t> left;
     std::unique_ptr<expression_t> right;
     char operator_token;
+};
+
+class power_op_t : public expression_t
+{
+public:
+    power_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), left(std::move(left)), right(std::move(right))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+
+public:
+    std::unique_ptr<expression_t> left;
+    std::unique_ptr<expression_t> right;
 };
 
 class comparison_op_t : public expression_t

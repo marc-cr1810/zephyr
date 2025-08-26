@@ -29,12 +29,12 @@ private:
     auto bitwise_or_expression() -> std::unique_ptr<expression_t>;
     auto bitwise_xor_expression() -> std::unique_ptr<expression_t>;
     auto bitwise_and_expression() -> std::unique_ptr<expression_t>;
-    auto bitwise_shift_expression() -> std::unique_ptr<expression_t>;
-    auto unary() -> std::unique_ptr<expression_t>;
-    auto comparison() -> std::unique_ptr<expression_t>;
+    auto shift_expression() -> std::unique_ptr<expression_t>;
     auto additive_expression() -> std::unique_ptr<expression_t>;
     auto term() -> std::unique_ptr<expression_t>;
-    auto unary_factor() -> std::unique_ptr<expression_t>;
+    auto power() -> std::unique_ptr<expression_t>;
+    auto comparison() -> std::unique_ptr<expression_t>;
+    auto unary() -> std::unique_ptr<expression_t>;
     auto factor() -> std::unique_ptr<expression_t>;
     auto block() -> std::unique_ptr<block_t>;
     auto if_statement() -> std::unique_ptr<if_statement_t>;

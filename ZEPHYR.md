@@ -36,9 +36,9 @@ Zephyr supports a range of modern scripting language features:
     *   Classes and class instances
     *   Lambda functions (anonymous functions)
 *   **Operators:**
-    *   **Arithmetic:** `+`, `-`, `*`, `/`, `%` (including negative number literals and expressions)
+    *   **Arithmetic:** `+`, `-`, `*`, `/`, `%`, `**` (power) (including negative number literals and expressions)
     *   **String Multiplication:** `"text" * count` and `count * "text"` for string repetition
-    *   **Comparison:** `==`, `!=`, `<`, `<=`, `>`, `>=`
+    *   **Comparison:** `==`, `!=`, `<`, `<=`, `>`, `>=`, `is` (identity)
     *   **Membership:** `in`
     *   **Logical:** `and`, `or`, `not`, `&&`, `||`, `!`
     *   **Bitwise:** `&` (AND), `|` (OR), `^` (XOR), `~` (NOT), `<<` (Left Shift), `>>` (Right Shift)
@@ -202,6 +202,17 @@ repeated_word = "Hello" * 3  # "HelloHelloHello"
 
 # Both directions work
 reverse_pattern = 5 * "ABC"  # "ABCABCABCABCABC"
+
+# Power operator
+four_cubed = 4 ** 3 # 64
+
+# Identity operator
+a = [1, 2]
+b = a
+c = [1, 2]
+
+print(a is b) # true
+print(a is c) # false
 ```
 
 ### Explicit Typing

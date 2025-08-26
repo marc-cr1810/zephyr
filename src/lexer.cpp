@@ -207,6 +207,7 @@ auto lexer_t::get_next_token() -> token_t
         if (identifier == "or") return { token_type_e::or_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
         if (identifier == "not") return { token_type_e::not_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
         if (identifier == "const") return { token_type_e::const_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
+        if (identifier == "is") return { token_type_e::is_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
 
         return { token_type_e::name, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
     }
@@ -219,6 +220,7 @@ auto lexer_t::get_next_token() -> token_t
         if (two_char == "!=") return make_token(token_type_e::ne, "!=");
         if (two_char == "<=") return make_token(token_type_e::le, "<=");
         if (two_char == ">=") return make_token(token_type_e::ge, ">=");
+        if (two_char == "**") return make_token(token_type_e::power, "**");
         if (two_char == "&&") return make_token(token_type_e::and_op, "&&");
         if (two_char == "||") return make_token(token_type_e::or_op, "||");
         if (two_char == "->") return make_token(token_type_e::arrow, "->");
