@@ -25,27 +25,27 @@ auto class_instance_t::to_string() const -> std::string
 
 auto class_instance_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for class instances");
+    return get_type()->add(shared_from_this(), other);
 }
 
 auto class_instance_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for class instances");
+    return get_type()->subtract(shared_from_this(), other);
 }
 
 auto class_instance_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for class instances");
+    return get_type()->multiply(shared_from_this(), other);
 }
 
 auto class_instance_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for class instances");
+    return get_type()->divide(shared_from_this(), other);
 }
 
 auto class_instance_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for class instances");
+    return get_type()->modulo(shared_from_this(), other);
 }
 
 auto class_instance_t::call_method(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
@@ -63,20 +63,20 @@ auto class_instance_t::has_member(const std::string& name) const -> bool
 auto class_instance_t::get_member(const std::string& member_name) -> std::shared_ptr<object_t>
 {
     validate_member_access(member_name);
-    
+
     auto it = m_members.find(member_name);
     if (it != m_members.end())
     {
         return it->second;
     }
-    
+
     throw attribute_error_t("Member '" + member_name + "' not found in class instance");
 }
 
 auto class_instance_t::set_member(const std::string& member_name, std::shared_ptr<object_t> value) -> void
 {
     validate_member_assignment(member_name);
-    
+
     // Check for type validation if member has explicit type
     if (m_class_obj)
     {
@@ -89,7 +89,7 @@ auto class_instance_t::set_member(const std::string& member_name, std::shared_pt
                 {
                     std::string expected_type = member_var.type_name;
                     std::string actual_type = value->get_type()->get_name();
-                    
+
                     // Normalize type names for common aliases
                     if (expected_type == "int" && actual_type == "number") {
                         actual_type = "int";
@@ -98,11 +98,11 @@ auto class_instance_t::set_member(const std::string& member_name, std::shared_pt
                     } else if (expected_type == "string" && actual_type == "string_literal") {
                         actual_type = "string";
                     }
-                    
+
                     if (actual_type != expected_type)
                     {
-                        throw type_error_t("Type mismatch for member '" + member_name + 
-                                               "': expected " + expected_type + 
+                        throw type_error_t("Type mismatch for member '" + member_name +
+                                               "': expected " + expected_type +
                                                ", got " + actual_type);
                     }
                 }
@@ -110,7 +110,7 @@ auto class_instance_t::set_member(const std::string& member_name, std::shared_pt
             }
         }
     }
-    
+
     m_members[member_name] = value;
 }
 
@@ -145,7 +145,7 @@ auto class_instance_t::validate_member_access(const std::string& name) const -> 
 auto class_instance_t::validate_member_assignment(const std::string& name) const -> void
 {
     validate_member_access(name);
-    
+
     if (is_member_const(name))
     {
         throw type_error_t("Cannot modify const member '" + name + "'");
@@ -158,7 +158,7 @@ auto class_instance_t::initialize_default_members() -> void
     {
         return;
     }
-    
+
     for (const auto& member_var : m_class_obj->m_member_variables)
     {
         if (member_var.has_default)
@@ -176,7 +176,7 @@ auto class_instance_t::initialize_default_members() -> void
         {
             m_members[member_var.name] = std::make_shared<none_object_t>();
         }
-        
+
         if (member_var.is_const)
         {
             mark_member_const(member_var.name);
@@ -188,7 +188,7 @@ auto class_instance_t::format_members() const -> std::string
 {
     std::string result = "{";
     bool first = true;
-    
+
     for (const auto& pair : m_members)
     {
         if (!first)
@@ -196,15 +196,15 @@ auto class_instance_t::format_members() const -> std::string
             result += ", ";
         }
         first = false;
-        
+
         result += pair.first + ": " + pair.second->to_string();
-        
+
         if (is_member_const(pair.first))
         {
             result += " (const)";
         }
     }
-    
+
     result += "}";
     return result;
 }

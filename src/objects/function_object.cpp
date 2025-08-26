@@ -35,34 +35,34 @@ auto function_object_t::call(const std::vector<std::shared_ptr<object_t>>& args)
 
 auto function_object_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions");
+    return get_type()->add(shared_from_this(), other);
 }
 
 auto function_object_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions");
+    return get_type()->subtract(shared_from_this(), other);
 }
 
 auto function_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions");
+    return get_type()->multiply(shared_from_this(), other);
 }
 
 auto function_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions");
+    return get_type()->divide(shared_from_this(), other);
 }
 
 auto function_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for functions");
+    return get_type()->modulo(shared_from_this(), other);
 }
 
 auto function_object_t::format_parameters() const -> std::string
 {
     std::string result = "(";
     bool first = true;
-    
+
     for (const auto& param : m_parameters)
     {
         if (!first)
@@ -70,20 +70,20 @@ auto function_object_t::format_parameters() const -> std::string
             result += ", ";
         }
         first = false;
-        
+
         if (param.is_const)
         {
             result += "const ";
         }
-        
+
         result += param.name;
-        
+
         if (param.has_explicit_type)
         {
             result += " : " + param.type_name;
         }
     }
-    
+
     result += ")";
     return result;
 }

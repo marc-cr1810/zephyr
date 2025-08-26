@@ -6,7 +6,7 @@
 namespace zephyr
 {
 
-lambda_object_t::lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<expression_t> body_expr, 
+lambda_object_t::lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<expression_t> body_expr,
                                 const std::string& return_type_name, bool has_explicit_return_type,
                                 std::map<std::string, std::shared_ptr<object_t>> captured, bool async)
     : m_parameters(std::move(params))
@@ -50,27 +50,27 @@ auto lambda_object_t::to_string() const -> std::string
 
 auto lambda_object_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for lambda functions");
+    return get_type()->add(shared_from_this(), other);
 }
 
 auto lambda_object_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for lambda functions");
+    return get_type()->subtract(shared_from_this(), other);
 }
 
 auto lambda_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for lambda functions");
+    return get_type()->multiply(shared_from_this(), other);
 }
 
 auto lambda_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for lambda functions");
+    return get_type()->divide(shared_from_this(), other);
 }
 
 auto lambda_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    throw type_error_t("Operation not supported for lambda functions");
+    return get_type()->modulo(shared_from_this(), other);
 }
 
 auto lambda_object_t::call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
@@ -84,7 +84,7 @@ auto lambda_object_t::format_parameters() const -> std::string
 {
     std::string result = "(";
     bool first = true;
-    
+
     for (const auto& param : m_parameters)
     {
         if (!first)
@@ -92,20 +92,20 @@ auto lambda_object_t::format_parameters() const -> std::string
             result += ", ";
         }
         first = false;
-        
+
         if (param.is_const)
         {
             result += "const ";
         }
-        
+
         result += param.name;
-        
+
         if (param.has_explicit_type)
         {
             result += " : " + param.type_name;
         }
     }
-    
+
     result += ")";
     return result;
 }
