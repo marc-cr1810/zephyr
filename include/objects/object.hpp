@@ -26,6 +26,10 @@ public:
     virtual auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
     virtual auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
     virtual auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
+    virtual auto power(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> // Added for **= operator
+    {
+        throw type_error_t("Object does not support power operation");
+    }
 
     // Truthiness check
     virtual auto is_truthy() const -> bool

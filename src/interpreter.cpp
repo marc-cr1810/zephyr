@@ -1497,6 +1497,10 @@ auto interpreter_t::visit(compound_assignment_t& node) -> void
             {
                 result_value = current_value->modulo(new_value);
             }
+            else if (node.operator_token == "**=") // Added for **= operator
+            {
+                result_value = current_value->power(new_value);
+            }
 
             // Validate type constraint before assignment
             validate_type_constraint(node.variable_name, result_value);
@@ -1518,9 +1522,48 @@ auto interpreter_t::visit(compound_member_assignment_t& node) -> void
     zephyr::get_current_error_location().column = node.column;
     zephyr::get_current_error_location().length = node.end_column - node.column + 1;
 
-    // Placeholder implementation
     node.object->accept(*this);
+    auto object = m_current_result;
     node.value->accept(*this);
+    auto new_value = m_current_result;
+
+    // Get the current value of the member element
+    auto current_value = object->get_member(node.member_name);
+
+    std::shared_ptr<object_t> result_value;
+
+    if (node.operator_token == "+=")
+    {
+        result_value = current_value->add(new_value);
+    }
+    else if (node.operator_token == "-=")
+    {
+        result_value = current_value->subtract(new_value);
+    }
+    else if (node.operator_token == "*=")
+    {
+        result_value = current_value->multiply(new_value);
+    }
+    else if (node.operator_token == "/=")
+    {
+        result_value = current_value->divide(new_value);
+    }
+    else if (node.operator_token == "%=")
+    {
+        result_value = current_value->modulo(new_value);
+    }
+    else if (node.operator_token == "**=")
+    {
+        result_value = current_value->power(new_value);
+    }
+    else
+    {
+        throw internal_error_t("Unknown compound member assignment operator: " + node.operator_token);
+    }
+
+    // Set the updated value back to the member element
+    object->set_member(node.member_name, result_value);
+    m_current_result = result_value;
     zephyr::get_current_error_location() = saved_location;
 }
 
@@ -1531,10 +1574,50 @@ auto interpreter_t::visit(compound_indexed_assignment_t& node) -> void
     zephyr::get_current_error_location().column = node.column;
     zephyr::get_current_error_location().length = node.end_column - node.column + 1;
 
-    // Placeholder implementation
     node.object->accept(*this);
+    auto object = m_current_result;
     node.index->accept(*this);
+    auto index = m_current_result;
     node.value->accept(*this);
+    auto new_value = m_current_result;
+
+    // Get the current value of the indexed element
+    auto current_value = object->get_item(index);
+
+    std::shared_ptr<object_t> result_value;
+
+    if (node.operator_token == "+=")
+    {
+        result_value = current_value->add(new_value);
+    }
+    else if (node.operator_token == "-=")
+    {
+        result_value = current_value->subtract(new_value);
+    }
+    else if (node.operator_token == "*=")
+    {
+        result_value = current_value->multiply(new_value);
+    }
+    else if (node.operator_token == "/=")
+    {
+        result_value = current_value->divide(new_value);
+    }
+    else if (node.operator_token == "%=")
+    {
+        result_value = current_value->modulo(new_value);
+    }
+    else if (node.operator_token == "**=")
+    {
+        result_value = current_value->power(new_value);
+    }
+    else
+    {
+        throw internal_error_t("Unknown compound indexed assignment operator: " + node.operator_token);
+    }
+
+    // Set the updated value back to the indexed element
+    object->set_item(index, result_value);
+    m_current_result = result_value;
     zephyr::get_current_error_location() = saved_location;
 }
 

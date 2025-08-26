@@ -316,7 +316,8 @@ std::unique_ptr<statement_t> parser_t::statement() {
         m_current_token.type == token_type_e::minus_assign ||
         m_current_token.type == token_type_e::mul_assign ||
         m_current_token.type == token_type_e::div_assign ||
-        m_current_token.type == token_type_e::modulo_assign) {
+        m_current_token.type == token_type_e::modulo_assign ||
+        m_current_token.type == token_type_e::power_assign) { // Added power_assign
 
         token_type_e assign_type = m_current_token.type;
         token_t assign_token = m_current_token;
@@ -336,6 +337,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
                     case token_type_e::mul_assign: op_str = "*="; break;
                     case token_type_e::div_assign: op_str = "/="; break;
                     case token_type_e::modulo_assign: op_str = "%="; break;
+                    case token_type_e::power_assign: op_str = "**="; break; // Added power_assign
                     default: zephyr::get_current_error_location() = {assign_token.line, assign_token.column, 1};
                              throw zephyr::syntax_error_t("Unknown compound assignment operator.");
                 }
@@ -353,6 +355,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
                     case token_type_e::mul_assign: op_str = "*="; break;
                     case token_type_e::div_assign: op_str = "/="; break;
                     case token_type_e::modulo_assign: op_str = "%="; break;
+                    case token_type_e::power_assign: op_str = "**="; break; // Added power_assign
                     default: zephyr::get_current_error_location() = {assign_token.line, assign_token.column, 1};
                              throw zephyr::syntax_error_t("Unknown compound assignment operator.");
                 }
@@ -373,6 +376,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
                     case token_type_e::mul_assign: op_str = "*="; break;
                     case token_type_e::div_assign: op_str = "/="; break;
                     case token_type_e::modulo_assign: op_str = "%="; break;
+                    case token_type_e::power_assign: op_str = "**="; break; // Added power_assign
                     default: zephyr::get_current_error_location() = {assign_token.line, assign_token.column, 1};
                              throw zephyr::syntax_error_t("Unknown compound assignment operator.");
                 }

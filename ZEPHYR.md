@@ -55,7 +55,7 @@ Zephyr supports a range of modern scripting language features:
         *   **Example:** `value |> func1 |> func2` is equivalent to `func2(func1(value))`.
         *   **Benefits:** Improves readability by transforming nested function calls into a linear sequence, making data flow clearer and reducing the need for intermediate variables.
     *   **Ternary:** `condition ? true_expression : false_expression` (e.g., `x > 10 ? "greater" : "not greater"`)
-    *   **Compound Assignment:** `+=`, `-=`, `*=`, `/=`, `%=` for in-place operations
+    *   **Compound Assignment:** `+=`, `-=`, `*=`, `/=`, `%=`, `**=` for in-place operations
     *   **Increment/Decrement:** `++`, `--` (both prefix and postfix forms)
 *   **Control Flow:**
     *   `if` / `else` statements

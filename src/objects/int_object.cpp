@@ -3,6 +3,7 @@
 #include "types/int_type.hpp"
 #include <string>
 #include "errors.hpp"
+#include <cmath> // Added for std::pow
 
 namespace zephyr
 {
@@ -47,6 +48,25 @@ auto int_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<ob
 {
     check_division_by_zero(other);
     return get_type()->modulo(shared_from_this(), other);
+}
+
+auto int_object_t::power(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
+{
+    auto other_int = std::dynamic_pointer_cast<int_object_t>(other);
+    auto other_float = std::dynamic_pointer_cast<float_object_t>(other);
+
+    if (other_int)
+    {
+        return std::make_shared<int_object_t>(static_cast<int>(std::pow(m_value, other_int->get_value())));
+    }
+    else if (other_float)
+    {
+        return std::make_shared<float_object_t>(std::pow(m_value, other_float->get_value()));
+    }
+    else
+    {
+        throw type_error_t("Unsupported operand type for power: " + other->get_type()->get_name());
+    }
 }
 
 auto int_object_t::is_truthy() const -> bool

@@ -41,6 +41,27 @@ print("remainder = 17")
 remainder %= 5
 print("remainder %= 5  => remainder =", remainder)  # 2
 
+# Exponentiation assignment (**=)
+base = 2
+print("base = 2")
+base **= 3
+print("base **= 3      => base =", base) # 8
+
+float_base = 3.0
+print("float_base = 3.0")
+float_base **= 2
+print("float_base **= 2 => float_base =", float_base) # 9.0
+
+fractional_exp = 4
+print("fractional_exp = 4")
+fractional_exp **= 0.5
+print("fractional_exp **= 0.5 => fractional_exp =", fractional_exp) # 2.0
+
+zero_exp = 5
+print("zero_exp = 5")
+zero_exp **= 0
+print("zero_exp **= 0 => zero_exp =", zero_exp) # 1
+
 print("\n🔤 String Compound Operations")
 print("=============================")
 

@@ -332,6 +332,7 @@ RBRACKET: ']';
 COMMA: ',';
 SEMICOLON: ';';
 ASSIGN: '=';
+POWER_ASSIGN: '**='; // Added for **= operator
 DOT: '.';
 QUESTION_DOT: '?.'; // New: Optional Chaining Operator
 PLUS: '+';

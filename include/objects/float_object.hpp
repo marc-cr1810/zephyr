@@ -16,6 +16,7 @@ public:
     auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
+    auto power(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override; // Added for **= operator
 
     auto is_truthy() const -> bool override;
 

@@ -36,6 +36,7 @@ enum class token_type_e
     mul_assign,
     div_assign,
     modulo_assign,
+    power_assign, // Added for **= operator
     increment,
     decrement,
     dot,

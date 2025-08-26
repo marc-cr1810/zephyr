@@ -220,7 +220,15 @@ auto lexer_t::get_next_token() -> token_t
         if (two_char == "!=") return make_token(token_type_e::ne, "!=");
         if (two_char == "<=") return make_token(token_type_e::le, "<=");
         if (two_char == ">=") return make_token(token_type_e::ge, ">=");
-        if (two_char == "**") return make_token(token_type_e::power, "**");
+        if (two_char == "**") {
+            if (m_position + 2 < m_source.length() && m_source[m_position + 2] == '=') {
+                m_position += 1; // Consume first *
+                m_column += 1;
+                return make_token(token_type_e::power_assign, "**=");
+            } else {
+                return make_token(token_type_e::power, "**");
+            }
+        }
         if (two_char == "&&") return make_token(token_type_e::and_op, "&&");
         if (two_char == "||") return make_token(token_type_e::or_op, "||");
         if (two_char == "->") return make_token(token_type_e::arrow, "->");
