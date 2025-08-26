@@ -188,8 +188,20 @@ print("2.3. Dynamic Variables")
 print("=======================")
 
 # Strings
+# Strings
 message = "Hello, Zephyr!"
 print("String message =", message)
+print("Length of message:", len(message))
+
+# String indexing
+print("First character:", message[0])
+print("Last character:", message[-1])
+print("Character at index 7:", message[7]) # 'Z'
+
+# String compound operations
+greeting = "Hello"
+greeting += " World"  # String concatenation
+greeting *= 2         # String repetition: "Hello WorldHello World"
 
 # Booleans
 is_awesome = true

@@ -1,6 +1,7 @@
 #include "objects/string_object.hpp"
 #include "types/string_type.hpp"
 #include "errors.hpp"
+#include "objects/int_object.hpp" // Added for int_object_t
 
 namespace zephyr
 {
@@ -50,16 +51,24 @@ auto string_object_t::is_truthy() const -> bool
     return !m_value.empty();
 }
 
-auto string_object_t::get_item(std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
+auto string_object_t::get_item(std::shared_ptr<object_t> index_obj) -> std::shared_ptr<object_t>
 {
-    // Implementation would go here for string indexing
-    throw index_error_t("String indexing not yet implemented");
+    auto int_index = std::dynamic_pointer_cast<int_object_t>(index_obj);
+    if (!int_index)
+    {
+        throw type_error_t("String index must be an integer");
+    }
+
+    int index = int_index->get_value();
+    index = normalize_index(index);
+    check_bounds(index);
+
+    return std::make_shared<string_object_t>(std::string(1, m_value[index]));
 }
 
 auto string_object_t::set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
-    // Implementation would go here for string item setting
-    throw type_error_t("String item setting not supported");
+    throw type_error_t("String does not support item assignment (immutable)");
 }
 
 auto string_object_t::get_value() const -> const std::string&
