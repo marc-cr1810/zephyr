@@ -9,6 +9,8 @@ namespace zephyr
 class string_object_t : public object_t
 {
 public:
+    explicit string_object_t(const std::string& val);
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -22,8 +24,6 @@ public:
     auto set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void override;
 
     auto is_truthy() const -> bool override;
-
-    explicit string_object_t(const std::string& val);
 
     // Getter and setter methods
     auto get_value() const -> const std::string&;

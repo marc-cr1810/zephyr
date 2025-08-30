@@ -16,6 +16,16 @@ struct parameter_t;
 class lambda_object_t : public object_t
 {
 public:
+    // Constructor for expression body
+    explicit lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<expression_t> body_expr,
+                    const std::string& return_type_name, bool has_explicit_return_type,
+                    std::map<std::string, std::shared_ptr<object_t>> captured, bool async = false);
+
+    // Constructor for block body
+    explicit lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<block_t> body_blk,
+                    const std::string& return_type_name, bool has_explicit_return_type,
+                    std::map<std::string, std::shared_ptr<object_t>> captured, bool async = false);
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -26,16 +36,6 @@ public:
     auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-
-    // Constructor for expression body
-    explicit lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<expression_t> body_expr,
-                    const std::string& return_type_name, bool has_explicit_return_type,
-                    std::map<std::string, std::shared_ptr<object_t>> captured, bool async = false);
-
-    // Constructor for block body
-    explicit lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<block_t> body_blk,
-                    const std::string& return_type_name, bool has_explicit_return_type,
-                    std::map<std::string, std::shared_ptr<object_t>> captured, bool async = false);
 
 public:
     std::vector<parameter_t> m_parameters;

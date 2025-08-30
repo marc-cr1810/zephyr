@@ -14,6 +14,8 @@ using builtin_function_ptr_t = std::shared_ptr<object_t> (*)(const std::vector<s
 class builtin_function_object_t : public object_t
 {
 public:
+    explicit builtin_function_object_t(builtin_function_ptr_t ptr, const std::string& function_name);
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -24,8 +26,6 @@ public:
     auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-
-    explicit builtin_function_object_t(builtin_function_ptr_t ptr, const std::string& function_name);
 
 public:
     builtin_function_ptr_t m_func_ptr;

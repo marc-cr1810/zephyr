@@ -18,6 +18,9 @@ enum class promise_state_e
 class promise_object_t : public object_t
 {
 public:
+    explicit promise_object_t();
+    ~promise_object_t() override = default;
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -26,9 +29,6 @@ public:
     auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-
-    explicit promise_object_t();
-    ~promise_object_t() override = default;
 
     // Promise control methods
     auto resolve(std::shared_ptr<object_t> value) -> void;

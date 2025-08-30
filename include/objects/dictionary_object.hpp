@@ -11,6 +11,9 @@ namespace zephyr
 class dictionary_object_t : public object_t
 {
 public:
+    explicit dictionary_object_t(std::map<std::string, std::shared_ptr<object_t>> elems);
+    dictionary_object_t();
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -24,9 +27,6 @@ public:
     auto set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void override;
 
     auto is_truthy() const -> bool override;
-
-    explicit dictionary_object_t(std::map<std::string, std::shared_ptr<object_t>> elems);
-    dictionary_object_t();
 
     // Getter and setter methods
     auto get_elements() const -> const std::map<std::string, std::shared_ptr<object_t>>&;

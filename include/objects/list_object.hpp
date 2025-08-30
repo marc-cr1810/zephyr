@@ -9,6 +9,9 @@ namespace zephyr
 class list_object_t : public object_t
 {
 public:
+    explicit list_object_t(const std::vector<std::shared_ptr<object_t>>& elements);
+    list_object_t();
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -22,9 +25,6 @@ public:
     auto set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void override;
 
     auto is_truthy() const -> bool override;
-
-    explicit list_object_t(const std::vector<std::shared_ptr<object_t>>& elements);
-    list_object_t();
 
     // Getter and setter methods
     auto get_elements() const -> const std::vector<std::shared_ptr<object_t>>&;

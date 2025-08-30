@@ -15,6 +15,8 @@ struct parameter_t;
 class function_object_t : public object_t
 {
 public:
+    explicit function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, const std::string& return_type_name, bool has_explicit_return_type, bool async = false);
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -25,8 +27,6 @@ public:
     auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-
-    explicit function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, const std::string& return_type_name, bool has_explicit_return_type, bool async = false);
 
 public:
     std::vector<parameter_t> m_parameters;

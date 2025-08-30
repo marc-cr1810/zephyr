@@ -8,6 +8,8 @@ namespace zephyr
 class boolean_object_t : public object_t
 {
 public:
+    explicit boolean_object_t(bool val);
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -18,8 +20,6 @@ public:
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
 
     auto is_truthy() const -> bool override;
-
-    explicit boolean_object_t(bool val);
 
 public:
     bool m_value;

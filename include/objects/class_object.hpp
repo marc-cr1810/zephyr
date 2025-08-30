@@ -35,6 +35,8 @@ struct member_variable_info_t
 class class_object_t : public object_t
 {
 public:
+    explicit class_object_t(const std::string& class_name);
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -45,8 +47,6 @@ public:
     auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-
-    explicit class_object_t(const std::string& class_name);
 
     auto add_method(const std::string& method_name, std::shared_ptr<function_definition_t> method) -> void;
     auto add_member_variable(const member_variable_info_t& var_info) -> void;

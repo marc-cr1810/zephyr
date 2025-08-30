@@ -11,10 +11,10 @@ namespace zephyr
 class interface_object_t : public object_t
 {
 public:
+    explicit interface_object_t(const std::string& interface_name);
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
-
-    explicit interface_object_t(const std::string& interface_name);
 
     auto add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;

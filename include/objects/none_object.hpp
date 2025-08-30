@@ -8,6 +8,8 @@ namespace zephyr
 class none_object_t : public object_t
 {
 public:
+    none_object_t();
+
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
@@ -18,8 +20,6 @@ public:
     auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
 
     auto is_truthy() const -> bool override;
-
-    explicit none_object_t();
 
 private:
     // None objects are singletons, so we store a static instance
