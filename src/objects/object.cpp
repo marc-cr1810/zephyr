@@ -1,5 +1,7 @@
 #include "objects/object.hpp"
 
+#include "errors.hpp"
+
 namespace zephyr
 {
 
