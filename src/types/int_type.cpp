@@ -109,6 +109,26 @@ auto int_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t
     throw type_error_t("Unsupported operand types for %");
 }
 
+auto int_type_t::power(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
+{
+    auto self_int = std::static_pointer_cast<int_object_t>(self);
+    auto other_int = std::dynamic_pointer_cast<int_object_t>(other);
+    auto other_float = std::dynamic_pointer_cast<float_object_t>(other);
+
+    if (other_int)
+    {
+        return std::make_shared<int_object_t>(static_cast<int>(std::pow(self_int->get_value(), other_int->get_value())));
+    }
+    else if (other_float)
+    {
+        return std::make_shared<float_object_t>(std::pow(self_int->get_value(), other_float->get_value()));
+    }
+    else
+    {
+        throw type_error_t("Unsupported operand type for power: " + other->get_type()->get_name());
+    }
+}
+
 auto int_type_t::get_name() const -> std::string
 {
     return "int";
@@ -156,6 +176,5 @@ auto int_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<object_
         throw type_error_t("Cannot compare int with " + other->get_type()->get_name());
     }
 }
-
 
 } // namespace zephyr

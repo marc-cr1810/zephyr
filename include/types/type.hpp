@@ -19,63 +19,32 @@ public:
     virtual auto get_name() const -> std::string = 0;
 
     // Binary operation dispatch
-    virtual auto add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
-    virtual auto subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
-    virtual auto multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
-    virtual auto divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
-    virtual auto modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> = 0;
+    virtual auto add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
+    virtual auto subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
+    virtual auto multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
+    virtual auto divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
+    virtual auto modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
+    virtual auto power(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
 
     // List operations
-    virtual auto get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
-    {
-        throw type_error_t("Object of type " + get_name() + " is not subscriptable");
-    }
-
-    virtual auto set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
-    {
-        throw type_error_t("Object of type " + get_name() + " does not support item assignment");
-    }
+    virtual auto get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>;
+    virtual auto set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void;
 
     // Dictionary operations
-    virtual auto is_member_present(std::shared_ptr<object_t> self, const std::string& name) -> bool
-    {
-        return false;
-    }
-
-    virtual auto get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>
-    {
-        throw attribute_error_t("Object of type " + get_name() + " has no member '" + name + "'");
-    }
-
-    virtual auto set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void
-    {
-        throw type_error_t("Object of type " + get_name() + " does not support member assignment");
-    }
+    virtual auto is_member_present(std::shared_ptr<object_t> self, const std::string& name) -> bool;
+    virtual auto get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>;
+    virtual auto set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void;
 
     // Comparison operations
-    virtual auto equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
-    {
-        return self.get() == other.get();
-    }
-
-    virtual auto compare(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> int
-    {
-        throw type_error_t("Object of type " + get_name() + " does not support comparison");
-    }
+    virtual auto equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool;
+    virtual auto compare(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> int;
 
     // Logical operations
-    virtual auto is_truthy(std::shared_ptr<object_t> self) -> bool = 0;
+    virtual auto is_truthy(std::shared_ptr<object_t> self) -> bool;
 
     // Container operations
-    virtual auto contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> item) -> bool
-    {
-        throw type_error_t("Object of type " + get_name() + " does not support membership testing");
-    }
-
-    virtual auto get_length(std::shared_ptr<object_t> self) -> int
-    {
-        throw type_error_t("Object of type " + get_name() + " has no length");
-    }
+    virtual auto contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> item) -> bool;
+    virtual auto get_length(std::shared_ptr<object_t> self) -> int;
 };
 
 }

@@ -48,27 +48,17 @@ auto string_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr
 
 auto string_object_t::is_truthy() const -> bool
 {
-    return !m_value.empty();
+    return get_type()->is_truthy(std::const_pointer_cast<object_t>(shared_from_this()));
 }
 
 auto string_object_t::get_item(std::shared_ptr<object_t> index_obj) -> std::shared_ptr<object_t>
 {
-    auto int_index = std::dynamic_pointer_cast<int_object_t>(index_obj);
-    if (!int_index)
-    {
-        throw type_error_t("String index must be an integer");
-    }
-
-    int index = int_index->get_value();
-    index = normalize_index(index);
-    check_bounds(index);
-
-    return std::make_shared<string_object_t>(std::string(1, m_value[index]));
+    return get_type()->get_item(shared_from_this(), index_obj);
 }
 
 auto string_object_t::set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
-    throw type_error_t("String does not support item assignment (immutable)");
+    get_type()->set_item(shared_from_this(), index, value);
 }
 
 auto string_object_t::get_value() const -> const std::string&
@@ -79,23 +69,6 @@ auto string_object_t::get_value() const -> const std::string&
 auto string_object_t::set_value(const std::string& val) -> void
 {
     m_value = val;
-}
-
-auto string_object_t::check_bounds(int index) const -> void
-{
-    if (index < 0 || index >= static_cast<int>(m_value.length()))
-    {
-        throw index_error_t("String index out of bounds");
-    }
-}
-
-auto string_object_t::normalize_index(int index) const -> int
-{
-    if (index < 0)
-    {
-        index += static_cast<int>(m_value.length());
-    }
-    return index;
 }
 
 } // namespace zephyr

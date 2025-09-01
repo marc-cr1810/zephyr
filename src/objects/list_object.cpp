@@ -67,50 +67,17 @@ auto list_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<o
 
 auto list_object_t::is_truthy() const -> bool
 {
-    return !m_elements.empty();
+    return get_type()->is_truthy(std::const_pointer_cast<object_t>(shared_from_this()));
 }
 
 auto list_object_t::get_item(std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
-    if (!index)
-    {
-        throw type_error_t("List index cannot be null");
-    }
-
-    auto int_index = std::dynamic_pointer_cast<int_object_t>(index);
-    if (!int_index)
-    {
-        throw type_error_t("List indices must be integers, not '" + index->get_type()->get_name() + "'");
-    }
-
-    int idx = normalize_index(int_index->get_value());
-    check_bounds(idx);
-
-    return m_elements[idx];
+    return get_type()->get_item(shared_from_this(), index);
 }
 
 auto list_object_t::set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
-    if (!index)
-    {
-        throw type_error_t("List index cannot be null");
-    }
-
-    if (!value)
-    {
-        throw value_error_t("List value cannot be null");
-    }
-
-    auto int_index = std::dynamic_pointer_cast<int_object_t>(index);
-    if (!int_index)
-    {
-        throw type_error_t("List indices must be integers, not '" + index->get_type()->get_name() + "'");
-    }
-
-    int idx = normalize_index(int_index->get_value());
-    check_bounds(idx);
-
-    m_elements[idx] = value;
+    get_type()->set_item(shared_from_this(), index, value);
 }
 
 auto list_object_t::get_elements() const -> const std::vector<std::shared_ptr<object_t>>&
@@ -128,47 +95,6 @@ auto list_object_t::set_elements(const std::vector<std::shared_ptr<object_t>>& e
     m_elements = elems;
 }
 
-auto list_object_t::check_bounds(int index) const -> void
-{
-    if (index < 0 || index >= static_cast<int>(m_elements.size()))
-    {
-        throw index_error_t("List index " + std::to_string(index) + " out of range [0, " +
-                                std::to_string(m_elements.size()) + ")");
-    }
-}
 
-auto list_object_t::normalize_index(int index) const -> int
-{
-    if (index < 0)
-    {
-        // Handle negative indices (Python-style)
-        index += static_cast<int>(m_elements.size());
-    }
-    return index;
-}
-
-auto list_object_t::append_element(std::shared_ptr<object_t> element) -> void
-{
-    if (!element)
-    {
-        element = std::make_shared<none_object_t>();
-    }
-    m_elements.push_back(element);
-}
-
-auto list_object_t::pop_element(int index) -> std::shared_ptr<object_t>
-{
-    if (m_elements.empty())
-    {
-        throw index_error_t("Cannot pop from empty list");
-    }
-
-    int idx = normalize_index(index);
-    check_bounds(idx);
-
-    auto result = m_elements[idx];
-    m_elements.erase(m_elements.begin() + idx);
-    return result;
-}
 
 } // namespace zephyr

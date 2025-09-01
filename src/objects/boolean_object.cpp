@@ -49,7 +49,7 @@ auto boolean_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_pt
 
 auto boolean_object_t::is_truthy() const -> bool
 {
-    return m_value;
+    return get_type()->is_truthy(std::const_pointer_cast<object_t>(shared_from_this()));
 }
 
 auto boolean_object_t::get_true() -> std::shared_ptr<boolean_object_t>

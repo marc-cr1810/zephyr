@@ -47,7 +47,7 @@ auto none_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<o
 
 auto none_object_t::is_truthy() const -> bool
 {
-    return false;
+    return get_type()->is_truthy(std::const_pointer_cast<object_t>(shared_from_this()));
 }
 
 auto none_object_t::get_instance() -> std::shared_ptr<none_object_t>

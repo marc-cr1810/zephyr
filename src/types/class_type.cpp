@@ -1,4 +1,5 @@
 #include "types/class_type.hpp"
+#include "objects/class_object.hpp"
 #include "objects/object.hpp"
 #include "errors.hpp"
 #include "objects/class_instance_object.hpp"
@@ -31,35 +32,7 @@ auto class_type_t::get_name() const -> std::string
     return m_class_name;
 }
 
-auto class_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("addition");
-    return nullptr;
-}
 
-auto class_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("subtraction");
-    return nullptr;
-}
-
-auto class_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("multiplication");
-    return nullptr;
-}
-
-auto class_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("division");
-    return nullptr;
-}
-
-auto class_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("modulo");
-    return nullptr;
-}
 
 auto class_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 {
@@ -79,28 +52,73 @@ auto class_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object
 
 auto class_type_t::get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>
 {
-    auto instance = std::dynamic_pointer_cast<class_instance_t>(self);
-    if (instance)
+    auto instance = std::static_pointer_cast<class_instance_t>(self);
+    
+    if (name.empty())
     {
-        return instance->get_member(name);
+        throw value_error_t("Member name cannot be empty");
     }
-    throw type_error_t("Cannot access member on non-class instance");
+
+    auto it = instance->m_members.find(name);
+    if (it != instance->m_members.end())
+    {
+        return it->second;
+    }
+
+    throw attribute_error_t("Member '" + name + "' not found in class instance");
 }
 
 auto class_type_t::set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void
 {
-    auto instance = std::dynamic_pointer_cast<class_instance_t>(self);
-    if (instance)
+    auto instance = std::static_pointer_cast<class_instance_t>(self);
+
+    if (name.empty())
     {
-        instance->set_member(name, value);
-        return;
+        throw value_error_t("Member name cannot be empty");
     }
-    throw type_error_t("Cannot set member on non-class instance");
+
+    if (instance->is_member_const(name))
+    {
+        throw type_error_t("Cannot modify const member '" + name + "'");
+    }
+
+    // Check for type validation if member has explicit type
+    if (instance->m_class_obj)
+    {
+        for (const auto& member_var : instance->m_class_obj->m_member_variables)
+        {
+            if (member_var.name == name && !member_var.type_name.empty())
+            {
+                // Member has explicit type - validate assignment
+                if (value->get_type()->get_name() != "none")
+                {
+                    std::string expected_type = member_var.type_name;
+                    std::string actual_type = value->get_type()->get_name();
+
+                    // Normalize type names for common aliases
+                    if (expected_type == "int" && actual_type == "number") {
+                        actual_type = "int";
+                    } else if (expected_type == "float" && actual_type == "number") {
+                        actual_type = "float";
+                    } else if (expected_type == "string" && actual_type == "string_literal") {
+                        actual_type = "string";
+                    }
+
+                    if (actual_type != expected_type)
+                    {
+                        throw type_error_t("Type mismatch for member '" + name +
+                                               "': expected " + expected_type +
+                                               ", got " + actual_type);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    instance->m_members[name] = value;
 }
 
-auto class_type_t::throw_unsupported_operation(const std::string& operation) const -> void
-{
-    throw type_error_t("Unsupported operation '" + operation + "' for class type '" + m_class_name + "'");
-}
+
 
 }

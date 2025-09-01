@@ -29,7 +29,7 @@ public:
 private:
     double m_value;
 
-    auto check_division_by_zero(std::shared_ptr<object_t> other) const -> void;
+    
     auto format_float_string() const -> std::string;
 };
 

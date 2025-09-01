@@ -20,7 +20,7 @@ auto interface_type_t::get_instance(const std::string& interface_name) -> std::s
     if (it != s_instances.end()) {
         return it->second;
     }
-    
+
     auto instance = std::shared_ptr<interface_type_t>(new interface_type_t(interface_name));
     s_instances[interface_name] = instance;
     return instance;
@@ -29,36 +29,6 @@ auto interface_type_t::get_instance(const std::string& interface_name) -> std::s
 auto interface_type_t::get_name() const -> std::string
 {
     return m_interface_name;
-}
-
-auto interface_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("addition");
-    return nullptr;
-}
-
-auto interface_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("subtraction");
-    return nullptr;
-}
-
-auto interface_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("multiplication");
-    return nullptr;
-}
-
-auto interface_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("division");
-    return nullptr;
-}
-
-auto interface_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw_unsupported_operation("modulo");
-    return nullptr;
 }
 
 auto interface_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
@@ -72,14 +42,9 @@ auto interface_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<ob
     {
         return false;
     }
-    
+
     // Instance equality is pointer equality
     return self.get() == other.get();
-}
-
-auto interface_type_t::throw_unsupported_operation(const std::string& operation) const -> void
-{
-    throw type_error_t("Unsupported operation '" + operation + "' for interface type '" + m_interface_name + "'");
 }
 
 }

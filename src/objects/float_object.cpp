@@ -42,38 +42,22 @@ auto float_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_pt
 
 auto float_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    check_division_by_zero(other);
     return get_type()->divide(shared_from_this(), other);
 }
 
 auto float_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    check_division_by_zero(other);
     return get_type()->modulo(shared_from_this(), other);
 }
 
 auto float_object_t::power(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
 {
-    auto other_int = std::dynamic_pointer_cast<int_object_t>(other);
-    auto other_float = std::dynamic_pointer_cast<float_object_t>(other);
-
-    if (other_int)
-    {
-        return std::make_shared<float_object_t>(std::pow(m_value, other_int->get_value()));
-    }
-    else if (other_float)
-    {
-        return std::make_shared<float_object_t>(std::pow(m_value, other_float->get_value()));
-    }
-    else
-    {
-        throw type_error_t("Unsupported operand type for power: " + other->get_type()->get_name());
-    }
+    return get_type()->power(shared_from_this(), other);
 }
 
 auto float_object_t::is_truthy() const -> bool
 {
-    return m_value != 0.0;
+    return get_type()->is_truthy(std::const_pointer_cast<object_t>(shared_from_this()));
 }
 
 auto float_object_t::get_value() const -> double
@@ -86,32 +70,7 @@ auto float_object_t::set_value(double val) -> void
     m_value = val;
 }
 
-auto float_object_t::check_division_by_zero(std::shared_ptr<object_t> other) const -> void
-{
-    if (!other)
-    {
-        throw value_error_t("Cannot divide by null object");
-    }
-    
-    auto type_name = other->get_type()->get_name();
-    
-    if (type_name == "float")
-    {
-        auto float_obj = std::static_pointer_cast<float_object_t>(other);
-        if (float_obj->get_value() == 0.0)
-        {
-            throw zero_division_error_t("Division by zero");
-        }
-    }
-    else if (type_name == "int")
-    {
-        auto int_obj = std::static_pointer_cast<int_object_t>(other);
-        if (int_obj->get_value() == 0)
-        {
-            throw zero_division_error_t("Division by zero");
-        }
-    }
-}
+
 
 auto float_object_t::format_float_string() const -> std::string
 {

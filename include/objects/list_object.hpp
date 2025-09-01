@@ -33,11 +33,6 @@ public:
 
 private:
     std::vector<std::shared_ptr<object_t>> m_elements;
-
-    auto check_bounds(int index) const -> void;
-    auto normalize_index(int index) const -> int;
-    auto append_element(std::shared_ptr<object_t> element) -> void;
-    auto pop_element(int index) -> std::shared_ptr<object_t>;
 };
 
 }

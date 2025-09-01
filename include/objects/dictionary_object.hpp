@@ -35,11 +35,6 @@ public:
 
 private:
     std::map<std::string, std::shared_ptr<object_t>> m_elements;
-
-    auto key_to_string(std::shared_ptr<object_t> key) const -> std::string;
-    auto has_key(const std::string& key) const -> bool;
-    auto get_keys() const -> std::vector<std::string>;
-    auto get_values() const -> std::vector<std::shared_ptr<object_t>>;
 };
 
 }

@@ -31,11 +31,6 @@ private:
     string_type_t() = default;
 
     static std::shared_ptr<string_type_t> s_instance;
-
-    auto validate_string_index(const std::string& str, int index) const -> void;
-    auto normalize_string_index(const std::string& str, int index) const -> int;
-    auto repeat_string(const std::string& str, int count) const -> std::string;
-    auto validate_multiplication_operand(std::shared_ptr<object_t> other) const -> void;
 };
 
 }

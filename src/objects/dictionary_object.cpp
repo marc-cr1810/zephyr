@@ -69,27 +69,17 @@ auto dictionary_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared
 
 auto dictionary_object_t::is_truthy() const -> bool
 {
-    return !m_elements.empty();
+    return get_type()->is_truthy(std::const_pointer_cast<object_t>(shared_from_this()));
 }
 
 auto dictionary_object_t::get_item(std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
-    auto key_str = key_to_string(index);
-
-    if (has_key(key_str))
-    {
-        return m_elements[key_str];
-    }
-    else
-    {
-        throw key_error_t("Key '" + key_str + "' not found in dictionary");
-    }
+    return get_type()->get_item(shared_from_this(), index);
 }
 
 auto dictionary_object_t::set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
-    auto key_str = key_to_string(index);
-    m_elements[key_str] = value;
+    get_type()->set_item(shared_from_this(), index, value);
 }
 
 auto dictionary_object_t::get_elements() const -> const std::map<std::string, std::shared_ptr<object_t>>&
@@ -107,61 +97,6 @@ auto dictionary_object_t::set_elements(const std::map<std::string, std::shared_p
     m_elements = elems;
 }
 
-auto dictionary_object_t::key_to_string(std::shared_ptr<object_t> key) const -> std::string
-{
-    if (!key)
-    {
-        throw type_error_t("Dictionary key cannot be null");
-    }
 
-    auto type_name = key->get_type()->get_name();
-
-    if (type_name == "string")
-    {
-        auto str_obj = std::static_pointer_cast<string_object_t>(key);
-        return str_obj->get_value();
-    }
-    else if (type_name == "int")
-    {
-        auto int_obj = std::static_pointer_cast<int_object_t>(key);
-        return std::to_string(int_obj->get_value());
-    }
-    else
-    {
-        // For other types, use their string representation
-        return key->to_string();
-    }
-}
-
-auto dictionary_object_t::has_key(const std::string& key) const -> bool
-{
-    return m_elements.find(key) != m_elements.end();
-}
-
-auto dictionary_object_t::get_keys() const -> std::vector<std::string>
-{
-    std::vector<std::string> keys;
-    keys.reserve(m_elements.size());
-
-    for (const auto& pair : m_elements)
-    {
-        keys.push_back(pair.first);
-    }
-
-    return keys;
-}
-
-auto dictionary_object_t::get_values() const -> std::vector<std::shared_ptr<object_t>>
-{
-    std::vector<std::shared_ptr<object_t>> values;
-    values.reserve(m_elements.size());
-
-    for (const auto& pair : m_elements)
-    {
-        values.push_back(pair.second);
-    }
-
-    return values;
-}
 
 } // namespace zephyr

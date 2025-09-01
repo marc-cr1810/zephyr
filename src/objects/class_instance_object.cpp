@@ -62,56 +62,12 @@ auto class_instance_t::has_member(const std::string& name) const -> bool
 
 auto class_instance_t::get_member(const std::string& member_name) -> std::shared_ptr<object_t>
 {
-    validate_member_access(member_name);
-
-    auto it = m_members.find(member_name);
-    if (it != m_members.end())
-    {
-        return it->second;
-    }
-
-    throw attribute_error_t("Member '" + member_name + "' not found in class instance");
+    return get_type()->get_member(shared_from_this(), member_name);
 }
 
 auto class_instance_t::set_member(const std::string& member_name, std::shared_ptr<object_t> value) -> void
 {
-    validate_member_assignment(member_name);
-
-    // Check for type validation if member has explicit type
-    if (m_class_obj)
-    {
-        for (const auto& member_var : m_class_obj->m_member_variables)
-        {
-            if (member_var.name == member_name && !member_var.type_name.empty())
-            {
-                // Member has explicit type - validate assignment
-                if (value->get_type()->get_name() != "none")
-                {
-                    std::string expected_type = member_var.type_name;
-                    std::string actual_type = value->get_type()->get_name();
-
-                    // Normalize type names for common aliases
-                    if (expected_type == "int" && actual_type == "number") {
-                        actual_type = "int";
-                    } else if (expected_type == "float" && actual_type == "number") {
-                        actual_type = "float";
-                    } else if (expected_type == "string" && actual_type == "string_literal") {
-                        actual_type = "string";
-                    }
-
-                    if (actual_type != expected_type)
-                    {
-                        throw type_error_t("Type mismatch for member '" + member_name +
-                                               "': expected " + expected_type +
-                                               ", got " + actual_type);
-                    }
-                }
-                break;
-            }
-        }
-    }
-
-    m_members[member_name] = value;
+    get_type()->set_member(shared_from_this(), member_name, value);
 }
 
 auto class_instance_t::has_method(const std::string& name) const -> bool
@@ -134,23 +90,7 @@ auto class_instance_t::is_member_const(const std::string& name) const -> bool
     return m_const_members.find(name) != m_const_members.end();
 }
 
-auto class_instance_t::validate_member_access(const std::string& name) const -> void
-{
-    if (name.empty())
-    {
-        throw value_error_t("Member name cannot be empty");
-    }
-}
 
-auto class_instance_t::validate_member_assignment(const std::string& name) const -> void
-{
-    validate_member_access(name);
-
-    if (is_member_const(name))
-    {
-        throw type_error_t("Cannot modify const member '" + name + "'");
-    }
-}
 
 auto class_instance_t::initialize_default_members() -> void
 {
@@ -184,29 +124,6 @@ auto class_instance_t::initialize_default_members() -> void
     }
 }
 
-auto class_instance_t::format_members() const -> std::string
-{
-    std::string result = "{";
-    bool first = true;
 
-    for (const auto& pair : m_members)
-    {
-        if (!first)
-        {
-            result += ", ";
-        }
-        first = false;
-
-        result += pair.first + ": " + pair.second->to_string();
-
-        if (is_member_const(pair.first))
-        {
-            result += " (const)";
-        }
-    }
-
-    result += "}";
-    return result;
-}
 
 } // namespace zephyr

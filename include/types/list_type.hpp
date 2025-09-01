@@ -16,10 +16,7 @@ public:
     auto get_name() const -> std::string override;
 
     auto add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
+    
 
     auto get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t> override;
     auto set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void override;
@@ -35,12 +32,6 @@ private:
     list_type_t() = default;
 
     static std::shared_ptr<list_type_t> s_instance;
-
-    auto validate_list_index(std::shared_ptr<object_t> self, int index) const -> void;
-    auto normalize_list_index(std::shared_ptr<object_t> self, int index) const -> int;
-    auto concatenate_lists(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) const -> std::shared_ptr<object_t>;
-    auto repeat_list(std::shared_ptr<object_t> self, int count) const -> std::shared_ptr<object_t>;
-    auto validate_multiplication_operand(std::shared_ptr<object_t> other) const -> void;
 };
 
 }

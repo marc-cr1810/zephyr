@@ -93,6 +93,26 @@ auto float_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object
     throw type_error_t("Unsupported operand types for %");
 }
 
+auto float_type_t::power(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
+{
+    auto self_float = std::static_pointer_cast<float_object_t>(self);
+    auto other_int = std::dynamic_pointer_cast<int_object_t>(other);
+    auto other_float = std::dynamic_pointer_cast<float_object_t>(other);
+
+    if (other_int)
+    {
+        return std::make_shared<float_object_t>(std::pow(self_float->get_value(), other_int->get_value()));
+    }
+    else if (other_float)
+    {
+        return std::make_shared<float_object_t>(std::pow(self_float->get_value(), other_float->get_value()));
+    }
+    else
+    {
+        throw type_error_t("Unsupported operand type for power: " + other->get_type()->get_name());
+    }
+}
+
 auto float_type_t::get_name() const -> std::string
 {
     return "float";

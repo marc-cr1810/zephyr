@@ -24,25 +24,7 @@ auto list_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> 
     throw type_error_t("Unsupported operand types for list concatenation");
 }
 
-auto list_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for lists");
-}
 
-auto list_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for lists");
-}
-
-auto list_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for lists");
-}
-
-auto list_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for lists");
-}
 
 auto list_type_t::get_name() const -> std::string
 {
@@ -92,6 +74,9 @@ auto list_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<objec
     {
         int idx = index_int->get_value();
         const auto& elements = self_list->get_elements();
+        if (idx < 0) {
+            idx += elements.size();
+        }
         if (idx < 0 || idx >= static_cast<int>(elements.size()))
         {
             throw index_error_t("List index out of bounds");
@@ -108,6 +93,9 @@ auto list_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<objec
     {
         int idx = index_int->get_value();
         auto& elements = self_list->get_elements_mutable();
+        if (idx < 0) {
+            idx += elements.size();
+        }
         if (idx < 0 || idx >= static_cast<int>(elements.size()))
         {
             throw index_error_t("List index out of bounds");

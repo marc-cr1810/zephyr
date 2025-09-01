@@ -16,11 +16,7 @@ class dictionary_type_t : public type_t
 public:
     auto get_name() const -> std::string override;
 
-    auto add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
+    
 
     auto get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t> override;
     auto set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void override;
@@ -42,10 +38,6 @@ private:
     static std::shared_ptr<dictionary_type_t> s_instance;
 
     auto key_to_string(std::shared_ptr<object_t> key) const -> std::string;
-    auto validate_key_type(std::shared_ptr<object_t> key) const -> void;
-    auto merge_dictionaries(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) const -> std::shared_ptr<object_t>;
-    auto get_keys_list(std::shared_ptr<object_t> self) const -> std::shared_ptr<object_t>;
-    auto get_values_list(std::shared_ptr<object_t> self) const -> std::shared_ptr<object_t>;
 };
 
 }

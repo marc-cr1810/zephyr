@@ -34,7 +34,6 @@ public:
 private:
     auto validate_function_pointer() const -> void;
     auto validate_function_name() const -> void;
-    auto throw_unsupported_operation(const std::string& operation) const -> void;
 };
 
 }

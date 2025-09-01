@@ -43,10 +43,7 @@ public:
     std::set<std::string> m_const_members;
 
 private:
-    auto validate_member_access(const std::string& name) const -> void;
-    auto validate_member_assignment(const std::string& name) const -> void;
     auto initialize_default_members() -> void;
-    auto format_members() const -> std::string;
 };
 
 }

@@ -11,30 +11,7 @@ auto boolean_type_t::get_instance() -> std::shared_ptr<boolean_type_t>
     return instance;
 }
 
-auto boolean_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for booleans");
-}
 
-auto boolean_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for booleans");
-}
-
-auto boolean_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for booleans");
-}
-
-auto boolean_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for booleans");
-}
-
-auto boolean_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for booleans");
-}
 
 auto boolean_type_t::get_name() const -> std::string
 {

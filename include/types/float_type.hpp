@@ -20,6 +20,7 @@ public:
     auto multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
     auto modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
+    auto power(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
 
     auto is_truthy(std::shared_ptr<object_t> self) -> bool override;
     auto equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool override;

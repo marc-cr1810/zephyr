@@ -31,9 +31,6 @@ public:
 
 private:
     std::string m_value;
-
-    auto check_bounds(int index) const -> void;
-    auto normalize_index(int index) const -> int;
 };
 
 }

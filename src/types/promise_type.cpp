@@ -11,30 +11,7 @@ auto promise_type_t::get_name() const -> std::string
     return "promise";
 }
 
-auto promise_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Promise objects do not support addition");
-}
 
-auto promise_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Promise objects do not support subtraction");
-}
-
-auto promise_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Promise objects do not support multiplication");
-}
-
-auto promise_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Promise objects do not support division");
-}
-
-auto promise_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Promise objects do not support modulo");
-}
 
 auto promise_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 {

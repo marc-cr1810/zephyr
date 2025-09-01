@@ -11,61 +11,29 @@ auto dictionary_type_t::get_instance() -> std::shared_ptr<dictionary_type_t>
     return instance;
 }
 
-auto dictionary_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Operation not supported for dictionaries");
-}
 
-auto dictionary_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Operation not supported for dictionaries");
-}
-
-auto dictionary_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Operation not supported for dictionaries");
-}
-
-auto dictionary_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for dictionaries");
-}
-
-auto dictionary_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    throw type_error_t("Unsupported operation for dictionaries");
-}
 
 auto dictionary_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
     auto self_dict = std::static_pointer_cast<dictionary_object_t>(self);
-    if (auto index_string = std::dynamic_pointer_cast<string_object_t>(index))
+    auto key_str = key_to_string(index);
+    const auto& elements = self_dict->get_elements();
+    if (elements.count(key_str))
     {
-        const auto& elements = self_dict->get_elements();
-        if (elements.count(index_string->get_value()))
-        {
-            return elements.at(index_string->get_value());
-        }
-        else
-        {
-            throw key_error_t("Key '" + index_string->get_value() + "' not found in dictionary.");
-        }
+        return elements.at(key_str);
     }
-    throw type_error_t("Dictionary key must be a string.");
+    else
+    {
+        throw key_error_t("Key '" + key_str + "' not found in dictionary.");
+    }
 }
 
 auto dictionary_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
     auto self_dict = std::static_pointer_cast<dictionary_object_t>(self);
-    if (auto index_string = std::dynamic_pointer_cast<string_object_t>(index))
-    {
-        auto& elements = self_dict->get_elements_mutable();
-        elements[index_string->get_value()] = value;
-    }
-    else
-    {
-        throw type_error_t("Dictionary key must be a string.");
-    }
+    auto key_str = key_to_string(index);
+    auto& elements = self_dict->get_elements_mutable();
+    elements[key_str] = value;
 }
 
 auto dictionary_type_t::get_name() const -> std::string
@@ -139,5 +107,30 @@ auto dictionary_type_t::get_length(std::shared_ptr<object_t> self) -> int
     return static_cast<int>(self_dict->get_elements().size());
 }
 
+auto dictionary_type_t::key_to_string(std::shared_ptr<object_t> key) const -> std::string
+{
+    if (!key)
+    {
+        throw type_error_t("Dictionary key cannot be null");
+    }
+
+    auto type_name = key->get_type()->get_name();
+
+    if (type_name == "string")
+    {
+        auto str_obj = std::static_pointer_cast<string_object_t>(key);
+        return str_obj->get_value();
+    }
+    else if (type_name == "int")
+    {
+        auto int_obj = std::static_pointer_cast<int_object_t>(key);
+        return std::to_string(int_obj->get_value());
+    }
+    else
+    {
+        // For other types, use their string representation
+        return key->to_string();
+    }
+}
 
 } // namespace zephyr

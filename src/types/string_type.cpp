@@ -100,6 +100,12 @@ auto string_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<obj
     {
         int idx = index_int->get_value();
         const std::string& str_value = self_str->get_value();
+
+        if (idx < 0)
+        {
+            idx += static_cast<int>(str_value.length());
+        }
+
         if (idx < 0 || idx >= static_cast<int>(str_value.length()))
         {
             throw index_error_t("String index out of bounds");
