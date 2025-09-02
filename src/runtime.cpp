@@ -57,7 +57,7 @@ auto runtime_t::start_repl() -> void
 {
     std::string line;
     std::string accumulated_input;
-    std::cout << "Zephyr REPL, version " << VERSION << " (Ctrl+D to exit)" << std::endl;
+    std::cout << "Zephyr " << VERSION << " (Ctrl+D to exit)" << std::endl;
 
     zephyr::interpreter_t interpreter("<stdin>", accumulated_input);
 
