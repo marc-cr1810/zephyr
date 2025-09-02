@@ -14,6 +14,7 @@ namespace zephyr
 
 // ANSI escape codes for colors
 #define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 runtime_t::runtime_t()
@@ -57,12 +58,12 @@ auto runtime_t::start_repl() -> void
     std::string line;
     std::string accumulated_input;
     std::cout << "Zephyr REPL (Ctrl+D to exit)" << std::endl;
-    
+
     zephyr::interpreter_t interpreter("<stdin>", accumulated_input);
 
     while (true)
     {
-        std::cout << (accumulated_input.empty() ? ">> " : ".. ");
+        std::cout << ANSI_COLOR_MAGENTA << (accumulated_input.empty() ? ">> " : ".. ") << ANSI_COLOR_RESET;
         if (!std::getline(std::cin, line))
         {
             break; // Exit on Ctrl+D or EOF
@@ -101,11 +102,6 @@ auto runtime_t::process_code(zephyr::interpreter_t& interpreter, const std::stri
         }
 
         return true;
-    }
-    catch (const zephyr::syntax_error_t& e)
-    {
-        print_error(e.what(), e.error_name(), source, e.line(), e.column(), filename, e.length());
-        return false;
     }
     catch (const zephyr::runtime_error_with_location_t& e)
     {
@@ -189,11 +185,11 @@ auto runtime_t::print_error(const std::string& message, const std::string& error
 
     if (!filename.empty() && line > 0)
     {
-        std::cerr << "  File \"" << filename << "\", line " << line << std::endl;
+        std::cerr << "  File " << ANSI_COLOR_MAGENTA << "\"" << filename << "\"" << ANSI_COLOR_RESET << ", line " << ANSI_COLOR_MAGENTA << line << ANSI_COLOR_RESET << std::endl;
     }
     else if (filename.empty() && line > 0)
     {
-        std::cerr << "  File \"<stdin>\", line " << line << std::endl;
+        std::cerr << "  File " << ANSI_COLOR_MAGENTA << "\"<stdin>\"" << ANSI_COLOR_RESET << ", line " << ANSI_COLOR_MAGENTA << line << ANSI_COLOR_RESET << std::endl;
     }
 
     if (line > 0 && !source_code.empty())
