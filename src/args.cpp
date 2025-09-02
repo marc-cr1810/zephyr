@@ -27,6 +27,11 @@ auto command_line_args_t::parse(int argc, char* argv[]) -> command_line_args_t
             args.mode = execution_mode_t::SHOW_HELP;
             return args; // Help is an exclusive action
         }
+        else if (token == "-v" || token == "--version")
+        {
+            args.mode = execution_mode_t::SHOW_VERSION;
+            return args; // Version is an exclusive action
+        }
         else if (token == "-c")
         {
             // -c requires an argument and should be the only primary mode

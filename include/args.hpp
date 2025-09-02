@@ -12,6 +12,7 @@ enum class execution_mode_t
     EXECUTE_FILE,
     EXECUTE_STRING,
     SHOW_HELP,
+    SHOW_VERSION,
     INVALID
 };
 

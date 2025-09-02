@@ -27,6 +27,9 @@ auto main(int argc, char* argv[]) -> int
         case zephyr::execution_mode_t::SHOW_HELP:
             show_usage(args.program_name);
             break;
+        case zephyr::execution_mode_t::SHOW_VERSION:
+            std::cout << "Zephyr Interpreter, version " << VERSION << std::endl;
+            break;
         case zephyr::execution_mode_t::INVALID:
             show_usage(args.program_name);
             return 1;
