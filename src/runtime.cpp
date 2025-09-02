@@ -57,7 +57,7 @@ auto runtime_t::start_repl() -> void
 {
     std::string line;
     std::string accumulated_input;
-    std::cout << "Zephyr " << ZEPHYR_VERSION << " (Ctrl+D to exit)" << std::endl;
+    std::cout << "Zephyr " << ZEPHYR_VERSION << " [GCC " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__ << "]" << std::endl;
 
     zephyr::interpreter_t interpreter("<stdin>", accumulated_input);
 
