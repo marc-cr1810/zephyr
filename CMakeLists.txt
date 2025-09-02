@@ -17,8 +17,7 @@ add_executable(zephyr ${SOURCES})
 # Generate a version string from the current timestamp
 string(TIMESTAMP BUILD_TIMESTAMP "%Y.%m.%d-%H%M%S" UTC)
 set(APP_VERSION "v${BUILD_TIMESTAMP}")
-target_compile_definitions(zephyr PRIVATE VERSION="${APP_VERSION}")
-
+target_compile_definitions(zephyr PRIVATE ZEPHYR_VERSION="${APP_VERSION}")
 
 add_custom_command(TARGET zephyr POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
