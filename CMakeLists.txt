@@ -18,6 +18,7 @@ add_executable(zephyr ${SOURCES})
 string(TIMESTAMP BUILD_TIMESTAMP "%Y.%m.%d-%H%M%S" UTC)
 set(APP_VERSION "v${BUILD_TIMESTAMP}")
 target_compile_definitions(zephyr PRIVATE ZEPHYR_VERSION="${APP_VERSION}")
+target_compile_definitions(zephyr PRIVATE ZEPHYR_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 
 add_custom_command(TARGET zephyr POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
