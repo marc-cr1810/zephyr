@@ -26,6 +26,9 @@ public:
     virtual auto modulo(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
     virtual auto power(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
 
+    // Unary operations
+    virtual auto negate(std::shared_ptr<object_t> self) -> std::shared_ptr<object_t>;
+
     // List operations
     virtual auto get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>;
     virtual auto set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void;

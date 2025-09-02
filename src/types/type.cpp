@@ -34,6 +34,11 @@ auto type_t::power(std::shared_ptr<object_t> self, std::shared_ptr<object_t> oth
     throw type_error_t("Object of type " + self->get_type()->get_name() + " does not support power operation");
 }
 
+auto type_t::negate(std::shared_ptr<object_t> self) -> std::shared_ptr<object_t>
+{
+    throw type_error_t("Object of type " + self->get_type()->get_name() + " does not support negation");
+}
+
 auto type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
     throw type_error_t("Object of type " + self->get_type()->get_name() + " is not subscriptable");

@@ -29,30 +29,7 @@ auto class_object_t::call(const std::vector<std::shared_ptr<object_t>>& args) ->
     throw type_error_t("Class instantiation should be handled by interpreter");
 }
 
-auto class_object_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->add(shared_from_this(), other);
-}
 
-auto class_object_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->subtract(shared_from_this(), other);
-}
-
-auto class_object_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->multiply(shared_from_this(), other);
-}
-
-auto class_object_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->divide(shared_from_this(), other);
-}
-
-auto class_object_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->modulo(shared_from_this(), other);
-}
 
 void class_object_t::add_interface(const std::string& interface_name)
 {

@@ -31,11 +31,6 @@ public:
 
     auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override;
 
-    auto add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    auto modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
 
 public:
     std::vector<parameter_t> m_parameters;

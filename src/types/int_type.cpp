@@ -129,6 +129,12 @@ auto int_type_t::power(std::shared_ptr<object_t> self, std::shared_ptr<object_t>
     }
 }
 
+auto int_type_t::negate(std::shared_ptr<object_t> self) -> std::shared_ptr<object_t>
+{
+    auto int_obj = std::static_pointer_cast<int_object_t>(self);
+    return std::make_shared<int_object_t>(-(int_obj->get_value()));
+}
+
 auto int_type_t::get_name() const -> std::string
 {
     return "int";

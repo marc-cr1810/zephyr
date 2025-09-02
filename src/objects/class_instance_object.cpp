@@ -23,31 +23,6 @@ auto class_instance_t::to_string() const -> std::string
     return "<instance of " + m_class_obj->m_class_name + ">";
 }
 
-auto class_instance_t::add(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->add(shared_from_this(), other);
-}
-
-auto class_instance_t::subtract(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->subtract(shared_from_this(), other);
-}
-
-auto class_instance_t::multiply(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->multiply(shared_from_this(), other);
-}
-
-auto class_instance_t::divide(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->divide(shared_from_this(), other);
-}
-
-auto class_instance_t::modulo(std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>
-{
-    return get_type()->modulo(shared_from_this(), other);
-}
-
 auto class_instance_t::call_method(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     // Method execution should be handled by the interpreter

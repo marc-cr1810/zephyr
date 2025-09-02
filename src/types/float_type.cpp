@@ -113,6 +113,12 @@ auto float_type_t::power(std::shared_ptr<object_t> self, std::shared_ptr<object_
     }
 }
 
+auto float_type_t::negate(std::shared_ptr<object_t> self) -> std::shared_ptr<object_t>
+{
+    auto float_obj = std::static_pointer_cast<float_object_t>(self);
+    return std::make_shared<float_object_t>(-(float_obj->get_value()));
+}
+
 auto float_type_t::get_name() const -> std::string
 {
     return "float";
