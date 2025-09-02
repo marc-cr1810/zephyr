@@ -1,29 +1,35 @@
 #include "runtime.hpp"
+#include "args.hpp"
 #include <iostream>
-#include <string>
+
+auto show_usage(const std::string& program_name) -> void
+{
+    std::cerr << "Usage: " << program_name << " [path/to/file.zephyr]" << std::endl;
+    std::cerr << "       " << program_name << " -c \"<source code>\"" << std::endl;
+    std::cerr << "       " << program_name << " [-h|--help]" << std::endl;
+    std::cerr << "       " << program_name << " (for REPL mode)" << std::endl;
+}
 
 auto main(int argc, char* argv[]) -> int
 {
     zephyr::runtime_t runtime;
+    const auto args = zephyr::command_line_args_t::parse(argc, argv);
 
-    if (argc == 1)
+    switch (args.mode)
     {
-        runtime.start_repl();
-    }
-    else if (argc == 2)
-    {
-        return runtime.execute_file(argv[1]);
-    }
-    else if (argc == 3 && std::string(argv[1]) == "-c")
-    {
-        return runtime.execute_string(argv[2], "<string>");
-    }
-    else
-    {
-        std::cerr << "Usage: " << argv[0] << " [path/to/file.zephyr]" << std::endl;
-        std::cerr << "       " << argv[0] << " -c \"<source code>\"" << std::endl;
-        std::cerr << "       " << argv[0] << std::endl;
-        return 1;
+        case zephyr::execution_mode_t::REPL:
+            runtime.start_repl();
+            break;
+        case zephyr::execution_mode_t::EXECUTE_FILE:
+            return runtime.execute_file(args.input_value);
+        case zephyr::execution_mode_t::EXECUTE_STRING:
+            return runtime.execute_string(args.input_value, "<string>");
+        case zephyr::execution_mode_t::SHOW_HELP:
+            show_usage(args.program_name);
+            break;
+        case zephyr::execution_mode_t::INVALID:
+            show_usage(args.program_name);
+            return 1;
     }
 
     return 0;
