@@ -43,6 +43,33 @@ namespace
         {"const", token_type_e::const_token},
         {"is", token_type_e::is_token},
     };
+
+    const std::unordered_map<std::string, token_type_e> three_char_operators = {
+        {"**=", token_type_e::power_assign},
+    };
+
+    const std::unordered_map<std::string, token_type_e> two_char_operators = {
+        {"==", token_type_e::eq},
+        {"!=", token_type_e::ne},
+        {"<=", token_type_e::le},
+        {">=", token_type_e::ge},
+        {"**", token_type_e::power},
+        {"&&", token_type_e::and_op},
+        {"||", token_type_e::or_op},
+        {"->", token_type_e::arrow},
+        {"??", token_type_e::nullish_coalescing},
+        {"|>", token_type_e::pipe},
+        {"?.", token_type_e::question_dot},
+        {"+=", token_type_e::plus_assign},
+        {"-=", token_type_e::minus_assign},
+        {"*=", token_type_e::mul_assign},
+        {"/=", token_type_e::div_assign},
+        {"%=", token_type_e::modulo_assign},
+        {"++", token_type_e::increment},
+        {"--", token_type_e::decrement},
+        {"<<", token_type_e::left_shift},
+        {">>", token_type_e::right_shift},
+    };
 } // namespace
 
 lexer_t::lexer_t(const std::string & source)
@@ -113,7 +140,7 @@ auto lexer_t::next_token() -> token_t
         while (m_position < m_source.length() && m_source[m_position] != '"')
         {
             if (m_source[m_position] == '\\')
-            { // Handle escape sequences
+            {
                 m_position++;
                 if (m_position >= m_source.length())
                 {
@@ -163,7 +190,7 @@ auto lexer_t::next_token() -> token_t
         while (m_position < m_source.length() && m_source[m_position] != quote_type)
         {
             if (m_source[m_position] == '\\')
-            { // Handle escape sequences
+            {
                 m_position++;
                 if (m_position >= m_source.length())
                 {
@@ -270,38 +297,24 @@ auto lexer_t::next_token() -> token_t
         };
     }
 
+    // Three-character operators
+    if (m_position + 2 < m_source.length())
+    {
+        std::string three_char = m_source.substr(m_position, 3);
+        if (auto it = three_char_operators.find(three_char); it != three_char_operators.end())
+        {
+            return make_token(it->second, it->first);
+        }
+    }
+
     // Two-character operators
     if (m_position + 1 < m_source.length())
     {
         std::string two_char = m_source.substr(m_position, 2);
-        if (two_char == "==") return make_token(token_type_e::eq, "==");
-        if (two_char == "!=") return make_token(token_type_e::ne, "!=");
-        if (two_char == "<=") return make_token(token_type_e::le, "<=");
-        if (two_char == ">=") return make_token(token_type_e::ge, ">=");
-        if (two_char == "**") {
-            if (m_position + 2 < m_source.length() && m_source[m_position + 2] == '=') {
-                m_position += 1; // Consume first *
-                m_column += 1;
-                return make_token(token_type_e::power_assign, "**=");
-            } else {
-                return make_token(token_type_e::power, "**");
-            }
+        if (auto it = two_char_operators.find(two_char); it != two_char_operators.end())
+        {
+            return make_token(it->second, it->first);
         }
-        if (two_char == "&&") return make_token(token_type_e::and_op, "&&");
-        if (two_char == "||") return make_token(token_type_e::or_op, "||");
-        if (two_char == "->") return make_token(token_type_e::arrow, "->");
-        if (two_char == "??") return make_token(token_type_e::nullish_coalescing, "??");
-        if (two_char == "|>") return make_token(token_type_e::pipe, "|>");
-        if (two_char == "?.") return make_token(token_type_e::question_dot, "?.");
-        if (two_char == "+=") return make_token(token_type_e::plus_assign, "+=");
-        if (two_char == "-=") return make_token(token_type_e::minus_assign, "-=");
-        if (two_char == "*=") return make_token(token_type_e::mul_assign, "*=");
-        if (two_char == "/=") return make_token(token_type_e::div_assign, "/=");
-        if (two_char == "%=") return make_token(token_type_e::modulo_assign, "%=");
-        if (two_char == "++") return make_token(token_type_e::increment, "++");
-        if (two_char == "--") return make_token(token_type_e::decrement, "--");
-        if (two_char == "<<") return make_token(token_type_e::left_shift, "<<");
-        if (two_char == ">>") return make_token(token_type_e::right_shift, ">>");
     }
 
     // Single-character operators
