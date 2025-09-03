@@ -93,8 +93,8 @@ auto runtime_t::process_code(zephyr::interpreter_t& interpreter, const std::stri
         {
             if (auto expr_stmt = dynamic_cast<zephyr::expression_statement_t*>(program_node->statements.back().get()))
             {
-                std::shared_ptr<zephyr::object_t> result = interpreter.get_current_result();
-                if (result && result->get_type()->get_name() != "none")
+                std::shared_ptr<zephyr::object_t> result = interpreter.current_result();
+                if (result && result->type()->name() != "none")
                 {
                     std::cout << result->to_string() << std::endl;
                 }
@@ -141,9 +141,9 @@ auto runtime_t::process_code_repl(zephyr::interpreter_t& interpreter, const std:
         {
             if (auto expr_stmt = dynamic_cast<zephyr::expression_statement_t*>(program_node->statements.back().get()))
             {
-                std::shared_ptr<zephyr::object_t> result = interpreter.get_current_result();
+                std::shared_ptr<zephyr::object_t> result = interpreter.current_result();
                 // Only print if there's a result and it's not a NoneObject
-                if (result && result->get_type()->get_name() != "none")
+                if (result && result->type()->name() != "none")
                 {
                     std::cout << result->to_string() << std::endl;
                 }

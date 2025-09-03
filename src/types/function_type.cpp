@@ -11,7 +11,7 @@ auto function_type_t::get_instance() -> std::shared_ptr<function_type_t>
     return instance;
 }
 
-auto function_type_t::get_name() const -> std::string
+auto function_type_t::name() const -> std::string
 {
     return "function";
 }
@@ -23,7 +23,7 @@ auto function_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 
 auto function_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != "function")
+    if (other->type()->name() != "function")
     {
         return false;
     }

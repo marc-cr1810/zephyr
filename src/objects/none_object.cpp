@@ -10,7 +10,7 @@ none_object_t::none_object_t()
 {
 }
 
-auto none_object_t::get_type() const -> std::shared_ptr<type_t>
+auto none_object_t::type() const -> std::shared_ptr<type_t>
 {
     return none_type_t::get_instance();
 }

@@ -12,7 +12,7 @@ class_object_t::class_object_t(const std::string& class_name)
 {
 }
 
-auto class_object_t::get_type() const -> std::shared_ptr<type_t>
+auto class_object_t::type() const -> std::shared_ptr<type_t>
 {
     return function_type_t::get_instance();  // Reuse function type for now
 }
@@ -34,7 +34,7 @@ void class_object_t::add_interface(const std::string& interface_name)
     m_interfaces.push_back(interface_name);
 }
 
-const std::vector<std::string>& class_object_t::get_interfaces() const
+const std::vector<std::string>& class_object_t::interfaces() const
 {
     return m_interfaces;
 }
@@ -70,7 +70,7 @@ auto class_object_t::has_method(const std::string& method_name) const -> bool
     return m_methods.find(method_name) != m_methods.end();
 }
 
-auto class_object_t::get_method(const std::string& method_name) const -> std::shared_ptr<function_definition_t>
+auto class_object_t::method(const std::string& method_name) const -> std::shared_ptr<function_definition_t>
 {
     auto it = m_methods.find(method_name);
     if (it != m_methods.end())
@@ -92,7 +92,7 @@ auto class_object_t::has_member_variable(const std::string& var_name) const -> b
     throw attribute_error_t("Member variable '" + var_name + "' not found in class '" + m_class_name + "'");
 }
 
-auto class_object_t::get_member_variable_info(const std::string& var_name) const -> member_variable_info_t
+auto class_object_t::member_variable_info(const std::string& var_name) const -> member_variable_info_t
 {
     for (const auto& var : m_member_variables)
     {

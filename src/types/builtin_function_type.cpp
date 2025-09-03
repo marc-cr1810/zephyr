@@ -11,7 +11,7 @@ auto builtin_function_type_t::get_instance() -> std::shared_ptr<builtin_function
     return instance;
 }
 
-auto builtin_function_type_t::get_name() const -> std::string
+auto builtin_function_type_t::name() const -> std::string
 {
     return "builtin_function";
 }
@@ -23,7 +23,7 @@ auto builtin_function_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 
 auto builtin_function_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != "builtin_function")
+    if (other->type()->name() != "builtin_function")
     {
         return false;
     }

@@ -11,10 +11,10 @@ namespace zephyr
 class class_type_t : public type_t
 {
 public:
-    auto get_name() const -> std::string override;
+    auto name() const -> std::string override;
 
-    auto get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t> override;
-    auto set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void override;
+    auto member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t> override;
+    auto member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void override;
 
     auto is_truthy(std::shared_ptr<object_t> self) -> bool override;
     auto equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool override;

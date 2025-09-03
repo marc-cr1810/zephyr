@@ -64,19 +64,19 @@ std::string token_type_to_string(token_type_e type) {
 }
 
 parser_t::parser_t(lexer_t& lexer)
-    : m_lexer(lexer), m_current_token(lexer.get_next_token())
+    : m_lexer(lexer), m_current_token(lexer.next_token())
 {}
 
 void parser_t::eat(token_type_e type) {
     if (m_current_token.type == type) {
-        m_current_token = m_lexer.get_next_token();
+        m_current_token = m_lexer.next_token();
     } else {
         if (m_current_token.type == token_type_e::end_of_file) {
-            zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t("Unexpected end of file. Expected " + token_type_to_string(type) + ".");
         }
         std::string error_msg = "Expected " + token_type_to_string(type) + ", but got " + token_type_to_string(m_current_token.type) + " ('" + m_current_token.text + "').";
-        zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t(error_msg);
     }
 }
@@ -87,7 +87,7 @@ std::unique_ptr<program_t> parser_t::parse() {
         std::string error_msg = "Extra tokens at end of file. Unexpected token: " +
                                 token_type_to_string(m_current_token.type) +
                                 " ('" + m_current_token.text + "').";
-        zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t(error_msg);
     }
 
@@ -262,7 +262,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
             auto condition = expression();
             return std::make_unique<do_until_statement_t>(std::move(body), std::move(condition), do_token.line, do_token.column, body->end_line, body->end_column);
         } else {
-            zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
             throw zephyr::syntax_error_t("Expected while_token or until after do_token block.");
         }
     } else if (m_current_token.type == token_type_e::break_token) {
@@ -299,7 +299,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
         bool is_increment = (m_current_token.type == token_type_e::increment);
         eat(m_current_token.type);
         if (m_current_token.type != token_type_e::name) {
-            zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
             throw zephyr::syntax_error_t("Expected variable name after " + op_token.text);
         }
         token_t name_token = m_current_token;
@@ -338,7 +338,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
                     case token_type_e::div_assign: op_str = "/="; break;
                     case token_type_e::modulo_assign: op_str = "%="; break;
                     case token_type_e::power_assign: op_str = "**="; break; // Added power_assign
-                    default: zephyr::get_current_error_location() = {assign_token.line, assign_token.column, 1};
+                    default: zephyr::current_error_location() = {assign_token.line, assign_token.column, 1};
                              throw zephyr::syntax_error_t("Unknown compound assignment operator.");
                 }
                 return std::make_unique<compound_assignment_t>(name_node->name, std::move(rhs), op_str, potential_lhs->line, potential_lhs->column, rhs->end_line, rhs->end_column);
@@ -356,7 +356,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
                     case token_type_e::div_assign: op_str = "/="; break;
                     case token_type_e::modulo_assign: op_str = "%="; break;
                     case token_type_e::power_assign: op_str = "**="; break; // Added power_assign
-                    default: zephyr::get_current_error_location() = {assign_token.line, assign_token.column, 1};
+                    default: zephyr::current_error_location() = {assign_token.line, assign_token.column, 1};
                              throw zephyr::syntax_error_t("Unknown compound assignment operator.");
                 }
                 return std::make_unique<compound_indexed_assignment_t>(std::move(index_access_node->object), std::move(index_access_node->index), std::move(rhs), op_str, potential_lhs->line, potential_lhs->column, rhs->end_line, rhs->end_column);
@@ -377,7 +377,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
                     case token_type_e::div_assign: op_str = "/="; break;
                     case token_type_e::modulo_assign: op_str = "%="; break;
                     case token_type_e::power_assign: op_str = "**="; break; // Added power_assign
-                    default: zephyr::get_current_error_location() = {assign_token.line, assign_token.column, 1};
+                    default: zephyr::current_error_location() = {assign_token.line, assign_token.column, 1};
                              throw zephyr::syntax_error_t("Unknown compound assignment operator.");
                 }
                 auto object = std::unique_ptr<expression_t>(member_access_node->object.release());
@@ -385,7 +385,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
                 return std::make_unique<compound_member_assignment_t>(std::move(object), member_name, std::move(rhs), op_str, potential_lhs->line, potential_lhs->column, rhs->end_line, rhs->end_column);
             }
         } else {
-            zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
             throw zephyr::syntax_error_t("Invalid left-hand side for assignment.");
         }
     } else {
@@ -634,7 +634,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
             }
         }
         // If not a lambda, this is an error - async can only be used with functions or lambdas
-        zephyr::get_current_error_location() = {token.line, token.column, 1};
+        zephyr::current_error_location() = {token.line, token.column, 1};
         throw zephyr::syntax_error_t("'async' can only be used with function definitions or lambda expressions");
     } else if (token.type == token_type_e::await) {
         // Await expression
@@ -676,7 +676,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                     i++;
                 }
                 if (brace_count != 0) {
-                    zephyr::get_current_error_location() = {token.line, token.column, 1};
+                    zephyr::current_error_location() = {token.line, token.column, 1};
                 throw zephyr::syntax_error_t("Unmatched braces in f-string");
                 }
                 std::string expr_str = token.text.substr(expr_start, i - expr_start - 1);
@@ -754,7 +754,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                     eat(token_type_e::rbracket);
                     expr = std::make_unique<optional_index_access_t>(std::move(expr), std::move(index_expr), optional_chain_token.line, optional_chain_token.column, rbracket_token.line, rbracket_token.column);
                 } else {
-                    zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
                     throw zephyr::syntax_error_t("Expected member name, method call, or index access after '?.'");
                 }
 
@@ -792,7 +792,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                     eat(token_type_e::rbracket);
                     expr = std::make_unique<optional_index_access_t>(std::move(expr), std::move(index_expr), optional_chain_token.line, optional_chain_token.column, rbracket_token.line, rbracket_token.column);
                 } else {
-                    zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
                     throw zephyr::syntax_error_t("Expected member name, method call, or index access after '?.'");
                 }
             } else if (m_current_token.type == token_type_e::question && m_lexer.peek_next_token().type == token_type_e::lbracket) { // Optional Index Access (?[])
@@ -827,7 +827,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                 auto index = std::unique_ptr<expression_t>(index_node->index.release());
                 return std::make_unique<indexed_increment_decrement_t>(std::move(target), std::move(index), is_increment, false, token.line, token.column, op_token.line, op_token.column + 1);
             } else {
-                zephyr::get_current_error_location() = {op_token.line, op_token.column, 1};
+                zephyr::current_error_location() = {op_token.line, op_token.column, 1};
                 throw zephyr::syntax_error_t("Postfix increment/decrement not supported on this expression type.");
             }
         }
@@ -842,7 +842,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
 
         // Only handle name tokens here, not const_token tokens
         if (token.type != token_type_e::name) {
-            zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
             throw zephyr::syntax_error_t("Expected name token");
         }
 
@@ -906,7 +906,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                     eat(token_type_e::rbracket);
                     expr = std::make_unique<optional_index_access_t>(std::move(expr), std::move(index_expr), optional_chain_token.line, optional_chain_token.column, rbracket_token.line, rbracket_token.column);
                 } else {
-                    zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
                     throw zephyr::syntax_error_t("Expected member name, method call, or index access after '?.'");
                 }
 
@@ -944,7 +944,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                     eat(token_type_e::rbracket);
                     expr = std::make_unique<optional_index_access_t>(std::move(expr), std::move(index_expr), optional_chain_token.line, optional_chain_token.column, rbracket_token.line, rbracket_token.column);
                 } else {
-                    zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
                     throw zephyr::syntax_error_t("Expected member name, method call, or index access after '?.'");
                 }
             } else if (m_current_token.type == token_type_e::question && m_lexer.peek_next_token().type == token_type_e::lbracket) { // Optional Index Access (?[])
@@ -1010,7 +1010,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
         std::string error_msg = "Invalid factor in expression. Expected number, float_token, string, true_token, false_token, name, lparen, lbracket, lbrace, or lambda expression, but got " +
                                 token_type_to_string(m_current_token.type) +
                                 " ('" + m_current_token.text + "').";
-        zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t(error_msg);
     }
 }
@@ -1198,7 +1198,7 @@ std::unique_ptr<parser_t::for_each_head_struct_t> parser_t::for_each_head() {
 
         head->variables.push_back(for_each_variable_t(var_name, type_name, has_explicit_type, is_const));
     } else {
-        zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t("Invalid for-each loop head.");
     }
     return head;
@@ -1277,10 +1277,10 @@ std::unique_ptr<index_access_t> parser_t::index_access(std::unique_ptr<expressio
 
 std::unique_ptr<function_definition_t> parser_t::function_definition() {
     token_t func_token = m_current_token;
-    bool is_async = false;
+    bool async = false;
 
     if (m_current_token.type == token_type_e::async) {
-        is_async = true;
+        async = true;
         eat(token_type_e::async);
     }
 
@@ -1289,7 +1289,7 @@ std::unique_ptr<function_definition_t> parser_t::function_definition() {
     eat(token_type_e::name);
 
     if (name_token.text == "init" && m_current_token.type == token_type_e::colon) {
-        zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t("init method cannot have an explicit return type");
     }
 
@@ -1336,16 +1336,16 @@ std::unique_ptr<function_definition_t> parser_t::function_definition() {
     eat(token_type_e::rparen);
 
     std::string return_type_name = "";
-    bool has_explicit_return_type = false;
+    bool explicit_return_type = false;
     if (m_current_token.type == token_type_e::colon) {
         eat(token_type_e::colon);
         return_type_name = m_current_token.text;
-        has_explicit_return_type = true;
+        explicit_return_type = true;
         eat(token_type_e::name);
     }
 
     auto body = block();
-    return std::make_unique<function_definition_t>(name_token.text, std::move(parameters), std::move(body), return_type_name, has_explicit_return_type, is_async,
+    return std::make_unique<function_definition_t>(name_token.text, std::move(parameters), std::move(body), return_type_name, explicit_return_type, async,
                                                func_token.line, func_token.column, m_current_token.line, m_current_token.column);
 }
 
@@ -1460,7 +1460,7 @@ std::unique_ptr<switch_statement_t> parser_t::switch_statement() {
             cases.push_back(case_statement());
         } else if (m_current_token.type == token_type_e::default_token) {
             if (has_default_case) {
-                zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
                 throw zephyr::syntax_error_t("Duplicate default case in switch statement.");
             }
             has_default_case = true;
@@ -1480,7 +1480,7 @@ std::unique_ptr<switch_statement_t> parser_t::switch_statement() {
                 }
             }
         } else {
-            zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
             throw zephyr::syntax_error_t("Expected case_token or default_token in switch statement.");
         }
     }
@@ -1654,7 +1654,7 @@ std::vector<parameter_t> parser_t::parse_parameter_list() {
         }
         eat(token_type_e::rparen);
     } else {
-        zephyr::get_current_error_location() = {m_current_token.line, m_current_token.column, 1};
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t("Expected parameter list in lambda expression");
     }
     return parameters;
@@ -1805,21 +1805,21 @@ std::unique_ptr<empty_declaration_t> parser_t::empty_declaration() {
 
 std::unique_ptr<lambda_expression_t> parser_t::lambda_function() {
     token_t start_token = m_current_token;
-    bool is_async = false;
+    bool async = false;
 
     if (m_current_token.type == token_type_e::async) {
-        is_async = true;
+        async = true;
         eat(token_type_e::async);
     }
 
     std::vector<parameter_t> parameters = parse_parameter_list();
 
     std::string return_type_name = "";
-    bool has_explicit_return_type = false;
+    bool explicit_return_type = false;
     if (m_current_token.type == token_type_e::colon) {
         eat(token_type_e::colon);
         return_type_name = m_current_token.text;
-        has_explicit_return_type = true;
+        explicit_return_type = true;
         eat(token_type_e::name);
     }
 
@@ -1830,7 +1830,7 @@ std::unique_ptr<lambda_expression_t> parser_t::lambda_function() {
         return std::make_unique<lambda_expression_t>(
             std::move(parameters),
             std::move(body_block),
-            return_type_name, has_explicit_return_type, is_async,
+            return_type_name, explicit_return_type, async,
             start_token.line,
             start_token.column,
             body_block->end_line,
@@ -1841,7 +1841,7 @@ std::unique_ptr<lambda_expression_t> parser_t::lambda_function() {
         return std::make_unique<lambda_expression_t>(
             std::move(parameters),
             std::move(body_expr),
-            return_type_name, has_explicit_return_type, is_async,
+            return_type_name, explicit_return_type, async,
             start_token.line,
             start_token.column,
             body_expr->end_line,

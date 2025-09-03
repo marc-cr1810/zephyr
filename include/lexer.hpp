@@ -11,7 +11,7 @@ class lexer_t
 public:
     lexer_t(const std::string& source);
 
-    auto get_next_token() -> token_t;
+    auto next_token() -> token_t;
     auto peek_next_token() -> token_t;
     auto peek_after(token_t since) -> token_t;
 

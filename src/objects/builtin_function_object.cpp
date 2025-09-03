@@ -13,7 +13,7 @@ builtin_function_object_t::builtin_function_object_t(builtin_function_ptr_t ptr,
     validate_function_name();
 }
 
-auto builtin_function_object_t::get_type() const -> std::shared_ptr<type_t>
+auto builtin_function_object_t::type() const -> std::shared_ptr<type_t>
 {
     return builtin_function_type_t::get_instance();
 }

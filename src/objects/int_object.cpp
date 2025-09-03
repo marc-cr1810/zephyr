@@ -11,7 +11,7 @@ int_object_t::int_object_t(int val)
 {
 }
 
-auto int_object_t::get_type() const -> std::shared_ptr<type_t>
+auto int_object_t::type() const -> std::shared_ptr<type_t>
 {
     return int_type_t::get_instance();
 }
@@ -21,12 +21,12 @@ auto int_object_t::to_string() const -> std::string
     return std::to_string(m_value);
 }
 
-auto int_object_t::get_value() const -> int
+auto int_object_t::value() const -> int
 {
     return m_value;
 }
 
-auto int_object_t::set_value(int val) -> void
+auto int_object_t::value(int val) -> void
 {
     m_value = val;
 }

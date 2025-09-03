@@ -11,7 +11,7 @@ lexer_t::lexer_t(const std::string& source)
 {
 }
 
-auto lexer_t::get_next_token() -> token_t
+auto lexer_t::next_token() -> token_t
 {
     while (m_position < m_source.length() && isspace(m_source[m_position]))
     {
@@ -52,8 +52,8 @@ auto lexer_t::get_next_token() -> token_t
             m_position++;
             m_column++;
         }
-        // After skipping the comment, call get_next_token() again to get the actual next token
-        return get_next_token();
+        // After skipping the comment, call next_token() again to get the actual next token
+        return next_token();
     }
 
     // String literals
@@ -70,7 +70,7 @@ auto lexer_t::get_next_token() -> token_t
                 m_position++;
                 if (m_position >= m_source.length())
                 {
-                    zephyr::get_current_error_location() = {m_line, m_column, 1};
+                    zephyr::current_error_location() = {m_line, m_column, 1};
                     throw zephyr::syntax_error_t("Unterminated string literal");
                 }
                 char escaped_char = m_source[m_position];
@@ -81,7 +81,7 @@ auto lexer_t::get_next_token() -> token_t
                     case '\'': str_value += '\''; break;
                     case '"': str_value += '"'; break;
                     case '\\': str_value += '\\'; break;
-                    default: zephyr::get_current_error_location() = {m_line, m_column, 1};
+                    default: zephyr::current_error_location() = {m_line, m_column, 1};
                              throw zephyr::syntax_error_t("Unknown escape sequence: \\" + std::string(1, escaped_char));
                 }
             }
@@ -93,7 +93,7 @@ auto lexer_t::get_next_token() -> token_t
         }
         if (m_position >= m_source.length())
         {
-            zephyr::get_current_error_location() = {m_line, m_column, 1};
+            zephyr::current_error_location() = {m_line, m_column, 1};
             throw zephyr::syntax_error_t("Unterminated string literal");
         }
         m_position++; // Consume the closing quote
@@ -112,7 +112,7 @@ auto lexer_t::get_next_token() -> token_t
                 m_position++;
                 if (m_position >= m_source.length())
                 {
-                    zephyr::get_current_error_location() = {m_line, m_column, 1};
+                    zephyr::current_error_location() = {m_line, m_column, 1};
                     throw zephyr::syntax_error_t("Unterminated string literal");
                 }
                 char escaped_char = m_source[m_position];
@@ -123,7 +123,7 @@ auto lexer_t::get_next_token() -> token_t
                     case '\'': str_value += '\''; break;
                     case '"': str_value += '"'; break;
                     case '\\': str_value += '\\'; break;
-                    default: zephyr::get_current_error_location() = {m_line, m_column, 1};
+                    default: zephyr::current_error_location() = {m_line, m_column, 1};
                              throw zephyr::syntax_error_t("Unknown escape sequence: \\" + std::string(1, escaped_char));
                 }
             }
@@ -135,7 +135,7 @@ auto lexer_t::get_next_token() -> token_t
         }
         if (m_position >= m_source.length())
         {
-            zephyr::get_current_error_location() = {m_line, m_column, 1};
+            zephyr::current_error_location() = {m_line, m_column, 1};
             throw zephyr::syntax_error_t("Unterminated string literal");
         }
         m_position++; // Consume the closing quote
@@ -274,7 +274,7 @@ auto lexer_t::get_next_token() -> token_t
         case ':': return make_token(token_type_e::colon, ":");
         case '?': return make_token(token_type_e::question, "?");
         default:
-            zephyr::get_current_error_location() = {m_line, m_column, 1};
+            zephyr::current_error_location() = {m_line, m_column, 1};
             throw zephyr::syntax_error_t("Unexpected character: " + std::string(1, current_char));
     }
 }
@@ -287,14 +287,14 @@ auto lexer_t::peek_next_token() -> token_t
     int saved_column = m_column;
 
     // Get next token
-    token_t next_token = get_next_token();
+    auto next = next_token();
 
     // Restore state
     m_position = saved_position;
     m_line = saved_line;
     m_column = saved_column;
 
-    return next_token;
+    return next;
 }
 
 auto lexer_t::peek_after(token_t since) -> token_t
@@ -308,18 +308,18 @@ auto lexer_t::peek_after(token_t since) -> token_t
     token_t current_token;
     do
     {
-        current_token = get_next_token();
+        current_token = next_token();
     } while (current_token.type != since.type || current_token.text != since.text);
 
     // Get the token after 'since'
-    token_t next_token = get_next_token();
+    auto next = next_token();
 
     // Restore state
     m_position = saved_position;
     m_line = saved_line;
     m_column = saved_column;
 
-    return next_token;
+    return next;
 }
 
 }

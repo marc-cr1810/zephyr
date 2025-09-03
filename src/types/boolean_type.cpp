@@ -11,7 +11,7 @@ auto boolean_type_t::get_instance() -> std::shared_ptr<boolean_type_t>
     return instance;
 }
 
-auto boolean_type_t::get_name() const -> std::string
+auto boolean_type_t::name() const -> std::string
 {
     return "bool";
 }
@@ -24,7 +24,7 @@ auto boolean_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 
 auto boolean_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != "bool")
+    if (other->type()->name() != "bool")
     {
         return false;
     }
@@ -36,9 +36,9 @@ auto boolean_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<obje
 
 auto boolean_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> int
 {
-    if (other->get_type()->get_name() != "bool")
+    if (other->type()->name() != "bool")
     {
-        throw type_error_t("Cannot compare bool with " + other->get_type()->get_name());
+        throw type_error_t("Cannot compare bool with " + other->type()->name());
     }
 
     auto self_bool = std::static_pointer_cast<boolean_object_t>(self);

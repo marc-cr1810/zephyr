@@ -18,15 +18,15 @@ class lambda_object_t : public object_t
 public:
     // Constructor for expression body
     explicit lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<expression_t> body_expr,
-                    const std::string& return_type_name, bool has_explicit_return_type,
+                    const std::string& return_type_name, bool explicit_return_type,
                     std::map<std::string, std::shared_ptr<object_t>> captured, bool async = false);
 
     // Constructor for block body
     explicit lambda_object_t(std::vector<parameter_t> params, std::shared_ptr<block_t> body_blk,
-                    const std::string& return_type_name, bool has_explicit_return_type,
+                    const std::string& return_type_name, bool explicit_return_type,
                     std::map<std::string, std::shared_ptr<object_t>> captured, bool async = false);
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
     auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override;

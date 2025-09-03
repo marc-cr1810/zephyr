@@ -15,7 +15,7 @@ class type_t
 public:
     virtual ~type_t() = default;
 
-    virtual auto get_name() const -> std::string = 0;
+    virtual auto name() const -> std::string = 0;
 
     // Binary operation dispatch
     virtual auto add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t>;
@@ -29,13 +29,13 @@ public:
     virtual auto negate(std::shared_ptr<object_t> self) -> std::shared_ptr<object_t>;
 
     // List operations
-    virtual auto get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>;
-    virtual auto set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void;
+    virtual auto item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>;
+    virtual auto item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void;
 
     // Dictionary operations
     virtual auto is_member_present(std::shared_ptr<object_t> self, const std::string& name) -> bool;
-    virtual auto get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>;
-    virtual auto set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void;
+    virtual auto member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>;
+    virtual auto member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void;
 
     // Comparison operations
     virtual auto equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool;
@@ -46,7 +46,7 @@ public:
 
     // Container operations
     virtual auto contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> item) -> bool;
-    virtual auto get_length(std::shared_ptr<object_t> self) -> int;
+    virtual auto length(std::shared_ptr<object_t> self) -> int;
 };
 
 }

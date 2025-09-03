@@ -10,6 +10,6 @@ struct error_location_context_t
     int length = 1;
 };
 
-error_location_context_t& get_current_error_location();
+error_location_context_t& current_error_location();
 
 } // namespace zephyr

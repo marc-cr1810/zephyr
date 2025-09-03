@@ -10,7 +10,7 @@ class none_object_t : public object_t
 public:
     none_object_t();
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
 private:

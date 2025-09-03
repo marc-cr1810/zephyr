@@ -15,7 +15,7 @@ auto lambda_type_t::get_instance() -> std::shared_ptr<lambda_type_t>
     return s_instance;
 }
 
-auto lambda_type_t::get_name() const -> std::string
+auto lambda_type_t::name() const -> std::string
 {
     return "lambda";
 }
@@ -27,7 +27,7 @@ auto lambda_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 
 auto lambda_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != "lambda")
+    if (other->type()->name() != "lambda")
     {
         return false;
     }

@@ -13,13 +13,13 @@ public:
     explicit dictionary_object_t(std::map<std::string, std::shared_ptr<object_t>> elems);
     dictionary_object_t();
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
     // Getter and setter methods
-    auto get_elements() const -> const std::map<std::string, std::shared_ptr<object_t>>&;
-    auto get_elements_mutable() -> std::map<std::string, std::shared_ptr<object_t>>&;
-    auto set_elements(const std::map<std::string, std::shared_ptr<object_t>>& elems) -> void;
+    auto elements() const -> const std::map<std::string, std::shared_ptr<object_t>>&;
+    auto elements_mutable() -> std::map<std::string, std::shared_ptr<object_t>>&;
+    auto elements(const std::map<std::string, std::shared_ptr<object_t>>& elems) -> void;
 
 private:
     std::map<std::string, std::shared_ptr<object_t>> m_elements;

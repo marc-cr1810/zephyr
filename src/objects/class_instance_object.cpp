@@ -13,7 +13,7 @@ class_instance_t::class_instance_t(std::shared_ptr<class_object_t> class_obj)
     initialize_default_members();
 }
 
-auto class_instance_t::get_type() const -> std::shared_ptr<type_t>
+auto class_instance_t::type() const -> std::shared_ptr<type_t>
 {
     return class_type_t::get_instance(m_class_obj->m_class_name);
 }
@@ -35,14 +35,14 @@ auto class_instance_t::has_member(const std::string& name) const -> bool
     return m_members.find(name) != m_members.end();
 }
 
-auto class_instance_t::get_member(const std::string& member_name) -> std::shared_ptr<object_t>
+auto class_instance_t::member(const std::string& member_name) -> std::shared_ptr<object_t>
 {
-    return get_type()->get_member(shared_from_this(), member_name);
+    return type()->member(shared_from_this(), member_name);
 }
 
-auto class_instance_t::set_member(const std::string& member_name, std::shared_ptr<object_t> value) -> void
+auto class_instance_t::member(const std::string& member_name, std::shared_ptr<object_t> value) -> void
 {
-    get_type()->set_member(shared_from_this(), member_name, value);
+    type()->member(shared_from_this(), member_name, value);
 }
 
 auto class_instance_t::has_method(const std::string& name) const -> bool
@@ -50,9 +50,9 @@ auto class_instance_t::has_method(const std::string& name) const -> bool
     return m_class_obj->has_method(name);
 }
 
-auto class_instance_t::get_method(const std::string& name) const -> std::shared_ptr<function_definition_t>
+auto class_instance_t::method(const std::string& name) const -> std::shared_ptr<function_definition_t>
 {
-    return m_class_obj->get_method(name);
+    return m_class_obj->method(name);
 }
 
 auto class_instance_t::mark_member_const(const std::string& name) -> void

@@ -16,7 +16,7 @@ class builtin_function_object_t : public object_t
 public:
     explicit builtin_function_object_t(builtin_function_ptr_t ptr, const std::string& function_name);
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
     auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override;

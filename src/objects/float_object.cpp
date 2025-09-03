@@ -13,7 +13,7 @@ float_object_t::float_object_t(double val)
 {
 }
 
-auto float_object_t::get_type() const -> std::shared_ptr<type_t>
+auto float_object_t::type() const -> std::shared_ptr<type_t>
 {
     return float_type_t::get_instance();
 }
@@ -23,12 +23,12 @@ auto float_object_t::to_string() const -> std::string
     return format_float_string();
 }
 
-auto float_object_t::get_value() const -> double
+auto float_object_t::value() const -> double
 {
     return m_value;
 }
 
-auto float_object_t::set_value(double val) -> void
+auto float_object_t::value(double val) -> void
 {
     m_value = val;
 }

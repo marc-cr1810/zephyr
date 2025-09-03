@@ -27,7 +27,7 @@ auto class_type_t::get_instance(const std::string& class_name) -> std::shared_pt
     return instance;
 }
 
-auto class_type_t::get_name() const -> std::string
+auto class_type_t::name() const -> std::string
 {
     return m_class_name;
 }
@@ -39,7 +39,7 @@ auto class_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 
 auto class_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != m_class_name)
+    if (other->type()->name() != m_class_name)
     {
         return false;
     }
@@ -48,7 +48,7 @@ auto class_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object
     return self.get() == other.get();
 }
 
-auto class_type_t::get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>
+auto class_type_t::member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>
 {
     auto instance = std::static_pointer_cast<class_instance_t>(self);
 
@@ -66,7 +66,7 @@ auto class_type_t::get_member(std::shared_ptr<object_t> self, const std::string&
     throw attribute_error_t("Member '" + name + "' not found in class instance");
 }
 
-auto class_type_t::set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void
+auto class_type_t::member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void
 {
     auto instance = std::static_pointer_cast<class_instance_t>(self);
 
@@ -88,10 +88,10 @@ auto class_type_t::set_member(std::shared_ptr<object_t> self, const std::string&
             if (member_var.name == name && !member_var.type_name.empty())
             {
                 // Member has explicit type - validate assignment
-                if (value->get_type()->get_name() != "none")
+                if (value->type()->name() != "none")
                 {
                     std::string expected_type = member_var.type_name;
-                    std::string actual_type = value->get_type()->get_name();
+                    std::string actual_type = value->type()->name();
 
                     // Normalize type names for common aliases
                     if (expected_type == "int" && actual_type == "number") {

@@ -26,7 +26,7 @@ auto interface_type_t::get_instance(const std::string& interface_name) -> std::s
     return instance;
 }
 
-auto interface_type_t::get_name() const -> std::string
+auto interface_type_t::name() const -> std::string
 {
     return m_interface_name;
 }
@@ -38,7 +38,7 @@ auto interface_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 
 auto interface_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != m_interface_name)
+    if (other->type()->name() != m_interface_name)
     {
         return false;
     }

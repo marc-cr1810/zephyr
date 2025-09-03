@@ -37,7 +37,7 @@ class class_object_t : public object_t
 public:
     explicit class_object_t(const std::string& class_name);
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
     auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override;
@@ -45,13 +45,13 @@ public:
     auto add_method(const std::string& method_name, std::shared_ptr<function_definition_t> method) -> void;
     auto add_member_variable(const member_variable_info_t& var_info) -> void;
     auto has_method(const std::string& method_name) const -> bool;
-    auto get_method(const std::string& method_name) const -> std::shared_ptr<function_definition_t>;
+    auto method(const std::string& method_name) const -> std::shared_ptr<function_definition_t>;
     auto has_member_variable(const std::string& var_name) const -> bool;
-    auto get_member_variable_info(const std::string& var_name) const -> member_variable_info_t;
+    auto member_variable_info(const std::string& var_name) const -> member_variable_info_t;
 
 public:
     void add_interface(const std::string& interface_name);
-    const std::vector<std::string>& get_interfaces() const;
+    const std::vector<std::string>& interfaces() const;
 
 public:
     std::string m_class_name;

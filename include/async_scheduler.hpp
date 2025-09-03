@@ -51,7 +51,7 @@ private:
     // Helper methods
     auto schedule_ready_tasks() -> void;
     auto wake_up_waiting_tasks() -> void;
-    auto get_next_ready_task() -> std::shared_ptr<task_t>;
+    auto next_ready_task() -> std::shared_ptr<task_t>;
     auto execute_task(std::shared_ptr<task_t> task) -> void;
     auto validate_task(std::shared_ptr<task_t> task) -> void;
     auto cleanup_completed_tasks() -> void;

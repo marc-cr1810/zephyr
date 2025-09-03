@@ -16,15 +16,15 @@ auto list_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> 
     if (auto other_list = std::dynamic_pointer_cast<list_object_t>(other))
     {
         auto self_list = std::static_pointer_cast<list_object_t>(self);
-        std::vector<std::shared_ptr<object_t>> new_elements = self_list->get_elements();
-        const auto& other_elements = other_list->get_elements();
+        std::vector<std::shared_ptr<object_t>> new_elements = self_list->elements();
+        const auto& other_elements = other_list->elements();
         new_elements.insert(new_elements.end(), other_elements.begin(), other_elements.end());
         return std::make_shared<list_object_t>(new_elements);
     }
     throw type_error_t("Unsupported operand types for list concatenation");
 }
 
-auto list_type_t::get_name() const -> std::string
+auto list_type_t::name() const -> std::string
 {
     return "list";
 }
@@ -32,12 +32,12 @@ auto list_type_t::get_name() const -> std::string
 auto list_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 {
     auto list_obj = std::static_pointer_cast<list_object_t>(self);
-    return !list_obj->get_elements().empty();
+    return !list_obj->elements().empty();
 }
 
 auto list_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != "list")
+    if (other->type()->name() != "list")
     {
         return false;
     }
@@ -45,8 +45,8 @@ auto list_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_
     auto self_list = std::static_pointer_cast<list_object_t>(self);
     auto other_list = std::static_pointer_cast<list_object_t>(other);
 
-    const auto& self_elements = self_list->get_elements();
-    const auto& other_elements = other_list->get_elements();
+    const auto& self_elements = self_list->elements();
+    const auto& other_elements = other_list->elements();
 
     if (self_elements.size() != other_elements.size())
     {
@@ -55,7 +55,7 @@ auto list_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_
 
     for (size_t i = 0; i < self_elements.size(); ++i)
     {
-        if (self_elements[i]->get_type()->get_name() != other_elements[i]->get_type()->get_name())
+        if (self_elements[i]->type()->name() != other_elements[i]->type()->name())
         {
             return false;
         }
@@ -64,13 +64,13 @@ auto list_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_
     return true;
 }
 
-auto list_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
+auto list_type_t::item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
     auto self_list = std::static_pointer_cast<list_object_t>(self);
     if (auto index_int = std::dynamic_pointer_cast<int_object_t>(index))
     {
-        int idx = index_int->get_value();
-        const auto& elements = self_list->get_elements();
+        int idx = index_int->value();
+        const auto& elements = self_list->elements();
         if (idx < 0) {
             idx += elements.size();
         }
@@ -83,13 +83,13 @@ auto list_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<objec
     throw type_error_t("List index must be an integer");
 }
 
-auto list_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
+auto list_type_t::item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void
 {
     auto self_list = std::static_pointer_cast<list_object_t>(self);
     if (auto index_int = std::dynamic_pointer_cast<int_object_t>(index))
     {
-        int idx = index_int->get_value();
-        auto& elements = self_list->get_elements_mutable();
+        int idx = index_int->value();
+        auto& elements = self_list->elements_mutable();
         if (idx < 0) {
             idx += elements.size();
         }
@@ -106,11 +106,11 @@ auto list_type_t::set_item(std::shared_ptr<object_t> self, std::shared_ptr<objec
 auto list_type_t::contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> item) -> bool
 {
     auto self_list = std::static_pointer_cast<list_object_t>(self);
-    const auto& elements = self_list->get_elements();
+    const auto& elements = self_list->elements();
 
     for (const auto& element : elements)
     {
-        if (element->get_type()->equals(element, item))
+        if (element->type()->equals(element, item))
         {
             return true;
         }
@@ -118,10 +118,10 @@ auto list_type_t::contains(std::shared_ptr<object_t> self, std::shared_ptr<objec
     return false;
 }
 
-auto list_type_t::get_length(std::shared_ptr<object_t> self) -> int
+auto list_type_t::length(std::shared_ptr<object_t> self) -> int
 {
     auto self_list = std::static_pointer_cast<list_object_t>(self);
-    return static_cast<int>(self_list->get_elements().size());
+    return static_cast<int>(self_list->elements().size());
 }
 
 } // namespace zephyr

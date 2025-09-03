@@ -18,9 +18,9 @@ public:
     // New constructor that uses thread-local context
     runtime_error_with_location_t(const std::string& message, const std::string& error_name = "Error")
         : std::runtime_error(message),
-              m_line(zephyr::get_current_error_location().line),
-              m_column(zephyr::get_current_error_location().column),
-              m_length(zephyr::get_current_error_location().length),
+              m_line(zephyr::current_error_location().line),
+              m_column(zephyr::current_error_location().column),
+              m_length(zephyr::current_error_location().length),
               m_error_name(error_name)
     {}
 

@@ -6,17 +6,17 @@
 namespace zephyr
 {
 
-function_object_t::function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, const std::string& return_type_name, bool has_explicit_return_type, bool async)
+function_object_t::function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, const std::string& return_type_name, bool explicit_return_type, bool async)
     : m_parameters(std::move(params))
     , m_body(std::move(body))
     , m_return_type_name(return_type_name)
-    , m_has_explicit_return_type(has_explicit_return_type)
+    , m_has_explicit_return_type(explicit_return_type)
     , m_is_async(async)
 {
     validate_parameters();
 }
 
-auto function_object_t::get_type() const -> std::shared_ptr<type_t>
+auto function_object_t::type() const -> std::shared_ptr<type_t>
 {
     return function_type_t::get_instance();
 }

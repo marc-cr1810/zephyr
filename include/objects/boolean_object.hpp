@@ -10,7 +10,7 @@ class boolean_object_t : public object_t
 public:
     explicit boolean_object_t(bool val);
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
 public:

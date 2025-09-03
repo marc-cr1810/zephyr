@@ -90,7 +90,7 @@ auto promise_object_t::to_string() const -> std::string
     }
 }
 
-auto promise_object_t::get_type() const -> std::shared_ptr<type_t>
+auto promise_object_t::type() const -> std::shared_ptr<type_t>
 {
     return promise_type_t::get_instance();
 }

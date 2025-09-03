@@ -21,9 +21,9 @@ public:
     interpreter_t(const std::string& filename = "<script>", const std::string& source_code = "");
 
     auto interpret(program_t& program) -> void;
-    auto get_current_result() const -> value_t;
+    auto current_result() const -> value_t;
 
-    static auto get_builtins() -> const std::map<std::string, value_t>&;
+    static auto builtins() -> const std::map<std::string, value_t>&;
 
     // AST visitor methods
     auto visit(number_t& node) -> void override;
@@ -112,7 +112,7 @@ private:
     auto validate_type_constraint(const std::string& variable_name, value_t value) -> void;
     auto handle_runtime_error(const std::string& message, int line, int column) -> void;
     auto resolve_variable(const std::string& variable_name) -> value_t;
-    auto set_variable(const std::string& variable_name, value_t value) -> void;
+    auto variable(const std::string& variable_name, value_t value) -> void;
     auto handle_const_assignment_error(const std::string& variable_name, int line, int column) -> void;
     auto handle_type_error(const std::string& variable_name, const std::string& expected_type, const std::string& actual_type, int line, int column) -> void;
     auto clone_expression(expression_t* expr) -> std::unique_ptr<expression_t>;

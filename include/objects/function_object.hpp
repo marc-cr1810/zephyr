@@ -15,9 +15,9 @@ struct parameter_t;
 class function_object_t : public object_t
 {
 public:
-    explicit function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, const std::string& return_type_name, bool has_explicit_return_type, bool async = false);
+    explicit function_object_t(std::vector<parameter_t> params, std::unique_ptr<block_t> body, const std::string& return_type_name, bool explicit_return_type, bool async = false);
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
     auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override;

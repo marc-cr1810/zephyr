@@ -16,7 +16,7 @@ class object_t : public std::enable_shared_from_this<object_t>
 public:
     virtual ~object_t() = default;
 
-    virtual auto get_type() const -> std::shared_ptr<type_t> = 0;
+    virtual auto type() const -> std::shared_ptr<type_t> = 0;
     virtual auto to_string() const -> std::string;
 
     // Binary operations (will be delegated to type_t)
@@ -34,12 +34,12 @@ public:
     virtual auto negate() -> std::shared_ptr<object_t>;
 
     // List operations
-    virtual auto get_item(std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>;
-    virtual auto set_item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void;
+    virtual auto item(std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>;
+    virtual auto item(std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void;
 
     // Member access operations
-    virtual auto get_member(const std::string& member_name) -> std::shared_ptr<object_t>;
-    virtual auto set_member(const std::string& member_name, std::shared_ptr<object_t> value) -> void;
+    virtual auto member(const std::string& member_name) -> std::shared_ptr<object_t>;
+    virtual auto member(const std::string& member_name, std::shared_ptr<object_t> value) -> void;
 
     // Function call operations
     virtual auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>;

@@ -57,7 +57,7 @@ auto async_scheduler_t::run_one_iteration() -> void
     }
 
     if (!m_ready_queue.empty()) {
-        auto task = get_next_ready_task();
+        auto task = next_ready_task();
         if (task) {
             execute_task(task);
         }
@@ -230,7 +230,7 @@ auto async_scheduler_t::wake_up_waiting_tasks() -> void
     }
 }
 
-auto async_scheduler_t::get_next_ready_task() -> std::shared_ptr<task_t>
+auto async_scheduler_t::next_ready_task() -> std::shared_ptr<task_t>
 {
     if (m_ready_queue.empty()) {
         return nullptr;

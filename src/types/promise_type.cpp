@@ -6,7 +6,7 @@ namespace zephyr
 
 std::shared_ptr<promise_type_t> promise_type_t::s_instance = nullptr;
 
-auto promise_type_t::get_name() const -> std::string
+auto promise_type_t::name() const -> std::string
 {
     return "promise";
 }

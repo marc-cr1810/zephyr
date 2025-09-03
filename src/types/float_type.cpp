@@ -16,11 +16,11 @@ auto float_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t>
 {
     if (auto other_float = std::dynamic_pointer_cast<float_object_t>(other))
     {
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() + other_float->get_value());
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() + other_float->value());
     }
     else if (auto other_int = std::dynamic_pointer_cast<int_object_t>(other))
     {
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() + static_cast<double>(other_int->get_value()));
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() + static_cast<double>(other_int->value()));
     }
     throw type_error_t("Unsupported operand types for +");
 }
@@ -29,11 +29,11 @@ auto float_type_t::subtract(std::shared_ptr<object_t> self, std::shared_ptr<obje
 {
     if (auto other_float = std::dynamic_pointer_cast<float_object_t>(other))
     {
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() - other_float->get_value());
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() - other_float->value());
     }
     else if (auto other_int = std::dynamic_pointer_cast<int_object_t>(other))
     {
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() - static_cast<double>(other_int->get_value()));
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() - static_cast<double>(other_int->value()));
     }
     throw type_error_t("Unsupported operand types for -");
 }
@@ -42,11 +42,11 @@ auto float_type_t::multiply(std::shared_ptr<object_t> self, std::shared_ptr<obje
 {
     if (auto other_float = std::dynamic_pointer_cast<float_object_t>(other))
     {
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() * other_float->get_value());
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() * other_float->value());
     }
     else if (auto other_int = std::dynamic_pointer_cast<int_object_t>(other))
     {
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() * static_cast<double>(other_int->get_value()));
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() * static_cast<double>(other_int->value()));
     }
     throw type_error_t("Unsupported operand types for *");
 }
@@ -55,19 +55,19 @@ auto float_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object
 {
     if (auto other_float = std::dynamic_pointer_cast<float_object_t>(other))
     {
-        if (other_float->get_value() == 0.0)
+        if (other_float->value() == 0.0)
         {
             throw zero_division_error_t("Division by zero");
         }
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() / other_float->get_value());
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() / other_float->value());
     }
     else if (auto other_int = std::dynamic_pointer_cast<int_object_t>(other))
     {
-        if (other_int->get_value() == 0)
+        if (other_int->value() == 0)
         {
             throw zero_division_error_t("Division by zero");
         }
-        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->get_value() / static_cast<double>(other_int->get_value()));
+        return std::make_shared<float_object_t>(std::static_pointer_cast<float_object_t>(self)->value() / static_cast<double>(other_int->value()));
     }
     throw type_error_t("Unsupported operand types for /");
 }
@@ -76,19 +76,19 @@ auto float_type_t::modulo(std::shared_ptr<object_t> self, std::shared_ptr<object
 {
     if (auto other_float = std::dynamic_pointer_cast<float_object_t>(other))
     {
-        if (other_float->get_value() == 0.0)
+        if (other_float->value() == 0.0)
         {
             throw zero_division_error_t("Modulo by zero");
         }
-        return std::make_shared<float_object_t>(fmod(std::static_pointer_cast<float_object_t>(self)->get_value(), other_float->get_value()));
+        return std::make_shared<float_object_t>(fmod(std::static_pointer_cast<float_object_t>(self)->value(), other_float->value()));
     }
     else if (auto other_int = std::dynamic_pointer_cast<int_object_t>(other))
     {
-        if (other_int->get_value() == 0)
+        if (other_int->value() == 0)
         {
             throw zero_division_error_t("Modulo by zero");
         }
-        return std::make_shared<float_object_t>(fmod(std::static_pointer_cast<float_object_t>(self)->get_value(), static_cast<double>(other_int->get_value())));
+        return std::make_shared<float_object_t>(fmod(std::static_pointer_cast<float_object_t>(self)->value(), static_cast<double>(other_int->value())));
     }
     throw type_error_t("Unsupported operand types for %");
 }
@@ -101,25 +101,25 @@ auto float_type_t::power(std::shared_ptr<object_t> self, std::shared_ptr<object_
 
     if (other_int)
     {
-        return std::make_shared<float_object_t>(std::pow(self_float->get_value(), other_int->get_value()));
+        return std::make_shared<float_object_t>(std::pow(self_float->value(), other_int->value()));
     }
     else if (other_float)
     {
-        return std::make_shared<float_object_t>(std::pow(self_float->get_value(), other_float->get_value()));
+        return std::make_shared<float_object_t>(std::pow(self_float->value(), other_float->value()));
     }
     else
     {
-        throw type_error_t("Unsupported operand type for power: " + other->get_type()->get_name());
+        throw type_error_t("Unsupported operand type for power: " + other->type()->name());
     }
 }
 
 auto float_type_t::negate(std::shared_ptr<object_t> self) -> std::shared_ptr<object_t>
 {
     auto float_obj = std::static_pointer_cast<float_object_t>(self);
-    return std::make_shared<float_object_t>(-(float_obj->get_value()));
+    return std::make_shared<float_object_t>(-(float_obj->value()));
 }
 
-auto float_type_t::get_name() const -> std::string
+auto float_type_t::name() const -> std::string
 {
     return "float";
 }
@@ -127,37 +127,37 @@ auto float_type_t::get_name() const -> std::string
 auto float_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 {
     auto float_obj = std::static_pointer_cast<float_object_t>(self);
-    return float_obj->get_value() != 0.0;
+    return float_obj->value() != 0.0;
 }
 
 auto float_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool
 {
-    if (other->get_type()->get_name() != "float")
+    if (other->type()->name() != "float")
     {
         return false;
     }
 
     auto self_float = std::static_pointer_cast<float_object_t>(self);
     auto other_float = std::static_pointer_cast<float_object_t>(other);
-    return self_float->get_value() == other_float->get_value();
+    return self_float->value() == other_float->value();
 }
 
 auto float_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> int
 {
-    double self_value = std::static_pointer_cast<float_object_t>(self)->get_value();
+    double self_value = std::static_pointer_cast<float_object_t>(self)->value();
     double other_value = 0.0;
 
     if (auto other_float = std::dynamic_pointer_cast<float_object_t>(other))
     {
-        other_value = other_float->get_value();
+        other_value = other_float->value();
     }
     else if (auto other_int = std::dynamic_pointer_cast<int_object_t>(other))
     {
-        other_value = static_cast<double>(other_int->get_value());
+        other_value = static_cast<double>(other_int->value());
     }
     else
     {
-        throw type_error_t("Cannot compare float with " + other->get_type()->get_name());
+        throw type_error_t("Cannot compare float with " + other->type()->name());
     }
 
     if (self_value < other_value) return -1;

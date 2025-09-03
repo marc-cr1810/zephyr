@@ -14,7 +14,7 @@ dictionary_object_t::dictionary_object_t()
 {
 }
 
-auto dictionary_object_t::get_type() const -> std::shared_ptr<type_t>
+auto dictionary_object_t::type() const -> std::shared_ptr<type_t>
 {
     return dictionary_type_t::get_instance();
 }
@@ -39,17 +39,17 @@ auto dictionary_object_t::to_string() const -> std::string
     return ss.str();
 }
 
-auto dictionary_object_t::get_elements() const -> const std::map<std::string, std::shared_ptr<object_t>>&
+auto dictionary_object_t::elements() const -> const std::map<std::string, std::shared_ptr<object_t>>&
 {
     return m_elements;
 }
 
-auto dictionary_object_t::get_elements_mutable() -> std::map<std::string, std::shared_ptr<object_t>>&
+auto dictionary_object_t::elements_mutable() -> std::map<std::string, std::shared_ptr<object_t>>&
 {
     return m_elements;
 }
 
-auto dictionary_object_t::set_elements(const std::map<std::string, std::shared_ptr<object_t>>& elems) -> void
+auto dictionary_object_t::elements(const std::map<std::string, std::shared_ptr<object_t>>& elems) -> void
 {
     m_elements = elems;
 }

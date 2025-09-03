@@ -13,11 +13,11 @@ class interface_object_t : public object_t
 public:
     explicit interface_object_t(const std::string& interface_name);
 
-    auto get_type() const -> std::shared_ptr<type_t> override;
+    auto type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
     void add_method(const function_signature_t& method);
-    const std::vector<function_signature_t>& get_methods() const;
+    const std::vector<function_signature_t>& methods() const;
 
 public:
     std::string m_interface_name;
