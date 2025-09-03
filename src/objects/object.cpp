@@ -1,13 +1,16 @@
 #include "objects/object.hpp"
 #include "types/type.hpp"
 #include "errors.hpp"
+#include <sstream>
 
 namespace zephyr
 {
 
 auto object_t::to_string() const -> std::string
 {
-    return std::string("<object>");
+    std::stringstream ss;
+    ss << "<object at " << std::hex << shared_from_this().get() << ">";
+    return std::string(ss.str());
 }
 
 // Binary operations (will be delegated to type_t)

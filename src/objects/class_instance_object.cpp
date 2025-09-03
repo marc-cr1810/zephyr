@@ -3,6 +3,7 @@
 #include "objects/none_object.hpp"
 #include "types/class_type.hpp"
 #include "errors.hpp"
+#include <sstream>
 
 namespace zephyr
 {
@@ -20,7 +21,9 @@ auto class_instance_t::type() const -> std::shared_ptr<type_t>
 
 auto class_instance_t::to_string() const -> std::string
 {
-    return "<instance of " + m_class_obj->m_class_name + ">";
+    std::stringstream ss;
+    ss << "<" << m_class_obj->m_class_name << " object at " << std::hex << shared_from_this().get() << ">";
+    return std::string(ss.str());
 }
 
 auto class_instance_t::call_method(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
