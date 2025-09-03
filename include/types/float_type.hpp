@@ -5,11 +5,6 @@
 namespace zephyr
 {
 
-// Forward declarations
-class int_object_t;
-class float_object_t;
-class string_object_t;
-
 class float_type_t : public type_t
 {
 public:

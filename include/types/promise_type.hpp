@@ -5,17 +5,10 @@
 namespace zephyr
 {
 
-// Forward declarations
-class promise_object_t;
-class string_object_t;
-class boolean_object_t;
-
 class promise_type_t : public type_t
 {
 public:
     auto get_name() const -> std::string override;
-
-    
 
     auto is_truthy(std::shared_ptr<object_t> self) -> bool override;
     auto equals(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> bool override;

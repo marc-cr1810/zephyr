@@ -8,15 +8,10 @@
 namespace zephyr
 {
 
-// Forward declarations
-class class_instance_t;
-
 class class_type_t : public type_t
 {
 public:
     auto get_name() const -> std::string override;
-
-    
 
     auto get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t> override;
     auto set_member(std::shared_ptr<object_t> self, const std::string& name, std::shared_ptr<object_t> value) -> void override;
@@ -30,7 +25,7 @@ private:
     explicit class_type_t(const std::string& class_name);
 
     std::string m_class_name;
-    
+
     static std::map<std::string, std::shared_ptr<class_type_t>> s_instances;
 };
 

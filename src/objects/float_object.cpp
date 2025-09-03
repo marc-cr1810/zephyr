@@ -1,10 +1,8 @@
 #include "objects/float_object.hpp"
-#include "objects/int_object.hpp"
 #include "types/float_type.hpp"
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include "errors.hpp"
 #include <cmath> // Added for std::pow
 
 namespace zephyr
@@ -25,8 +23,6 @@ auto float_object_t::to_string() const -> std::string
     return format_float_string();
 }
 
-
-
 auto float_object_t::get_value() const -> double
 {
     return m_value;
@@ -36,8 +32,6 @@ auto float_object_t::set_value(double val) -> void
 {
     m_value = val;
 }
-
-
 
 auto float_object_t::format_float_string() const -> std::string
 {
@@ -53,7 +47,7 @@ auto float_object_t::format_float_string() const -> std::string
         std::ostringstream oss;
         oss << std::setprecision(15) << m_value;
         std::string result = oss.str();
-        
+
         // Remove trailing zeros after decimal point
         if (result.find('.') != std::string::npos)
         {
@@ -63,7 +57,7 @@ auto float_object_t::format_float_string() const -> std::string
                 result += '0';
             }
         }
-        
+
         return result;
     }
 }

@@ -20,8 +20,6 @@ auto none_object_t::to_string() const -> std::string
     return "none";
 }
 
-
-
 auto none_object_t::get_instance() -> std::shared_ptr<none_object_t>
 {
     if (!s_instance)

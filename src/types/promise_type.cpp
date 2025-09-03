@@ -11,8 +11,6 @@ auto promise_type_t::get_name() const -> std::string
     return "promise";
 }
 
-
-
 auto promise_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 {
     return true; // Promises are always truthy

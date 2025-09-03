@@ -1,8 +1,6 @@
 #include "objects/int_object.hpp"
-#include "objects/float_object.hpp"
 #include "types/int_type.hpp"
 #include <string>
-#include "errors.hpp"
 #include <cmath> // Added for std::pow
 
 namespace zephyr
@@ -23,8 +21,6 @@ auto int_object_t::to_string() const -> std::string
     return std::to_string(m_value);
 }
 
-
-
 auto int_object_t::get_value() const -> int
 {
     return m_value;
@@ -34,7 +30,5 @@ auto int_object_t::set_value(int val) -> void
 {
     m_value = val;
 }
-
-
 
 } // namespace zephyr

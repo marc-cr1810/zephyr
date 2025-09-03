@@ -1,9 +1,6 @@
 #include "objects/dictionary_object.hpp"
-#include "objects/string_object.hpp"
-#include "objects/int_object.hpp"
 #include "types/dictionary_type.hpp"
 #include <sstream>
-#include "errors.hpp"
 
 namespace zephyr
 {
@@ -42,8 +39,6 @@ auto dictionary_object_t::to_string() const -> std::string
     return ss.str();
 }
 
-
-
 auto dictionary_object_t::get_elements() const -> const std::map<std::string, std::shared_ptr<object_t>>&
 {
     return m_elements;
@@ -58,7 +53,5 @@ auto dictionary_object_t::set_elements(const std::map<std::string, std::shared_p
 {
     m_elements = elems;
 }
-
-
 
 } // namespace zephyr

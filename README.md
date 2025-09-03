@@ -4,7 +4,7 @@ A modern, dynamically-typed scripting language implemented in C++17 with compreh
 
 ## Overview
 
-Zephyr is a powerful scripting language that combines the simplicity of dynamic typing with advanced features like asynchronous programming, lambda expressions, and optional explicit typing. Originally known as GeminiLang, the language has been renamed to Zephyr to better reflect its modern, streamlined design philosophy.
+Zephyr is a powerful scripting language that combines the simplicity of dynamic typing with advanced features like asynchronous programming, lambda expressions, and optional explicit typing.
 
 ## Key Features
 
@@ -18,16 +18,6 @@ Zephyr is a powerful scripting language that combines the simplicity of dynamic 
 - **Error Handling**: Try-catch blocks and comprehensive error reporting
 - **String Operations**: Advanced string manipulation and formatting
 - **Control Flow**: If-else, loops, switch statements with fall-through
-
-## Language Rename
-
-This project was previously known as **GeminiLang** and has been comprehensively renamed to **Zephyr**. All references, file extensions, documentation, and code have been updated:
-
-- **Language Name**: GeminiLang → Zephyr
-- **File Extension**: `.gemini` → `.zephyr`
-- **Executable**: `gemini_lang` → `zephyr`
-- **Namespace**: `gemini::` → `zephyr::`
-- **Documentation**: All references updated throughout
 
 ## Quick Start
 
@@ -104,11 +94,11 @@ class Person {
         this.name = name
         this.age = age
     }
-    
+
     func greet() {
         return "Hi, I'm " + this.name
     }
-    
+
     func have_birthday() {
         this.age += 1
         print(this.name, "is now", this.age, "years old")
@@ -133,13 +123,13 @@ async func process_data() {
     # Sequential execution
     result1 = await fetch_data("api.example.com/users")
     result2 = await fetch_data("api.example.com/posts")
-    
+
     # Parallel execution
     parallel_results = await all([
         spawn fetch_data("api.example.com/comments"),
         spawn fetch_data("api.example.com/likes")
     ])
-    
+
     return [result1, result2] + parallel_results
 }
 ```

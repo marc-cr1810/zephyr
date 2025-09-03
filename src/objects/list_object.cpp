@@ -1,8 +1,5 @@
 #include "objects/list_object.hpp"
-#include "objects/int_object.hpp"
-#include "objects/none_object.hpp"
 #include "types/list_type.hpp"
-#include "errors.hpp"
 
 namespace zephyr
 {
@@ -40,8 +37,6 @@ auto list_object_t::to_string() const -> std::string
     return result;
 }
 
-
-
 auto list_object_t::get_elements() const -> const std::vector<std::shared_ptr<object_t>>&
 {
     return m_elements;
@@ -56,7 +51,5 @@ auto list_object_t::set_elements(const std::vector<std::shared_ptr<object_t>>& e
 {
     m_elements = elems;
 }
-
-
 
 } // namespace zephyr

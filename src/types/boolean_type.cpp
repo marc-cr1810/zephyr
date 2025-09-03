@@ -11,8 +11,6 @@ auto boolean_type_t::get_instance() -> std::shared_ptr<boolean_type_t>
     return instance;
 }
 
-
-
 auto boolean_type_t::get_name() const -> std::string
 {
     return "bool";
@@ -52,6 +50,5 @@ auto boolean_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<obj
     }
     return self_bool->m_value ? 1 : -1;  // true > false
 }
-
 
 } // namespace zephyr

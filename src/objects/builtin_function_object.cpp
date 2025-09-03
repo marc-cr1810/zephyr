@@ -28,8 +28,6 @@ auto builtin_function_object_t::call(const std::vector<std::shared_ptr<object_t>
     return m_func_ptr(args);
 }
 
-
-
 auto builtin_function_object_t::validate_function_pointer() const -> void
 {
     if (!m_func_ptr)
@@ -45,7 +43,5 @@ auto builtin_function_object_t::validate_function_name() const -> void
         throw value_error_t("Builtin function name cannot be empty");
     }
 }
-
-
 
 } // namespace zephyr

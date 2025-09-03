@@ -128,7 +128,7 @@ Zephyr provides several built-in functions to enhance its capabilities:
 
 ### Variables and Basic Operations
 
-```gemini
+```zephyr
 # Assign a number to a variable
 x = 10
 y = 20.5
@@ -219,7 +219,7 @@ print(a is c) # false
 
 Zephyr supports comprehensive optional explicit typing for enhanced type safety and code clarity. Explicitly typed variables maintain their type constraints throughout their lifetime while still allowing assignment to `none`.
 
-```gemini
+```zephyr
 # Basic explicit type declarations
 name : string = "Alice"
 age : int = 25
@@ -264,7 +264,7 @@ class Person {
         this.name = person_name
         this.age = person_age
     }
-    
+
     func greet() {
         return "Hello, I'm " + this.name
     }
@@ -287,7 +287,7 @@ try {
 
 ### Functions with Explicit Typing
 
-```gemini
+```zephyr
 # Function parameters with explicit types and return type
 func calculate_area(length : float, width : float) : float {
     return length * width
@@ -297,7 +297,7 @@ func calculate_area(length : float, width : float) : float {
 func process_data(data : string, multiplier, const max_size : int) : string {
     multiplier = multiplier * 2  # Can modify untyped parameter
     # max_size = 100            # Would error: const parameter
-    
+
     result : string = data * multiplier
     if (len(result) > max_size) {
         result = data  # Fallback if too large
@@ -334,7 +334,7 @@ print("Config:", config)
 
 ### Lambda Functions with Explicit Typing
 
-```gemini
+```zephyr
 # Lambda with explicitly typed parameters and return type
 multiply : lambda = (a : int, b : int) : int -> a * b
 result : int = multiply(6, 7)
@@ -378,7 +378,7 @@ print("Sum from collection:", sum_result)
 
 ### For-Each Loops with Explicit Typing
 
-```gemini
+```zephyr
 # Basic typed for-each loops
 numbers : list = [1, 2, 3, 4, 5]
 for num : int in numbers {
@@ -433,7 +433,7 @@ for (name : string, age : int) in zip(names, ages) {
 
 ### Control Flow
 
-```gemini
+```zephyr
 # If-else statement
 if (x > 10) {
     # This is a block of code
@@ -499,7 +499,7 @@ for i = 0; i < 10; i = i + 1 {
 
 Zephyr's `switch` statements support fall-through behavior, similar to C/C++. If a `case` matches, execution continues into subsequent `case` blocks until a `break` statement is encountered or the end of the `switch` block is reached.
 
-```gemini
+```zephyr
 value = 1
 
 switch value {
@@ -768,12 +768,12 @@ pipeline = {
         if stage_index < 0 or stage_index >= len(pipeline["stages"]) {
             return value
         }
-        
+
         stages = pipeline["stages"]
         current_stage = stages[stage_index]
         transform_func = current_stage["transform"]
 transformed = transform_func(value)
-        
+
         if current_stage["next_stage"] == -1 {
             return transformed
         } else {
@@ -844,7 +844,7 @@ class Person {
     # Class member variables with explicit typing
     name : string = "Unknown"     # Typed with default value
     age : int                     # Typed, defaults to none
-    email : string                # Typed, defaults to none  
+    email : string                # Typed, defaults to none
     active : bool = true          # Typed with default value
     metadata                      # Untyped, defaults to none
     tags = []                     # Untyped with default value
@@ -921,18 +921,18 @@ class Greeter {
     func get_name() {
         return this.name
     }
-    
+
     # Async method with const parameter
     async func async_greet(const message) {
         print("Async greeting:", message, "from", this.name)
-        
+
         # Const parameter protection works in async methods
         try {
             message = "modified"  # Will fail
         } catch e {
             print("Const protected:", e)
         }
-        
+
         return "Async: Hello, " + this.name + " - " + message
     }
 }
@@ -984,7 +984,7 @@ class DataManager {
         ]
         this.processors = [Person("Processor1", 30), Person("Processor2", 25)]
     }
-    
+
     func get_record_value(record_index, value_index) {
         return this.records[record_index]["data"]["values"][value_index]
     }
@@ -1061,17 +1061,17 @@ class AsyncProcessor {
     func init(name) {
         this.name = name
     }
-    
+
     async func process_item(const data) {
         print("Processing", data, "with", this.name)
-        
+
         # Const parameter protection works in async methods
         try {
             data = "modified"  # Will fail
         } catch e {
             print("Const protected:", e)
         }
-        
+
         return "Async processed: " + data
     }
 }
@@ -1079,16 +1079,16 @@ class AsyncProcessor {
 # Basic await usage
 async func main() {
     print("Starting async operations...")
-    
+
     # Await async function
     result1 = await fetch_data("http://example.com/api/users")
     print("Received:", result1)
-    
+
     # Await async class method
     processor = AsyncProcessor("MainProcessor")
     result2 = await processor.process_item(result1)
     print("Processed:", result2)
-    
+
     return result2
 }
 
@@ -1111,20 +1111,20 @@ class DataProcessor {
     func init(name) {
         this.name = name
     }
-    
+
     async func process_data(const data) {
         print("Processing", data, "with", this.name)
-        
+
         # Const parameter protection works in spawned methods
         try {
             data = "modified"  # Will fail
         } catch e {
             print("Const protected:", e)
         }
-        
+
         return "Processed: " + data
     }
-    
+
     func sync_process(const data) {
         print("Sync processing", data, "with", this.name)
         return "Sync: " + data
@@ -1133,36 +1133,36 @@ class DataProcessor {
 
 async func parallel_example() {
     print("Starting parallel operations...")
-    
+
     # Spawn async functions
     promise1 = spawn fetch_user(1)
     promise2 = spawn fetch_user(2)
-    
+
     # Spawn async method calls
     processor = DataProcessor("ParallelProcessor")
     promise3 = spawn processor.process_data("item1")
     promise4 = spawn processor.process_data("item2")
-    
+
     # Spawn sync method calls
     promise5 = spawn processor.sync_process("sync_item")
-    
+
     print("All tasks spawned, doing other work...")
     # Other non-blocking work can happen here
-    
+
     # Await results when needed
     user1 = await promise1
     user2 = await promise2
     processed1 = await promise3
     processed2 = await promise4
     sync_result = await promise5
-    
+
     print("All operations completed:")
     print("- " + user1)
     print("- " + user2)
     print("- " + processed1)
     print("- " + processed2)
     print("- " + sync_result)
-    
+
     return [user1, user2, processed1, processed2, sync_result]
 }
 
@@ -1188,9 +1188,9 @@ class AsyncBatchProcessor {
 
 async func promise_all_example() {
     print("Using Promise.all pattern...")
-    
+
     processor = AsyncBatchProcessor()
-    
+
     # Create list of mixed promises (functions AND methods)
     promises = [
         spawn fetch_item("Apple"),
@@ -1199,10 +1199,10 @@ async func promise_all_example() {
         spawn processor.process_batch("Batch2"),
         spawn fetch_item("Cherry")
     ]
-    
+
     # Wait for all promises to resolve
     results = await all(promises)
-    
+
     print("All operations completed:", results)
     return results
 }
@@ -1270,7 +1270,7 @@ class LambdaContainer {
             async const y -> y + 10
         ]
     }
-    
+
     async func execute_operation(const data, const index) {
         operation = this.async_operations[index]
         return await operation(data)
@@ -1296,10 +1296,10 @@ async func error_handling_example() {
     try {
         result1 = await risky_operation(false)
         print("Success case:", result1)
-        
+
         result2 = await risky_operation(true)
         print("Failure case:", result2)
-        
+
         return [result1, result2]
     } catch e {
         print("Caught async error:", e)
@@ -1326,7 +1326,7 @@ class DataContainer {
             {"name": "second", "value": 222}
         ]
     }
-    
+
     func get_matrix_value(row, col) {
         return this.matrix[row][col]
     }
@@ -1539,7 +1539,7 @@ class MyClass {
     func init(value) {
         this.value = value
     }
-    
+
     func get_value() {
         return this.value
     }
@@ -1643,7 +1643,7 @@ The language supports sophisticated data access and manipulation with complete f
 
 *   **Mixed Member/Index Chaining:** Any combination of `.` and `[]` operations in any order:
     *   `object.member[index].property` - Member access then indexing
-    *   `object.list[index].member` - Indexing then member access  
+    *   `object.list[index].member` - Indexing then member access
     *   `object.list[index].method()` - Method calls on indexed objects
     *   `object.dict[key][index].submember[key2]` - Unlimited mixed chaining depth
 *   **Direct Member Access for Dictionaries:** `dict.key`

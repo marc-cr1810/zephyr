@@ -156,5 +156,4 @@ auto string_type_t::get_length(std::shared_ptr<object_t> self) -> int
     return static_cast<int>(self_str->get_value().length());
 }
 
-
 } // namespace zephyr

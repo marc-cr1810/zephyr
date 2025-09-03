@@ -65,8 +65,6 @@ auto class_instance_t::is_member_const(const std::string& name) const -> bool
     return m_const_members.find(name) != m_const_members.end();
 }
 
-
-
 auto class_instance_t::initialize_default_members() -> void
 {
     if (!m_class_obj)
@@ -98,7 +96,5 @@ auto class_instance_t::initialize_default_members() -> void
         }
     }
 }
-
-
 
 } // namespace zephyr

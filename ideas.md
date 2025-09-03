@@ -12,7 +12,7 @@ For larger projects, the ability to split code into multiple files is essential.
 
 **Example:**
 ```zephyr
-# In file: math_utils.gemini
+# In file: math_utils.zephyr
 func factorial(n) {
     if n <= 1 {
         return 1
@@ -28,7 +28,7 @@ func fibonacci(n) {
 }
 
 # In file: main.zephyr
-import "math_utils.gemini" as math
+import "math_utils.zephyr" as math
 
 result = math.factorial(5)
 fib_result = math.fibonacci(10)
@@ -260,7 +260,7 @@ area: float = calculate_area(10.5, 20.0)
 Additional string manipulation capabilities beyond multiplication.
 
 **Example:**
-```gemini
+```zephyr
 # String methods
 text = "Hello, World!"
 print(text.upper())           # "HELLO, WORLD!"
@@ -284,7 +284,7 @@ print(message)  # "Hello, Alice! You have 5 messages."
 Built-in file handling capabilities for reading and writing files.
 
 **Example:**
-```gemini
+```zephyr
 # Reading files
 content = read_file("data.txt")
 lines = content.split("\n")
@@ -310,7 +310,7 @@ print("Name:", parsed_data["name"])
 Additional loop patterns for common iteration scenarios.
 
 **Example:**
-```gemini
+```zephyr
 # Loop with index
 for (index, item) in enumerate(my_list) {
     print("Item", index, ":", item)
@@ -343,7 +343,7 @@ loop {
 Advanced pattern matching for complex data structures.
 
 **Example:**
-```gemini
+```zephyr
 # Pattern matching on values
 func process_response(response) {
     match response {
@@ -378,7 +378,7 @@ func handle_value(value) {
 Enhanced function capabilities including closures and partial application.
 
 **Example:**
-```gemini
+```zephyr
 # Closure with captured variables
 func create_multiplier(factor) {
     return x -> x * factor
@@ -405,7 +405,7 @@ print(result)  # 10
 For defining a type that can be one of several named values or types.
 
 **Example:**
-```gemini
+```zephyr
 enum DayOfWeek {
     MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
 }
@@ -427,7 +427,7 @@ print("Is Saturday a weekend?", is_weekend(DayOfWeek.SATURDAY))
 For immutable, fixed-size ordered collections.
 
 **Example:**
-```gemini
+```zephyr
 # Create a tuple
 point = (10, 20)
 person_info = ("Alice", 30, true)
@@ -456,7 +456,7 @@ print("Lat:", lat, "Lon:", lon)
 Allow multiple methods with the same name but different parameters within classes.
 
 **Example:**
-```gemini
+```zephyr
 class Calculator {
     func add(a, b) {
         return a + b
@@ -482,11 +482,11 @@ print(calc.add([10, 20, 30, 40]))   # Calls add(values: list)
 
 ### 18. Compound Assignment Operators
 
-GeminiLang supports comprehensive compound assignment operators for efficient variable manipulation, bringing modern scripting language convenience to variable operations.
+Zephyr supports comprehensive compound assignment operators for efficient variable manipulation, bringing modern scripting language convenience to variable operations.
 
 ### 19. Asynchronous Programming (Async/Await)
 
-GeminiLang supports modern asynchronous programming patterns for handling concurrent operations and non-blocking execution.
+Zephyr supports modern asynchronous programming patterns for handling concurrent operations and non-blocking execution.
 ```
 ---
 
@@ -575,7 +575,7 @@ Features can be prioritized based on:
 - **Developer feedback**: What features would be most useful?
 - **Use case analysis**: What problems need solving?
 - **Implementation complexity**: Balance effort vs. benefit
-- **Language ecosystem**: What features would make GeminiLang more competitive?
+- **Language ecosystem**: What features would make Zephyr more competitive?
 
 ---
 
@@ -621,7 +621,7 @@ Features can be prioritized based on:
 
 ### 🎉 **Impact Assessment**
 
-This implementation successfully brings GeminiLang's variable manipulation capabilities up to modern scripting language standards, covering 95%+ of common use cases with clean, efficient syntax. The few edge cases have straightforward workarounds and don't impact the language's practical usability.
+This implementation successfully brings Zephyr's variable manipulation capabilities up to modern scripting language standards, covering 95%+ of common use cases with clean, efficient syntax. The few edge cases have straightforward workarounds and don't impact the language's practical usability.
 
 ---
 
@@ -686,7 +686,7 @@ This implementation successfully brings GeminiLang's variable manipulation capab
 
 ### 🎉 **Impact Assessment**
 
-The async/await implementation brings GeminiLang up to modern language standards for concurrent programming with **complete feature parity** for both functional and object-oriented async programming. It provides a clean, intuitive API for handling asynchronous operations while maintaining the language's simplicity and ease of use. 
+The async/await implementation brings Zephyr up to modern language standards for concurrent programming with **complete feature parity** for both functional and object-oriented async programming. It provides a clean, intuitive API for handling asynchronous operations while maintaining the language's simplicity and ease of use.
 
 **Key Achievements:**
 - **Complete Async OOP:** Full support for async methods in classes with const parameters
@@ -694,7 +694,7 @@ The async/await implementation brings GeminiLang up to modern language standards
 - **True Parallel OOP:** Object-oriented code can now execute in parallel using spawn
 - **Seamless Integration:** All async patterns work consistently across programming paradigms
 
-The implementation now covers **all major async programming patterns** and integrates seamlessly with existing language features, making GeminiLang a fully-featured async programming language.
+The implementation now covers **all major async programming patterns** and integrates seamlessly with existing language features, making Zephyr a fully-featured async programming language.
 
 ---
 
@@ -702,12 +702,12 @@ The implementation now covers **all major async programming patterns** and integ
 
 ### 18. WebAssembly (WASM) Compilation Target
 
-Compile GeminiLang to WebAssembly for browser and edge deployment.
+Compile Zephyr to WebAssembly for browser and edge deployment.
 
 **Example:**
-```gemini
+```zephyr
 # Compile to WASM
-# gemini-wasm compile my_script.gemini --output web_app.wasm
+# zephyr-wasm compile my_script.zephyr --output web_app.wasm
 
 # Browser integration
 async func handle_user_input(data) {
@@ -724,7 +724,7 @@ export handle_user_input
 Built-in database connectivity with object-relational mapping.
 
 **Example:**
-```gemini
+```zephyr
 # Database connection
 db = connect_database("sqlite://app.db")
 
@@ -732,10 +732,10 @@ db = connect_database("sqlite://app.db")
 class User {
     @db_field(primary_key=true)
     id: int
-    
+
     @db_field(unique=true)
     email: string
-    
+
     @db_field()
     name: string
 }
@@ -756,7 +756,7 @@ users = await db.query(User).where("name LIKE ?", "A%").limit(10)
 Built-in support for machine learning operations and model inference.
 
 **Example:**
-```gemini
+```zephyr
 # Load pre-trained model
 model = load_model("sentiment_analysis.onnx")
 
@@ -769,7 +769,7 @@ func preprocess_text(text) {
 async func analyze_sentiment(texts) {
     processed_texts = map(texts, preprocess_text)
     predictions = await model.predict(processed_texts)
-    
+
     results = []
     for i = 0; i < len(texts); i++ {
         result = {
@@ -792,7 +792,7 @@ sentiments = await analyze_sentiment(reviews)
 Stream processing capabilities for handling continuous data flows.
 
 **Example:**
-```gemini
+```zephyr
 # Create data stream
 stream = create_stream("user_events")
 

@@ -11,8 +11,6 @@ auto builtin_function_type_t::get_instance() -> std::shared_ptr<builtin_function
     return instance;
 }
 
-
-
 auto builtin_function_type_t::get_name() const -> std::string
 {
     return "builtin_function";
@@ -33,7 +31,5 @@ auto builtin_function_type_t::equals(std::shared_ptr<object_t> self, std::shared
     // Function equality is pointer equality
     return self.get() == other.get();
 }
-
-
 
 } // namespace zephyr

@@ -29,8 +29,6 @@ auto class_object_t::call(const std::vector<std::shared_ptr<object_t>>& args) ->
     throw type_error_t("Class instantiation should be handled by interpreter");
 }
 
-
-
 void class_object_t::add_interface(const std::string& interface_name)
 {
     m_interfaces.push_back(interface_name);

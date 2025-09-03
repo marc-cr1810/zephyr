@@ -2,7 +2,6 @@
 
 #include <string>
 #include <memory>
-#include "errors.hpp"
 
 namespace zephyr
 {

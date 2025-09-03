@@ -1,7 +1,5 @@
 #include "objects/string_object.hpp"
 #include "types/string_type.hpp"
-#include "errors.hpp"
-#include "objects/int_object.hpp" // Added for int_object_t
 
 namespace zephyr
 {
@@ -20,8 +18,6 @@ auto string_object_t::to_string() const -> std::string
 {
     return m_value;
 }
-
-
 
 auto string_object_t::get_value() const -> const std::string&
 {

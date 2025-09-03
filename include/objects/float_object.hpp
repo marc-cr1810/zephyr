@@ -18,10 +18,11 @@ public:
     auto set_value(double val) -> void;
 
 private:
+    auto format_float_string() const -> std::string;
+
+private:
     double m_value;
 
-    
-    auto format_float_string() const -> std::string;
 };
 
 }

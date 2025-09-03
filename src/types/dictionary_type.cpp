@@ -11,8 +11,6 @@ auto dictionary_type_t::get_instance() -> std::shared_ptr<dictionary_type_t>
     return instance;
 }
 
-
-
 auto dictionary_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {
     auto self_dict = std::static_pointer_cast<dictionary_object_t>(self);

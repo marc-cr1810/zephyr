@@ -24,8 +24,6 @@ auto list_type_t::add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> 
     throw type_error_t("Unsupported operand types for list concatenation");
 }
 
-
-
 auto list_type_t::get_name() const -> std::string
 {
     return "list";
@@ -65,7 +63,6 @@ auto list_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object_
 
     return true;
 }
-
 
 auto list_type_t::get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t>
 {

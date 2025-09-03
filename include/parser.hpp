@@ -7,8 +7,6 @@
 namespace zephyr
 {
 
-
-
 class parser_t
 {
 public:

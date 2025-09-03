@@ -1,6 +1,5 @@
 #include "objects/interface_object.hpp"
 #include "types/interface_type.hpp"
-#include "errors.hpp"
 
 namespace zephyr
 {
@@ -29,7 +28,5 @@ const std::vector<function_signature_t>& interface_object_t::get_methods() const
 {
     return m_methods;
 }
-
-
 
 }

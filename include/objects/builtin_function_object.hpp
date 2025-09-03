@@ -19,11 +19,7 @@ public:
     auto get_type() const -> std::shared_ptr<type_t> override;
     auto to_string() const -> std::string override;
 
-    
-
     auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override;
-
-    
 
 public:
     builtin_function_ptr_t m_func_ptr;

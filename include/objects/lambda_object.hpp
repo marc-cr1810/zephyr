@@ -31,7 +31,6 @@ public:
 
     auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override;
 
-
 public:
     std::vector<parameter_t> m_parameters;
     std::shared_ptr<block_t> m_body_block;

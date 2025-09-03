@@ -165,5 +165,4 @@ auto float_type_t::compare(std::shared_ptr<object_t> self, std::shared_ptr<objec
     return 0;
 }
 
-
 } // namespace zephyr

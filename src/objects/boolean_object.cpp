@@ -12,17 +12,15 @@ boolean_object_t::boolean_object_t(bool val)
 {
 }
 
-auto boolean_object_t::get_type() const -> std::shared_ptr<type_t> 
+auto boolean_object_t::get_type() const -> std::shared_ptr<type_t>
 {
     return boolean_type_t::get_instance();
 }
 
-auto boolean_object_t::to_string() const -> std::string 
+auto boolean_object_t::to_string() const -> std::string
 {
     return m_value ? "true" : "false";
 }
-
-
 
 auto boolean_object_t::get_true() -> std::shared_ptr<boolean_object_t>
 {

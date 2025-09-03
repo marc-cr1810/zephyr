@@ -48,8 +48,6 @@ auto lambda_object_t::to_string() const -> std::string
     return m_is_async ? "<async lambda>" : "<lambda>";
 }
 
-
-
 auto lambda_object_t::call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     // Lambda execution is handled directly in the interpreter's visit(function_call_t&) method

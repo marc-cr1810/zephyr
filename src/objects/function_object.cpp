@@ -33,8 +33,6 @@ auto function_object_t::call(const std::vector<std::shared_ptr<object_t>>& args)
     throw type_error_t("Function call should be handled by interpreter");
 }
 
-
-
 auto function_object_t::format_parameters() const -> std::string
 {
     std::string result = "(";

@@ -20,8 +20,6 @@ auto lambda_type_t::get_name() const -> std::string
     return "lambda";
 }
 
-
-
 auto lambda_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 {
     return true; // Lambda functions are always truthy
@@ -37,7 +35,5 @@ auto lambda_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<objec
     // Lambda equality is pointer equality
     return self.get() == other.get();
 }
-
-
 
 }

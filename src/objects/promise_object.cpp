@@ -95,8 +95,6 @@ auto promise_object_t::get_type() const -> std::shared_ptr<type_t>
     return promise_type_t::get_instance();
 }
 
-
-
 auto promise_object_t::is_resolved() const -> bool
 {
     return m_state != promise_state_e::pending;

@@ -11,8 +11,6 @@ auto none_type_t::get_instance() -> std::shared_ptr<none_type_t>
     return instance;
 }
 
-
-
 auto none_type_t::get_name() const -> std::string
 {
     return "none";

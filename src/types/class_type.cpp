@@ -32,8 +32,6 @@ auto class_type_t::get_name() const -> std::string
     return m_class_name;
 }
 
-
-
 auto class_type_t::is_truthy(std::shared_ptr<object_t> self) -> bool
 {
     return true; // Class instances are always truthy
@@ -53,7 +51,7 @@ auto class_type_t::equals(std::shared_ptr<object_t> self, std::shared_ptr<object
 auto class_type_t::get_member(std::shared_ptr<object_t> self, const std::string& name) -> std::shared_ptr<object_t>
 {
     auto instance = std::static_pointer_cast<class_instance_t>(self);
-    
+
     if (name.empty())
     {
         throw value_error_t("Member name cannot be empty");
@@ -118,7 +116,5 @@ auto class_type_t::set_member(std::shared_ptr<object_t> self, const std::string&
 
     instance->m_members[name] = value;
 }
-
-
 
 }

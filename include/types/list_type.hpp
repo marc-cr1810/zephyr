@@ -5,18 +5,12 @@
 namespace zephyr
 {
 
-// Forward declarations
-class list_object_t;
-class int_object_t;
-class string_object_t;
-
 class list_type_t : public type_t
 {
 public:
     auto get_name() const -> std::string override;
 
     auto add(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> std::shared_ptr<object_t> override;
-    
 
     auto get_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index) -> std::shared_ptr<object_t> override;
     auto set_item(std::shared_ptr<object_t> self, std::shared_ptr<object_t> index, std::shared_ptr<object_t> value) -> void override;
