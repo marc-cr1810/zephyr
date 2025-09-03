@@ -1,12 +1,51 @@
 #include "lexer.hpp"
-#include <cctype>
-#include "errors.hpp"
 #include "error_context.hpp"
+#include "errors.hpp"
+#include <cctype>
+#include <unordered_map>
 
 namespace zephyr
 {
 
-lexer_t::lexer_t(const std::string& source)
+namespace
+{
+    const std::unordered_map<std::string, token_type_e> keywords = {
+        {"if", token_type_e::if_token},
+        {"else", token_type_e::else_token},
+        {"while", token_type_e::while_token},
+        {"for", token_type_e::for_token},
+        {"do", token_type_e::do_token},
+        {"until", token_type_e::until},
+        {"loop", token_type_e::loop},
+        {"where", token_type_e::where},
+        {"in", token_type_e::in},
+        {"switch", token_type_e::switch_token},
+        {"case", token_type_e::case_token},
+        {"default", token_type_e::default_token},
+        {"func", token_type_e::func},
+        {"return", token_type_e::return_token},
+        {"class", token_type_e::class_token},
+        {"interface", token_type_e::interface_token},
+        {"this", token_type_e::this_token},
+        {"try", token_type_e::try_token},
+        {"catch", token_type_e::catch_token},
+        {"break", token_type_e::break_token},
+        {"continue", token_type_e::continue_token},
+        {"async", token_type_e::async},
+        {"await", token_type_e::await},
+        {"spawn", token_type_e::spawn},
+        {"true", token_type_e::true_token},
+        {"false", token_type_e::false_token},
+        {"none", token_type_e::none},
+        {"and", token_type_e::and_token},
+        {"or", token_type_e::or_token},
+        {"not", token_type_e::not_token},
+        {"const", token_type_e::const_token},
+        {"is", token_type_e::is_token},
+    };
+} // namespace
+
+lexer_t::lexer_t(const std::string & source)
     : m_source(source), m_position(0), m_line(1), m_column(1)
 {
 }
@@ -38,7 +77,15 @@ auto lexer_t::next_token() -> token_t
 
     auto make_token = [&](token_type_e type, const std::string& text) -> token_t
     {
-        token_t token = { type, text, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(text.length()) - 1 };
+        token_t token = {
+            type,
+            text,
+            m_line,
+            start_column,
+            start_pos,
+            m_line,
+            start_column + static_cast<int>(text.length()) - 1
+        };
         m_column += text.length();
         m_position += text.length();
         return token;
@@ -97,7 +144,15 @@ auto lexer_t::next_token() -> token_t
             throw zephyr::syntax_error_t("Unterminated string literal");
         }
         m_position++; // Consume the closing quote
-        return { token_type_e::fstring, str_value, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(str_value.length()) - 1 };
+        return {
+            token_type_e::fstring,
+            str_value,
+            m_line,
+            start_column,
+            start_pos,
+            m_line,
+            start_column + static_cast<int>(str_value.length()) - 1
+        };
     }
 
     if (current_char == '\'' || current_char == '"')
@@ -139,7 +194,15 @@ auto lexer_t::next_token() -> token_t
             throw zephyr::syntax_error_t("Unterminated string literal");
         }
         m_position++; // Consume the closing quote
-        return { token_type_e::string, str_value, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(str_value.length()) - 1 };
+        return {
+            token_type_e::string,
+            str_value,
+            m_line,
+            start_column,
+            start_pos,
+            m_line,
+            start_column + static_cast<int>(str_value.length()) - 1
+        };
     }
 
     // Numbers (including floats)
@@ -161,7 +224,15 @@ auto lexer_t::next_token() -> token_t
             m_position++;
         }
         m_column += number_str.length();
-        return { is_float ? token_type_e::float_token : token_type_e::number, number_str, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(number_str.length()) - 1 };
+        return {
+            is_float ? token_type_e::float_token : token_type_e::number,
+            number_str,
+            m_line,
+            start_column,
+            start_pos,
+            m_line,
+            start_column + static_cast<int>(number_str.length()) - 1
+        };
     }
 
     // Identifiers and keywords
@@ -175,41 +246,28 @@ auto lexer_t::next_token() -> token_t
         }
         m_column += identifier.length();
 
-        // Check for keywords
-        if (identifier == "if") return { token_type_e::if_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "else") return { token_type_e::else_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "while") return { token_type_e::while_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "for") return { token_type_e::for_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "do") return { token_type_e::do_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "until") return { token_type_e::until, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "loop") return { token_type_e::loop, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "where") return { token_type_e::where, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "in") return { token_type_e::in, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "switch") return { token_type_e::switch_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "case") return { token_type_e::case_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "default") return { token_type_e::default_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "func") return { token_type_e::func, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "return") return { token_type_e::return_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "class") return { token_type_e::class_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "interface") return { token_type_e::interface_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "this") return { token_type_e::this_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "try") return { token_type_e::try_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "catch") return { token_type_e::catch_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "break") return { token_type_e::break_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "continue") return { token_type_e::continue_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "async") return { token_type_e::async, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "await") return { token_type_e::await, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "spawn") return { token_type_e::spawn, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "true") return { token_type_e::true_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "false") return { token_type_e::false_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "none") return { token_type_e::none, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "and") return { token_type_e::and_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "or") return { token_type_e::or_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "not") return { token_type_e::not_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "const") return { token_type_e::const_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
-        if (identifier == "is") return { token_type_e::is_token, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
+        if (auto it = keywords.find(identifier); it != keywords.end())
+        {
+            return {
+                it->second,
+                identifier,
+                m_line,
+                start_column,
+                start_pos,
+                m_line,
+                start_column + static_cast<int>(identifier.length()) - 1
+            };
+        }
 
-        return { token_type_e::name, identifier, m_line, start_column, start_pos, m_line, start_column + static_cast<int>(identifier.length()) - 1 };
+        return {
+            token_type_e::name,
+            identifier,
+            m_line,
+            start_column,
+            start_pos,
+            m_line,
+            start_column + static_cast<int>(identifier.length()) - 1
+        };
     }
 
     // Two-character operators
