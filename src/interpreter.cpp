@@ -786,7 +786,14 @@ auto interpreter_t::visit(comparison_op_t& node) -> void
     }
     else if (node.operator_token == "is")
     {
-        result = (left.get() == right.get());
+        if (left_type == "none" && right_type == "none")
+        {
+            result = true;
+        }
+        else
+        {
+            result = (left.get() == right.get());
+        }
     }
     else if (node.operator_token == "!=")
     {
