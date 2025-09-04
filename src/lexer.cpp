@@ -9,7 +9,7 @@ namespace zephyr
 
 namespace
 {
-    const std::unordered_map<std::string, token_type_e> keywords = {
+    const std::unordered_map<std::string_view, token_type_e> keywords = {
         {"if", token_type_e::if_token},
         {"else", token_type_e::else_token},
         {"while", token_type_e::while_token},
@@ -44,53 +44,46 @@ namespace
         {"is", token_type_e::is_token},
     };
 
-    const std::unordered_map<std::string, token_type_e> three_char_operators = {
-        {"**=", token_type_e::power_assign},
-    };
 
-    const std::unordered_map<std::string, token_type_e> two_char_operators = {
-        {"==", token_type_e::eq},
-        {"!=", token_type_e::ne},
-        {"<=", token_type_e::le},
-        {">=", token_type_e::ge},
-        {"**", token_type_e::power},
-        {"&&", token_type_e::and_op},
-        {"||", token_type_e::or_op},
-        {"->", token_type_e::arrow},
-        {"??", token_type_e::nullish_coalescing},
-        {"|>", token_type_e::pipe},
-        {"?.", token_type_e::question_dot},
-        {"+=", token_type_e::plus_assign},
-        {"-=", token_type_e::minus_assign},
-        {"*=", token_type_e::mul_assign},
-        {"/=", token_type_e::div_assign},
-        {"%=", token_type_e::modulo_assign},
-        {"++", token_type_e::increment},
-        {"--", token_type_e::decrement},
-        {"<<", token_type_e::left_shift},
-        {">>", token_type_e::right_shift},
-    };
 } // namespace
+
+
 
 lexer_t::lexer_t(const std::string & source)
     : m_source(source), m_position(0), m_line(1), m_column(1)
 {
 }
 
+
 auto lexer_t::next_token() -> token_t
 {
-    while (m_position < m_source.length() && isspace(m_source[m_position]))
+    while (m_position < m_source.length())
     {
-        if (m_source[m_position] == '\n')
+        if (isspace(m_source[m_position]))
         {
-            m_line++;
-            m_column = 1;
+            if (m_source[m_position] == '\n')
+            {
+                m_line++;
+                m_column = 1;
+            }
+            else
+            {
+                m_column++;
+            }
+            m_position++;
+            continue;
         }
-        else
+
+        if (m_source[m_position] == '#')
         {
-            m_column++;
+            while (m_position < m_source.length() && m_source[m_position] != '\n')
+            {
+                m_position++;
+                m_column++;
+            }
+            continue;
         }
-        m_position++;
+        break;
     }
 
     if (m_position >= m_source.length())
@@ -102,7 +95,7 @@ auto lexer_t::next_token() -> token_t
     int start_column = m_column;
     char current_char = m_source[m_position];
 
-    auto make_token = [&](token_type_e type, const std::string& text) -> token_t
+    auto make_token = [&](token_type_e type, std::string_view text) -> token_t
     {
         token_t token = {
             type,
@@ -113,129 +106,91 @@ auto lexer_t::next_token() -> token_t
             m_line,
             start_column + static_cast<int>(text.length()) - 1
         };
-        m_column += text.length();
         m_position += text.length();
+        m_column += text.length();
         return token;
     };
 
-    // Skip comments
-    if (current_char == '#')
-    {
-        while (m_position < m_source.length() && m_source[m_position] != '\n')
-        {
-            m_position++;
-            m_column++;
+    auto peek = [&](int offset = 1) -> char {
+        if (m_position + offset < m_source.length()) {
+            return m_source[m_position + offset];
         }
-        // After skipping the comment, call next_token() again to get the actual next token
-        return next_token();
-    }
+        return '\0';
+    };
 
-    // String literals
-    if (current_char == 'f' && m_position + 1 < m_source.length() && m_source[m_position + 1] == '"')
+    // String literals (raw view, no un-escaping)
+    if (current_char == 'f' && (peek() == '"' || peek() == '\''))
     {
-        m_position++; // Consume the 'f'
-        current_char = m_source[m_position];
-        m_position++; // Consume the opening quote
-        std::string str_value;
-        while (m_position < m_source.length() && m_source[m_position] != '"')
+        char quote_type = peek();
+        size_t literal_start_pos = m_position;
+        m_position += 2; // Skip f and the opening quote
+        size_t content_start_pos = m_position;
+
+        while (m_position < m_source.length() && m_source[m_position] != quote_type)
         {
-            if (m_source[m_position] == '\\')
-            {
+            if (m_source[m_position] == '\\' && m_position + 1 < m_source.length()) {
                 m_position++;
-                if (m_position >= m_source.length())
-                {
-                    zephyr::current_error_location() = {m_line, m_column, 1};
-                    throw zephyr::syntax_error_t("Unterminated string literal");
-                }
-                char escaped_char = m_source[m_position];
-                switch (escaped_char)
-                {
-                    case 'n': str_value += '\n'; break;
-                    case 't': str_value += '\t'; break;
-                    case '\'': str_value += '\''; break;
-                    case '"': str_value += '"'; break;
-                    case '\\': str_value += '\\'; break;
-                    default: zephyr::current_error_location() = {m_line, m_column, 1};
-                             throw zephyr::syntax_error_t("Unknown escape sequence: \\" + std::string(1, escaped_char));
-                }
-            }
-            else
-            {
-                str_value += m_source[m_position];
             }
             m_position++;
         }
-        if (m_position >= m_source.length())
-        {
-            zephyr::current_error_location() = {m_line, m_column, 1};
-            throw zephyr::syntax_error_t("Unterminated string literal");
+        size_t content_length = m_position - content_start_pos;
+
+        if (m_position < m_source.length()) {
+            m_position++; // Skip closing quote
         }
-        m_position++; // Consume the closing quote
-        return {
+        size_t full_literal_length = m_position - literal_start_pos;
+
+        token_t token = {
             token_type_e::fstring,
-            str_value,
+            std::string_view(m_source.data() + content_start_pos, content_length),
             m_line,
             start_column,
-            start_pos,
+            literal_start_pos,
             m_line,
-            start_column + static_cast<int>(str_value.length()) - 1
+            start_column + static_cast<int>(full_literal_length) - 1
         };
+        m_column += full_literal_length;
+        return token;
     }
 
     if (current_char == '\'' || current_char == '"')
     {
+        size_t literal_start_pos = m_position;
         char quote_type = current_char;
-        m_position++; // Consume the opening quote
-        std::string str_value;
+        m_position++; // Skip opening quote
+        size_t content_start_pos = m_position;
+
         while (m_position < m_source.length() && m_source[m_position] != quote_type)
         {
-            if (m_source[m_position] == '\\')
-            {
+            if (m_source[m_position] == '\\' && m_position + 1 < m_source.length()) {
                 m_position++;
-                if (m_position >= m_source.length())
-                {
-                    zephyr::current_error_location() = {m_line, m_column, 1};
-                    throw zephyr::syntax_error_t("Unterminated string literal");
-                }
-                char escaped_char = m_source[m_position];
-                switch (escaped_char)
-                {
-                    case 'n': str_value += '\n'; break;
-                    case 't': str_value += '\t'; break;
-                    case '\'': str_value += '\''; break;
-                    case '"': str_value += '"'; break;
-                    case '\\': str_value += '\\'; break;
-                    default: zephyr::current_error_location() = {m_line, m_column, 1};
-                             throw zephyr::syntax_error_t("Unknown escape sequence: \\" + std::string(1, escaped_char));
-                }
-            }
-            else
-            {
-                str_value += m_source[m_position];
             }
             m_position++;
         }
-        if (m_position >= m_source.length())
-        {
-            zephyr::current_error_location() = {m_line, m_column, 1};
-            throw zephyr::syntax_error_t("Unterminated string literal");
+        size_t content_length = m_position - content_start_pos;
+
+        if (m_position < m_source.length()) {
+            m_position++; // Skip closing quote
         }
-        m_position++; // Consume the closing quote
-        return {
+        size_t full_literal_length = m_position - literal_start_pos;
+
+        token_t token = {
             token_type_e::string,
-            str_value,
+            std::string_view(m_source.data() + content_start_pos, content_length),
             m_line,
             start_column,
-            start_pos,
+            literal_start_pos,
             m_line,
-            start_column + static_cast<int>(str_value.length()) - 1
+            start_column + static_cast<int>(full_literal_length) - 1
         };
+        m_column += full_literal_length;
+        return token;
     }
 
     // Numbers (including floats)
     if (isdigit(current_char))
     {
-        std::string number_str;
+        size_t num_start = m_position;
         bool is_float = false;
         while (m_position < m_source.length() && (isdigit(m_source[m_position]) || m_source[m_position] == '.'))
         {
@@ -243,81 +198,38 @@ auto lexer_t::next_token() -> token_t
             {
                 if (is_float)
                 {
-                    break; // Second dot, not part of this number
+                    break;
                 }
                 is_float = true;
             }
-            number_str += m_source[m_position];
             m_position++;
         }
-        m_column += number_str.length();
-        return {
-            is_float ? token_type_e::float_token : token_type_e::number,
-            number_str,
-            m_line,
-            start_column,
-            start_pos,
-            m_line,
-            start_column + static_cast<int>(number_str.length()) - 1
-        };
+        size_t length = m_position - num_start;
+        m_position = num_start; // reset for make_token
+        return make_token(is_float ? token_type_e::float_token : token_type_e::number, std::string_view(m_source.data() + num_start, length));
     }
 
     // Identifiers and keywords
     if (isalpha(current_char) || current_char == '_')
     {
-        std::string identifier;
+        size_t ident_start = m_position;
         while (m_position < m_source.length() && (isalnum(m_source[m_position]) || m_source[m_position] == '_'))
         {
-            identifier += m_source[m_position];
             m_position++;
         }
-        m_column += identifier.length();
+        size_t length = m_position - ident_start;
+        std::string_view identifier(m_source.data() + ident_start, length);
+        m_position = ident_start; // reset for make_token
 
         if (auto it = keywords.find(identifier); it != keywords.end())
         {
-            return {
-                it->second,
-                identifier,
-                m_line,
-                start_column,
-                start_pos,
-                m_line,
-                start_column + static_cast<int>(identifier.length()) - 1
-            };
+            return make_token(it->second, identifier);
         }
 
-        return {
-            token_type_e::name,
-            identifier,
-            m_line,
-            start_column,
-            start_pos,
-            m_line,
-            start_column + static_cast<int>(identifier.length()) - 1
-        };
+        return make_token(token_type_e::name, identifier);
     }
 
-    // Three-character operators
-    if (m_position + 2 < m_source.length())
-    {
-        std::string three_char = m_source.substr(m_position, 3);
-        if (auto it = three_char_operators.find(three_char); it != three_char_operators.end())
-        {
-            return make_token(it->second, it->first);
-        }
-    }
-
-    // Two-character operators
-    if (m_position + 1 < m_source.length())
-    {
-        std::string two_char = m_source.substr(m_position, 2);
-        if (auto it = two_char_operators.find(two_char); it != two_char_operators.end())
-        {
-            return make_token(it->second, it->first);
-        }
-    }
-
-    // Single-character operators
+    // Operators and punctuation
     switch (current_char)
     {
         case '(': return make_token(token_type_e::lparen, "(");
@@ -328,27 +240,66 @@ auto lexer_t::next_token() -> token_t
         case ']': return make_token(token_type_e::rbracket, "]");
         case ',': return make_token(token_type_e::comma, ",");
         case ';': return make_token(token_type_e::semicolon, ";");
-        case '+': return make_token(token_type_e::plus, "+");
-        case '-': return make_token(token_type_e::minus, "-");
-        case '*': return make_token(token_type_e::mul, "*");
-        case '/': return make_token(token_type_e::div, "/");
-        case '%': return make_token(token_type_e::modulo, "%");
-        case '&': return make_token(token_type_e::bitwise_and, "&");
-        case '|': return make_token(token_type_e::bitwise_or, "|");
-        case '^': return make_token(token_type_e::bitwise_xor, "^");
-        case '~': return make_token(token_type_e::bitwise_not, "~");
-        case '=': return make_token(token_type_e::assign, "=");
-        case '<': return make_token(token_type_e::lt, "<");
-        case '>': return make_token(token_type_e::gt, ">");
-        case '!': return make_token(token_type_e::not_op, "!");
-        case '.': return make_token(token_type_e::dot, ".");
         case ':': return make_token(token_type_e::colon, ":");
-        case '?': return make_token(token_type_e::question, "?");
+        case '~': return make_token(token_type_e::bitwise_not, "~");
+        case '^': return make_token(token_type_e::bitwise_xor, "^");
+        case '.': return make_token(token_type_e::dot, ".");
+
+        case '+':
+            if (peek() == '=') { return make_token(token_type_e::plus_assign, "+="); }
+            if (peek() == '+') { return make_token(token_type_e::increment, "++"); }
+            return make_token(token_type_e::plus, "+");
+        case '-':
+            if (peek() == '=') { return make_token(token_type_e::minus_assign, "-="); }
+            if (peek() == '-') { return make_token(token_type_e::decrement, "--"); }
+            if (peek() == '>') { return make_token(token_type_e::arrow, "->"); }
+            return make_token(token_type_e::minus, "-");
+        case '*':
+            if (peek() == '*')
+            {
+                if (peek(2) == '=') { return make_token(token_type_e::power_assign, "**="); }
+                return make_token(token_type_e::power, "**");
+            }
+            if (peek() == '=') { return make_token(token_type_e::mul_assign, "*="); }
+            return make_token(token_type_e::mul, "*");
+        case '/':
+            if (peek() == '=') { return make_token(token_type_e::div_assign, "/="); }
+            return make_token(token_type_e::div, "/");
+        case '%':
+            if (peek() == '=') { return make_token(token_type_e::modulo_assign, "%="); }
+            return make_token(token_type_e::modulo, "%");
+        case '=':
+            if (peek() == '=') { return make_token(token_type_e::eq, "=="); }
+            return make_token(token_type_e::assign, "=");
+        case '!':
+            if (peek() == '=') { return make_token(token_type_e::ne, "!="); }
+            return make_token(token_type_e::not_op, "!");
+        case '<':
+            if (peek() == '<') { return make_token(token_type_e::left_shift, "<<"); }
+            if (peek() == '=') { return make_token(token_type_e::le, "<="); }
+            return make_token(token_type_e::lt, "<");
+        case '>':
+            if (peek() == '>') { return make_token(token_type_e::right_shift, ">>"); }
+            if (peek() == '=') { return make_token(token_type_e::ge, ">="); }
+            return make_token(token_type_e::gt, ">");
+        case '&':
+            if (peek() == '&') { return make_token(token_type_e::and_op, "&&"); }
+            return make_token(token_type_e::bitwise_and, "&");
+        case '|':
+            if (peek() == '|') { return make_token(token_type_e::or_op, "||"); }
+            if (peek() == '>') { return make_token(token_type_e::pipe, "|>"); }
+            return make_token(token_type_e::bitwise_or, "|");
+        case '?':
+            if (peek() == '?') { return make_token(token_type_e::nullish_coalescing, "??"); }
+            if (peek() == '.') { return make_token(token_type_e::question_dot, "?."); }
+            return make_token(token_type_e::question, "?");
+
         default:
             zephyr::current_error_location() = {m_line, m_column, 1};
             throw zephyr::syntax_error_t("Unexpected character: " + std::string(1, current_char));
     }
 }
+
 
 auto lexer_t::peek_next_token() -> token_t
 {

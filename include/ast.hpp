@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <memory>
 
@@ -218,7 +219,7 @@ struct parameter_t
     std::string type_name;
     bool has_explicit_type;
 
-    parameter_t(const std::string& param_name, bool const_param = false, const std::string& type = "", bool has_type = false)
+    parameter_t(std::string_view param_name, bool const_param = false, std::string_view type = "", bool has_type = false)
         : name(param_name), is_const(const_param), type_name(type), has_explicit_type(has_type)
     {
     }
@@ -231,7 +232,7 @@ struct for_each_variable_t
     bool has_explicit_type;
     bool is_const;
 
-    for_each_variable_t(const std::string& variable_name, const std::string& type = "", bool has_type = false, bool const_variable = false)
+    for_each_variable_t(std::string_view variable_name, std::string_view type = "", bool has_type = false, bool const_variable = false)
         : name(variable_name), type_name(type), has_explicit_type(has_type), is_const(const_variable)
     {
     }
@@ -269,7 +270,7 @@ public:
 class string_literal_t : public expression_t
 {
 public:
-    string_literal_t(const std::string& value, int line, int column, int end_line, int end_column)
+    string_literal_t(std::string_view value, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), value(value)
     {
     }
@@ -358,7 +359,7 @@ public:
 class name_t : public expression_t
 {
 public:
-    name_t(const std::string& name, int line, int column, int end_line, int end_column)
+    name_t(std::string_view name, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), name(name)
     {
     }
@@ -404,7 +405,7 @@ public:
 class comparison_op_t : public expression_t
 {
 public:
-    comparison_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, const std::string& operator_token, int line, int column, int end_line, int end_column)
+    comparison_op_t(std::unique_ptr<expression_t> left, std::unique_ptr<expression_t> right, std::string_view operator_token, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), left(std::move(left)), right(std::move(right)), operator_token(operator_token)
     {
     }
@@ -540,7 +541,7 @@ public:
 class member_access_t : public expression_t
 {
 public:
-    member_access_t(std::unique_ptr<expression_t> object, const std::string& member_name, int line, int column, int end_line, int end_column)
+    member_access_t(std::unique_ptr<expression_t> object, std::string_view member_name, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), object(std::move(object)), member_name(member_name)
     {
     }
@@ -555,7 +556,7 @@ public:
 class optional_member_access_t : public expression_t
 {
 public:
-    optional_member_access_t(std::unique_ptr<expression_t> object, const std::string& member_name, int line, int column, int end_line, int end_column)
+    optional_member_access_t(std::unique_ptr<expression_t> object, std::string_view member_name, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), object(std::move(object)), member_name(member_name)
     {
     }
@@ -570,7 +571,7 @@ public:
 class method_call_t : public expression_t
 {
 public:
-    method_call_t(std::unique_ptr<expression_t> object, const std::string& method_name, std::vector<std::unique_ptr<expression_t>> arguments, int line, int column, int end_line, int end_column)
+    method_call_t(std::unique_ptr<expression_t> object, std::string_view method_name, std::vector<std::unique_ptr<expression_t>> arguments, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), object(std::move(object)), method_name(method_name), arguments(std::move(arguments))
     {
     }
@@ -586,7 +587,7 @@ public:
 class optional_method_call_t : public expression_t
 {
 public:
-    optional_method_call_t(std::unique_ptr<expression_t> object, const std::string& method_name, std::vector<std::unique_ptr<expression_t>> arguments, int line, int column, int end_line, int end_column)
+    optional_method_call_t(std::unique_ptr<expression_t> object, std::string_view method_name, std::vector<std::unique_ptr<expression_t>> arguments, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), object(std::move(object)), method_name(method_name), arguments(std::move(arguments))
     {
     }
@@ -602,7 +603,7 @@ public:
 class function_call_t : public expression_t
 {
 public:
-    function_call_t(const std::string& function_name, std::vector<std::unique_ptr<expression_t>> arguments, int line, int column, int end_line, int end_column)
+    function_call_t(std::string_view function_name, std::vector<std::unique_ptr<expression_t>> arguments, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), function_name(function_name), arguments(std::move(arguments))
     {
     }
@@ -778,7 +779,7 @@ public:
 class assignment_t : public statement_t
 {
 public:
-    assignment_t(const std::string& variable_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
+    assignment_t(std::string_view variable_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), value(std::move(value))
     {
     }
@@ -793,7 +794,7 @@ public:
 class member_assignment_t : public statement_t
 {
 public:
-    member_assignment_t(std::unique_ptr<expression_t> object, const std::string& member_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
+    member_assignment_t(std::unique_ptr<expression_t> object, std::string_view member_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), object(std::move(object)), member_name(member_name), value(std::move(value))
     {
     }
@@ -826,7 +827,7 @@ public:
 class const_declaration_t : public statement_t
 {
 public:
-    const_declaration_t(const std::string& variable_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
+    const_declaration_t(std::string_view variable_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), value(std::move(value))
     {
     }
@@ -841,7 +842,7 @@ public:
 class typed_declaration_t : public statement_t
 {
 public:
-    typed_declaration_t(const std::string& variable_name, const std::string& type_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
+    typed_declaration_t(std::string_view variable_name, std::string_view type_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), type_name(type_name), value(std::move(value))
     {
     }
@@ -857,7 +858,7 @@ public:
 class typed_const_declaration_t : public statement_t
 {
 public:
-    typed_const_declaration_t(const std::string& variable_name, const std::string& type_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
+    typed_const_declaration_t(std::string_view variable_name, std::string_view type_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), type_name(type_name), value(std::move(value))
     {
     }
@@ -873,7 +874,7 @@ public:
 class empty_declaration_t : public statement_t
 {
 public:
-    empty_declaration_t(const std::string& variable_name, int line, int column, int end_line, int end_column)
+    empty_declaration_t(std::string_view variable_name, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name)
     {
     }
@@ -887,7 +888,7 @@ public:
 class empty_typed_declaration_t : public statement_t
 {
 public:
-    empty_typed_declaration_t(const std::string& variable_name, const std::string& type_name, int line, int column, int end_line, int end_column)
+    empty_typed_declaration_t(std::string_view variable_name, std::string_view type_name, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), type_name(type_name)
     {
     }
@@ -902,7 +903,7 @@ public:
 class member_variable_declaration_t : public statement_t
 {
 public:
-    member_variable_declaration_t(const std::string& variable_name, const std::string& type_name, std::unique_ptr<expression_t> value, bool has_explicit_type, bool has_default_value, int line, int column, int end_line, int end_column)
+    member_variable_declaration_t(std::string_view variable_name, std::string_view type_name, std::unique_ptr<expression_t> value, bool has_explicit_type, bool has_default_value, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), type_name(type_name), value(std::move(value)), has_explicit_type(has_explicit_type), has_default_value(has_default_value)
     {
     }
@@ -921,7 +922,7 @@ public:
 class compound_assignment_t : public statement_t
 {
 public:
-    compound_assignment_t(const std::string& variable_name, std::unique_ptr<expression_t> value, const std::string& operator_token, int line, int column, int end_line, int end_column)
+    compound_assignment_t(std::string_view variable_name, std::unique_ptr<expression_t> value, std::string_view operator_token, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), value(std::move(value)), operator_token(operator_token)
     {
     }
@@ -937,7 +938,7 @@ public:
 class compound_member_assignment_t : public statement_t
 {
 public:
-    compound_member_assignment_t(std::unique_ptr<expression_t> object, const std::string& member_name, std::unique_ptr<expression_t> value, const std::string& operator_token, int line, int column, int end_line, int end_column)
+    compound_member_assignment_t(std::unique_ptr<expression_t> object, std::string_view member_name, std::unique_ptr<expression_t> value, std::string_view operator_token, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), object(std::move(object)), member_name(member_name), value(std::move(value)), operator_token(operator_token)
     {
     }
@@ -954,7 +955,7 @@ public:
 class compound_indexed_assignment_t : public statement_t
 {
 public:
-    compound_indexed_assignment_t(std::unique_ptr<expression_t> object, std::unique_ptr<expression_t> index, std::unique_ptr<expression_t> value, const std::string& operator_token, int line, int column, int end_line, int end_column)
+    compound_indexed_assignment_t(std::unique_ptr<expression_t> object, std::unique_ptr<expression_t> index, std::unique_ptr<expression_t> value, std::string_view operator_token, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), object(std::move(object)), index(std::move(index)), value(std::move(value)), operator_token(operator_token)
     {
     }
@@ -972,7 +973,7 @@ public:
 class increment_decrement_t : public statement_t
 {
 public:
-    increment_decrement_t(const std::string& variable_name, bool is_increment, bool is_prefix, int line, int column, int end_line, int end_column)
+    increment_decrement_t(std::string_view variable_name, bool is_increment, bool is_prefix, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), variable_name(variable_name), is_increment(is_increment), is_prefix(is_prefix)
     {
     }
@@ -988,7 +989,7 @@ public:
 class increment_decrement_expression_t : public expression_t
 {
 public:
-    increment_decrement_expression_t(const std::string& variable_name, bool is_increment, bool is_prefix, int line, int column, int end_line, int end_column)
+    increment_decrement_expression_t(std::string_view variable_name, bool is_increment, bool is_prefix, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), variable_name(variable_name), is_increment(is_increment), is_prefix(is_prefix)
     {
     }
@@ -1004,7 +1005,7 @@ public:
 class member_increment_decrement_t : public expression_t
 {
 public:
-    member_increment_decrement_t(std::unique_ptr<expression_t> object, const std::string& member_name, bool is_increment, bool is_prefix, int line, int column, int end_line, int end_column)
+    member_increment_decrement_t(std::unique_ptr<expression_t> object, std::string_view member_name, bool is_increment, bool is_prefix, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), object(std::move(object)), member_name(member_name), is_increment(is_increment), is_prefix(is_prefix)
     {
     }
@@ -1217,7 +1218,7 @@ public:
 class try_catch_statement_t : public statement_t
 {
 public:
-    try_catch_statement_t(std::unique_ptr<block_t> try_block, const std::string& exception_variable_name, std::unique_ptr<block_t> catch_block, int line, int column, int end_line, int end_column)
+    try_catch_statement_t(std::unique_ptr<block_t> try_block, std::string_view exception_variable_name, std::unique_ptr<block_t> catch_block, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), try_block(std::move(try_block)), exception_variable_name(exception_variable_name), catch_block(std::move(catch_block))
     {
     }
@@ -1280,7 +1281,7 @@ public:
 class function_definition_t : public statement_t
 {
 public:
-    function_definition_t(const std::string& function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, const std::string& return_type_name, bool explicit_return_type, bool async, int line, int column, int end_line, int end_column)
+    function_definition_t(std::string_view function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, std::string_view return_type_name, bool explicit_return_type, bool async, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), return_type_name(return_type_name), explicit_return_type(explicit_return_type), async(async)
     {
     }
@@ -1299,12 +1300,12 @@ public:
 class lambda_expression_t : public expression_t
 {
 public:
-    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<expression_t> body_expression, const std::string& return_type_name, bool explicit_return_type, bool async, int line, int column, int end_line, int end_column)
+    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<expression_t> body_expression, std::string_view return_type_name, bool explicit_return_type, bool async, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), parameters(std::move(parameters)), body_expression(std::move(body_expression)), body_block(nullptr), return_type_name(return_type_name), explicit_return_type(explicit_return_type), is_block_body(false), async(async)
     {
     }
 
-    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<block_t> body_block, const std::string& return_type_name, bool explicit_return_type, bool async, int line, int column, int end_line, int end_column)
+    lambda_expression_t(std::vector<parameter_t> parameters, std::unique_ptr<block_t> body_block, std::string_view return_type_name, bool explicit_return_type, bool async, int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column), parameters(std::move(parameters)), body_expression(nullptr), body_block(std::move(body_block)), return_type_name(return_type_name), explicit_return_type(explicit_return_type), is_block_body(true), async(async)
     {
     }
@@ -1332,7 +1333,7 @@ struct function_signature_t
 class interface_definition_t : public statement_t
 {
 public:
-    interface_definition_t(const std::string& interface_name, std::vector<function_signature_t> methods, int line, int column, int end_line, int end_column)
+    interface_definition_t(std::string_view interface_name, std::vector<function_signature_t> methods, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), interface_name(interface_name), methods(std::move(methods))
     {
     }
@@ -1347,7 +1348,7 @@ public:
 class class_definition_t : public statement_t
 {
 public:
-    class_definition_t(const std::string& class_name, std::vector<std::string> interfaces, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, int line, int column, int end_line, int end_column)
+    class_definition_t(std::string_view class_name, std::vector<std::string> interfaces, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, int line, int column, int end_line, int end_column)
         : statement_t(line, column, end_line, end_column), class_name(class_name), interfaces(std::move(interfaces)), member_variables(std::move(member_variables)), methods(std::move(methods))
     {
     }

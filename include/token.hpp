@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 namespace zephyr
 {
@@ -100,7 +101,7 @@ enum class token_type_e
 struct token_t
 {
     token_type_e type;
-    std::string text;
+    std::string_view text;
     int line;
     int column;
     size_t position; // Added back for lexer_t internal use

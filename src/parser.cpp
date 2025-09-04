@@ -75,7 +75,7 @@ void parser_t::eat(token_type_e type) {
             zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t("Unexpected end of file. Expected " + token_type_to_string(type) + ".");
         }
-        std::string error_msg = "Expected " + token_type_to_string(type) + ", but got " + token_type_to_string(m_current_token.type) + " ('" + m_current_token.text + "').";
+        std::string error_msg = "Expected " + token_type_to_string(type) + ", but got " + token_type_to_string(m_current_token.type) + " ('" + std::string(m_current_token.text) + "').";
         zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t(error_msg);
     }
@@ -86,7 +86,7 @@ std::unique_ptr<program_t> parser_t::parse() {
     if (m_current_token.type != token_type_e::end_of_file) {
         std::string error_msg = "Extra tokens at end of file. Unexpected token: " +
                                 token_type_to_string(m_current_token.type) +
-                                " ('" + m_current_token.text + "').";
+                                " ('" + std::string(m_current_token.text) + "').";
         zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t(error_msg);
     }
@@ -300,7 +300,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
         eat(m_current_token.type);
         if (m_current_token.type != token_type_e::name) {
             zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
-            throw zephyr::syntax_error_t("Expected variable name after " + op_token.text);
+            throw zephyr::syntax_error_t("Expected variable name after " + std::string(op_token.text));
         }
         token_t name_token = m_current_token;
         eat(token_type_e::name);
@@ -650,10 +650,10 @@ std::unique_ptr<expression_t> parser_t::factor() {
         return std::make_unique<spawn_expression_t>(std::move(expr), spawn_token.line, spawn_token.column, expr->end_line, expr->end_column);
     } else if (token.type == token_type_e::number) {
         eat(token_type_e::number);
-        return std::make_unique<number_t>(std::stoi(token.text), token.line, token.column, token.line, token.column + token.text.length() - 1);
+        return std::make_unique<number_t>(std::stoi(std::string(token.text)), token.line, token.column, token.line, token.column + token.text.length() - 1);
     } else if (token.type == token_type_e::float_token) {
         eat(token_type_e::float_token);
-        return std::make_unique<float_literal_t>(std::stod(token.text), token.line, token.column, token.line, token.column + token.text.length() - 1);
+        return std::make_unique<float_literal_t>(std::stod(std::string(token.text)), token.line, token.column, token.line, token.column + token.text.length() - 1);
     } else if (token.type == token_type_e::string) {
         eat(token_type_e::string);
         return std::make_unique<string_literal_t>(token.text, token.line, token.column, token.line, token.column + token.text.length() - 1);
@@ -679,7 +679,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                     zephyr::current_error_location() = {token.line, token.column, 1};
                 throw zephyr::syntax_error_t("Unmatched braces in f-string");
                 }
-                std::string expr_str = token.text.substr(expr_start, i - expr_start - 1);
+                std::string expr_str(token.text.substr(expr_start, i - expr_start - 1));
                 lexer_t expr_lexer(expr_str);
                 parser_t expr_parser(expr_lexer);
                 parts.push_back(expr_parser.expression());
@@ -709,7 +709,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
         while (m_current_token.type == token_type_e::dot || m_current_token.type == token_type_e::lbracket || m_current_token.type == token_type_e::question_dot || (m_current_token.type == token_type_e::question && m_lexer.peek_next_token().type == token_type_e::lbracket)) {
             if (m_current_token.type == token_type_e::dot) {
                 eat(token_type_e::dot);
-                std::string member_name = m_current_token.text;
+                std::string member_name(m_current_token.text);
                 token_t member_token = m_current_token;
                 eat(token_type_e::name);
 
@@ -724,7 +724,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                 token_t optional_chain_token = m_current_token;
                 eat(token_type_e::question_dot);
                 if (m_current_token.type == token_type_e::name) {
-                    std::string member_name = m_current_token.text;
+                    std::string member_name(m_current_token.text);
                     token_t member_token = m_current_token;
                     eat(token_type_e::name);
                     if (m_current_token.type == token_type_e::lparen) {
@@ -762,7 +762,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                 token_t optional_chain_token = m_current_token;
                 eat(token_type_e::question_dot);
                 if (m_current_token.type == token_type_e::name) {
-                    std::string member_name = m_current_token.text;
+                    std::string member_name(m_current_token.text);
                     token_t member_token = m_current_token;
                     eat(token_type_e::name);
                     if (m_current_token.type == token_type_e::lparen) {
@@ -846,7 +846,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
             throw zephyr::syntax_error_t("Expected name token");
         }
 
-        std::string name = token.text;
+        std::string name(token.text);
         token_t name_token = token;
         eat(token_type_e::name);
 
@@ -861,7 +861,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
         while (m_current_token.type == token_type_e::dot || m_current_token.type == token_type_e::lbracket || m_current_token.type == token_type_e::question_dot || (m_current_token.type == token_type_e::question && m_lexer.peek_next_token().type == token_type_e::lbracket)) {
             if (m_current_token.type == token_type_e::dot) {
                 eat(token_type_e::dot);
-                std::string member_name = m_current_token.text;
+                std::string member_name(m_current_token.text);
                 token_t member_token = m_current_token;
                 eat(token_type_e::name);
 
@@ -876,7 +876,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                 token_t optional_chain_token = m_current_token;
                 eat(token_type_e::question_dot);
                 if (m_current_token.type == token_type_e::name) {
-                    std::string member_name = m_current_token.text;
+                    std::string member_name(m_current_token.text);
                     token_t member_token = m_current_token;
                     eat(token_type_e::name);
                     if (m_current_token.type == token_type_e::lparen) {
@@ -914,7 +914,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
                 token_t optional_chain_token = m_current_token;
                 eat(token_type_e::question_dot);
                 if (m_current_token.type == token_type_e::name) {
-                    std::string member_name = m_current_token.text;
+                    std::string member_name(m_current_token.text);
                     token_t member_token = m_current_token;
                     eat(token_type_e::name);
                     if (m_current_token.type == token_type_e::lparen) {
@@ -1009,7 +1009,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
     } else {
         std::string error_msg = "Invalid factor in expression. Expected number, float_token, string, true_token, false_token, name, lparen, lbracket, lbrace, or lambda expression, but got " +
                                 token_type_to_string(m_current_token.type) +
-                                " ('" + m_current_token.text + "').";
+                                " ('" + std::string(m_current_token.text) + "').";
         zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw zephyr::syntax_error_t(error_msg);
     }
@@ -1138,7 +1138,7 @@ std::unique_ptr<parser_t::for_each_head_struct_t> parser_t::for_each_head() {
                 eat(token_type_e::const_token);
             }
 
-            std::string var_name = m_current_token.text;
+            std::string var_name(m_current_token.text);
             eat(token_type_e::name);
 
             std::string type_name = "";
@@ -1184,7 +1184,7 @@ std::unique_ptr<parser_t::for_each_head_struct_t> parser_t::for_each_head() {
             eat(token_type_e::const_token);
         }
 
-        std::string var_name = m_current_token.text;
+        std::string var_name(m_current_token.text);
         eat(token_type_e::name);
 
         std::string type_name = "";
@@ -1301,7 +1301,7 @@ std::unique_ptr<function_definition_t> parser_t::function_definition() {
             is_const = true;
             eat(token_type_e::const_token);
         }
-        std::string param_name = m_current_token.text;
+        std::string param_name(m_current_token.text);
         eat(token_type_e::name);
         std::string type_name = "";
         bool has_explicit_type = false;
@@ -1382,11 +1382,11 @@ std::unique_ptr<list_destructuring_assignment_t> parser_t::list_destructuring_as
 
     std::vector<std::string> variable_names;
     if (m_current_token.type == token_type_e::name) {
-        variable_names.push_back(m_current_token.text);
+        variable_names.push_back(std::string(m_current_token.text));
         eat(token_type_e::name);
         while (m_current_token.type == token_type_e::comma) {
             eat(token_type_e::comma);
-            variable_names.push_back(m_current_token.text);
+            variable_names.push_back(std::string(m_current_token.text));
             eat(token_type_e::name);
         }
     }
@@ -1556,7 +1556,7 @@ std::unique_ptr<try_catch_statement_t> parser_t::try_catch_statement() {
         has_lparen = true;
     }
 
-    std::string exception_variable_name = m_current_token.text;
+    std::string exception_variable_name(m_current_token.text);
     eat(token_type_e::name);
 
     if (has_lparen) {
@@ -1587,7 +1587,7 @@ std::vector<parameter_t> parser_t::parse_parameter_list() {
             eat(token_type_e::const_token); // m_current_token is now the name
         }
 
-        std::string param_name = m_current_token.text;
+        std::string param_name(m_current_token.text);
         eat(token_type_e::name); // Consume the name
 
         // Check for type annotation
@@ -1612,7 +1612,7 @@ std::vector<parameter_t> parser_t::parse_parameter_list() {
                 eat(token_type_e::const_token); // m_current_token is now the name
             }
 
-            std::string param_name = m_current_token.text;
+            std::string param_name(m_current_token.text);
             eat(token_type_e::name); // Consume the name
 
             // Check for type annotation
@@ -1743,7 +1743,7 @@ std::unique_ptr<member_variable_declaration_t> parser_t::member_variable_declara
     }
 
     return std::make_unique<member_variable_declaration_t>(
-        name_token.text, type_name, std::move(value),
+        std::string(name_token.text), type_name, std::move(value),
         has_explicit_type, has_default_value,
         name_token.line, name_token.column,
         has_default_value ? value->end_line : (has_explicit_type ? m_current_token.line : name_token.line),
@@ -1858,17 +1858,17 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
     token_t class_token = m_current_token;
     eat(token_type_e::class_token);
 
-    std::string class_name = m_current_token.text;
+    std::string class_name(m_current_token.text);
     eat(token_type_e::name);
 
     std::vector<std::string> interfaces;
     if (m_current_token.type == token_type_e::colon) {
         eat(token_type_e::colon);
-        interfaces.push_back(m_current_token.text);
+        interfaces.push_back(std::string(m_current_token.text));
         eat(token_type_e::name);
         while (m_current_token.type == token_type_e::comma) {
             eat(token_type_e::comma);
-            interfaces.push_back(m_current_token.text);
+            interfaces.push_back(std::string(m_current_token.text));
             eat(token_type_e::name);
         }
     }
@@ -1924,7 +1924,7 @@ std::unique_ptr<interface_definition_t> parser_t::interface_definition() {
     token_t interface_token = m_current_token;
     eat(token_type_e::interface_token);
 
-    std::string interface_name = m_current_token.text;
+    std::string interface_name(m_current_token.text);
     eat(token_type_e::name);
 
     eat(token_type_e::lbrace);
@@ -1960,7 +1960,7 @@ function_signature_t parser_t::function_signature() {
             is_const = true;
             eat(token_type_e::const_token);
         }
-        std::string param_name = m_current_token.text;
+        std::string param_name(m_current_token.text);
         eat(token_type_e::name);
         std::string type_name = "";
         bool has_explicit_type = false;
@@ -2004,7 +2004,7 @@ function_signature_t parser_t::function_signature() {
     }
 
     return function_signature_t{
-        name_token.text,
+        std::string(name_token.text),
         std::move(parameters),
         return_type_name,
         has_return_type
@@ -2056,14 +2056,14 @@ std::unique_ptr<member_assignment_t> parser_t::member_assignment() {
         eat(token_type_e::this_token);
         object = std::make_unique<this_expression_t>(start_token.line, start_token.column, start_token.end_line, start_token.end_column);
     } else {
-        std::string name = m_current_token.text;
+        std::string name(m_current_token.text);
         eat(token_type_e::name);
         object = std::make_unique<name_t>(name, start_token.line, start_token.column, start_token.end_line, start_token.end_column);
     }
 
     eat(token_type_e::dot);
 
-    std::string member_name = m_current_token.text;
+    std::string member_name(m_current_token.text);
     token_t member_token = m_current_token;
     eat(token_type_e::name);
 
