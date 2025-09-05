@@ -1529,6 +1529,12 @@ auto interpreter_t::visit(compound_member_assignment_t& node) -> void
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
 
+    if (auto name_node = dynamic_cast<name_t*>(node.object.get())) {
+        if (m_const_variables.count(name_node->name)) {
+            throw type_error_t("Cannot modify member of a const variable: " + name_node->name);
+        }
+    }
+
     node.object->accept(*this);
     auto object = m_current_result;
     node.value->accept(*this);
@@ -1580,6 +1586,12 @@ auto interpreter_t::visit(compound_indexed_assignment_t& node) -> void
     zephyr::current_error_location().line = node.line;
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
+
+    if (auto name_node = dynamic_cast<name_t*>(node.object.get())) {
+        if (m_const_variables.count(name_node->name)) {
+            throw type_error_t("Cannot modify element of a const variable: " + name_node->name);
+        }
+    }
 
     node.object->accept(*this);
     auto object = m_current_result;
@@ -1826,6 +1838,12 @@ auto interpreter_t::visit(indexed_assignment_t& node) -> void
     zephyr::current_error_location().line = node.line;
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
+
+    if (auto name_node = dynamic_cast<name_t*>(node.object.get())) {
+        if (m_const_variables.count(name_node->name)) {
+            throw type_error_t("Cannot modify element of a const variable: " + name_node->name);
+        }
+    }
 
     node.object->accept(*this);
     auto list_obj = m_current_result;
@@ -3869,6 +3887,12 @@ auto interpreter_t::visit(member_assignment_t& node) -> void
     zephyr::current_error_location().line = node.line;
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.member_name.length();
+
+    if (auto name_node = dynamic_cast<name_t*>(node.object.get())) {
+        if (m_const_variables.count(name_node->name)) {
+            throw type_error_t("Cannot modify member of a const variable: " + name_node->name);
+        }
+    }
 
     node.object->accept(*this);
     auto obj = m_current_result;

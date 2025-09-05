@@ -13,6 +13,7 @@ class type_t;
 // Base object_t class
 class object_t : public std::enable_shared_from_this<object_t>
 {
+
 public:
     virtual ~object_t() = default;
 

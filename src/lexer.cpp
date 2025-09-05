@@ -43,17 +43,12 @@ namespace
         {"const", token_type_e::const_token},
         {"is", token_type_e::is_token},
     };
-
-
 } // namespace
-
-
 
 lexer_t::lexer_t(const std::string & source)
     : m_source(source), m_position(0), m_line(1), m_column(1)
 {
 }
-
 
 auto lexer_t::next_token() -> token_t
 {
@@ -299,7 +294,6 @@ auto lexer_t::next_token() -> token_t
             throw zephyr::syntax_error_t("Unexpected character: " + std::string(1, current_char));
     }
 }
-
 
 auto lexer_t::peek_next_token() -> token_t
 {

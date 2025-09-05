@@ -117,11 +117,6 @@ try {
 const USER_DATA = {"name": "Alice", "age": 30, "roles": ["admin", "user"]}
 print("Const complex data =", USER_DATA)
 
-# Note: The const protection applies to the variable binding, not deep immutability
-# This means the reference is const, but the contents can still be modified
-USER_DATA["age"] = 31  # This works - we're modifying contents, not reassigning
-print("Modified const data contents =", USER_DATA)
-
 try {
     USER_DATA = {"different": "object"}  # This should fail - reassignment
 } catch e {
