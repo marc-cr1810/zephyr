@@ -3594,7 +3594,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
             member_var->type_name,
             default_value,
             member_var->has_default_value,
-            false // is_const - not supported in member_variable_declaration_t yet
+            member_var->is_const
         );
         class_obj->add_member_variable(var_info);
     }
@@ -3896,6 +3896,13 @@ auto interpreter_t::visit(member_assignment_t& node) -> void
 
     node.object->accept(*this);
     auto obj = m_current_result;
+
+    if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(obj)) {
+        if (class_instance->is_member_const(node.member_name)) {
+            throw type_error_t("Cannot assign to const member: '" + node.member_name + "'");
+        }
+    }
+
     node.value->accept(*this);
     auto value = m_current_result;
 

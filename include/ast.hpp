@@ -903,8 +903,8 @@ public:
 class member_variable_declaration_t : public statement_t
 {
 public:
-    member_variable_declaration_t(std::string_view variable_name, std::string_view type_name, std::unique_ptr<expression_t> value, bool has_explicit_type, bool has_default_value, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), variable_name(variable_name), type_name(type_name), value(std::move(value)), has_explicit_type(has_explicit_type), has_default_value(has_default_value)
+    member_variable_declaration_t(std::string_view variable_name, std::string_view type_name, std::unique_ptr<expression_t> value, bool has_explicit_type, bool has_default_value, bool is_const, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), variable_name(variable_name), type_name(type_name), value(std::move(value)), has_explicit_type(has_explicit_type), has_default_value(has_default_value), is_const(is_const)
     {
     }
 
@@ -916,6 +916,7 @@ public:
     std::unique_ptr<expression_t> value;
     bool has_explicit_type;
     bool has_default_value;
+    bool is_const;
 };
 
 // Compound operations

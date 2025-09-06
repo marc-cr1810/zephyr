@@ -1718,6 +1718,13 @@ std::unique_ptr<typed_const_declaration_t> parser_t::typed_const_declaration() {
 }
 
 std::unique_ptr<member_variable_declaration_t> parser_t::member_variable_declaration() {
+    bool is_const = false;
+    token_t start_token = m_current_token;
+    if (m_current_token.type == token_type_e::const_token) {
+        is_const = true;
+        eat(token_type_e::const_token);
+    }
+
     token_t name_token = m_current_token;
     eat(token_type_e::name);
 
@@ -1744,14 +1751,20 @@ std::unique_ptr<member_variable_declaration_t> parser_t::member_variable_declara
 
     return std::make_unique<member_variable_declaration_t>(
         std::string(name_token.text), type_name, std::move(value),
-        has_explicit_type, has_default_value,
-        name_token.line, name_token.column,
+        has_explicit_type, has_default_value, is_const,
+        start_token.line, start_token.column,
         has_default_value ? value->end_line : (has_explicit_type ? m_current_token.line : name_token.line),
         has_default_value ? value->end_column : (has_explicit_type ? m_current_token.column : name_token.column + name_token.text.length() - 1)
     );
 }
 
 bool parser_t::is_member_variable_declaration_lookahead() {
+    if (m_current_token.type == token_type_e::const_token) {
+        token_t next = m_lexer.peek_next_token();
+        if (next.type == token_type_e::name) {
+            return true;
+        }
+    }
     if (m_current_token.type == token_type_e::name) {
         token_t next_token = m_lexer.peek_next_token();
         // Member variable if followed by colon (typed), assignment (untyped with default),
@@ -1877,7 +1890,7 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
 
     // Parse member variable declarations first
     std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables;
-    while (m_current_token.type == token_type_e::name) {
+    while (m_current_token.type == token_type_e::name || m_current_token.type == token_type_e::const_token) {
         // Check if this is a method definition
         if (m_current_token.type == token_type_e::func || m_current_token.type == token_type_e::async) {
             break;
