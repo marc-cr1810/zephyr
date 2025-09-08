@@ -115,7 +115,7 @@ auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 auto float_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
     if (args.size() != 1) {
-                throw type_error_t("float() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+        throw type_error_t("float() takes exactly one argument (" + std::to_string(args.size()) + " given)");
     }
 
     auto obj = args[0];

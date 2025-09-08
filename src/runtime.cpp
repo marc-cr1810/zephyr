@@ -1,5 +1,6 @@
 #include "runtime.hpp"
 #include "lexer.hpp"
+#include "objects/object.hpp"
 #include "parser.hpp"
 #include "errors.hpp"
 #include "runtime_error.hpp"
@@ -7,7 +8,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <sstream>
+#include <string>
 
 namespace zephyr
 {
@@ -16,6 +19,26 @@ namespace zephyr
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+
+static auto print_result(const std::shared_ptr<object_t>& obj) -> void
+{
+    if (obj == nullptr or obj->type()->name() == "none")
+    {
+        return;
+    }
+
+    auto output = obj->to_string();
+    if (obj->type()->name() == "string")
+    {
+        char quote_char = '\'';
+        if ((output.find_first_of('\'') != std::string::npos) and not (output.find_first_of('"') != std::string::npos))
+        {
+            quote_char = '"';
+        }
+        output = quote_char + output + quote_char;
+    }
+    std::cout << output << std::endl;
+}
 
 runtime_t::runtime_t()
     : m_scheduler(async_scheduler_t::instance())
@@ -41,14 +64,14 @@ auto runtime_t::execute_file(const std::string& filename) -> int
     buffer << file.rdbuf();
     std::string source_code = buffer.str();
 
-    zephyr::interpreter_t interpreter(filename, source_code);
+    interpreter_t interpreter(filename, source_code);
     bool success = process_code(interpreter, source_code, filename);
     return success ? 0 : 1;
 }
 
 auto runtime_t::execute_string(const std::string& source, const std::string& context_name) -> int
 {
-    zephyr::interpreter_t interpreter(context_name, source);
+    interpreter_t interpreter(context_name, source);
     bool success = process_code(interpreter, source, context_name);
     return success ? 0 : 1;
 }
@@ -59,7 +82,7 @@ auto runtime_t::start_repl() -> void
     std::string accumulated_input;
     std::cout << "Zephyr " << ZEPHYR_VERSION << " [GCC " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__ << "] on " << ZEPHYR_SYSTEM_NAME << std::endl;
 
-    zephyr::interpreter_t interpreter("<stdin>", accumulated_input);
+    interpreter_t interpreter("<stdin>", accumulated_input);
 
     while (true)
     {
@@ -78,32 +101,29 @@ auto runtime_t::start_repl() -> void
     }
 }
 
-auto runtime_t::process_code(zephyr::interpreter_t& interpreter, const std::string& source, const std::string& filename) -> bool
+auto runtime_t::process_code(interpreter_t& interpreter, const std::string& source, const std::string& filename) -> bool
 {
     try
     {
-        zephyr::lexer_t lexer(source);
-        zephyr::parser_t parser(lexer);
-        std::unique_ptr<zephyr::program_t> program_node = parser.parse();
+        lexer_t lexer(source);
+        parser_t parser(lexer);
+        std::unique_ptr<program_t> program_node = parser.parse();
 
         interpreter.interpret(*program_node);
 
         // If the last statement was an expression, print its result
         if (!program_node->statements.empty())
         {
-            if (auto expr_stmt = dynamic_cast<zephyr::expression_statement_t*>(program_node->statements.back().get()))
+            if (auto expr_stmt = dynamic_cast<expression_statement_t*>(program_node->statements.back().get()))
             {
-                std::shared_ptr<zephyr::object_t> result = interpreter.current_result();
-                if (result && result->type()->name() != "none")
-                {
-                    std::cout << result->to_string() << std::endl;
-                }
+                auto result = interpreter.current_result();
+                print_result(result);
             }
         }
 
         return true;
     }
-    catch (const zephyr::runtime_error_with_location_t& e)
+    catch (const runtime_error_with_location_t& e)
     {
         print_error(e.what(), e.error_name(), source, e.line(), e.column(), filename, e.length());
         return false;
@@ -116,20 +136,20 @@ auto runtime_t::process_code(zephyr::interpreter_t& interpreter, const std::stri
     return true;
 }
 
-auto runtime_t::process_code_repl(zephyr::interpreter_t& interpreter, const std::string& source, const std::string& full_source_code) -> bool
+auto runtime_t::process_code_repl(interpreter_t& interpreter, const std::string& source, const std::string& full_source_code) -> bool
 {
     try
     {
-        zephyr::lexer_t lexer(source);
-        zephyr::parser_t parser(lexer);
-        std::unique_ptr<zephyr::program_t> program_node = parser.parse();
+        lexer_t lexer(source);
+        parser_t parser(lexer);
+        std::unique_ptr<program_t> program_node = parser.parse();
 
         interpreter.interpret(*program_node);
 
         bool has_class_definition = false;
         for (const auto& stmt : program_node->statements)
         {
-            if (dynamic_cast<zephyr::class_definition_t*>(stmt.get()))
+            if (dynamic_cast<class_definition_t*>(stmt.get()))
             {
                 has_class_definition = true;
                 break;
@@ -139,14 +159,10 @@ auto runtime_t::process_code_repl(zephyr::interpreter_t& interpreter, const std:
         // If the last statement was an expression, print its result in REPL mode
         if (!program_node->statements.empty())
         {
-            if (auto expr_stmt = dynamic_cast<zephyr::expression_statement_t*>(program_node->statements.back().get()))
+            if (auto expr_stmt = dynamic_cast<expression_statement_t*>(program_node->statements.back().get()))
             {
-                std::shared_ptr<zephyr::object_t> result = interpreter.current_result();
-                // Only print if there's a result and it's not a NoneObject
-                if (result && result->type()->name() != "none")
-                {
-                    std::cout << result->to_string() << std::endl;
-                }
+                auto result = interpreter.current_result();
+                print_result(result);
             }
         }
 
@@ -157,7 +173,7 @@ auto runtime_t::process_code_repl(zephyr::interpreter_t& interpreter, const std:
 
         return true;
     }
-    catch (const zephyr::syntax_error_t& e)
+    catch (const syntax_error_t& e)
     {
         if (std::string(e.what()).find("Unexpected end of file") != std::string::npos)
         {
@@ -166,7 +182,7 @@ auto runtime_t::process_code_repl(zephyr::interpreter_t& interpreter, const std:
         print_error(e.what(), e.error_name(), full_source_code, e.line(), e.column());
         return true; // Error occurred, clear input
     }
-    catch (const zephyr::runtime_error_with_location_t& e)
+    catch (const runtime_error_with_location_t& e)
     {
         print_error(e.what(), e.error_name(), full_source_code, e.line(), e.column(), "", e.length());
         return true; // Error occurred, clear input
