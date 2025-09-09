@@ -27,13 +27,13 @@ This enables the following pattern:
 // File: my_utility.zephyr
 
 func useful_function() {
-    print("Doing something useful...");
+    print("Doing something useful...")
 }
 
 // This block only executes when this file is run directly.
 if __module_name__ == "__main__" {
-    print("Running utility as a standalone script.");
-    useful_function();
+    print("Running utility as a standalone script.")
+    useful_function()
 }
 ```
 
@@ -50,16 +50,16 @@ The `internal` keyword prevents a top-level declaration from being imported by o
 // File: math.zephyr
 
 // This constant is public by default and can be imported.
-const PI = 3.14159;
+const PI = 3.14159
 
 // This function is also public by default.
 func add(a, b) {
-    return a + b;
+    return a + b
 }
 
 // This function is private to math.zephyr and cannot be imported.
 internal func secret_helper_func() {
-    return 42;
+    return 42
 }
 ```
 
@@ -68,12 +68,12 @@ internal func secret_helper_func() {
 The `import` statement is used to bring public symbols from other modules into the current scope. It supports two ways of specifying the module source: by path or by name.
 
 -   **Importing from a Path:** Uses a string literal for the path. The `.zephyr` extension is required.
-    -   Named imports: `import PI, add from "./math.zephyr";`
-    -   Namespace import: `import * as math from "./math.zephyr";`
+    -   Named imports: `import PI, add from "./math.zephyr"`
+    -   Namespace import: `import * as math from "./math.zephyr"`
 
 -   **Importing from a Module Name:** Uses an identifier for the name. The `.zephyr` extension is omitted.
-    -   Named imports: `import PI, add from math;`
-    -   Namespace import: `import * as math from math;`
+    -   Named imports: `import PI, add from math`
+    -   Namespace import: `import * as math from math`
 
 An attempt to import an `internal` symbol will always result in an error.
 
@@ -98,7 +98,7 @@ A `module_loader_t` class will be implemented with a multi-step resolution strat
 
 2.  **Name-based Resolution:** If the import specifier is an identifier (e.g., `math`), the loader will search for a corresponding file (`math.zephyr`) in the following locations, in order:
     a.  The current working directory where the interpreter was launched.
-    b.  Directories listed in the `ZEPHYRPATH` environment variable. The interpreter will read this variable on startup, which contains a list of paths separated by `:` (Linux/macOS) or `;` (Windows).
+    b.  Directories listed in the `ZEPHYRPATH` environment variable. The interpreter will read this variable on startup, which contains a list of paths separated by `:` (Linux/macOS) or `` (Windows).
 
 3.  **Caching:** Resolved modules will be cached using their absolute file path as the key. This prevents the same module from being loaded and executed multiple times.
 
