@@ -239,7 +239,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<number_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     int value;
@@ -254,7 +254,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<float_literal_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     double value;
@@ -269,7 +269,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<string_literal_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string value;
@@ -285,13 +285,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        std::vector<std::unique_ptr<expression_t>> new_parts;
-        for(const auto& part : parts) {
-            new_parts.push_back(part ? std::unique_ptr<expression_t>(static_cast<expression_t*>(part->clone().release())) : nullptr);
-        }
-        return std::make_unique<fstring_t>(std::move(new_parts), line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 };
 
 class boolean_literal_t : public expression_t
@@ -303,7 +297,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<boolean_literal_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     bool value;
@@ -318,7 +312,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<none_literal_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 };
 
 class list_literal_t : public expression_t
@@ -335,13 +329,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_list = std::make_unique<list_literal_t>(line, column, end_line, end_column);
-        for (const auto& element : elements) {
-            new_list->add_element(element ? std::unique_ptr<expression_t>(static_cast<expression_t*>(element->clone().release())) : nullptr);
-        }
-        return new_list;
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::vector<std::unique_ptr<expression_t>> elements;
@@ -361,15 +349,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_dict = std::make_unique<dictionary_literal_t>(line, column, end_line, end_column);
-        for (const auto& pair : key_value_pairs) {
-            auto key_clone = pair.first ? std::unique_ptr<expression_t>(static_cast<expression_t*>(pair.first->clone().release())) : nullptr;
-            auto value_clone = pair.second ? std::unique_ptr<expression_t>(static_cast<expression_t*>(pair.second->clone().release())) : nullptr;
-            new_dict->add_element(std::move(key_clone), std::move(value_clone));
-        }
-        return new_dict;
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::vector<std::pair<std::unique_ptr<expression_t>, std::unique_ptr<expression_t>>> key_value_pairs;
@@ -384,7 +364,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<name_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string name;
@@ -400,12 +380,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<binary_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            operator_token, line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -422,12 +397,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<power_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -443,12 +413,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<comparison_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            operator_token, line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -465,12 +430,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<logical_and_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -486,12 +446,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<logical_or_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -507,12 +462,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<nullish_coalescing_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -528,12 +478,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<pipe_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -549,11 +494,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<logical_not_op_t>(
-            expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> expression;
@@ -568,12 +509,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<unary_op_t>(
-            operator_token,
-            expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> expression;
@@ -590,12 +526,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<index_access_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            index ? std::unique_ptr<expression_t>(static_cast<expression_t*>(index->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -611,12 +542,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<optional_index_access_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            index ? std::unique_ptr<expression_t>(static_cast<expression_t*>(index->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -632,11 +558,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<member_access_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            member_name, line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -652,11 +574,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<optional_member_access_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            member_name, line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -672,15 +590,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_args = std::vector<std::unique_ptr<expression_t>>();
-        for(const auto& arg : arguments) {
-            new_args.push_back(arg ? std::unique_ptr<expression_t>(static_cast<expression_t*>(arg->clone().release())) : nullptr);
-        }
-        return std::make_unique<method_call_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            method_name, std::move(new_args), line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -697,15 +607,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_args = std::vector<std::unique_ptr<expression_t>>();
-        for(const auto& arg : arguments) {
-            new_args.push_back(arg ? std::unique_ptr<expression_t>(static_cast<expression_t*>(arg->clone().release())) : nullptr);
-        }
-        return std::make_unique<optional_method_call_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            method_name, std::move(new_args), line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -722,13 +624,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_args = std::vector<std::unique_ptr<expression_t>>();
-        for(const auto& arg : arguments) {
-            new_args.push_back(arg ? std::unique_ptr<expression_t>(static_cast<expression_t*>(arg->clone().release())) : nullptr);
-        }
-        return std::make_unique<function_call_t>(function_name, std::move(new_args), line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string function_name;
@@ -744,7 +640,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<this_expression_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 };
 
 class ternary_expression_t : public expression_t
@@ -756,13 +652,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<ternary_expression_t>(
-            condition ? std::unique_ptr<expression_t>(static_cast<expression_t*>(condition->clone().release())) : nullptr,
-            true_expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(true_expression->clone().release())) : nullptr,
-            false_expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(false_expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> condition;
@@ -779,11 +669,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<await_expression_t>(
-            expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> expression;
@@ -798,11 +684,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<spawn_expression_t>(
-            expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> expression;
@@ -817,12 +699,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<in_expression_t>(
-            element ? std::unique_ptr<expression_t>(static_cast<expression_t*>(element->clone().release())) : nullptr,
-            container_expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(container_expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> element;
@@ -839,12 +716,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<bitwise_and_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -860,12 +732,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<bitwise_or_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -881,12 +748,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<bitwise_xor_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -902,11 +764,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<bitwise_not_op_t>(
-            expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> expression;
@@ -921,12 +779,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<left_shift_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -942,12 +795,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<right_shift_op_t>(
-            left ? std::unique_ptr<expression_t>(static_cast<expression_t*>(left->clone().release())) : nullptr,
-            right ? std::unique_ptr<expression_t>(static_cast<expression_t*>(right->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> left;
@@ -964,12 +812,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<assignment_t>(
-            variable_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -985,13 +828,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<member_assignment_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            member_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -1008,13 +845,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<indexed_assignment_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            index ? std::unique_ptr<expression_t>(static_cast<expression_t*>(index->clone().release())) : nullptr,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -1032,12 +863,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<const_declaration_t>(
-            variable_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1053,13 +879,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<typed_declaration_t>(
-            variable_name,
-            type_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1076,13 +896,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<typed_const_declaration_t>(
-            variable_name,
-            type_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1099,7 +913,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<empty_declaration_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1114,7 +928,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<empty_typed_declaration_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1130,16 +944,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<member_variable_declaration_t>(
-            variable_name,
-            type_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            has_explicit_type,
-            has_default_value,
-            is_const,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1160,13 +965,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<compound_assignment_t>(
-            variable_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            operator_token,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1183,14 +982,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<compound_member_assignment_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            member_name,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            operator_token,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -1208,14 +1000,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<compound_indexed_assignment_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            index ? std::unique_ptr<expression_t>(static_cast<expression_t*>(index->clone().release())) : nullptr,
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            operator_token,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -1234,7 +1019,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<increment_decrement_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1251,7 +1036,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<increment_decrement_expression_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string variable_name;
@@ -1268,11 +1053,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<member_increment_decrement_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            member_name, is_increment, is_prefix, line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -1290,12 +1071,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<indexed_increment_decrement_t>(
-            object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
-            index ? std::unique_ptr<expression_t>(static_cast<expression_t*>(index->clone().release())) : nullptr,
-            is_increment, is_prefix, line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> object;
@@ -1314,11 +1090,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<expression_statement_t>(
-            expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> expression;
@@ -1338,13 +1110,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_block = std::make_unique<block_t>(line, column, end_line, end_column);
-        for (const auto& stmt : statements) {
-            new_block->add_statement(stmt ? std::unique_ptr<statement_t>(static_cast<statement_t*>(stmt->clone().release())) : nullptr);
-        }
-        return new_block;
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::vector<std::unique_ptr<statement_t>> statements;
@@ -1359,13 +1125,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<if_statement_t>(
-            condition ? std::unique_ptr<expression_t>(static_cast<expression_t*>(condition->clone().release())) : nullptr,
-            then_block ? std::unique_ptr<block_t>(static_cast<block_t*>(then_block->clone().release())) : nullptr,
-            else_block ? std::unique_ptr<block_t>(static_cast<block_t*>(else_block->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> condition;
@@ -1382,12 +1142,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<while_statement_t>(
-            condition ? std::unique_ptr<expression_t>(static_cast<expression_t*>(condition->clone().release())) : nullptr,
-            body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> condition;
@@ -1403,12 +1158,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<do_while_statement_t>(
-            body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
-            condition ? std::unique_ptr<expression_t>(static_cast<expression_t*>(condition->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<block_t> body;
@@ -1424,12 +1174,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<do_until_statement_t>(
-            body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
-            condition ? std::unique_ptr<expression_t>(static_cast<expression_t*>(condition->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<block_t> body;
@@ -1445,14 +1190,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<for_statement_t>(
-            initialization ? std::unique_ptr<statement_t>(static_cast<statement_t*>(initialization->clone().release())) : nullptr,
-            condition ? std::unique_ptr<expression_t>(static_cast<expression_t*>(condition->clone().release())) : nullptr,
-            increment ? std::unique_ptr<statement_t>(static_cast<statement_t*>(increment->clone().release())) : nullptr,
-            body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<statement_t> initialization;
@@ -1470,14 +1208,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<for_each_statement_t>(
-            variables,
-            collection ? std::unique_ptr<expression_t>(static_cast<expression_t*>(collection->clone().release())) : nullptr,
-            body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
-            where_clause ? std::unique_ptr<expression_t>(static_cast<expression_t*>(where_clause->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::vector<for_each_variable_t> variables;
@@ -1495,11 +1226,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<loop_statement_t>(
-            body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<block_t> body;
@@ -1514,7 +1241,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<break_statement_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 };
 
 class continue_statement_t : public statement_t
@@ -1526,7 +1253,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override { return std::make_unique<continue_statement_t>(*this); }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 };
 
 class return_statement_t : public statement_t
@@ -1538,11 +1265,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<return_statement_t>(
-            return_value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(return_value->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> return_value;
@@ -1557,13 +1280,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<try_catch_statement_t>(
-            try_block ? std::unique_ptr<block_t>(static_cast<block_t*>(try_block->clone().release())) : nullptr,
-            exception_variable_name,
-            catch_block ? std::unique_ptr<block_t>(static_cast<block_t*>(catch_block->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<block_t> try_block;
@@ -1580,12 +1297,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<list_destructuring_assignment_t>(
-            variable_names,
-            assigned_expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(assigned_expression->clone().release())) : nullptr,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::vector<std::string> variable_names;
@@ -1601,16 +1313,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_stmts = std::vector<std::unique_ptr<statement_t>>();
-        for(const auto& stmt : statements) {
-            new_stmts.push_back(stmt ? std::unique_ptr<statement_t>(static_cast<statement_t*>(stmt->clone().release())) : nullptr);
-        }
-        return std::make_unique<case_statement_t>(
-            value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
-            std::move(new_stmts),
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> value;
@@ -1626,22 +1329,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_cases = std::vector<std::unique_ptr<case_statement_t>>();
-        for(const auto& c : cases) {
-            new_cases.push_back(c ? std::unique_ptr<case_statement_t>(static_cast<case_statement_t*>(c->clone().release())) : nullptr);
-        }
-        auto new_defaults = std::vector<std::unique_ptr<statement_t>>();
-        for(const auto& s : default_statements) {
-            new_defaults.push_back(s ? std::unique_ptr<statement_t>(static_cast<statement_t*>(s->clone().release())) : nullptr);
-        }
-        return std::make_unique<switch_statement_t>(
-            expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(expression->clone().release())) : nullptr,
-            std::move(new_cases),
-            std::move(new_defaults),
-            has_default_case,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::unique_ptr<expression_t> expression;
@@ -1659,16 +1347,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<function_definition_t>(
-            function_name,
-            parameters,
-            body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
-            return_type_name,
-            explicit_return_type,
-            async,
-            line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string function_name;
@@ -1693,25 +1372,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        if (is_block_body) {
-            return std::make_unique<lambda_expression_t>(
-                parameters,
-                body_block ? std::unique_ptr<block_t>(static_cast<block_t*>(body_block->clone().release())) : nullptr,
-                return_type_name,
-                explicit_return_type,
-                async,
-                line, column, end_line, end_column);
-        } else {
-            return std::make_unique<lambda_expression_t>(
-                parameters,
-                body_expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(body_expression->clone().release())) : nullptr,
-                return_type_name,
-                explicit_return_type,
-                async,
-                line, column, end_line, end_column);
-        }
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::vector<parameter_t> parameters;
@@ -1740,9 +1401,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        return std::make_unique<interface_definition_t>(interface_name, methods, line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string interface_name;
@@ -1758,17 +1417,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_members = std::vector<std::unique_ptr<member_variable_declaration_t>>();
-        for(const auto& m : member_variables) {
-            new_members.push_back(m ? std::unique_ptr<member_variable_declaration_t>(static_cast<member_variable_declaration_t*>(m->clone().release())) : nullptr);
-        }
-        auto new_methods = std::vector<std::unique_ptr<function_definition_t>>();
-        for(const auto& m : methods) {
-            new_methods.push_back(m ? std::unique_ptr<function_definition_t>(static_cast<function_definition_t*>(m->clone().release())) : nullptr);
-        }
-        return std::make_unique<class_definition_t>(class_name, interfaces, std::move(new_members), std::move(new_methods), line, column, end_line, end_column);
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::string class_name;
@@ -1792,13 +1441,7 @@ public:
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
-    auto clone() const -> std::unique_ptr<ast_node_t> override {
-        auto new_program = std::make_unique<program_t>(line, column, end_line, end_column);
-        for (const auto& stmt : statements) {
-            new_program->add_statement(stmt ? std::unique_ptr<statement_t>(static_cast<statement_t*>(stmt->clone().release())) : nullptr);
-        }
-        return new_program;
-    }
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
 
 public:
     std::vector<std::unique_ptr<statement_t>> statements;
