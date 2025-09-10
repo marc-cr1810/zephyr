@@ -1,0 +1,37 @@
+# test_path_import.zephyr - Test path-based import functionality
+
+# Test path-based imports using string literals
+import add, multiply, PI from "./math_utils.zephyr"
+
+print("Testing path-based imports:")
+print("Path imported add(12, 8):", add(12, 8))
+print("Path imported multiply(9, 6):", multiply(9, 6))
+print("Path imported PI:", PI)
+
+# Test path-based namespace import
+import * as pathmath from "./math_utils.zephyr"
+
+print("\nTesting path-based namespace import:")
+# Use two-step approach for function calls
+path_add_func = pathmath["add"]
+path_multiply_func = pathmath["multiply"]
+path_circle_func = pathmath["circle_area"]
+
+print("pathmath['add'](7, 3):", path_add_func(7, 3))
+print("pathmath['multiply'](4, 5):", path_multiply_func(4, 5))
+print("pathmath['PI']:", pathmath["PI"])
+print("pathmath['E']:", pathmath["E"])
+print("pathmath['circle_area'](2):", path_circle_func(2))
+
+# Verify module name in imported module vs current module
+print("\nModule identity:")
+print("Current module name:", __module_name__)
+print("This should be '__main__' when run directly")
+
+# Test mixed import styles work together
+print("\nTesting mixed import styles:")
+print("Name-based add(1, 2):", add(1, 2))  # From name-based import
+print("Path-based add(1, 2):", path_add_func(1, 2))  # From path-based import
+print("Both should give same result: 3")
+
+print("\nPath-based import test completed successfully!")

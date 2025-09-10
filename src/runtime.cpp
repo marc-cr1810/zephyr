@@ -1,4 +1,5 @@
 #include "runtime.hpp"
+#include "module_loader.hpp"
 #include "lexer.hpp"
 #include "objects/object.hpp"
 #include "parser.hpp"
@@ -43,6 +44,7 @@ static auto print_result(const std::shared_ptr<object_t>& obj) -> void
 runtime_t::runtime_t()
     : m_scheduler(async_scheduler_t::instance())
 {
+    initialize_module_system();
 }
 
 auto runtime_t::execute_file(const std::string& filename) -> int
@@ -65,6 +67,12 @@ auto runtime_t::execute_file(const std::string& filename) -> int
     std::string source_code = buffer.str();
 
     interpreter_t interpreter(filename, source_code);
+    
+    // Set up module system for main script
+    auto main_module = create_main_module(filename, source_code);
+    interpreter.set_module_loader(m_module_loader);
+    interpreter.set_current_module(main_module);
+    
     bool success = process_code(interpreter, source_code, filename);
     return success ? 0 : 1;
 }
@@ -72,6 +80,12 @@ auto runtime_t::execute_file(const std::string& filename) -> int
 auto runtime_t::execute_string(const std::string& source, const std::string& context_name) -> int
 {
     interpreter_t interpreter(context_name, source);
+    
+    // Set up module system for string execution
+    auto main_module = create_main_module(context_name, source);
+    interpreter.set_module_loader(m_module_loader);
+    interpreter.set_current_module(main_module);
+    
     bool success = process_code(interpreter, source, context_name);
     return success ? 0 : 1;
 }
@@ -83,6 +97,11 @@ auto runtime_t::start_repl() -> void
     std::cout << "Zephyr " << ZEPHYR_VERSION << " [GCC " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__ << "] on " << ZEPHYR_SYSTEM_NAME << std::endl;
 
     interpreter_t interpreter("<stdin>", accumulated_input);
+    
+    // Set up module system for REPL
+    auto repl_module = create_main_module("<stdin>", "");
+    interpreter.set_module_loader(m_module_loader);
+    interpreter.set_current_module(repl_module);
 
     while (true)
     {
@@ -93,10 +112,17 @@ auto runtime_t::start_repl() -> void
         }
 
         accumulated_input += line + "\n";
+        
+        // Update module source code for current input
+        repl_module->set_source_code(accumulated_input);
+        // Re-inject module name variable for current session
+        interpreter.update_module_name_variable();
 
         if (process_code_repl(interpreter, accumulated_input, accumulated_input))
         {
             accumulated_input.clear(); // Clear on successful processing or error
+            // Reset module source when input is cleared
+            repl_module->set_source_code("");
         }
     }
 }
@@ -269,6 +295,30 @@ auto runtime_t::print_error(const std::string& message, const std::string& error
     }
 
     std::cerr << ANSI_COLOR_RED << error_type << ": " << message << ANSI_COLOR_RESET << std::endl;
+}
+
+auto runtime_t::initialize_module_system() -> void
+{
+    m_module_loader = std::make_shared<module_loader_t>();
+}
+
+auto runtime_t::create_main_module(const std::string& file_path, const std::string& source_code) -> std::shared_ptr<module_t>
+{
+    auto main_module = std::make_shared<module_t>("__main__", file_path);
+    main_module->set_source_code(source_code);
+
+    // Parse the main module for potential exports
+    try {
+        lexer_t lexer(source_code);
+        parser_t parser(lexer);
+        auto ast = parser.parse();
+        main_module->set_ast(std::move(ast));
+    } catch (const std::exception&) {
+        // If parsing fails, we'll handle it during execution
+        // This is just for setting up the module structure
+    }
+
+    return main_module;
 }
 
 } // namespace zephyr

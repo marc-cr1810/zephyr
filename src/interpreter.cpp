@@ -1,5 +1,7 @@
 #include "interpreter.hpp"
+#include "module_loader.hpp"
 #include "error_context.hpp"
+#include "errors.hpp"
 #include "objects/function_object.hpp"
 #include "objects/lambda_object.hpp"
 #include "objects/class_object.hpp"
@@ -1361,6 +1363,13 @@ auto interpreter_t::visit(const_declaration_t& node) -> void
 
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = value;
+    
+    // Export the constant if it's not internal
+    if (should_export(node.is_internal))
+    {
+        add_to_exports(node.variable_name, value);
+    }
+    
     m_current_result = value;
     zephyr::current_error_location() = saved_location;
 }
@@ -2220,6 +2229,13 @@ auto interpreter_t::visit(function_definition_t& node) -> void
     auto func_obj = std::make_shared<function_object_t>(node.parameters, std::unique_ptr<block_t>(static_cast<block_t*>(node.body->clone().release())), node.return_type_name, node.explicit_return_type, node.async);
     auto& current_scope = m_scope_stack.back();
     current_scope[node.function_name] = func_obj;
+    
+    // Export the function if it's not internal
+    if (should_export(node.is_internal))
+    {
+        add_to_exports(node.function_name, func_obj);
+    }
+    
     m_current_result = func_obj;
     zephyr::current_error_location() = saved_location;
 }
@@ -2928,6 +2944,13 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     // Store the class in the current scope
     auto& current_scope = m_scope_stack.back();
     current_scope[node.class_name] = class_obj;
+    
+    // Export the class if it's not internal
+    if (should_export(node.is_internal))
+    {
+        add_to_exports(node.class_name, class_obj);
+    }
+    
     m_current_result = class_obj;
     zephyr::current_error_location() = saved_location;
 }
@@ -3602,5 +3625,105 @@ auto interpreter_t::variable(const std::string& variable_name, value_t value) ->
 // Static member definitions
 std::map<std::string, value_t> interpreter_t::s_builtin_functions;
 bool interpreter_t::s_builtins_initialized = false;
+
+auto interpreter_t::set_module_loader(std::shared_ptr<module_loader_t> loader) -> void
+{
+    m_module_loader = loader;
+}
+
+auto interpreter_t::set_current_module(std::shared_ptr<module_t> module) -> void
+{
+    m_current_module = module;
+    inject_module_name_variable();
+}
+
+auto interpreter_t::get_current_module() const -> std::shared_ptr<module_t>
+{
+    return m_current_module;
+}
+
+auto interpreter_t::visit(import_statement_t& node) -> void
+{
+    if (!m_module_loader)
+    {
+        throw value_error_t("Module loader not set");
+    }
+    
+    // Load the module
+    auto module = m_module_loader->load_module(
+        node.get_module_specifier(), 
+        node.is_path_based(), 
+        m_current_module ? m_current_module->get_file_path() : ""
+    );
+    
+    if (node.is_namespace_import())
+    {
+        if (!node.get_alias_name().empty())
+        {
+            // Namespace import: import * as alias_name from module
+            // Create a dictionary with all exports
+            auto exports_dict = std::make_shared<dictionary_object_t>();
+            for (const auto& [symbol_name, value] : module->get_all_exports())
+            {
+                exports_dict->elements_mutable()[symbol_name] = value;
+            }
+            
+            // Store the dictionary in the current scope with the alias name
+            variable(node.get_alias_name(), exports_dict);
+        }
+        else
+        {
+            // Direct star import: import * from module
+            // Import all symbols directly into current scope
+            for (const auto& [symbol_name, value] : module->get_all_exports())
+            {
+                variable(symbol_name, value);
+            }
+        }
+    }
+    else
+    {
+        // Named import: import symbol1, symbol2 from module
+        for (const auto& symbol_name : node.get_imported_symbols())
+        {
+            auto export_value = module->get_export(symbol_name);
+            if (!export_value)
+            {
+                throw name_error_t("Module '" + node.get_module_specifier() + "' has no export '" + symbol_name + "'");
+            }
+            
+            // Import the symbol into current scope
+            variable(symbol_name, export_value);
+        }
+    }
+}
+
+auto interpreter_t::inject_module_name_variable() -> void
+{
+    if (m_current_module)
+    {
+        std::string module_name = m_current_module->get_name();
+        auto module_name_obj = std::make_shared<string_object_t>(module_name);
+        variable("__module_name__", module_name_obj);
+    }
+}
+
+auto interpreter_t::add_to_exports(const std::string& symbol_name, value_t value) -> void
+{
+    if (m_current_module)
+    {
+        m_current_module->add_export(symbol_name, value);
+    }
+}
+
+auto interpreter_t::should_export(bool is_internal) const -> bool
+{
+    return !is_internal && m_current_module;
+}
+
+auto interpreter_t::update_module_name_variable() -> void
+{
+    inject_module_name_variable();
+}
 
 } // namespace zephyr

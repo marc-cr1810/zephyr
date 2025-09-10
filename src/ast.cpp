@@ -679,6 +679,7 @@ auto const_declaration_t::clone() const -> std::unique_ptr<ast_node_t>
     return std::make_unique<const_declaration_t>(
         variable_name,
         value ? std::unique_ptr<expression_t>(static_cast<expression_t*>(value->clone().release())) : nullptr,
+        is_internal,
         line, column, end_line, end_column);
 }
 
@@ -929,6 +930,7 @@ auto function_definition_t::clone() const -> std::unique_ptr<ast_node_t>
         return_type_name,
         explicit_return_type,
         async,
+        is_internal,
         line, column, end_line, end_column);
 }
 
@@ -973,7 +975,7 @@ auto class_definition_t::clone() const -> std::unique_ptr<ast_node_t>
     {
         new_methods.push_back(m ? std::unique_ptr<function_definition_t>(static_cast<function_definition_t*>(m->clone().release())) : nullptr);
     }
-    return std::make_unique<class_definition_t>(class_name, interfaces, std::move(new_members), std::move(new_methods), line, column, end_line, end_column);
+    return std::make_unique<class_definition_t>(class_name, interfaces, std::move(new_members), std::move(new_methods), is_internal, line, column, end_line, end_column);
 }
 
 auto program_t::clone() const -> std::unique_ptr<ast_node_t>
@@ -984,6 +986,55 @@ auto program_t::clone() const -> std::unique_ptr<ast_node_t>
         new_program->add_statement(stmt ? std::unique_ptr<statement_t>(static_cast<statement_t*>(stmt->clone().release())) : nullptr);
     }
     return new_program;
+}
+
+import_statement_t::import_statement_t(std::vector<std::string> imported_symbols, 
+                                      std::string alias_name,
+                                      std::string module_specifier, 
+                                      bool is_namespace_import,
+                                      bool is_path_based)
+    : statement_t(0, 0, 0, 0), 
+      m_imported_symbols(std::move(imported_symbols)), 
+      m_alias_name(std::move(alias_name)), 
+      m_module_specifier(std::move(module_specifier)), 
+      m_is_namespace_import(is_namespace_import), 
+      m_is_path_based(is_path_based)
+{
+}
+
+auto import_statement_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto import_statement_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    return std::make_unique<import_statement_t>(m_imported_symbols, m_alias_name, m_module_specifier, m_is_namespace_import, m_is_path_based);
+}
+
+auto import_statement_t::get_imported_symbols() const -> const std::vector<std::string>&
+{
+    return m_imported_symbols;
+}
+
+auto import_statement_t::get_alias_name() const -> const std::string&
+{
+    return m_alias_name;
+}
+
+auto import_statement_t::get_module_specifier() const -> const std::string&
+{
+    return m_module_specifier;
+}
+
+auto import_statement_t::is_namespace_import() const -> bool
+{
+    return m_is_namespace_import;
+}
+
+auto import_statement_t::is_path_based() const -> bool
+{
+    return m_is_path_based;
 }
 
 } // namespace zephyr

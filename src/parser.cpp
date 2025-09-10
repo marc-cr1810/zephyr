@@ -124,10 +124,20 @@ std::unique_ptr<const_declaration_t> parser_t::const_declaration() {
     eat(token_type_e::name);
     eat(token_type_e::assign);
     auto value_expr = expression();
-    return std::make_unique<const_declaration_t>(name_token.text, std::move(value_expr), const_token.line, const_token.column, value_expr->end_line, value_expr->end_column);
+    return std::make_unique<const_declaration_t>(name_token.text, std::move(value_expr), false, const_token.line, const_token.column, value_expr->end_line, value_expr->end_column);
 }
 
 std::unique_ptr<statement_t> parser_t::statement() {
+    // Check for import statements first
+    if (m_current_token.type == token_type_e::import_token) {
+        return import_statement();
+    }
+
+    // Check for internal declarations
+    if (m_current_token.type == token_type_e::internal_token) {
+        return internal_declaration();
+    }
+
     // Add this check at the very beginning
     if (m_current_token.type == token_type_e::const_token) {
         // Check if this is a typed const declaration: const x : type = value
@@ -1345,7 +1355,7 @@ std::unique_ptr<function_definition_t> parser_t::function_definition() {
     }
 
     auto body = block();
-    return std::make_unique<function_definition_t>(name_token.text, std::move(parameters), std::move(body), return_type_name, explicit_return_type, async,
+    return std::make_unique<function_definition_t>(name_token.text, std::move(parameters), std::move(body), return_type_name, explicit_return_type, async, false,
                                                func_token.line, func_token.column, m_current_token.line, m_current_token.column);
 }
 
@@ -1926,6 +1936,7 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
         std::move(interfaces),
         std::move(member_variables),
         std::move(methods),
+        false,
         class_token.line,
         class_token.column,
         end_token.line,
@@ -2093,6 +2104,163 @@ std::unique_ptr<member_assignment_t> parser_t::member_assignment() {
         value->end_line,
         value->end_column
     );
+}
+
+auto parser_t::import_statement() -> std::unique_ptr<import_statement_t>
+{
+    token_t import_token = m_current_token;
+    eat(token_type_e::import_token);
+    
+    std::vector<std::string> imported_symbols;
+    std::string alias_name;
+    bool is_namespace_import = false;
+    
+    // Check for star import: import * [as alias]
+    if (m_current_token.type == token_type_e::mul)
+    {
+        eat(token_type_e::mul);
+        is_namespace_import = true;
+        
+        // Check if there's an 'as' clause for aliased namespace import
+        if (m_current_token.type == token_type_e::as_token)
+        {
+            eat(token_type_e::as_token);
+            
+            if (m_current_token.type != token_type_e::name)
+            {
+                throw syntax_error_t("Expected alias name after 'as'");
+            }
+            
+            alias_name = std::string(m_current_token.text);
+            eat(token_type_e::name);
+        }
+        // If no 'as' clause, it's a direct star import (import * from module)
+        // alias_name remains empty to indicate direct import
+    }
+    else
+    {
+        // Named import: import symbol1, symbol2, symbol3
+        imported_symbols = parse_imported_symbols();
+    }
+    
+    // Parse 'from' clause
+    eat(token_type_e::from_token);
+    
+    // Parse module specifier (string literal or identifier)
+    auto [module_specifier, is_path_based] = parse_import_specifier();
+    
+    return std::make_unique<import_statement_t>(
+        std::move(imported_symbols),
+        std::move(alias_name),
+        std::move(module_specifier),
+        is_namespace_import,
+        is_path_based
+    );
+}
+
+auto parser_t::parse_imported_symbols() -> std::vector<std::string>
+{
+    std::vector<std::string> symbols;
+    
+    if (m_current_token.type != token_type_e::name)
+    {
+        throw syntax_error_t("Expected symbol name in import statement");
+    }
+    
+    symbols.push_back(std::string(m_current_token.text));
+    eat(token_type_e::name);
+    
+    // Parse additional symbols separated by commas
+    while (m_current_token.type == token_type_e::comma)
+    {
+        eat(token_type_e::comma);
+        
+        if (m_current_token.type != token_type_e::name)
+        {
+            throw syntax_error_t("Expected symbol name after comma in import statement");
+        }
+        
+        symbols.push_back(std::string(m_current_token.text));
+        eat(token_type_e::name);
+    }
+    
+    return symbols;
+}
+
+auto parser_t::parse_import_specifier() -> std::pair<std::string, bool>
+{
+    if (m_current_token.type == token_type_e::string)
+    {
+        // Path-based import: from "./math.zephyr"
+        std::string specifier = std::string(m_current_token.text);
+        // Remove quotes from string literal
+        if (specifier.length() >= 2 && specifier.front() == '"' && specifier.back() == '"')
+        {
+            specifier = specifier.substr(1, specifier.length() - 2);
+        }
+        eat(token_type_e::string);
+        return {specifier, true};
+    }
+    else if (m_current_token.type == token_type_e::name)
+    {
+        // Name-based import: from math
+        std::string specifier = std::string(m_current_token.text);
+        eat(token_type_e::name);
+        return {specifier, false};
+    }
+    else
+    {
+        throw syntax_error_t("Expected module name or path in import statement");
+    }
+}
+
+auto parser_t::internal_declaration() -> std::unique_ptr<statement_t>
+{
+    eat(token_type_e::internal_token);
+    
+    // Parse the declaration that follows 'internal'
+    if (m_current_token.type == token_type_e::func)
+    {
+        // Internal function
+        auto func_def = function_definition();
+        func_def->is_internal = true;
+        return func_def;
+    }
+    else if (m_current_token.type == token_type_e::async)
+    {
+        // Internal async function
+        auto func_def = function_definition();
+        func_def->is_internal = true;
+        return func_def;
+    }
+    else if (m_current_token.type == token_type_e::class_token)
+    {
+        // Internal class
+        auto class_def = class_definition();
+        class_def->is_internal = true;
+        return class_def;
+    }
+    else if (m_current_token.type == token_type_e::const_token)
+    {
+        // Internal const declaration
+        auto const_def = const_declaration();
+        const_def->is_internal = true;
+        return const_def;
+    }
+    else
+    {
+        throw syntax_error_t("'internal' can only be used with func, async, class, or const declarations");
+    }
+}
+
+auto parser_t::is_import_statement_lookahead() -> bool
+{
+    return m_current_token.type == token_type_e::import_token;
+}
+
+auto parser_t::is_internal_declaration_lookahead() -> bool
+{
+    return m_current_token.type == token_type_e::internal_token;
 }
 
 }

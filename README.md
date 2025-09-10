@@ -214,6 +214,32 @@ bash test_all_examples.sh
 ./bin/zephyr examples/20_explicit_typing.zephyr
 ```
 
+### Module System Tests
+
+The module system includes comprehensive tests for import/export functionality:
+
+```bash
+# Run all module system tests
+tests/modules/run_tests.sh
+
+# Run individual module tests
+./bin/zephyr tests/modules/internal_keyword_test.zephyr
+./bin/zephyr tests/modules/import_test.zephyr
+./bin/zephyr tests/modules/internal_import_test.zephyr
+./bin/zephyr tests/modules/path_import_test.zephyr
+```
+
+Module system features tested:
+- ✅ Internal keyword parsing (`internal func`, `internal const`, `internal class`)
+- ✅ Named imports (`import symbol from module`)
+- ✅ Namespace imports (`import * as alias from module`)
+- ✅ Path-based imports (`import from "./path.zephyr"`)
+- ✅ Export management and internal symbol protection
+- ✅ Module name injection (`__module_name__` variable)
+- ✅ Error handling for missing modules and symbols
+
+See `tests/modules/README.md` for detailed test documentation.
+
 ## Development Tools
 
 - **Grammar Definition**: `grammar/Zephyr.g4` - ANTLR4 grammar specification

@@ -65,15 +65,22 @@ internal func secret_helper_func() {
 
 ### `import` Keyword
 
-The `import` statement is used to bring public symbols from other modules into the current scope. It supports two ways of specifying the module source: by path or by name.
+The `import` statement is used to bring public symbols from other modules into the current scope. It supports two ways of specifying the module source: by path or by name, and three different import patterns.
 
 -   **Importing from a Path:** Uses a string literal for the path. The `.zephyr` extension is required.
     -   Named imports: `import PI, add from "./math.zephyr"`
+    -   Direct star import: `import * from "./math.zephyr"`
     -   Namespace import: `import * as math from "./math.zephyr"`
 
 -   **Importing from a Module Name:** Uses an identifier for the name. The `.zephyr` extension is omitted.
     -   Named imports: `import PI, add from math`
+    -   Direct star import: `import * from math`
     -   Namespace import: `import * as math from math`
+
+**Import Patterns:**
+-   **Named Import:** `import symbol1, symbol2 from module` - Imports specific symbols by name
+-   **Direct Star Import:** `import * from module` - Imports all public symbols directly into current scope
+-   **Namespace Import:** `import * as alias from module` - Imports all public symbols into a namespace dictionary
 
 An attempt to import an `internal` symbol will always result in an error.
 

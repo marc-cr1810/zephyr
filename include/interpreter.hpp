@@ -10,6 +10,13 @@
 
 namespace zephyr
 {
+// Forward declaration for module system
+class module_loader_t;
+class module_t;
+}
+
+namespace zephyr
+{
 
 // Value is now a shared pointer to an object_t
 using value_t = std::shared_ptr<object_t>;
@@ -99,8 +106,15 @@ public:
     auto visit(bitwise_not_op_t& node) -> void override;
     auto visit(left_shift_op_t& node) -> void override;
     auto visit(right_shift_op_t& node) -> void override;
+    auto visit(import_statement_t& node) -> void override;
 
 public:
+    // Module system functions
+    auto set_module_loader(std::shared_ptr<module_loader_t> loader) -> void;
+    auto set_current_module(std::shared_ptr<module_t> module) -> void;
+    auto get_current_module() const -> std::shared_ptr<module_t>;
+    auto update_module_name_variable() -> void;
+
     // Public member variables
     bool debug_mode;
     std::string current_filename;
@@ -120,6 +134,11 @@ private:
     auto clone_block(block_t* block) -> std::unique_ptr<block_t>;
     auto contains_return_with_value(block_t* block) -> bool;
 
+    // Module system functions
+    auto inject_module_name_variable() -> void;
+    auto add_to_exports(const std::string& symbol_name, value_t value) -> void;
+    auto should_export(bool is_internal) const -> bool;
+
 private:
     // Private member variables
     std::vector<std::map<std::string, value_t>> m_scope_stack;
@@ -129,6 +148,10 @@ private:
     std::map<std::string, std::string> m_type_constraints;
     std::set<std::string> m_const_variables;
     std::vector<std::string> m_expected_return_types;
+
+    // Module system variables
+    std::shared_ptr<module_loader_t> m_module_loader;
+    std::shared_ptr<module_t> m_current_module;
 
 protected:
     // Protected methods

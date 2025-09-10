@@ -90,6 +90,13 @@ enum class token_type_e
     spawn,
     const_token,
 
+    // Module system tokens
+    import_token,
+    from_token,
+    internal_token,
+    as_token,
+    star,
+
     // End of file
     end_of_file,
 

@@ -1,0 +1,30 @@
+# test_import_working.zephyr - Test the import functionality with two-step approach
+
+# Test named imports from our math module
+import add, multiply, PI from "./math_utils.zephyr"
+
+print("Testing named imports:")
+print("Imported add(10, 5):", add(10, 5))
+print("Imported multiply(6, 7):", multiply(6, 7))
+print("Imported PI:", PI)
+
+# Test namespace import
+import * as math from "./math_utils.zephyr"
+
+print("\nTesting namespace import:")
+# Use two-step approach for function calls from dictionary
+add_func = math["add"]
+multiply_func = math["multiply"]
+circle_area_func = math["circle_area"]
+
+print("math['add'](3, 4):", add_func(3, 4))
+print("math['multiply'](2, 8):", multiply_func(2, 8))
+print("math['PI']:", math["PI"])
+print("math['E']:", math["E"])
+print("math['circle_area'](3):", circle_area_func(3))
+
+# Test that we're in the main module
+print("\nModule info:")
+print("Current module name:", __module_name__)
+
+print("\nImport test completed successfully!")

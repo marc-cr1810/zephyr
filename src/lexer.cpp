@@ -42,6 +42,10 @@ namespace
         {"not", token_type_e::not_token},
         {"const", token_type_e::const_token},
         {"is", token_type_e::is_token},
+        {"import", token_type_e::import_token},
+        {"from", token_type_e::from_token},
+        {"internal", token_type_e::internal_token},
+        {"as", token_type_e::as_token},
     };
 } // namespace
 

@@ -9,6 +9,7 @@ namespace zephyr
 {
 // Forward declarations
 class ast_visitor_t;
+class import_statement_t;
 class switch_statement_t;
 class case_statement_t;
 class ternary_expression_t;
@@ -165,6 +166,7 @@ public:
     virtual auto visit(bitwise_not_op_t& node) -> void = 0;
     virtual auto visit(left_shift_op_t& node) -> void = 0;
     virtual auto visit(right_shift_op_t& node) -> void = 0;
+    virtual auto visit(import_statement_t& node) -> void = 0;
 };
 
 // Base class for all AST nodes
@@ -857,8 +859,8 @@ public:
 class const_declaration_t : public statement_t
 {
 public:
-    const_declaration_t(std::string_view variable_name, std::unique_ptr<expression_t> value, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), variable_name(variable_name), value(std::move(value))
+    const_declaration_t(std::string_view variable_name, std::unique_ptr<expression_t> value, bool is_internal, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), variable_name(variable_name), value(std::move(value)), is_internal(is_internal)
     {
     }
 
@@ -868,6 +870,7 @@ public:
 public:
     std::string variable_name;
     std::unique_ptr<expression_t> value;
+    bool is_internal;
 };
 
 class typed_declaration_t : public statement_t
@@ -1341,8 +1344,8 @@ public:
 class function_definition_t : public statement_t
 {
 public:
-    function_definition_t(std::string_view function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, std::string_view return_type_name, bool explicit_return_type, bool async, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), return_type_name(return_type_name), explicit_return_type(explicit_return_type), async(async)
+    function_definition_t(std::string_view function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, std::string_view return_type_name, bool explicit_return_type, bool async, bool is_internal, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), return_type_name(return_type_name), explicit_return_type(explicit_return_type), async(async), is_internal(is_internal)
     {
     }
 
@@ -1356,6 +1359,7 @@ public:
     std::string return_type_name;
     bool explicit_return_type;
     bool async;
+    bool is_internal;
 };
 
 class lambda_expression_t : public expression_t
@@ -1411,8 +1415,8 @@ public:
 class class_definition_t : public statement_t
 {
 public:
-    class_definition_t(std::string_view class_name, std::vector<std::string> interfaces, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), class_name(class_name), interfaces(std::move(interfaces)), member_variables(std::move(member_variables)), methods(std::move(methods))
+    class_definition_t(std::string_view class_name, std::vector<std::string> interfaces, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, bool is_internal, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), class_name(class_name), interfaces(std::move(interfaces)), member_variables(std::move(member_variables)), methods(std::move(methods)), is_internal(is_internal)
     {
     }
 
@@ -1424,6 +1428,7 @@ public:
     std::vector<std::string> interfaces;
     std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables;
     std::vector<std::unique_ptr<function_definition_t>> methods;
+    bool is_internal;
 };
 
 // Program
@@ -1445,6 +1450,34 @@ public:
 
 public:
     std::vector<std::unique_ptr<statement_t>> statements;
+};
+
+class import_statement_t : public statement_t
+{
+public:
+    // Functions
+    import_statement_t(std::vector<std::string> imported_symbols, 
+                      std::string alias_name,
+                      std::string module_specifier, 
+                      bool is_namespace_import,
+                      bool is_path_based);
+    
+    auto accept(ast_visitor_t& visitor) -> void override;
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
+    
+    auto get_imported_symbols() const -> const std::vector<std::string>&;
+    auto get_alias_name() const -> const std::string&;
+    auto get_module_specifier() const -> const std::string&;
+    auto is_namespace_import() const -> bool;
+    auto is_path_based() const -> bool;
+
+private:
+    // Variables
+    std::vector<std::string> m_imported_symbols;  // ["PI", "add"] for named imports
+    std::string m_alias_name;                     // "math" for namespace imports
+    std::string m_module_specifier;               // "./math.zephyr" or "math"
+    bool m_is_namespace_import;                   // true for "import * as math"
+    bool m_is_path_based;                         // true if specifier is string literal
 };
 
 }

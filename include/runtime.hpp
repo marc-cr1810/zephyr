@@ -11,6 +11,10 @@
 namespace zephyr
 {
 
+// Forward declarations
+class module_loader_t;
+class module_t;
+
 class runtime_t
 {
 public:
@@ -44,9 +48,16 @@ private:
         int length = 1
     ) -> void;
 
+    // Module system functions
+    auto initialize_module_system() -> void;
+    auto create_main_module(const std::string& file_path, const std::string& source_code) -> std::shared_ptr<module_t>;
+
     // Variables
     async_scheduler_t& m_scheduler;
     std::vector<std::unique_ptr<program_t>> m_alive_programs; // For REPL object lifetime
+    
+    // Module system variables
+    std::shared_ptr<module_loader_t> m_module_loader;
 };
 
 } // namespace zephyr

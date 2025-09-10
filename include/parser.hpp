@@ -42,6 +42,7 @@ private:
     auto for_statement() -> std::unique_ptr<for_statement_t>;
     auto for_each_statement() -> std::unique_ptr<for_each_statement_t>;
     auto loop_statement() -> std::unique_ptr<loop_statement_t>;
+    auto import_statement() -> std::unique_ptr<import_statement_t>;
 
     auto list_literal() -> std::unique_ptr<list_literal_t>;
     auto dictionary_literal() -> std::unique_ptr<dictionary_literal_t>;
@@ -74,8 +75,16 @@ private:
     auto is_typed_declaration_lookahead() -> bool;
     auto is_empty_declaration_lookahead() -> bool;
     auto is_member_variable_declaration_lookahead() -> bool;
+    auto is_import_statement_lookahead() -> bool;
+    auto is_internal_declaration_lookahead() -> bool;
     auto lambda_function() -> std::unique_ptr<lambda_expression_t>;
     auto parse_parameter_list() -> std::vector<parameter_t>;
+    
+    // Import statement parsing helpers
+    auto parse_import_specifier() -> std::pair<std::string, bool>; // returns {specifier, is_path_based}
+    auto parse_imported_symbols() -> std::vector<std::string>;
+    auto parse_namespace_import() -> std::string; // returns alias name
+    auto internal_declaration() -> std::unique_ptr<statement_t>;
 
 private:
     struct for_each_head_struct_t
