@@ -1,0 +1,26 @@
+# simple_conditional_test.zephyr - Simple conditional import test
+
+print("Testing basic conditional imports...")
+
+# Test 1: Simple if condition
+use_math = true
+
+if use_math {
+    import add, PI from "./math_utils.zephyr"
+    print("Math imported:", add(5, 10))
+    print("PI value:", PI)
+} else {
+    print("Math not imported")
+}
+
+# Test 2: Conditional namespace import
+use_namespace = true
+
+if use_namespace {
+    import * as math from "./math_utils.zephyr"
+    add_func = math["add"]
+    print("Namespace math imported:", add_func(3, 7))
+    print("Namespace PI:", math["PI"])
+}
+
+print("Basic conditional import test passed!")

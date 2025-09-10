@@ -111,7 +111,22 @@ run_test "tests/modules/comprehensive_import_test.zephyr" \
          "Comprehensive Import Syntax Test" \
          "Test all import syntaxes: named, star, namespace, path-based, and error handling"
 
-# Test 9: REPL Module System Test
+# Test 9: Conditional Import Test
+run_test "tests/modules/conditional_import_test.zephyr" \
+         "Conditional Import Test" \
+         "Test all conditional importing patterns: if/else, functions, loops, error handling"
+
+# Test 10: Simple Conditional Import Test
+run_test "tests/modules/simple_conditional_test.zephyr" \
+         "Simple Conditional Import Test" \
+         "Basic conditional import functionality verification"
+
+# Test 11: Conditional Import Guide
+run_test "tests/modules/conditional_import_guide.zephyr" \
+         "Conditional Import Comprehensive Guide" \
+         "Complete guide and documentation for conditional importing patterns"
+
+# Test 12: REPL Module System Test
 run_test "tests/modules/repl_test.zephyr" \
          "REPL Module System Test" \
          "Verify that REPL mode properly supports module system features"
@@ -139,6 +154,7 @@ if [ $FAILED_TESTS -eq 0 ]; then
     echo -e "${GREEN}✅ Error handling for missing symbols/modules${NC}"
     echo -e "${GREEN}✅ Module caching and performance${NC}"
     echo -e "${GREEN}✅ All import syntax patterns (named, star, namespace)${NC}"
+    echo -e "${GREEN}✅ Conditional importing (if/else, functions, loops)${NC}"
     echo -e "${GREEN}✅ REPL mode module system support${NC}"
     echo ""
     echo -e "${GREEN}MODULE SYSTEM STATUS: PRODUCTION READY ✅${NC}"

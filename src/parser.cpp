@@ -2128,6 +2128,7 @@ auto parser_t::import_statement() -> std::unique_ptr<import_statement_t>
             
             if (m_current_token.type != token_type_e::name)
             {
+                zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
                 throw syntax_error_t("Expected alias name after 'as'");
             }
             
@@ -2164,6 +2165,7 @@ auto parser_t::parse_imported_symbols() -> std::vector<std::string>
     
     if (m_current_token.type != token_type_e::name)
     {
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw syntax_error_t("Expected symbol name in import statement");
     }
     
@@ -2177,6 +2179,7 @@ auto parser_t::parse_imported_symbols() -> std::vector<std::string>
         
         if (m_current_token.type != token_type_e::name)
         {
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
             throw syntax_error_t("Expected symbol name after comma in import statement");
         }
         
@@ -2210,6 +2213,7 @@ auto parser_t::parse_import_specifier() -> std::pair<std::string, bool>
     }
     else
     {
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw syntax_error_t("Expected module name or path in import statement");
     }
 }
@@ -2249,6 +2253,7 @@ auto parser_t::internal_declaration() -> std::unique_ptr<statement_t>
     }
     else
     {
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
         throw syntax_error_t("'internal' can only be used with func, async, class, or const declarations");
     }
 }
