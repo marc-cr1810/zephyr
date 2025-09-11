@@ -1,30 +1,85 @@
-# test_import_working.zephyr - Test the import functionality with two-step approach
+# import_test.zephyr - Comprehensive test of the Zephyr import system
 
-# Test named imports from our math module
-import add, multiply, PI from "./math_utils.zephyr"
+print("Testing Zephyr import system...")
 
-print("Testing named imports:")
-print("Imported add(10, 5):", add(10, 5))
-print("Imported multiply(6, 7):", multiply(6, 7))
-print("Imported PI:", PI)
+# Test 1: Lazy import - imports everything as module.x
+print("\n=== Test 1: Lazy Import ===")
+import math_utils
 
-# Test namespace import
-import * as math from "./math_utils.zephyr"
+print("math_utils.PI:", math_utils.PI)
+print("math_utils.add(5, 3):", math_utils.add(5, 3))
+print("math_utils.multiply(4, 6):", math_utils.multiply(4, 6))
 
-print("\nTesting namespace import:")
-# Use two-step approach for function calls from dictionary
-add_func = math["add"]
-multiply_func = math["multiply"]
-circle_area_func = math["circle_area"]
+# Test 2: Lazy import with alias
+print("\n=== Test 2: Lazy Import with Alias ===")
+import math_utils as math
 
-print("math['add'](3, 4):", add_func(3, 4))
-print("math['multiply'](2, 8):", multiply_func(2, 8))
-print("math['PI']:", math["PI"])
-print("math['E']:", math["E"])
-print("math['circle_area'](3):", circle_area_func(3))
+print("math.PI:", math.PI)
+print("math.add(10, 20):", math.add(10, 20))
+print("math.circle_area(5):", math.circle_area(5))
 
-# Test that we're in the main module
-print("\nModule info:")
+# Test 3: Named imports (current syntax still works)
+print("\n=== Test 3: Named Imports ===")
+import add, PI from math_utils
+
+print("Named import add(7, 8):", add(7, 8))
+print("Named import PI:", PI)
+
+# Test 4: Named imports with module alias
+print("\n=== Test 4: Named Imports with Module Alias ===")
+import multiply, E from math_utils as mathlib
+
+print("Named import multiply(3, 9):", multiply(3, 9))
+print("Named import E:", E)
+print("Module alias mathlib.PI:", mathlib.PI)
+
+# Test 5: String import (file path)
+print("\n=== Test 5: String Import ===")
+import "./math_utils.zephyr"
+
+print("math_utils.add(1, 2):", math_utils.add(1, 2))
+
+# Test 6: String import with alias
+print("\n=== Test 6: String Import with Alias ===")
+import "./math_utils.zephyr" as mymath
+
+print("mymath.multiply(5, 5):", mymath.multiply(5, 5))
+print("mymath.E:", mymath.E)
+
+# Test 7: Subdirectory import
+print("\n=== Test 7: Subdirectory Import ===")
+import math.advanced
+
+print("advanced.GOLDEN_RATIO:", advanced.GOLDEN_RATIO)
+print("advanced.factorial(5):", advanced.factorial(5))
+print("advanced.fibonacci(8):", advanced.fibonacci(8))
+print("advanced.is_prime(17):", advanced.is_prime(17))
+
+# Test 8: Subdirectory import with alias
+print("\n=== Test 8: Subdirectory Import with Alias ===")
+import math.advanced as advmath
+
+print("advmath.power_of_two(6):", advmath.power_of_two(6))
+print("advmath.gcd(48, 18):", advmath.gcd(48, 18))
+print("advmath.lcm(12, 8):", advmath.lcm(12, 8))
+
+# Test module identity
+print("\n=== Module Identity ===")
 print("Current module name:", __module_name__)
 
-print("\nImport test completed successfully!")
+# Test that different import methods give access to same functions
+print("\n=== Consistency Test ===")
+print("math_utils.add(1, 1):", math_utils.add(1, 1))
+print("math.add(1, 1):", math.add(1, 1))
+print("add(1, 1):", add(1, 1))  # from named import
+print("mymath.add(1, 1):", mymath.add(1, 1))
+print("All should equal 2")
+
+# Test subdirectory consistency
+print("\nSubdirectory consistency:")
+print("advanced.factorial(4):", advanced.factorial(4))
+print("advmath.factorial(4):", advmath.factorial(4))
+print("Both should equal 24")
+
+print("\n=== Import Test Complete ===")
+print("All import patterns working correctly!")

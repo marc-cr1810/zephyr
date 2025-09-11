@@ -66,4 +66,11 @@ namespace zephyr
         value_error_t(const std::string& message)
             : runtime_error_with_location_t(message, "ValueError") {}
     };
+
+    class import_error_t : public runtime_error_with_location_t
+    {
+    public:
+        import_error_t(const std::string& message)
+            : runtime_error_with_location_t(message, "ImportError") {}
+    };
 }

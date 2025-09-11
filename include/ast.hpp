@@ -1455,28 +1455,36 @@ public:
 class import_statement_t : public statement_t
 {
 public:
+    enum class import_type_e {
+        lazy_import,        // import math (imports everything as math.x)
+        named_import,       // import add, PI from math
+        string_import       // import "./lib/math.zephyr"
+    };
+    
     // Functions
-    import_statement_t(std::vector<std::string> imported_symbols, 
+    import_statement_t(import_type_e import_type,
+                      std::vector<std::string> imported_symbols, 
+                      std::string module_specifier,
                       std::string alias_name,
-                      std::string module_specifier, 
-                      bool is_namespace_import,
-                      bool is_path_based);
+                      bool is_path_based,
+                      int line, int column, int end_line, int end_column);
     
     auto accept(ast_visitor_t& visitor) -> void override;
     auto clone() const -> std::unique_ptr<ast_node_t> override;
     
+    auto get_import_type() const -> import_type_e;
     auto get_imported_symbols() const -> const std::vector<std::string>&;
-    auto get_alias_name() const -> const std::string&;
     auto get_module_specifier() const -> const std::string&;
-    auto is_namespace_import() const -> bool;
+    auto get_alias_name() const -> const std::string&;
     auto is_path_based() const -> bool;
+    auto has_alias() const -> bool;
 
 private:
     // Variables
+    import_type_e m_import_type;                  // Type of import statement
     std::vector<std::string> m_imported_symbols;  // ["PI", "add"] for named imports
-    std::string m_alias_name;                     // "math" for namespace imports
-    std::string m_module_specifier;               // "./math.zephyr" or "math"
-    bool m_is_namespace_import;                   // true for "import * as math"
+    std::string m_module_specifier;               // "math", "math.advanced", or "./math.zephyr"
+    std::string m_alias_name;                     // Alias name if specified
     bool m_is_path_based;                         // true if specifier is string literal
 };
 

@@ -2111,52 +2111,147 @@ auto parser_t::import_statement() -> std::unique_ptr<import_statement_t>
     token_t import_token = m_current_token;
     eat(token_type_e::import_token);
     
-    std::vector<std::string> imported_symbols;
-    std::string alias_name;
-    bool is_namespace_import = false;
-    
-    // Check for star import: import * [as alias]
-    if (m_current_token.type == token_type_e::mul)
+
+    // Check for string import: import "./lib/math.zephyr" [as alias]
+    if (m_current_token.type == token_type_e::string)
     {
-        eat(token_type_e::mul);
-        is_namespace_import = true;
+        std::string path = std::string(m_current_token.text);
+        // Remove quotes from string literal
+        if (path.length() >= 2 && path.front() == '"' && path.back() == '"')
+        {
+            path = path.substr(1, path.length() - 2);
+        }
+        eat(token_type_e::string);
         
-        // Check if there's an 'as' clause for aliased namespace import
+        std::string alias_name;
         if (m_current_token.type == token_type_e::as_token)
         {
             eat(token_type_e::as_token);
-            
             if (m_current_token.type != token_type_e::name)
             {
                 zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
                 throw syntax_error_t("Expected alias name after 'as'");
             }
-            
             alias_name = std::string(m_current_token.text);
             eat(token_type_e::name);
         }
-        // If no 'as' clause, it's a direct star import (import * from module)
-        // alias_name remains empty to indicate direct import
+        
+        return std::make_unique<import_statement_t>(
+            import_statement_t::import_type_e::string_import,
+            std::vector<std::string>(),  // No specific symbols
+            std::move(path),
+            std::move(alias_name),
+            true,  // is_path_based
+            import_token.line, import_token.column, m_current_token.line, m_current_token.column
+        );
     }
-    else
+    
+    // Check for named import with 'from': import add, PI from math [as alias]
+    if (m_current_token.type == token_type_e::name)
     {
-        // Named import: import symbol1, symbol2, symbol3
-        imported_symbols = parse_imported_symbols();
+        // Look ahead to see if there's a 'from' keyword
+        std::vector<std::string> temp_symbols;
+        
+        // Parse potential symbol list
+        temp_symbols.push_back(std::string(m_current_token.text));
+        auto temp_token = m_current_token;
+        eat(token_type_e::name);
+        
+        // Check for comma-separated list
+        while (m_current_token.type == token_type_e::comma)
+        {
+            eat(token_type_e::comma);
+            if (m_current_token.type != token_type_e::name)
+            {
+                zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                throw syntax_error_t("Expected symbol name after comma");
+            }
+            temp_symbols.push_back(std::string(m_current_token.text));
+            eat(token_type_e::name);
+        }
+        
+        // Check if 'from' follows
+        if (m_current_token.type == token_type_e::from_token)
+        {
+            eat(token_type_e::from_token);
+            
+            // Parse module specifier
+            auto [module_specifier, is_path_based] = parse_import_specifier();
+            
+            // Check for alias after module specifier
+            std::string alias_name;
+            if (m_current_token.type == token_type_e::as_token)
+            {
+                eat(token_type_e::as_token);
+                if (m_current_token.type != token_type_e::name)
+                {
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    throw syntax_error_t("Expected alias name after 'as'");
+                }
+                alias_name = std::string(m_current_token.text);
+                eat(token_type_e::name);
+            }
+            
+            return std::make_unique<import_statement_t>(
+                import_statement_t::import_type_e::named_import,
+                std::move(temp_symbols),
+                std::move(module_specifier),
+                std::move(alias_name),
+                is_path_based,
+                import_token.line, import_token.column, m_current_token.line, m_current_token.column
+            );
+        }
+        else
+        {
+            // It's a lazy import: import math [as alias] or import math.advanced [as alias]
+            if (temp_symbols.size() > 1)
+            {
+                zephyr::current_error_location() = {temp_token.line, temp_token.column, 1};
+                throw syntax_error_t("Lazy import can only specify one module name");
+            }
+            
+            // Parse dotted module name: math.advanced
+            std::string module_specifier = temp_symbols[0];
+            while (m_current_token.type == token_type_e::dot)
+            {
+                eat(token_type_e::dot);
+                if (m_current_token.type != token_type_e::name)
+                {
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    throw syntax_error_t("Expected module name after '.' in import specifier");
+                }
+                module_specifier += "." + std::string(m_current_token.text);
+                eat(token_type_e::name);
+            }
+            
+            std::string alias_name;
+            
+            // Check for 'as' clause
+            if (m_current_token.type == token_type_e::as_token)
+            {
+                eat(token_type_e::as_token);
+                if (m_current_token.type != token_type_e::name)
+                {
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    throw syntax_error_t("Expected alias name after 'as'");
+                }
+                alias_name = std::string(m_current_token.text);
+                eat(token_type_e::name);
+            }
+            
+            return std::make_unique<import_statement_t>(
+                import_statement_t::import_type_e::lazy_import,
+                std::vector<std::string>(),  // No specific symbols
+                std::move(module_specifier),
+                std::move(alias_name),
+                false,  // not path_based
+                import_token.line, import_token.column, m_current_token.line, m_current_token.column
+            );
+        }
     }
     
-    // Parse 'from' clause
-    eat(token_type_e::from_token);
-    
-    // Parse module specifier (string literal or identifier)
-    auto [module_specifier, is_path_based] = parse_import_specifier();
-    
-    return std::make_unique<import_statement_t>(
-        std::move(imported_symbols),
-        std::move(alias_name),
-        std::move(module_specifier),
-        is_namespace_import,
-        is_path_based
-    );
+    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+    throw syntax_error_t("Invalid import statement syntax");
 }
 
 auto parser_t::parse_imported_symbols() -> std::vector<std::string>
@@ -2206,9 +2301,23 @@ auto parser_t::parse_import_specifier() -> std::pair<std::string, bool>
     }
     else if (m_current_token.type == token_type_e::name)
     {
-        // Name-based import: from math
+        // Name-based import: from math or from math.advanced
         std::string specifier = std::string(m_current_token.text);
         eat(token_type_e::name);
+        
+        // Handle dotted module names: math.advanced
+        while (m_current_token.type == token_type_e::dot)
+        {
+            eat(token_type_e::dot);
+            if (m_current_token.type != token_type_e::name)
+            {
+                zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                throw syntax_error_t("Expected module name after '.' in import specifier");
+            }
+            specifier += "." + std::string(m_current_token.text);
+            eat(token_type_e::name);
+        }
+        
         return {specifier, false};
     }
     else

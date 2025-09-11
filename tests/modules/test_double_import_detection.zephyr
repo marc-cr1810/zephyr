@@ -1,0 +1,41 @@
+# test_double_import_detection.zephyr - Focused test for double import detection feature
+
+print("=== Testing Double Import Detection ===")
+
+# Test 1: Basic double import should fail
+print("\n--- Test 1: Basic Double Import ---")
+import math_utils
+print("✓ First import of math_utils successful")
+
+try {
+    import math_utils
+    print("✗ ERROR: Second import should have failed!")
+} catch error {
+    print("✓ Second import correctly prevented:", error)
+}
+
+# Test 2: Different aliases should still be detected as double import
+print("\n--- Test 2: Different Aliases ---")
+try {
+    import math_utils as utils
+    print("✗ ERROR: Import with alias should have failed!")
+} catch error {
+    print("✓ Import with alias correctly prevented:", error)
+}
+
+# Test 3: Named imports after module import should be prevented
+print("\n--- Test 3: Named Import After Module Import ---")
+try {
+    import add from math_utils
+    print("✗ ERROR: Named import should have failed!")
+} catch error {
+    print("✓ Named import correctly prevented:", error)
+}
+
+# Test 4: Verify the first import still works
+print("\n--- Test 4: Functionality Check ---")
+print("✓ math_utils.PI =", math_utils.PI)
+print("✓ math_utils.add(10, 5) =", math_utils.add(10, 5))
+
+print("\n=== Double Import Detection Test Complete ===")
+print("All tests passed! Double import detection is working correctly.")

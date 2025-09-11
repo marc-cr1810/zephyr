@@ -33,6 +33,7 @@ public:
     auto get_export(const std::string& symbol_name) const -> value_t;
     auto add_export(const std::string& symbol_name, value_t value) -> void;
     auto get_all_exports() const -> const std::map<std::string, value_t>&;
+    auto get_global_scope() const -> const std::map<std::string, value_t>&;
 
 private:
     // Variables

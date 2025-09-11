@@ -102,6 +102,20 @@ auto runtime_t::start_repl() -> void
     auto repl_module = create_main_module("<stdin>", "");
     interpreter.set_module_loader(m_module_loader);
     interpreter.set_current_module(repl_module);
+    
+    // Initialize the REPL module with proper interpreter for imports
+    // Create a dummy AST for the empty REPL module
+    lexer_t empty_lexer("");
+    parser_t empty_parser(empty_lexer);
+    auto empty_ast = empty_parser.parse();
+    repl_module->set_ast(std::move(empty_ast));
+    
+    // Execute the REPL module to set up its interpreter properly
+    try {
+        repl_module->execute(*m_module_loader);
+    } catch (...) {
+        // If execution fails, we'll still continue but imports might not work
+    }
 
     while (true)
     {

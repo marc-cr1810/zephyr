@@ -1,0 +1,55 @@
+# double_import_test.zephyr - Test double import behavior
+
+print("Testing double import behavior...")
+
+# Test 1: Basic double import
+print("\n=== Test 1: Basic Double Import ===")
+import math_utils
+print("First import successful")
+
+import math_utils  # This should either error or be silently ignored
+print("Second import completed")
+
+# Test 2: Import with different aliases
+print("\n=== Test 2: Import with Different Aliases ===")
+import math_utils as math1
+print("First alias import successful")
+
+import math_utils as math2  # Different alias for same module
+print("Second alias import completed")
+
+# Test 3: Mixed import patterns
+print("\n=== Test 3: Mixed Import Patterns ===")
+import add from math_utils
+print("Named import successful")
+
+import math_utils as math3  # Full module after named import
+print("Full module import after named import completed")
+
+# Test 4: String imports
+print("\n=== Test 4: String Import Duplicates ===")
+import "./math_utils.zephyr"
+print("String import successful")
+
+import "./math_utils.zephyr" as utils  # Same file, different alias
+print("String import with alias completed")
+
+# Test 5: Subdirectory imports
+print("\n=== Test 5: Subdirectory Import Duplicates ===")
+import math.advanced
+print("Subdirectory import successful")
+
+import math.advanced as adv  # Same module, different alias
+print("Subdirectory import with alias completed")
+
+# Test functionality to ensure everything still works
+print("\n=== Functionality Tests ===")
+print("math_utils.PI:", math_utils.PI)
+print("math1.add(1, 2):", math1.add(1, 2))
+print("math2.multiply(3, 4):", math2.multiply(3, 4))
+print("add(5, 6):", add(5, 6))
+print("math3.E:", math3.E)
+print("advanced.factorial(4):", advanced.factorial(4))
+print("adv.fibonacci(7):", adv.fibonacci(7))
+
+print("\n=== Double Import Test Complete ===")

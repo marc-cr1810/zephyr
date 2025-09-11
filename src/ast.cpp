@@ -988,16 +988,17 @@ auto program_t::clone() const -> std::unique_ptr<ast_node_t>
     return new_program;
 }
 
-import_statement_t::import_statement_t(std::vector<std::string> imported_symbols, 
+import_statement_t::import_statement_t(import_type_e import_type,
+                                      std::vector<std::string> imported_symbols, 
+                                      std::string module_specifier,
                                       std::string alias_name,
-                                      std::string module_specifier, 
-                                      bool is_namespace_import,
-                                      bool is_path_based)
-    : statement_t(0, 0, 0, 0), 
+                                      bool is_path_based,
+                                      int line, int column, int end_line, int end_column)
+    : statement_t(line, column, end_line, end_column), 
+      m_import_type(import_type),
       m_imported_symbols(std::move(imported_symbols)), 
+      m_module_specifier(std::move(module_specifier)),
       m_alias_name(std::move(alias_name)), 
-      m_module_specifier(std::move(module_specifier)), 
-      m_is_namespace_import(is_namespace_import), 
       m_is_path_based(is_path_based)
 {
 }
@@ -1009,7 +1010,12 @@ auto import_statement_t::accept(ast_visitor_t& visitor) -> void
 
 auto import_statement_t::clone() const -> std::unique_ptr<ast_node_t>
 {
-    return std::make_unique<import_statement_t>(m_imported_symbols, m_alias_name, m_module_specifier, m_is_namespace_import, m_is_path_based);
+    return std::make_unique<import_statement_t>(m_import_type, m_imported_symbols, m_module_specifier, m_alias_name, m_is_path_based, line, column, end_line, end_column);
+}
+
+auto import_statement_t::get_import_type() const -> import_type_e
+{
+    return m_import_type;
 }
 
 auto import_statement_t::get_imported_symbols() const -> const std::vector<std::string>&
@@ -1017,24 +1023,24 @@ auto import_statement_t::get_imported_symbols() const -> const std::vector<std::
     return m_imported_symbols;
 }
 
-auto import_statement_t::get_alias_name() const -> const std::string&
-{
-    return m_alias_name;
-}
-
 auto import_statement_t::get_module_specifier() const -> const std::string&
 {
     return m_module_specifier;
 }
 
-auto import_statement_t::is_namespace_import() const -> bool
+auto import_statement_t::get_alias_name() const -> const std::string&
 {
-    return m_is_namespace_import;
+    return m_alias_name;
 }
 
 auto import_statement_t::is_path_based() const -> bool
 {
     return m_is_path_based;
+}
+
+auto import_statement_t::has_alias() const -> bool
+{
+    return !m_alias_name.empty();
 }
 
 } // namespace zephyr

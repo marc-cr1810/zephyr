@@ -101,6 +101,15 @@ Zephyr supports a range of modern scripting language features:
     *   **Promise.all:** Wait for multiple Promises to complete using the `all()` built-in function.
     *   **Async Lambdas:** Anonymous async functions with arrow syntax, including support for const parameters.
 *   **Comments:** Single-line comments starting with `#`.
+*   **Module System:** Intuitive import patterns for code organization and reuse.
+    *   **Lazy Imports:** `import math` - imports everything as `math.symbol`
+    *   **Import with Alias:** `import math_extra as math` - custom module names
+    *   **Named Imports:** `import add, PI from math` - specific symbols
+    *   **Named with Alias:** `import PI from math_constants as constants` - specific + module
+    *   **String Imports:** `import "./lib/math.zephyr"` - file path imports
+    *   **String with Alias:** `import "./lib/math.zephyr" as utils` - file + custom name
+    *   **Subdirectory Imports:** `import math.advanced` - searches `./math/advanced.zephyr`
+    *   **Internal Keyword:** `internal func` restricts symbols to module scope only
 
 ## Built-in Functions
 
@@ -1685,6 +1694,139 @@ All language features integrate seamlessly with powerful cross-feature compatibi
 *   **Negative Numbers Everywhere:** Full negative number support across all features
 *   **Mixed Access Patterns:** Complete flexibility in combining member access and indexing
 *   **Compound Assignment Operations:** Efficient in-place variable modification with full type support
+
+## Module System
+
+Zephyr features a modern, intuitive module system that makes code organization and reuse straightforward. The import system supports multiple patterns to fit different use cases, from simple lazy imports to complex subdirectory structures.
+
+### Import Patterns
+
+#### Lazy Import
+Import entire modules for access via dot notation:
+
+```zephyr
+import math
+result = math.add(5, 3)
+pi_value = math.PI
+```
+
+#### Lazy Import with Alias
+Import a module with a custom name:
+
+```zephyr
+import math_extra as math
+result = math.multiply(4, 6)
+```
+
+#### Named Imports
+Import specific symbols from a module:
+
+```zephyr
+import add, subtract, PI from math
+x = add(PI, subtract(10, 5))
+```
+
+#### Named Imports with Module Alias
+Import specific symbols and create a module alias:
+
+```zephyr
+import PI from math_constants as constants
+x = PI + constants.E  # Both specific symbol and module namespace
+```
+
+#### String Imports
+Import modules using file paths:
+
+```zephyr
+import "./lib/math.zephyr"
+result = math.add(1, 2)  # Module name comes from filename
+```
+
+#### String Imports with Alias
+Import file-based modules with custom names:
+
+```zephyr
+import "./utils/helpers.zephyr" as helpers
+helpers.format_string("hello")
+```
+
+#### Subdirectory Imports
+Import modules from subdirectories using dot notation:
+
+```zephyr
+import math.advanced  # Searches for ./math/advanced.zephyr
+result = advanced.factorial(5)
+```
+
+#### Subdirectory Imports with Alias
+```zephyr
+import math.advanced as advanced_math
+result = advanced_math.fibonacci(10)
+```
+
+### Internal Keyword
+
+Use the `internal` keyword to restrict symbols to module scope:
+
+```zephyr
+# Public - can be imported
+const PI = 3.14159
+func add(a, b) { return a + b }
+
+# Private - cannot be imported
+internal const SECRET_KEY = "hidden"
+internal func helper_function() { return "private" }
+```
+
+### Module Resolution
+
+The module system uses smart resolution:
+
+- **Name-based imports** (`import math`) search current directory and ZEPHYRPATH
+- **Path-based imports** (`import "./math.zephyr"`) resolve relative to current file
+- **Subdirectory imports** (`import math.advanced`) convert dots to path separators
+
+### Module Identity
+
+Every module has access to `__module_name__`:
+
+```zephyr
+if __module_name__ == "__main__" {
+    print("Running as main script")
+} else {
+    print("Imported as module:", __module_name__)
+}
+```
+
+### Example Usage
+
+```zephyr
+# math_utils.zephyr
+const PI = 3.14159
+const E = 2.71828
+
+func add(a, b) { return a + b }
+func multiply(a, b) { return a * b }
+
+internal func secret_helper() {
+    return "This cannot be imported"
+}
+
+if __module_name__ == "__main__" {
+    print("Running math module directly")
+}
+```
+
+```zephyr
+# main.zephyr
+import math_utils as math
+import add from math_utils
+import "./advanced/stats.zephyr" as stats
+
+result1 = math.add(5, 3)           # Via module object
+result2 = add(math.PI, math.E)     # Direct named import
+result3 = stats.calculate_mean([1, 2, 3])  # File import
+```
 
 ## Current Limitations
 

@@ -13,8 +13,11 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <filesystem>
 #include <memory>
 #include <cmath>
+#include "objects/module_object.hpp"
+#include "objects/function_object.hpp"
 
 namespace zephyr
 {
@@ -3067,6 +3070,133 @@ auto interpreter_t::visit(method_call_t& node) -> void
         args.push_back(m_current_result);
     }
 
+    // Handle module method calls as function calls
+    auto module_obj = std::dynamic_pointer_cast<module_object_t>(obj);
+    if (module_obj)
+    {
+        // Get the exported function from the module
+        auto export_value = module_obj->get_module()->get_export(node.method_name);
+        if (!export_value)
+        {
+            throw name_error_t("Module '" + module_obj->get_module_name() + "' has no export '" + node.method_name + "'");
+        }
+        
+        // Check if it's a function object
+        auto function_obj = std::dynamic_pointer_cast<function_object_t>(export_value);
+        if (!function_obj)
+        {
+            throw type_error_t("'" + node.method_name + "' is not a function");
+        }
+        
+        // Execute the function directly using interpreter logic (similar to function_call_t)
+        
+        // Check parameter count
+        if (args.size() != function_obj->m_parameters.size())
+        {
+            throw type_error_t("Function '" + node.method_name + "' expects " +
+                               std::to_string(function_obj->m_parameters.size()) + " arguments, got " +
+                               std::to_string(args.size()));
+        }
+
+        // Create new scope for function
+        std::map<std::string, value_t> function_scope;
+
+        // Bind parameters to arguments
+        for (size_t i = 0; i < function_obj->m_parameters.size(); ++i)
+        {
+            const auto& param = function_obj->m_parameters[i];
+
+            // Type checking for explicitly typed parameters
+            if (param.has_explicit_type && args[i]->type()->name() != "none")
+            {
+                std::string expected_type = param.type_name;
+                std::string actual_type = args[i]->type()->name();
+
+                // Normalize type names for common aliases
+                if (expected_type == "dict") expected_type = "dictionary";
+                if (actual_type == "dict") actual_type = "dictionary";
+
+                if (actual_type != expected_type)
+                {
+                    throw type_error_t("Type mismatch for parameter '" + param.name +
+                                       "': expected " + param.type_name +
+                                       ", got " + args[i]->type()->name());
+                }
+            }
+
+            function_scope[param.name] = args[i];
+
+            // Track const parameters
+            if (param.is_const)
+            {
+                m_const_variables.insert(param.name);
+            }
+        }
+
+        // Push module's global scope first (for accessing module-level variables)
+        auto module_global_scope = module_obj->get_module()->get_global_scope();
+        if (!module_global_scope.empty())
+        {
+            m_scope_stack.push_back(module_global_scope);
+        }
+        
+        // Push function scope
+        m_scope_stack.push_back(function_scope);
+        m_expected_return_types.push_back(function_obj->m_return_type_name);
+
+        try
+        {
+            // Execute function body
+            function_obj->m_body->accept(*this);
+
+            // If no return statement, return none
+            m_current_result = std::make_shared<none_object_t>();
+        }
+        catch (const return_value_t& return_val)
+        {
+            // Function returned a value
+            m_current_result = return_val.value;
+        }
+        catch (const std::runtime_error& e)
+        {
+            // Pop function scope and module global scope, then re-throw
+            m_scope_stack.pop_back(); // function scope
+            if (!module_global_scope.empty())
+            {
+                m_scope_stack.pop_back(); // module global scope
+            }
+            m_expected_return_types.pop_back();
+            for (const auto& param : function_obj->m_parameters)
+            {
+                if (param.is_const)
+                {
+                    m_const_variables.erase(param.name);
+                }
+            }
+            throw;
+        }
+
+        // Pop function scope and module global scope
+        m_scope_stack.pop_back(); // function scope
+        if (!module_global_scope.empty())
+        {
+            m_scope_stack.pop_back(); // module global scope
+        }
+        m_expected_return_types.pop_back();
+
+        // Remove const parameters from tracking when leaving function scope
+        for (const auto& param : function_obj->m_parameters)
+        {
+            if (param.is_const)
+            {
+                m_const_variables.erase(param.name);
+            }
+        }
+        
+        zephyr::current_error_location() = saved_location;
+        return;
+    }
+
     // Handle class instance method calls
     auto class_instance = std::dynamic_pointer_cast<class_instance_t>(obj);
     if (class_instance)
@@ -3644,58 +3774,117 @@ auto interpreter_t::get_current_module() const -> std::shared_ptr<module_t>
 
 auto interpreter_t::visit(import_statement_t& node) -> void
 {
+    zephyr::error_location_context_t saved_location = zephyr::current_error_location();
+    zephyr::current_error_location().line = node.line;
+    zephyr::current_error_location().column = node.column;
+    zephyr::current_error_location().length = node.end_column - node.column + 1;
+
     if (!m_module_loader)
     {
-        throw value_error_t("Module loader not set");
+        throw import_error_t("Module loader not set");
     }
     
-    // Load the module
+    // Load the module first to get the canonical file path
     auto module = m_module_loader->load_module(
         node.get_module_specifier(), 
         node.is_path_based(), 
         m_current_module ? m_current_module->get_file_path() : ""
     );
     
-    if (node.is_namespace_import())
+    // Use the loaded module's file path as the import key for consistent tracking
+    // Canonicalize the path to resolve differences like "./file.ext" vs "file.ext"
+    std::string module_file_path;
+    try {
+        module_file_path = std::filesystem::canonical(module->get_file_path()).string();
+    } catch (const std::filesystem::filesystem_error&) {
+        // Fallback to absolute path if canonical fails
+        module_file_path = std::filesystem::absolute(module->get_file_path()).string();
+    }
+    
+    // Check for double import using the module's canonical file path
+    if (m_imported_modules.find(module_file_path) != m_imported_modules.end())
     {
-        if (!node.get_alias_name().empty())
+        throw import_error_t("Module '" + node.get_module_specifier() + "' has already been imported in this module");
+    }
+    
+    // Track the import using the module's canonical file path
+    m_imported_modules.insert(module_file_path);
+    
+    switch (node.get_import_type())
+    {
+        case import_statement_t::import_type_e::lazy_import:
         {
-            // Namespace import: import * as alias_name from module
-            // Create a dictionary with all exports
-            auto exports_dict = std::make_shared<dictionary_object_t>();
-            for (const auto& [symbol_name, value] : module->get_all_exports())
+            // Lazy import: import math [as alias] - creates module object
+            std::string var_name;
+            if (node.has_alias())
             {
-                exports_dict->elements_mutable()[symbol_name] = value;
+                var_name = node.get_alias_name();
+            }
+            else
+            {
+                // Use the last part of a dotted module name
+                std::string spec = node.get_module_specifier();
+                size_t last_dot = spec.find_last_of('.');
+                var_name = (last_dot != std::string::npos) ? spec.substr(last_dot + 1) : spec;
             }
             
-            // Store the dictionary in the current scope with the alias name
-            variable(node.get_alias_name(), exports_dict);
+            // Create a module object that supports direct member access
+            auto module_obj = std::make_shared<module_object_t>(module, var_name);
+            
+            // Store the module object in the current scope
+            variable(var_name, module_obj);
+            break;
         }
-        else
+        
+        case import_statement_t::import_type_e::named_import:
         {
-            // Direct star import: import * from module
-            // Import all symbols directly into current scope
-            for (const auto& [symbol_name, value] : module->get_all_exports())
+            // Named import: import symbol1, symbol2 from module [as alias]
+            for (const auto& symbol_name : node.get_imported_symbols())
             {
-                variable(symbol_name, value);
-            }
-        }
-    }
-    else
-    {
-        // Named import: import symbol1, symbol2 from module
-        for (const auto& symbol_name : node.get_imported_symbols())
-        {
-            auto export_value = module->get_export(symbol_name);
-            if (!export_value)
-            {
-                throw name_error_t("Module '" + node.get_module_specifier() + "' has no export '" + symbol_name + "'");
+                auto export_value = module->get_export(symbol_name);
+                if (!export_value)
+                {
+                    throw name_error_t("Module '" + node.get_module_specifier() + "' has no export '" + symbol_name + "'");
+                }
+                
+                // Import the symbol into current scope
+                variable(symbol_name, export_value);
             }
             
-            // Import the symbol into current scope
-            variable(symbol_name, export_value);
+            // If there's an alias for the module itself, create a module object
+            if (node.has_alias())
+            {
+                auto module_obj = std::make_shared<module_object_t>(module, node.get_alias_name());
+                variable(node.get_alias_name(), module_obj);
+            }
+            break;
+        }
+        
+        case import_statement_t::import_type_e::string_import:
+        {
+            // String import: import "./lib/math.zephyr" [as alias] - creates module object
+            std::string var_name;
+            if (node.has_alias())
+            {
+                var_name = node.get_alias_name();
+            }
+            else
+            {
+                // Use the filename without extension
+                std::filesystem::path path(node.get_module_specifier());
+                var_name = path.stem().string();
+            }
+            
+            // Create a module object that supports direct member access
+            auto module_obj = std::make_shared<module_object_t>(module, var_name);
+            
+            // Store the module object in the current scope
+            variable(var_name, module_obj);
+            break;
         }
     }
+    
+    zephyr::current_error_location() = saved_location;
 }
 
 auto interpreter_t::inject_module_name_variable() -> void
@@ -3724,6 +3913,16 @@ auto interpreter_t::should_export(bool is_internal) const -> bool
 auto interpreter_t::update_module_name_variable() -> void
 {
     inject_module_name_variable();
+}
+
+auto interpreter_t::get_global_scope() const -> const std::map<std::string, value_t>&
+{
+    if (!m_scope_stack.empty())
+    {
+        return m_scope_stack[0]; // Return the first (global) scope
+    }
+    static const std::map<std::string, value_t> empty_scope;
+    return empty_scope;
 }
 
 } // namespace zephyr

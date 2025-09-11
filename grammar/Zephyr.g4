@@ -59,6 +59,7 @@ statement
     | breakStatement
     | continueStatement
     | tryCatchStatement
+    | importStatement
     ;
 
 tryCatchStatement
@@ -403,6 +404,12 @@ FALSE: 'false';
 CONST: 'const';
 NONE: 'none';
 
+// Import-related tokens
+IMPORT: 'import';
+FROM: 'from';
+AS: 'as';
+INTERNAL: 'internal';
+
 /*
     Literal Tokens:
     - NAME: Identifiers for variables, functions, classes
@@ -453,5 +460,22 @@ FSTRING: 'f"' ( '\\{' | '\\}' | '{' ~[}]* '}' | ~["\r\n] )* '"';
     - async x -> expression - Async lambda functions
     - all([promises]) - Promise.all built-in function
 */
+// Import statement patterns
+importStatement
+    : IMPORT importSpecifier (AS NAME)?                                    // import math, import math as alias
+    | IMPORT importList FROM importSpecifier (AS NAME)?                    // import add, PI from math as alias
+    | IMPORT STRING (AS NAME)?                                             // import "./lib/math.zephyr" as math
+    ;
+
+importSpecifier
+    : NAME (DOT NAME)*                                                     // math.advanced, math
+    ;
+
+importList
+    : NAME (COMMA NAME)*                                                   // add, subtract, PI
+    ;
+
+
+
 WS: [ \t\r\n]+ -> skip;
 COMMENT: '#' ~[\r\n]* -> skip;

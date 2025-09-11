@@ -66,7 +66,7 @@ auto module_t::execute(module_loader_t& loader) -> void
     
     if (!m_ast)
     {
-        throw value_error_t("Module AST not set");
+        throw import_error_t("Module AST not set");
     }
     
     // Create interpreter for this module
@@ -98,6 +98,16 @@ auto module_t::add_export(const std::string& symbol_name, value_t value) -> void
 auto module_t::get_all_exports() const -> const std::map<std::string, value_t>&
 {
     return m_exports;
+}
+
+auto module_t::get_global_scope() const -> const std::map<std::string, value_t>&
+{
+    if (m_module_interpreter && m_is_executed)
+    {
+        return m_module_interpreter->get_global_scope();
+    }
+    static const std::map<std::string, value_t> empty_scope;
+    return empty_scope;
 }
 
 module_loader_t::module_loader_t()
@@ -184,6 +194,7 @@ auto module_loader_t::load_module(const std::string& specifier,
         else
         {
             // For name-based imports, use the specifier as the module name
+            // For dotted names like "math.advanced", use the full dotted name
             module_name = specifier;
         }
         
@@ -212,7 +223,7 @@ auto module_loader_t::load_module(const std::string& specifier,
     {
         // Remove from loading stack on error
         m_loading_stack.pop_back();
-        throw value_error_t("Failed to load module '" + specifier + "': " + e.what());
+        throw import_error_t("Failed to load module '" + specifier + "': " + e.what());
     }
 }
 
@@ -231,30 +242,45 @@ auto module_loader_t::resolve_module_path(const std::string& specifier,
         
         if (!file_exists(resolved_path.string()))
         {
-            throw value_error_t("Module file not found: " + resolved_path.string());
+            throw import_error_t("Module file not found: " + resolved_path.string());
         }
         
         return resolved_path.string();
     }
     else
     {
-        // Name-based resolution
-        std::string filename = specifier + ".zephyr";
+        // Name-based resolution with support for dotted module names
+        // For "math.advanced", search for:
+        // 1. math/advanced.zephyr (subdirectory)
+        // 2. math.advanced.zephyr (filename with dots)
         
-        // Search in all search paths
+        std::vector<std::string> search_patterns;
+        
+        // Convert dots to path separators for subdirectory search
+        std::string subdir_path = specifier;
+        std::replace(subdir_path.begin(), subdir_path.end(), '.', '/');
+        search_patterns.push_back(subdir_path + ".zephyr");
+        
+        // Also try as direct filename with dots
+        search_patterns.push_back(specifier + ".zephyr");
+        
+        // Search in all search paths with all patterns
         for (const auto& search_path : m_search_paths)
         {
-            std::filesystem::path candidate_path = std::filesystem::path(search_path) / filename;
-            candidate_path = std::filesystem::absolute(candidate_path);
-            
-            if (file_exists(candidate_path.string()))
+            for (const auto& pattern : search_patterns)
             {
-                return candidate_path.string();
+                std::filesystem::path candidate_path = std::filesystem::path(search_path) / pattern;
+                candidate_path = std::filesystem::absolute(candidate_path);
+                
+                if (file_exists(candidate_path.string()))
+                {
+                    return candidate_path.string();
+                }
             }
         }
         
         // Module not found
-        throw value_error_t("Module '" + specifier + "' not found in search paths");
+        throw import_error_t("Module '" + specifier + "' not found in search paths");
     }
 }
 
@@ -271,7 +297,7 @@ auto module_loader_t::detect_circular_dependency(const std::string& module_path)
         }
         chain += " -> " + module_path;
         
-        throw value_error_t("Circular dependency detected: " + chain);
+        throw import_error_t("Circular dependency detected: " + chain);
     }
 }
 
@@ -291,7 +317,7 @@ auto module_loader_t::read_file_content(const std::string& path) const -> std::s
     std::ifstream file(path);
     if (!file.is_open())
     {
-        throw value_error_t("Cannot open file: " + path);
+        throw import_error_t("Cannot open file: " + path);
     }
     
     // Read entire file content

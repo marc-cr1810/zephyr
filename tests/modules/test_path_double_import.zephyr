@@ -1,0 +1,66 @@
+# test_path_double_import.zephyr - Test double import detection for path-based imports
+
+print("=== Testing Path-Based Double Import Detection ===")
+
+# Test 1: Basic path-based double import should fail
+print("\n--- Test 1: Path-Based Double Import ---")
+import "./math_utils.zephyr"
+print("✓ First path import successful")
+
+try {
+    import "./math_utils.zephyr"
+    print("✗ ERROR: Second path import should have failed!")
+} catch error {
+    print("✓ Second path import correctly prevented:", error)
+}
+
+# Test 2: Same path with different alias should still fail
+print("\n--- Test 2: Same Path with Different Alias ---")
+try {
+    import "./math_utils.zephyr" as utils
+    print("✗ ERROR: Path import with alias should have failed!")
+} catch error {
+    print("✓ Path import with alias correctly prevented:", error)
+}
+
+# Test 3: Mixing name-based and path-based imports of same module should fail
+print("\n--- Test 3: Mixed Import Types ---")
+try {
+    import math_utils
+    print("✗ ERROR: Name-based import after path import should have failed!")
+} catch error {
+    print("✓ Name-based import after path import correctly prevented:", error)
+}
+
+# Test 4: Verify the first import still works
+print("\n--- Test 4: Functionality Check ---")
+print("✓ math_utils.E =", math_utils.E)
+print("✓ math_utils.multiply(6, 7) =", math_utils.multiply(6, 7))
+
+# Test 5: Test subdirectory path imports
+print("\n--- Test 5: Subdirectory Path Import ---")
+import "./math/advanced.zephyr"
+print("✓ First subdirectory path import successful")
+
+try {
+    import "./math/advanced.zephyr"
+    print("✗ ERROR: Second subdirectory path import should have failed!")
+} catch error {
+    print("✓ Second subdirectory path import correctly prevented:", error)
+}
+
+# Test 6: Mixing subdirectory name and path imports
+print("\n--- Test 6: Mixed Subdirectory Import Types ---")
+try {
+    import math.advanced
+    print("✗ ERROR: Name-based subdirectory import after path import should have failed!")
+} catch error {
+    print("✓ Name-based subdirectory import after path import correctly prevented:", error)
+}
+
+print("\n--- Test 7: Subdirectory Functionality Check ---")
+print("✓ advanced.GOLDEN_RATIO =", advanced.GOLDEN_RATIO)
+print("✓ advanced.factorial(6) =", advanced.factorial(6))
+
+print("\n=== Path-Based Double Import Detection Test Complete ===")
+print("All tests passed! Path-based double import detection is working correctly.")

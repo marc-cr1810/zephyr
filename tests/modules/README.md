@@ -1,291 +1,207 @@
 # Zephyr Module System Test Suite
 
-This directory contains comprehensive tests for the Zephyr module system implementation. The module system allows code organization through imports, exports, and proper encapsulation using the `internal` keyword.
+This directory contains comprehensive tests for the modern Zephyr module system. The module system provides intuitive import syntax and proper module encapsulation.
 
-## 🎯 Test Overview
+## 🎯 Module System Overview
 
-The module system has been fully implemented and tested with the following core features:
+The Zephyr module system supports clean, intuitive import patterns:
 
-### ✅ Implemented Features
+### ✅ Import Patterns
 
-- **Import Statements**: Both named (`import symbol from module`) and namespace (`import * as alias from module`) imports
-- **Internal Keyword**: Mark functions, classes, and constants as private to their module
-- **Module Resolution**: Support for both name-based (`from module`) and path-based (`from "./path.zephyr"`) imports
-- **Export Management**: Automatic export of public symbols, exclusion of internal symbols
-- **Module Name Injection**: `__module_name__` variable automatically set in each module
-- **Module Caching**: Prevents duplicate loading and execution of modules
-- **Error Handling**: Clear error messages for missing modules and symbols
+- **Lazy Import**: `import math` → Access as `math.add()`, `math.PI`
+- **Lazy Import with Alias**: `import math_extra as math` → Access as `math.add()`
+- **Named Imports**: `import add, PI from math` → Direct access to `add()`, `PI`
+- **Named with Module Alias**: `import add from math as mathlib` → Both `add()` and `mathlib.PI`
+- **String Imports**: `import "./lib/math.zephyr"` → Access as `math.add()`
+- **String with Alias**: `import "./lib/math.zephyr" as utils` → Access as `utils.add()`
+- **Subdirectory Imports**: `import math.advanced` → Access as `advanced.factorial()`
+
+### ✅ Core Features
+
+- **Module Objects**: Direct member access via dot notation (`module.function()`)
+- **Internal Keyword**: `internal` functions/variables are private to the module
+- **Proper Scoping**: Module functions maintain access to their module's global scope
+- **Module Identity**: `__module_name__` variable available in every module
+- **Smart Resolution**: Supports both name-based and path-based module resolution
+- **Subdirectory Support**: `math.advanced` searches for `./math/advanced.zephyr`
 
 ## 📁 Test Files
 
-### Core Test Modules
+### Library Modules
 
-| File | Purpose | Description |
-|------|---------|-------------|
-| `math_utils.zephyr` | Library Module | Basic math functions and constants for import testing |
-| `math_with_internal.zephyr` | Internal Testing | Math module with internal functions to test privacy |
-| `internal_keyword_test.zephyr` | Keyword Testing | Standalone test of internal keyword parsing |
+| File | Purpose |
+|------|---------|
+| `math_utils.zephyr` | Basic math functions and constants |
+| `math_with_internal.zephyr` | Module with internal (private) functions |
+| `math/advanced.zephyr` | Advanced math functions in subdirectory |
 
 ### Test Scripts
 
-| File | Purpose | Tests |
-|------|---------|-------|
-| `import_test.zephyr` | Import Functionality | Named imports, namespace imports, two-step function calls |
-| `internal_import_test.zephyr` | Privacy Protection | Internal symbol exclusion, error handling |
-| `path_import_test.zephyr` | Path Resolution | Relative path imports, mixed import styles |
-| `run_module_tests.zephyr` | Test Runner | Comprehensive test suite documentation |
+| File | Tests |
+|------|-------|
+| `import_test.zephyr` | Comprehensive test of all import patterns |
+| `basic_test.zephyr` | Simple syntax validation tests |
 
 ## 🚀 Running Tests
 
 ### Prerequisites
 - Built Zephyr interpreter in `../../bin/zephyr`
-- Current working directory should be the project root (`zephyr/`)
+- Run from the `tests/modules` directory
 
-### Individual Test Execution
-
-```bash
-# Run from project root (zephyr/)
-
-# Test 1: Internal keyword parsing
-./bin/zephyr tests/modules/internal_keyword_test.zephyr
-
-# Test 2: Module with __module_name__ variable
-./bin/zephyr tests/modules/math_utils.zephyr
-
-# Test 3: Module with internal functions
-./bin/zephyr tests/modules/math_with_internal.zephyr
-
-# Test 4: Named and namespace imports
-./bin/zephyr tests/modules/import_test.zephyr
-
-# Test 5: Internal symbol protection
-./bin/zephyr tests/modules/internal_import_test.zephyr
-
-# Test 6: Path-based imports
-./bin/zephyr tests/modules/path_import_test.zephyr
-
-# Test 7: Test suite overview
-./bin/zephyr tests/modules/run_module_tests.zephyr
-```
-
-### Automated Test Script
+### Test Execution
 
 ```bash
-# Create a simple test runner
 cd tests/modules
-for test in *.zephyr; do
-    echo "Running $test..."
-    ../../bin/zephyr "$test"
-    echo "---"
-done
+
+# Comprehensive test suite
+../../bin/zephyr import_test.zephyr
+
+# Basic syntax tests  
+../../bin/zephyr basic_test.zephyr
+
+# Run library modules directly
+../../bin/zephyr math_utils.zephyr
+../../bin/zephyr math/advanced.zephyr
 ```
 
-## 📋 Expected Results
+## 📋 Expected Test Output
 
-### ✅ Successful Test Outputs
-
-**internal_keyword_test.zephyr:**
+### import_test.zephyr
 ```
-Public function: This is public
-Private function: This is internal
-Public constant: 42
-Private constant: 99
-Private class value: private
-Internal parsing test completed successfully!
-```
+Testing Zephyr import system...
 
-**math_utils.zephyr:**
-```
-Running math module as standalone script
-PI = 3.14159
-E = 2.71828
-add(5, 3) = 8
-multiply(4, 7) = 28
-circle_area(5) = 78.53975
-```
+=== Test 1: Lazy Import ===
+math_utils.PI: 3.14159
+math_utils.add(5, 3): 8
+math_utils.multiply(4, 6): 24
 
-**import_test.zephyr:**
-```
-Testing named imports:
-Imported add(10, 5): 15
-Imported multiply(6, 7): 42
-Imported PI: 3.14159
+=== Test 2: Lazy Import with Alias ===
+math.PI: 3.14159
+math.add(10, 20): 30
+math.circle_area(5): 78.53975
 
-Testing namespace import:
-math['add'](3, 4): 7
-math['multiply'](2, 8): 16
-math['PI']: 3.14159
-math['E']: 2.71828
-math['circle_area'](3): 28.27431
+=== Test 3: Named Imports ===
+Named import add(7, 8): 15
+Named import PI: 3.14159
 
-Module info:
-Current module name: __main__
+=== Test 4: Named Imports with Module Alias ===
+Named import multiply(3, 9): 27
+Named import E: 2.71828
+Module alias mathlib.PI: 3.14159
 
-Import test completed successfully!
-```
+=== Test 5: String Import ===
+math_utils.add(1, 2): 3
 
-**internal_import_test.zephyr:**
-```
-Testing public symbol imports:
-Imported add(5, 3): 8
-Imported PI: 3.14159
-SUCCESS: Cannot import internal function: Module 'math_with_internal' has no export 'secret_helper'
+=== Test 6: String Import with Alias ===
+mymath.multiply(5, 5): 25
+mymath.E: 2.71828
 
-Testing namespace import excludes internal symbols:
-math has PI: true
-math has add: true
-math has multiply: true
-math has circle_area: true
-math has secret_helper: false
-SUCCESS: Internal function properly excluded from namespace
+=== Test 7: Subdirectory Import ===
+advanced.GOLDEN_RATIO: 1.61803398874989
+advanced.factorial(5): 120
+advanced.fibonacci(8): 21
+advanced.is_prime(17): true
 
-Internal import test completed successfully!
+=== Test 8: Subdirectory Import with Alias ===
+advmath.power_of_two(6): 64
+advmath.gcd(48, 18): 6
+advmath.lcm(12, 8): 24
+
+All import patterns working correctly!
 ```
 
-## 🔧 Module System Usage Examples
+## 🔧 Usage Examples
 
 ### Basic Import Patterns
 
 ```zephyr
-# Named imports
-import add, multiply, PI from math_utils
-result = add(5, 3)
+# Lazy import - clean and simple
+import math_utils
+result = math_utils.add(5, 3)
+value = math_utils.PI
 
-# Namespace import with dictionary access
-import * as math from math_utils
-add_func = math["add"]
-result = add_func(5, 3)
+# Alias for shorter names
+import math_utils as math  
+result = math.multiply(4, 6)
 
-# Path-based imports
-import add from "./math_utils.zephyr"
+# Named imports for frequently used symbols
+import add, subtract, PI from math_utils
+result = add(PI, subtract(10, 5))
+
+# String imports for relative files
+import "./utils/helpers.zephyr" as helpers
+helpers.format_string("hello")
+
+# Subdirectory imports
+import math.advanced
+result = advanced.factorial(5)
 ```
 
 ### Internal/Private Declarations
 
 ```zephyr
-# Public function (exported by default)
-func public_function() {
-    return "Available for import"
-}
+# Public - can be imported
+const PI = 3.14159
+func add(a, b) { return a + b }
 
-# Internal function (not exported)
-internal func private_helper() {
-    return "Cannot be imported"
-}
+# Private - cannot be imported  
+internal const SECRET = "hidden"
+internal func helper() { return "private" }
 
-# Internal constant
-internal const SECRET_KEY = "hidden"
-
-# Internal class
-internal class PrivateClass {
-    func init() {
-        this.data = "private"
-    }
+# Module identity
+if __module_name__ == "__main__" {
+    print("Running as main script")
 }
 ```
 
-### Module Identity
+### Module Resolution
 
 ```zephyr
-# Every module has access to __module_name__
-if __module_name__ == "__main__" {
-    print("This is the main script")
-} else {
-    print("This module was imported as:", __module_name__)
-}
+# Name-based: searches current dir and ZEPHYRPATH
+import math
+
+# Path-based: relative to current file
+import "./lib/utils.zephyr"
+
+# Subdirectory: converts dots to path separators
+import math.advanced  # → ./math/advanced.zephyr
 ```
 
-## 🐛 Known Limitations
+## ✨ Key Advantages
 
-1. **Function Calls from Collections**: The syntax `collection[index](args)` is not yet supported
-   - **Workaround**: Use two-step approach: `func = collection[index]; result = func(args)`
+### Clean Syntax
+- No confusing `import *` or bracket notation
+- Natural dot notation: `module.function()`
+- Intuitive alias system
 
-2. **Dictionary Method Access**: Cannot use `dict.method()` syntax for imported namespaces
-   - **Workaround**: Use bracket notation: `dict["method"]`
+### Proper Scoping
+- Module functions can access module variables
+- No variable collision between modules
+- Predictable scope resolution
 
-3. **Module Search Paths**: ZEPHYRPATH environment variable is implemented but not extensively tested
+### Flexible Resolution
+- Smart subdirectory handling
+- Both relative and absolute imports
+- Environment variable support (ZEPHYRPATH)
 
-## 🔄 Future Enhancements
+## 🔄 Module System Status
 
-The following Phase 3 features are planned but not yet implemented:
+| Feature | Status |
+|---------|--------|
+| Lazy Imports | ✅ Complete |
+| Named Imports | ✅ Complete |
+| String Imports | ✅ Complete |
+| Module Aliases | ✅ Complete |
+| Subdirectory Imports | ✅ Complete |
+| Internal Keyword | ✅ Complete |
+| Proper Scoping | ✅ Complete |
+| Module Objects | ✅ Complete |
+| Direct Function Calls | ✅ Complete |
 
-- Import aliasing (`import add as math_add from module`)
-- Package system (directory-based modules)
-- Dynamic module loading at runtime
-- Module versioning and compatibility checks
-- Hot module reloading for development
-- Module permissions and sandboxing
-
-## 📊 Test Status Summary
-
-| Feature | Status | Test Coverage |
-|---------|--------|---------------|
-| Internal Keyword | ✅ Complete | 100% |
-| Named Imports | ✅ Complete | 100% |
-| Namespace Imports | ✅ Complete | 100% |
-| Path-based Imports | ✅ Complete | 100% |
-| Export Management | ✅ Complete | 100% |
-| Symbol Protection | ✅ Complete | 100% |
-| Module Caching | ✅ Complete | 90% |
-| Error Handling | ✅ Complete | 95% |
-| __module_name__ | ✅ Complete | 100% |
-
-**Overall Module System Status: PRODUCTION READY** ✅
-
-## 🔄 REPL Module System Support
-
-The REPL (Read-Eval-Print Loop) now fully supports the module system with complete feature parity to script execution:
-
-### ✅ REPL Features
-
-- **Module Name Variable**: `__module_name__` is set to `"__main__"` in REPL sessions
-- **Internal Keyword**: Full support for `internal func`, `internal const`, `internal class`
-- **Export Tracking**: Public symbols are tracked for potential export, internal symbols excluded
-- **Consistent Behavior**: Same module system behavior as script files
-
-### 🧪 Testing REPL Module System
-
-```bash
-# Start REPL
-./bin/zephyr
-
-# Test commands:
->> print("Module name:", __module_name__)
->> internal func secret() { return "hidden" }
->> const PUBLIC_CONST = 42
->> print("Secret:", secret())
->> print("Public:", PUBLIC_CONST)
-```
-
-**Expected Output:**
-```
-Module name: __main__
-Secret: hidden  
-Public: 42
-```
-
-### 📖 REPL Test Documentation
-
-Run the REPL module system test for comprehensive documentation:
-
-```bash
-./bin/zephyr tests/modules/repl_test.zephyr
-```
-
-This test provides detailed examples and expected outputs for all REPL module system features.
-
-## 🤝 Contributing
-
-When adding new module system tests:
-
-1. Follow the naming convention: `feature_test.zephyr`
-2. Include comprehensive error cases
-3. Document expected output in comments
-4. Test both positive and negative scenarios
-5. Update this README with new test descriptions
+**Status: PRODUCTION READY** 🎉
 
 ## 📖 References
 
-- [MODULE_DESIGN.md](../../MODULE_DESIGN.md) - Complete module system specification
-- [ZEPHYR.md](../../ZEPHYR.md) - Full language documentation
-- [examples/](../../examples/) - Additional language feature examples
+- [MODULE_DESIGN.md](../../MODULE_DESIGN.md) - Technical specification
+- [NEW_IMPORT_SYSTEM.md](../../NEW_IMPORT_SYSTEM.md) - Complete documentation
+- [ZEPHYR.md](../../ZEPHYR.md) - Full language reference

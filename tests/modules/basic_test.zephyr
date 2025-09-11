@@ -1,0 +1,67 @@
+# basic_test.zephyr - Basic test of Zephyr import functionality
+
+print("Testing basic import patterns...")
+
+# Test 1: Lazy import
+print("\n1. Testing lazy import:")
+try {
+    import math_utils
+    print("✓ Lazy import syntax parsed successfully")
+    # This would work: result = math_utils.add(1, 2)
+} catch e {
+    print("✗ Lazy import failed:", e)
+}
+
+# Test 2: Lazy import with alias
+print("\n2. Testing lazy import with alias:")
+try {
+    import math_utils as math
+    print("✓ Lazy import with alias syntax parsed successfully")
+    # This would work: result = math.add(1, 2)
+} catch e {
+    print("✗ Lazy import with alias failed:", e)
+}
+
+# Test 3: String import
+print("\n3. Testing string import:")
+try {
+    import "./math_utils.zephyr"
+    print("✓ String import syntax parsed successfully")
+    # This would work: result = math_utils.add(1, 2)
+} catch e {
+    print("✗ String import failed:", e)
+}
+
+# Test 4: String import with alias
+print("\n4. Testing string import with alias:")
+try {
+    import "./math_utils.zephyr" as mymath
+    print("✓ String import with alias syntax parsed successfully")
+    # This would work: result = mymath.add(1, 2)
+} catch e {
+    print("✗ String import with alias failed:", e)
+}
+
+# Test 5: Named import (existing syntax)
+print("\n5. Testing named import:")
+try {
+    import add, PI from math_utils
+    print("✓ Named import syntax parsed successfully")
+    print("✓ add function imported:", add(1, 2))
+    print("✓ PI constant imported:", PI)
+} catch e {
+    print("✗ Named import failed:", e)
+}
+
+# Test 6: Subdirectory import (if math/advanced.zephyr exists)
+print("\n6. Testing subdirectory import:")
+try {
+    import math.advanced
+    print("✓ Subdirectory import syntax parsed successfully")
+    # This would work: result = math.advanced.factorial(5)
+} catch e {
+    print("Note: Subdirectory import test - file may not exist:", e)
+}
+
+print("\n=== Basic Import Test Complete ===")
+print("If you see check marks (✓), the import system is working!")

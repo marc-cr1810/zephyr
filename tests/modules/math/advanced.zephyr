@@ -1,0 +1,71 @@
+# advanced.zephyr - Advanced math module for testing subdirectory imports
+
+# Advanced mathematical constants
+const GOLDEN_RATIO = 1.618033988749895
+const EULER_MASCHERONI = 0.5772156649015329
+
+# Advanced mathematical functions
+func factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+func fibonacci(n) {
+    if n <= 1 {
+        return n
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2)
+}
+
+func power_of_two(n) {
+    return 2 ** n
+}
+
+func is_prime(n) {
+    if n < 2 {
+        return false
+    }
+    if n == 2 {
+        return true
+    }
+    if n % 2 == 0 {
+        return false
+    }
+
+    i = 3
+    while i * i <= n {
+        if n % i == 0 {
+            return false
+        }
+        i = i + 2
+    }
+    return true
+}
+
+func gcd(a, b) {
+    while b != 0 {
+        temp = b
+        b = a % b
+        a = temp
+    }
+    return a
+}
+
+func lcm(a, b) {
+    return (a * b) / gcd(a, b)
+}
+
+# Test if this module is run directly
+if __module_name__ == "__main__" {
+    print("Running advanced math module as standalone script")
+    print("GOLDEN_RATIO =", GOLDEN_RATIO)
+    print("EULER_MASCHERONI =", EULER_MASCHERONI)
+    print("factorial(5) =", factorial(5))
+    print("fibonacci(10) =", fibonacci(10))
+    print("power_of_two(8) =", power_of_two(8))
+    print("is_prime(17) =", is_prime(17))
+    print("gcd(48, 18) =", gcd(48, 18))
+    print("lcm(12, 8) =", lcm(12, 8))
+}

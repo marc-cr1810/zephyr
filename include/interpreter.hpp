@@ -114,6 +114,7 @@ public:
     auto set_current_module(std::shared_ptr<module_t> module) -> void;
     auto get_current_module() const -> std::shared_ptr<module_t>;
     auto update_module_name_variable() -> void;
+    auto get_global_scope() const -> const std::map<std::string, value_t>&;
 
     // Public member variables
     bool debug_mode;
@@ -152,6 +153,7 @@ private:
     // Module system variables
     std::shared_ptr<module_loader_t> m_module_loader;
     std::shared_ptr<module_t> m_current_module;
+    std::set<std::string> m_imported_modules; // Track imported modules to prevent double imports
 
 protected:
     // Protected methods
