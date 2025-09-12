@@ -1198,12 +1198,12 @@ print("Sign of -3:", sign_lambda(-3))
 print("Sign of 0:", sign_lambda(0))
 
 # Test lambda as function parameter (alternative)
-func apply_lambda(fn, value) {
+func apply_lambda_alt(fn, value) {
     return fn(value)
 }
 
 double_lambda = x -> x * 2
-apply_result = apply_lambda(double_lambda, 8)
+apply_result = apply_lambda_alt(double_lambda, 8)
 print("Applied double lambda to 8:", apply_result)
 
 # Test lambda returning from function (factory pattern)

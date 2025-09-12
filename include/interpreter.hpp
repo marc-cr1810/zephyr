@@ -2,6 +2,7 @@
 
 #include "ast.hpp"
 #include "objects/object.hpp"
+#include "function_overload_resolver.hpp"
 #include <map>
 #include <string>
 #include <memory>
@@ -149,6 +150,9 @@ private:
     std::map<std::string, std::string> m_type_constraints;
     std::set<std::string> m_const_variables;
     std::vector<std::string> m_expected_return_types;
+    
+    // Function overloading support
+    std::vector<function_overload_resolver_t> m_function_resolvers; // One per scope level
 
     // Module system variables
     std::shared_ptr<module_loader_t> m_module_loader;

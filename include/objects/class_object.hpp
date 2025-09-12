@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object.hpp"
+#include "function_overload_resolver.hpp"
 #include <string>
 #include <map>
 #include <vector>
@@ -46,6 +47,7 @@ public:
     auto add_member_variable(const member_variable_info_t& var_info) -> void;
     auto has_method(const std::string& method_name) const -> bool;
     auto method(const std::string& method_name) const -> std::shared_ptr<function_definition_t>;
+    auto resolve_method_call(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> overload_resolution_result_t;
     auto has_member_variable(const std::string& var_name) const -> bool;
     auto member_variable_info(const std::string& var_name) const -> member_variable_info_t;
 
@@ -56,7 +58,8 @@ public:
 public:
     std::string m_class_name;
     std::vector<std::string> m_interfaces;
-    std::map<std::string, std::shared_ptr<function_definition_t>> m_methods;
+    std::map<std::string, std::shared_ptr<function_definition_t>> m_methods; // Keep for backward compatibility
+    function_overload_resolver_t m_method_resolver; // New overload resolver for methods
     std::vector<member_variable_info_t> m_member_variables;
     bool m_has_invalid_init = false;
 

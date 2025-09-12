@@ -1,0 +1,201 @@
+# Function Overloading Examples
+print("=== Function Overloading Examples ===")
+
+# Test 1: Basic function overloading with different parameter counts
+print("\n--- Test 1: Parameter Count Overloading ---")
+
+func test() {
+    return "test() - no parameters"
+}
+
+func test(a) {
+    return "test(a) - one parameter: " + str(a)
+}
+
+func test(a, b) {
+    return "test(a, b) - two parameters: " + str(a) + ", " + str(b)
+}
+
+print(test())           # Should call test()
+print(test(42))         # Should call test(a)
+print(test(42, "hello")) # Should call test(a, b)
+
+# Test 2: Type-based overloading
+print("\n--- Test 2: Type-Based Overloading ---")
+
+func process(value : int) {
+    return "Processing integer: " + str(value * 2)
+}
+
+func process(value : string) {
+    return "Processing string: " + value + " (length: " + str(len(value)) + ")"
+}
+
+func process(value : float) {
+    return "Processing float: " + str(value * 1.5)
+}
+
+func process(value) {
+    return "Processing unknown type: " + str(value)
+}
+
+print(process(10))        # Should call process(value : int)
+print(process("hello"))   # Should call process(value : string)
+print(process(3.14))      # Should call process(value : float)
+print(process(true))      # Should call process(value) - untyped fallback
+
+# Test 3: Mixed parameter count and types
+print("\n--- Test 3: Mixed Parameter Count and Types ---")
+
+func calculate(a : int) {
+    return a * a
+}
+
+func calculate(a : int, b : int) {
+    return a + b
+}
+
+func calculate(a : float, b : float) {
+    return a * b
+}
+
+func calculate(a : string, b : string) {
+    return a + " " + b
+}
+
+print("calculate(5):", calculate(5))              # int version
+print("calculate(3, 7):", calculate(3, 7))       # int + int version
+print("calculate(2.5, 4.0):", calculate(2.5, 4.0)) # float * float version
+print("calculate('Hello', 'World'):", calculate("Hello", "World")) # string concat version
+
+# Test 4: Function overloading with more complex types
+print("\n--- Test 4: Complex Type Overloading ---")
+
+func format_data(data : list) {
+    return "List with " + str(len(data)) + " elements: " + str(data)
+}
+
+func format_data(data : dictionary) {
+    return "Dictionary with " + str(len(data)) + " keys: " + str(data)
+}
+
+func format_data(data) {
+    return "Unknown data type: " + str(data)
+}
+
+my_list = [1, 2, 3, 4]
+my_dict = {"name": "Alice", "age": 30}
+my_number = 42
+
+print(format_data(my_list))   # Should use list version
+print(format_data(my_dict))   # Should use dictionary version
+print(format_data(my_number)) # Should use untyped version
+
+# Test 5: Overloading with class methods
+print("\n--- Test 5: Class Method Overloading ---")
+
+class Calculator {
+    func init() {
+        this.name = "Calculator"
+    }
+
+    func add(a : int, b : int) {
+        return a + b
+    }
+
+    func add(a : float, b : float) {
+        return a + b
+    }
+
+    func add(a : string, b : string) {
+        return a + b
+    }
+
+    func add(a) {
+        return a + a
+    }
+}
+
+calc = Calculator()
+print("Class method overloading:")
+print("add(5, 3):", calc.add(5, 3))           # int version
+print("add(2.5, 1.5):", calc.add(2.5, 1.5))  # float version
+print("add('Hello', ' World'):", calc.add("Hello", " World")) # string version
+print("add(10):", calc.add(10))               # single parameter version
+
+# Test 6: Error cases - ambiguous calls
+print("\n--- Test 6: Error Handling ---")
+
+try {
+    # This should work - exact match
+    print("Valid call: " + str(calculate(5)))
+} catch (error) {
+    print("Unexpected error: " + error)
+}
+
+# Test 7: Overloading with default behavior
+print("\n--- Test 7: Overloading Priority ---")
+
+func priority_test(value : int) {
+    return "Typed int parameter: " + str(value)
+}
+
+func priority_test(value) {
+    return "Untyped parameter: " + str(value)
+}
+
+print(priority_test(42))    # Should prefer typed version
+print(priority_test(true))  # Should use untyped version (bool -> int not exact match)
+
+# Test 8: Function overloading in nested scopes
+print("\n--- Test 8: Nested Scope Overloading ---")
+
+func outer() {
+    func inner(x : int) {
+        return "Inner int: " + str(x)
+    }
+
+    func inner(x : string) {
+        return "Inner string: " + x
+    }
+
+    return [inner(10), inner("test")]
+}
+
+results = outer()
+print("Nested overloading results:", results)
+
+# Test 9: Interface overloading (if supported)
+print("\n--- Test 9: Interface Compatibility ---")
+
+func interface_test(value : string) {
+    return "String parameter: " + value
+}
+
+func interface_test(value) {
+    return "Generic parameter: " + str(value)
+}
+
+print(interface_test("hello"))  # Should use string version
+print(interface_test(123))      # Should use generic version
+
+# Test 10: Advanced overloading scenarios
+print("\n--- Test 10: Advanced Overloading ---")
+
+func advanced(a : int, b : string) {
+    return "int + string: " + str(a) + " " + b
+}
+
+func advanced(a : string, b : int) {
+    return "string + int: " + a + " " + str(b)
+}
+
+func advanced(a, b, c) {
+    return "three parameters: " + str(a) + ", " + str(b) + ", " + str(c)
+}
+
+print(advanced(42, "test"))        # int + string version
+print(advanced("hello", 99))       # string + int version
+print(advanced(1, 2, 3))          # three parameter version
+
+print("\n=== Function Overloading Tests Complete ===")

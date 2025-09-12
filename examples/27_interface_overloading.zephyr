@@ -1,0 +1,222 @@
+# Interface Overloading Examples
+print("=== Interface Overloading Examples ===")
+
+# Test 1: Interface with overloaded method signatures
+print("\n--- Test 1: Interface Method Overloading ---")
+
+interface Processor {
+    func process(value : int)
+    func process(value : string)
+    func process(value : float)
+    func process(value)
+}
+
+print("✓ Interface 'Processor' with overloaded methods defined")
+
+# Test 2: Class implementing interface with overloaded methods
+print("\n--- Test 2: Class Implementation ---")
+
+class DataProcessor : Processor {
+    func init() {
+        this.name = "DataProcessor"
+    }
+
+    func process(value : int) {
+        return "Processing integer: " + str(value * 2)
+    }
+
+    func process(value : string) {
+        return "Processing string: " + value + " (length: " + str(len(value)) + ")"
+    }
+
+    func process(value : float) {
+        return "Processing float: " + str(value * 1.5)
+    }
+
+    func process(value) {
+        return "Processing generic: " + str(value)
+    }
+}
+
+processor = DataProcessor()
+print("Class implementing interface created")
+
+# Test 3: Using interface as type annotation with overloaded methods
+print("\n--- Test 3: Interface Type Usage ---")
+
+func run_processor(p : Processor, test_data) {
+    return p.process(test_data)
+}
+
+print("run_processor(processor, 42):", run_processor(processor, 42))
+print("run_processor(processor, 'hello'):", run_processor(processor, "hello"))
+print("run_processor(processor, 3.14):", run_processor(processor, 3.14))
+print("run_processor(processor, true):", run_processor(processor, true))
+
+# Test 4: Multiple interfaces with overloaded methods
+print("\n--- Test 4: Multiple Interfaces ---")
+
+interface Formatter {
+    func format(data : int)
+    func format(data : string)
+}
+
+interface Logger {
+    func log(message)
+    func log(level : string, message)
+}
+
+class AdvancedProcessor : Processor, Formatter, Logger {
+    func init() {
+        this.name = "AdvancedProcessor"
+    }
+
+    # Implement Processor interface
+    func process(value : int) {
+        return "Advanced int: " + str(value * 3)
+    }
+
+    func process(value : string) {
+        return "Advanced string: " + value.upper()
+    }
+
+    func process(value : float) {
+        return "Advanced float: " + str(value * 2.0)
+    }
+
+    func process(value) {
+        return "Advanced generic: " + str(value)
+    }
+
+    # Implement Formatter interface
+    func format(data : int) {
+        return "[INT:" + str(data) + "]"
+    }
+
+    func format(data : string) {
+        return "[STR:" + data + "]"
+    }
+
+    # Implement Logger interface
+    func log(message) {
+        print("[LOG] " + message)
+    }
+
+    func log(level : string, message) {
+        print("[" + level + "] " + message)
+    }
+}
+
+advanced = AdvancedProcessor()
+print("Advanced processor created")
+print("Format int:", advanced.format(123))
+print("Format string:", advanced.format("test"))
+advanced.log("Simple message")
+advanced.log("ERROR", "Error message")
+
+# Test 5: Interface inheritance-like behavior
+print("\n--- Test 5: Extended Interface ---")
+
+interface ExtendedProcessor {
+    func process(value : int)
+    func process(value : string)
+    func process(value : float)
+    func process(value)
+    func process(a : int, b : int)
+    func process(a : string, b : string)
+}
+
+class SuperProcessor : ExtendedProcessor {
+    func init() {
+        this.name = "SuperProcessor"
+    }
+
+    func process(value : int) {
+        return "Super int: " + str(value)
+    }
+
+    func process(value : string) {
+        return "Super string: " + value
+    }
+
+    func process(value : float) {
+        return "Super float: " + str(value)
+    }
+
+    func process(value) {
+        return "Super generic: " + str(value)
+    }
+
+    func process(a : int, b : int) {
+        return "Super int pair: " + str(a + b)
+    }
+
+    func process(a : string, b : string) {
+        return "Super string pair: " + a + " " + b
+    }
+}
+
+super_proc = SuperProcessor()
+print("SuperProcessor created")
+print("process(10):", super_proc.process(10))
+print("process(5, 15):", super_proc.process(5, 15))
+print("process('hello', 'world'):", super_proc.process("hello", "world"))
+
+# Test 6: Error cases
+print("\n--- Test 6: Error Handling ---")
+
+try {
+    # This should work if interface overloading is properly implemented
+    interface TestInterface {
+        func test(x : int)
+        func test(x : string)
+    }
+
+    class TestClass : TestInterface {
+        func init() {}
+
+        func test(x : int) {
+            return "int version"
+        }
+
+        func test(x : string) {
+            return "string version"
+        }
+    }
+
+    test_obj = TestClass()
+    print("✓ Interface with overloaded methods implemented successfully")
+    print("test_obj.test(42):", test_obj.test(42))
+    print("test_obj.test('hello'):", test_obj.test("hello"))
+
+} catch (error) {
+    print("✗ Error with interface overloading:", error)
+}
+
+# Test 7: Incomplete implementation should fail
+print("\n--- Test 7: Incomplete Implementation ---")
+
+try {
+    interface StrictInterface {
+        func method(x : int)
+        func method(x : string)
+        func method(x : float)
+    }
+
+    class IncompleteClass : StrictInterface {
+        func init() {}
+
+        func method(x : int) {
+            return "only int version"
+        }
+
+        # Missing string and float versions
+    }
+
+    print("✗ This should have failed - incomplete interface implementation")
+
+} catch (error) {
+    print("✓ Correctly caught incomplete implementation:", error)
+}
+
+print("\n=== Interface Overloading Tests Complete ===")

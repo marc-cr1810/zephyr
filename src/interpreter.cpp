@@ -1,4 +1,5 @@
 #include "interpreter.hpp"
+#include "function_overload_resolver.hpp"
 #include "module_loader.hpp"
 #include "error_context.hpp"
 #include "errors.hpp"
@@ -507,6 +508,9 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
 
     m_global_scope = s_builtin_functions;
     m_scope_stack.push_back(m_global_scope);
+    
+    // Initialize function resolvers with global scope
+    m_function_resolvers.emplace_back();
 }
 
 auto interpreter_t::interpret(program_t& program) -> void
@@ -1245,6 +1249,7 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
 
             // Push the method scope
             m_scope_stack.push_back(method_scope);
+            m_function_resolvers.emplace_back(); // Add function resolver for method scope
 
             try
             {
@@ -1262,6 +1267,9 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
 
             // Pop the method scope
             m_scope_stack.pop_back();
+            if (!m_function_resolvers.empty()) {
+                m_function_resolvers.pop_back();
+            }
 
             // Clean up const variables for this method call
             for (const auto& param : method->parameters)
@@ -1279,6 +1287,9 @@ auto interpreter_t::visit(optional_method_call_t& node) -> void
             // Ensure scope cleanup on error
             if (!m_scope_stack.empty()) {
                 m_scope_stack.pop_back();
+            }
+            if (!m_function_resolvers.empty()) {
+                m_function_resolvers.pop_back();
             }
 
             // Clean up const variables on error
@@ -2023,6 +2034,7 @@ auto interpreter_t::visit(for_statement_t& node) -> void
 
     // Create new scope for loop
     m_scope_stack.push_back(std::map<std::string, value_t>());
+    m_function_resolvers.emplace_back(); // Add function resolver for loop scope
 
     try
     {
@@ -2065,10 +2077,16 @@ auto interpreter_t::visit(for_statement_t& node) -> void
     catch (...)
     {
         m_scope_stack.pop_back();
+        if (!m_function_resolvers.empty()) {
+            m_function_resolvers.pop_back();
+        }
         throw;
     }
 
     m_scope_stack.pop_back();
+    if (!m_function_resolvers.empty()) {
+        m_function_resolvers.pop_back();
+    }
     zephyr::current_error_location() = saved_location;
 }
 
@@ -2083,6 +2101,7 @@ auto interpreter_t::visit(for_each_statement_t& node) -> void
     auto collection = m_current_result;
 
     m_scope_stack.push_back(std::map<std::string, value_t>());
+    m_function_resolvers.emplace_back(); // Add function resolver for for-each scope
 
     try
     {
@@ -2189,10 +2208,16 @@ auto interpreter_t::visit(for_each_statement_t& node) -> void
     catch (...)
     {
         m_scope_stack.pop_back();
+        if (!m_function_resolvers.empty()) {
+            m_function_resolvers.pop_back();
+        }
         throw;
     }
 
     m_scope_stack.pop_back();
+    if (!m_function_resolvers.empty()) {
+        m_function_resolvers.pop_back();
+    }
     zephyr::current_error_location() = saved_location;
 }
 
@@ -2230,6 +2255,12 @@ auto interpreter_t::visit(function_definition_t& node) -> void
 
     // Note: function_object_t constructor expects a unique_ptr to body
     auto func_obj = std::make_shared<function_object_t>(node.parameters, std::unique_ptr<block_t>(static_cast<block_t*>(node.body->clone().release())), node.return_type_name, node.explicit_return_type, node.async);
+    
+    // Add to function overload resolver
+    auto& current_resolver = m_function_resolvers.back();
+    current_resolver.add_overload(node.function_name, node.parameters, func_obj);
+    
+    // Also store in scope for backward compatibility (will be removed later)
     auto& current_scope = m_scope_stack.back();
     current_scope[node.function_name] = func_obj;
     
@@ -2250,23 +2281,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.function_name.length();
 
-    // Find function in scope
-    std::shared_ptr<object_t> func_obj = nullptr;
-    for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it)
-    {
-        auto& scope = *it;
-        if (scope.find(node.function_name) != scope.end())
-        {
-            func_obj = scope[node.function_name];
-            break;
-        }
-    }
-
-    if (!func_obj)
-    {
-        throw name_error_t("Undefined function: " + node.function_name);
-    }
-
+    // Evaluate arguments first
     std::vector<std::shared_ptr<object_t>> args;
     for (auto& arg : node.arguments)
     {
@@ -2274,12 +2289,274 @@ auto interpreter_t::visit(function_call_t& node) -> void
         args.push_back(m_current_result);
     }
 
-    // Check if it's a builtin function
-    if (func_obj->type()->name() == "builtin_function")
+    // First try to resolve using overload resolvers for user-defined functions
+    std::shared_ptr<function_object_t> func_obj = nullptr;
+    bool found_in_overloads = false;
+    
+    for (int i = m_function_resolvers.size() - 1; i >= 0; --i)
     {
-        m_current_result = func_obj->call(args);
-        zephyr::current_error_location() = saved_location;
-        return;
+        auto& resolver = m_function_resolvers[i];
+        if (resolver.has_function(node.function_name))
+        {
+            auto resolution_result = resolver.resolve_call(node.function_name, args);
+            if (resolution_result.found_match)
+            {
+                func_obj = resolution_result.selected_function;
+                found_in_overloads = true;
+                break;
+            }
+            else
+            {
+                // If we found the function name but no matching overload, throw error
+                throw type_error_t(resolution_result.error_message);
+            }
+        }
+    }
+
+    // If found in overload resolvers, use that function
+    if (found_in_overloads && func_obj)
+    {
+        // Handle user-defined functions (existing logic continues below)
+    }
+    else
+    {
+        // Not found in overload resolvers, try other callable objects (classes, builtins, etc.)
+        std::shared_ptr<object_t> callable_obj = nullptr;
+        for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it)
+        {
+            auto& scope = *it;
+            if (scope.find(node.function_name) != scope.end())
+            {
+                callable_obj = scope[node.function_name];
+                break;
+            }
+        }
+
+        if (!callable_obj)
+        {
+            throw name_error_t("Undefined function: " + node.function_name);
+        }
+
+        // Check if it's a builtin function
+        if (callable_obj->type()->name() == "builtin_function")
+        {
+            m_current_result = callable_obj->call(args);
+            zephyr::current_error_location() = saved_location;
+            return;
+        }
+
+        // Check if it's a class object (for class instantiation)
+        auto class_obj = std::dynamic_pointer_cast<class_object_t>(callable_obj);
+        if (class_obj)
+        {
+            // Handle class instantiation logic here
+            if (class_obj->m_has_invalid_init) {
+                throw type_error_t("init method cannot return a value.");
+            }
+
+            // Create a new instance of this class
+            auto instance = std::make_shared<class_instance_t>(class_obj);
+
+            // Check if the class has an 'init' method
+            if (class_obj->has_method("init"))
+            {
+                // Use overload resolver to find the best matching init method
+                auto resolution_result = class_obj->resolve_method_call("init", args);
+                if (!resolution_result.found_match)
+                {
+                    throw attribute_error_t(resolution_result.error_message);
+                }
+
+                auto init_method = resolution_result.selected_function;
+
+                // Create new scope for init method
+                std::map<std::string, value_t> init_scope;
+
+                // Add 'this' to the scope
+                init_scope["this"] = instance;
+
+                // Bind parameters to arguments
+                for (size_t i = 0; i < init_method->m_parameters.size(); ++i)
+                {
+                    const auto& param = init_method->m_parameters[i];
+
+                    // Type checking for explicitly typed parameters
+                    if (param.has_explicit_type && args[i]->type()->name() != "none")
+                    {
+                        std::string expected_type = param.type_name;
+                        std::string actual_type = args[i]->type()->name();
+
+                        // Normalize type names for common aliases
+                        if (expected_type == "dict") expected_type = "dictionary";
+                        if (actual_type == "dict") actual_type = "dictionary";
+
+                        if (actual_type != expected_type)
+                        {
+                            throw type_error_t("Type mismatch for parameter '" + param.name +
+                                               "': expected " + param.type_name +
+                                               ", got " + args[i]->type()->name());
+                        }
+                    }
+
+                    init_scope[param.name] = args[i];
+
+                    // Track const parameters
+                    if (param.is_const)
+                    {
+                        m_const_variables.insert(param.name);
+                    }
+                }
+
+                // Push init scope
+                m_scope_stack.push_back(init_scope);
+                m_function_resolvers.emplace_back(); // Add function resolver for init scope
+
+                try
+                {
+                    // Execute init method body
+                    init_method->m_body->accept(*this);
+                }
+                catch (const return_value_t&)
+                {
+                    // init methods should not return values, but we catch it anyway
+                    // The error is already thrown during method creation
+                }
+
+                // Pop init scope
+                m_scope_stack.pop_back();
+                if (!m_function_resolvers.empty()) {
+                    m_function_resolvers.pop_back();
+                }
+
+                // Remove const parameters from tracking when leaving init scope
+                for (const auto& param : init_method->m_parameters)
+                {
+                    if (param.is_const)
+                    {
+                        m_const_variables.erase(param.name);
+                    }
+                }
+            }
+            else
+            {
+                // No init method, check if args were provided
+                if (!args.empty())
+                {
+                    throw type_error_t("Class '" + class_obj->m_class_name + "' constructor expects 0 arguments, got " +
+                                       std::to_string(args.size()));
+                }
+            }
+
+            m_current_result = instance;
+            zephyr::current_error_location() = saved_location;
+            return;
+        }
+
+        // Check if it's a lambda object
+        auto lambda_obj = std::dynamic_pointer_cast<lambda_object_t>(callable_obj);
+        if (lambda_obj)
+        {
+            // Handle lambda execution in the interpreter
+            // Check parameter count
+            if (args.size() != lambda_obj->m_parameters.size())
+            {
+                throw type_error_t("Lambda expects " +
+                                   std::to_string(lambda_obj->m_parameters.size()) + " arguments, got " +
+                                   std::to_string(args.size()));
+            }
+
+            // Create new scope for lambda
+            std::map<std::string, value_t> lambda_scope;
+
+            // Add captured variables
+            for (const auto& captured : lambda_obj->m_captured_variables)
+            {
+                lambda_scope[captured.first] = captured.second;
+            }
+
+            // Bind parameters to arguments
+            for (size_t i = 0; i < lambda_obj->m_parameters.size(); ++i)
+            {
+                const auto& param = lambda_obj->m_parameters[i];
+
+                // Type checking for explicitly typed parameters
+                if (param.has_explicit_type && args[i]->type()->name() != "none")
+                {
+                    std::string expected_type = param.type_name;
+                    std::string actual_type = args[i]->type()->name();
+
+                    // Normalize type names for common aliases
+                    if (expected_type == "dict") expected_type = "dictionary";
+                    if (actual_type == "dict") actual_type = "dictionary";
+
+                    if (actual_type != expected_type)
+                    {
+                        throw type_error_t("Type mismatch for parameter '" + param.name +
+                                           "': expected " + param.type_name +
+                                           ", got " + args[i]->type()->name());
+                    }
+                }
+
+                lambda_scope[param.name] = args[i];
+
+                // Track const parameters
+                if (param.is_const)
+                {
+                    m_const_variables.insert(param.name);
+                }
+            }
+
+            // Push lambda scope
+            m_scope_stack.push_back(lambda_scope);
+            m_function_resolvers.emplace_back(); // Add function resolver for lambda scope
+
+            try
+            {
+                if (lambda_obj->m_is_block_body)
+                {
+                    // Execute lambda block body
+                    lambda_obj->m_body_block->accept(*this);
+                    // If no return statement, return none
+                    m_current_result = std::make_shared<none_object_t>();
+                }
+                else
+                {
+                    // Execute lambda expression body
+                    lambda_obj->m_body_expression->accept(*this);
+                    // Result is already in m_current_result
+                }
+            }
+            catch (const return_value_t& return_val)
+            {
+                // Lambda returned a value
+                m_current_result = return_val.value;
+            }
+
+            // Pop lambda scope
+            m_scope_stack.pop_back();
+            if (!m_function_resolvers.empty()) {
+                m_function_resolvers.pop_back();
+            }
+
+            // Remove const parameters from tracking when leaving lambda scope
+            for (const auto& param : lambda_obj->m_parameters)
+            {
+                if (param.is_const)
+                {
+                    m_const_variables.erase(param.name);
+                }
+            }
+
+            zephyr::current_error_location() = saved_location;
+            return;
+        }
+
+        // If it's a function object, cast it and continue with user-defined function logic
+        func_obj = std::dynamic_pointer_cast<function_object_t>(callable_obj);
+        if (!func_obj)
+        {
+            throw type_error_t("Object '" + node.function_name + "' is not callable");
+        }
     }
 
     // Handle user-defined functions
@@ -2343,6 +2620,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
         // Push function scope
         m_scope_stack.push_back(function_scope);
+        m_function_resolvers.emplace_back(); // Add function resolver for function scope
         m_expected_return_types.push_back(func->m_return_type_name);
 
         try
@@ -2362,6 +2640,9 @@ auto interpreter_t::visit(function_call_t& node) -> void
         {
             // Pop function scope and re-throw
             m_scope_stack.pop_back();
+            if (!m_function_resolvers.empty()) {
+                m_function_resolvers.pop_back();
+            }
             m_expected_return_types.pop_back();
             for (const auto& param : func->m_parameters)
             {
@@ -2375,6 +2656,9 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
         // Pop function scope
         m_scope_stack.pop_back();
+        if (!m_function_resolvers.empty()) {
+            m_function_resolvers.pop_back();
+        }
         m_expected_return_types.pop_back();
 
         // Remove const parameters from tracking when leaving function scope
@@ -2444,6 +2728,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
         // Push lambda scope
         m_scope_stack.push_back(lambda_scope);
+        m_function_resolvers.emplace_back(); // Add function resolver for lambda scope
 
         try
         {
@@ -2477,6 +2762,9 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
         // Pop lambda scope
         m_scope_stack.pop_back();
+        if (!m_function_resolvers.empty()) {
+            m_function_resolvers.pop_back();
+        }
 
         // Remove const parameters from tracking when leaving lambda scope
         for (const auto& param : lambda->m_parameters)
@@ -2559,6 +2847,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
                 // Push init scope
                 m_scope_stack.push_back(init_scope);
+                m_function_resolvers.emplace_back(); // Add function resolver for init scope
 
                 try
                 {
@@ -2572,6 +2861,9 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
                 // Pop init scope
                 m_scope_stack.pop_back();
+                if (!m_function_resolvers.empty()) {
+                    m_function_resolvers.pop_back();
+                }
 
                 // Remove const parameters from tracking when leaving init scope
                 for (const auto& param : init_method->parameters)
@@ -2826,19 +3118,18 @@ auto interpreter_t::visit(lambda_expression_t& node) -> void
     // Capture current scope variables for closure with safer approach
     std::map<std::string, std::shared_ptr<object_t>> captured_vars;
 
-    // Only capture from the immediate parent scope (most recent non-global scope)
+    // Capture variables from all non-global scopes for proper closure support
     if (m_scope_stack.size() > 1) {
-        // Find the most recent function scope (skip the current local scope if it exists)
+        // Iterate through all scopes from innermost to outermost (excluding global)
         for (int i = static_cast<int>(m_scope_stack.size()) - 1; i >= 1; --i) {
             const auto& scope = m_scope_stack[i];
             for (const auto& pair : scope) {
-                // Only capture if not already captured (first occurrence wins)
+                // Only capture if not already captured (inner scope wins)
                 if (captured_vars.find(pair.first) == captured_vars.end()) {
                     captured_vars[pair.first] = pair.second;
                 }
             }
-            // Only capture from one scope level to prevent deep capture issues
-            break;
+            // Continue to capture from all non-global scopes
         }
     }
 
@@ -2889,24 +3180,47 @@ auto interpreter_t::visit(class_definition_t& node) -> void
 
         for (const auto& interface_method : interface_obj->methods()) {
             bool method_found = false;
+            
+            // Look for an exact signature match in the class methods
             for (const auto& class_method : node.methods) {
                 if (class_method->function_name == interface_method.name) {
-                    if (class_method->parameters.size() != interface_method.parameters.size()) {
-                        throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' has different number of parameters than in interface '" + interface_name + "'.");
-                    }
-                    for (size_t i = 0; i < class_method->parameters.size(); ++i) {
-                        const auto& class_param = class_method->parameters[i];
-                        const auto& interface_param = interface_method.parameters[i];
-                        if (class_param.type_name != interface_param.type_name) {
-                            throw type_error_t("Class '" + node.class_name + "' method '" + class_method->function_name + "' parameter '" + class_param.name + "' has different type than in interface '" + interface_name + "'.");
+                    // Check if this class method matches the interface method signature exactly
+                    if (class_method->parameters.size() == interface_method.parameters.size()) {
+                        bool signature_matches = true;
+                        
+                        for (size_t i = 0; i < class_method->parameters.size(); ++i) {
+                            const auto& class_param = class_method->parameters[i];
+                            const auto& interface_param = interface_method.parameters[i];
+                            
+                            // Compare parameter types (empty type means untyped parameter)
+                            if (class_param.type_name != interface_param.type_name) {
+                                signature_matches = false;
+                                break;
+                            }
+                        }
+                        
+                        if (signature_matches) {
+                            method_found = true;
+                            break;
                         }
                     }
-                    method_found = true;
-                    break;
                 }
             }
+            
             if (!method_found) {
-                throw type_error_t("Class '" + node.class_name + "' does not implement method '" + interface_method.name + "' from interface '" + interface_name + "'.");
+                // Generate a detailed error message with the expected signature
+                std::string expected_signature = interface_method.name + "(";
+                for (size_t i = 0; i < interface_method.parameters.size(); ++i) {
+                    if (i > 0) expected_signature += ", ";
+                    expected_signature += interface_method.parameters[i].name;
+                    if (!interface_method.parameters[i].type_name.empty()) {
+                        expected_signature += " : " + interface_method.parameters[i].type_name;
+                    }
+                }
+                expected_signature += ")";
+                
+                throw type_error_t("Class '" + node.class_name + "' does not implement interface method '" + 
+                                 expected_signature + "' from interface '" + interface_name + "'.");
             }
         }
     }
@@ -3138,10 +3452,12 @@ auto interpreter_t::visit(method_call_t& node) -> void
         if (!module_global_scope.empty())
         {
             m_scope_stack.push_back(module_global_scope);
+            m_function_resolvers.emplace_back(); // Add function resolver for module scope
         }
         
         // Push function scope
         m_scope_stack.push_back(function_scope);
+        m_function_resolvers.emplace_back(); // Add function resolver for function scope
         m_expected_return_types.push_back(function_obj->m_return_type_name);
 
         try
@@ -3161,9 +3477,15 @@ auto interpreter_t::visit(method_call_t& node) -> void
         {
             // Pop function scope and module global scope, then re-throw
             m_scope_stack.pop_back(); // function scope
+            if (!m_function_resolvers.empty()) {
+                m_function_resolvers.pop_back();
+            }
             if (!module_global_scope.empty())
             {
                 m_scope_stack.pop_back(); // module global scope
+                if (!m_function_resolvers.empty()) {
+                    m_function_resolvers.pop_back();
+                }
             }
             m_expected_return_types.pop_back();
             for (const auto& param : function_obj->m_parameters)
@@ -3178,9 +3500,15 @@ auto interpreter_t::visit(method_call_t& node) -> void
 
         // Pop function scope and module global scope
         m_scope_stack.pop_back(); // function scope
+        if (!m_function_resolvers.empty()) {
+            m_function_resolvers.pop_back();
+        }
         if (!module_global_scope.empty())
         {
             m_scope_stack.pop_back(); // module global scope
+            if (!m_function_resolvers.empty()) {
+                m_function_resolvers.pop_back();
+            }
         }
         m_expected_return_types.pop_back();
 
@@ -3201,25 +3529,17 @@ auto interpreter_t::visit(method_call_t& node) -> void
     auto class_instance = std::dynamic_pointer_cast<class_instance_t>(obj);
     if (class_instance)
     {
-        // Check if the method exists in the class
-        if (!class_instance->has_method(node.method_name))
+        // Use overload resolver to find the best matching method
+        auto resolution_result = class_instance->m_class_obj->resolve_method_call(node.method_name, args);
+        if (!resolution_result.found_match)
         {
-            throw attribute_error_t("Method '" + node.method_name + "' not found in class '" +
-                                   class_instance->m_class_obj->m_class_name + "'");
+            throw attribute_error_t(resolution_result.error_message);
         }
 
-        auto method = class_instance->method(node.method_name);
-        if (!method)
+        auto method_func = resolution_result.selected_function;
+        if (!method_func)
         {
-            throw attribute_error_t("Method '" + node.method_name + "' is null");
-        }
-
-        // Check parameter count
-        if (args.size() != method->parameters.size())
-        {
-            throw type_error_t("Method '" + node.method_name + "' expects " +
-                                   std::to_string(method->parameters.size()) + " arguments, got " +
-                                   std::to_string(args.size()));
+            throw attribute_error_t("Method '" + node.method_name + "' resolution returned null function");
         }
 
         // Create new scope for method
@@ -3228,10 +3548,10 @@ auto interpreter_t::visit(method_call_t& node) -> void
         // Add 'this' to the scope
         method_scope["this"] = class_instance;
 
-        // Bind parameters to arguments
-        for (size_t i = 0; i < method->parameters.size(); ++i)
+        // Bind parameters to arguments using the selected function's parameters
+        for (size_t i = 0; i < method_func->m_parameters.size(); ++i)
         {
-            const auto& param = method->parameters[i];
+            const auto& param = method_func->m_parameters[i];
 
             // Type checking for explicitly typed parameters
             if (param.has_explicit_type && args[i]->type()->name() != "none")
@@ -3274,12 +3594,13 @@ auto interpreter_t::visit(method_call_t& node) -> void
 
         // Push method scope
         m_scope_stack.push_back(method_scope);
-        m_expected_return_types.push_back(method->return_type_name);
+        m_function_resolvers.emplace_back(); // Add function resolver for method scope
+        m_expected_return_types.push_back(method_func->m_return_type_name);
 
         try
         {
             // Execute method body
-            method->body->accept(*this);
+            method_func->m_body->accept(*this);
 
             // If no return statement, return none
             m_current_result = std::make_shared<none_object_t>();
@@ -3293,8 +3614,11 @@ auto interpreter_t::visit(method_call_t& node) -> void
         {
             // Pop method scope and re-throw
             m_scope_stack.pop_back();
+            if (!m_function_resolvers.empty()) {
+                m_function_resolvers.pop_back();
+            }
             m_expected_return_types.pop_back();
-            for (const auto& param : method->parameters)
+            for (const auto& param : method_func->m_parameters)
             {
                 if (param.is_const)
                 {
@@ -3306,10 +3630,13 @@ auto interpreter_t::visit(method_call_t& node) -> void
 
         // Pop method scope
         m_scope_stack.pop_back();
+        if (!m_function_resolvers.empty()) {
+            m_function_resolvers.pop_back();
+        }
         m_expected_return_types.pop_back();
 
         // Remove const parameters from tracking when leaving method scope
-        for (const auto& param : method->parameters)
+        for (const auto& param : method_func->m_parameters)
         {
             if (param.is_const)
             {
@@ -3479,6 +3806,7 @@ auto interpreter_t::visit(await_expression_t& node) -> void
 auto interpreter_t::push_scope(const std::map<std::string, value_t>& scope) -> void
 {
     m_scope_stack.push_back(scope);
+    m_function_resolvers.emplace_back(); // Add new function resolver for this scope
 }
 
 auto interpreter_t::pop_scope() -> std::map<std::string, value_t>
@@ -3488,6 +3816,12 @@ auto interpreter_t::pop_scope() -> std::map<std::string, value_t>
     }
     auto scope = m_scope_stack.back();
     m_scope_stack.pop_back();
+    
+    // Also remove the corresponding function resolver
+    if (!m_function_resolvers.empty()) {
+        m_function_resolvers.pop_back();
+    }
+    
     return scope;
 }
 
@@ -3495,6 +3829,7 @@ auto interpreter_t::enter_function_scope() -> void
 {
     std::map<std::string, value_t> function_scope;
     m_scope_stack.push_back(function_scope);
+    m_function_resolvers.emplace_back();
 }
 
 auto interpreter_t::exit_function_scope() -> void
@@ -3503,6 +3838,9 @@ auto interpreter_t::exit_function_scope() -> void
         throw internal_error_t("Cannot exit global scope");
     }
     m_scope_stack.pop_back();
+    if (!m_function_resolvers.empty()) {
+        m_function_resolvers.pop_back();
+    }
 }
 
 auto interpreter_t::visit(spawn_expression_t& node) -> void

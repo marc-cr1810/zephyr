@@ -1,5 +1,6 @@
 #include "objects/class_object.hpp"
 #include "objects/class_instance_object.hpp"
+#include "objects/function_object.hpp"
 #include "types/function_type.hpp"
 #include "ast.hpp"
 #include "errors.hpp"
@@ -45,7 +46,21 @@ auto class_object_t::add_method(const std::string& method_name, std::shared_ptr<
 
     if (method)
     {
-        m_methods[method_name] = method;
+        // Keep for backward compatibility - store first method with this name
+        if (m_methods.find(method_name) == m_methods.end()) {
+            m_methods[method_name] = method;
+        }
+        
+        // Create function object and add to overload resolver
+        auto func_obj = std::make_shared<function_object_t>(
+            method->parameters, 
+            std::unique_ptr<block_t>(static_cast<block_t*>(method->body->clone().release())), 
+            method->return_type_name, 
+            method->explicit_return_type, 
+            method->async
+        );
+        
+        m_method_resolver.add_overload(method_name, method->parameters, func_obj);
     }
 }
 
@@ -67,7 +82,7 @@ auto class_object_t::add_member_variable(const member_variable_info_t& var_info)
 
 auto class_object_t::has_method(const std::string& method_name) const -> bool
 {
-    return m_methods.find(method_name) != m_methods.end();
+    return m_method_resolver.has_function(method_name);
 }
 
 auto class_object_t::method(const std::string& method_name) const -> std::shared_ptr<function_definition_t>
@@ -77,7 +92,12 @@ auto class_object_t::method(const std::string& method_name) const -> std::shared
     {
         return it->second;
     }
-    throw attribute_error_t("Member variable '" + method_name + "' not found in class '" + m_class_name + "'");
+    throw attribute_error_t("Method '" + method_name + "' not found in class '" + m_class_name + "'");
+}
+
+auto class_object_t::resolve_method_call(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> overload_resolution_result_t
+{
+    return m_method_resolver.resolve_call(method_name, args);
 }
 
 auto class_object_t::has_member_variable(const std::string& var_name) const -> bool
@@ -111,10 +131,8 @@ auto class_object_t::validate_method_name(const std::string& method_name) const 
         throw value_error_t("Method name cannot be empty in class '" + m_class_name + "'");
     }
 
-    if (m_methods.find(method_name) != m_methods.end())
-    {
-        throw attribute_error_t("Method '" + method_name + "' already defined in class '" + m_class_name + "'");
-    }
+    // Remove the check for existing methods to allow overloading
+    // Method overloading is now handled by the method resolver
 }
 
 auto class_object_t::validate_member_variable_name(const std::string& var_name) const -> void

@@ -204,8 +204,8 @@ print("Mixed Promise.all test completed\n")
 print("3. Complex Data Fetching")
 print("=========================")
 
-async func fetch_user_profile(user_id) {
-    print("Fetching preferences for user:", user_id)
+async func fetch_user_settings(user_id) {
+    print("Fetching settings for user:", user_id)
     return {
         "theme": "dark",
         "language": "en",
@@ -228,7 +228,7 @@ async func load_dashboard_data(user_id) {
     # Create promises for all user data
     user_promises = [
         spawn fetch_user_profile(user_id),
-        spawn fetch_user_preferences(user_id),
+        spawn fetch_user_settings(user_id),
         spawn fetch_user_activity(user_id)
     ]
 
