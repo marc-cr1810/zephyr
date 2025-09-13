@@ -1,0 +1,31 @@
+# Simple test of class inheritance
+
+class Animal {
+    name : string
+
+    func init(name : string) {
+        this.name = name
+    }
+
+    func speak() {
+        print("Animal speaks")
+    }
+}
+
+class Dog : Animal {
+    func init(name : string) {
+        super.init(name)
+    }
+
+    func speak() {
+        print("Dog barks")
+    }
+}
+
+# Test basic inheritance
+animal = Animal("Generic")
+animal.speak()
+
+dog = Dog("Buddy")
+dog.speak()
+print("Dog's name: " + dog.name)

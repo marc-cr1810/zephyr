@@ -1,0 +1,36 @@
+# Test final class modifier
+
+class Animal {
+    name : string
+
+    func init(name : string) {
+        this.name = name
+    }
+
+    func speak() {
+        print("Animal makes a sound")
+    }
+}
+
+final class Cat : Animal {
+    func init(name : string) {
+        super.init(name)
+    }
+
+    func speak() {
+        print(this.name + " meows!")
+    }
+}
+
+# Test that final class works
+cat = Cat("Whiskers")
+cat.speak()
+
+# The following would cause an error if uncommented:
+# class Kitten : Cat {
+#     func init(name : string) {
+#         super.init(name)
+#     }
+# }
+
+print("Final class test passed!")

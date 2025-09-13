@@ -22,6 +22,7 @@ class optional_method_call_t;
 class optional_member_access_t;
 class optional_index_access_t;
 class this_expression_t;
+class super_expression_t;
 class await_expression_t;
 class spawn_expression_t;
 class typed_declaration_t;
@@ -153,9 +154,10 @@ public:
     virtual auto visit(lambda_expression_t& node) -> void = 0;
     virtual auto visit(class_definition_t& node) -> void = 0;
     virtual auto visit(interface_definition_t& node) -> void = 0;
+    virtual auto visit(this_expression_t& node) -> void = 0;
+    virtual auto visit(super_expression_t& node) -> void = 0;
     virtual auto visit(method_call_t& node) -> void = 0;
     virtual auto visit(member_access_t& node) -> void = 0;
-    virtual auto visit(this_expression_t& node) -> void = 0;
     virtual auto visit(member_assignment_t& node) -> void = 0;
     virtual auto visit(in_expression_t& node) -> void = 0;
     virtual auto visit(await_expression_t& node) -> void = 0;
@@ -637,6 +639,18 @@ class this_expression_t : public expression_t
 {
 public:
     this_expression_t(int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column)
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
+};
+
+class super_expression_t : public expression_t
+{
+public:
+    super_expression_t(int line, int column, int end_line, int end_column)
         : expression_t(line, column, end_line, end_column)
     {
     }
@@ -1344,8 +1358,8 @@ public:
 class function_definition_t : public statement_t
 {
 public:
-    function_definition_t(std::string_view function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, std::string_view return_type_name, bool explicit_return_type, bool async, bool is_internal, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), return_type_name(return_type_name), explicit_return_type(explicit_return_type), async(async), is_internal(is_internal)
+    function_definition_t(std::string_view function_name, std::vector<parameter_t> parameters, std::unique_ptr<block_t> body, std::string_view return_type_name, bool explicit_return_type, bool async, bool is_internal, bool is_abstract, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), function_name(function_name), parameters(std::move(parameters)), body(std::move(body)), return_type_name(return_type_name), explicit_return_type(explicit_return_type), async(async), is_internal(is_internal), is_abstract(is_abstract)
     {
     }
 
@@ -1360,6 +1374,7 @@ public:
     bool explicit_return_type;
     bool async;
     bool is_internal;
+    bool is_abstract;
 };
 
 class lambda_expression_t : public expression_t
@@ -1415,8 +1430,8 @@ public:
 class class_definition_t : public statement_t
 {
 public:
-    class_definition_t(std::string_view class_name, std::vector<std::string> interfaces, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, bool is_internal, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), class_name(class_name), interfaces(std::move(interfaces)), member_variables(std::move(member_variables)), methods(std::move(methods)), is_internal(is_internal)
+    class_definition_t(std::string_view class_name, std::string_view parent_class, std::vector<std::string> interfaces, std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables, std::vector<std::unique_ptr<function_definition_t>> methods, bool is_internal, bool is_final, bool is_abstract, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), class_name(class_name), parent_class(parent_class), interfaces(std::move(interfaces)), member_variables(std::move(member_variables)), methods(std::move(methods)), is_internal(is_internal), is_final(is_final), is_abstract(is_abstract)
     {
     }
 
@@ -1425,10 +1440,13 @@ public:
 
 public:
     std::string class_name;
+    std::string parent_class;
     std::vector<std::string> interfaces;
     std::vector<std::unique_ptr<member_variable_declaration_t>> member_variables;
     std::vector<std::unique_ptr<function_definition_t>> methods;
     bool is_internal;
+    bool is_final;
+    bool is_abstract;
 };
 
 // Program

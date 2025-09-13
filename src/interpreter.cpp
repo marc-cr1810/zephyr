@@ -2353,6 +2353,11 @@ auto interpreter_t::visit(function_call_t& node) -> void
             if (class_obj->m_has_invalid_init) {
                 throw type_error_t("init method cannot return a value.");
             }
+            
+            // Check if trying to instantiate an abstract class
+            if (class_obj->m_is_abstract) {
+                throw type_error_t("Cannot instantiate abstract class '" + class_obj->m_class_name + "'.");
+            }
 
             // Create a new instance of this class
             auto instance = std::make_shared<class_instance_t>(class_obj);
@@ -2785,6 +2790,11 @@ auto interpreter_t::visit(function_call_t& node) -> void
         if (class_obj->m_has_invalid_init) {
             throw type_error_t("init method cannot return a value.");
         }
+        
+        // Check if trying to instantiate an abstract class
+        if (class_obj->m_is_abstract) {
+            throw type_error_t("Cannot instantiate abstract class '" + class_obj->m_class_name + "'.");
+        }
 
         // Create a new instance of this class
         auto instance = std::make_shared<class_instance_t>(class_obj);
@@ -3167,9 +3177,102 @@ auto interpreter_t::visit(class_definition_t& node) -> void
 
     // Create a new class object
     auto class_obj = std::make_shared<class_object_t>(node.class_name);
+    
+    // Set class modifiers
+    class_obj->m_is_final = node.is_final;
+    class_obj->m_is_abstract = node.is_abstract;
+    
+    // Determine what is a class and what is an interface
+    std::shared_ptr<class_object_t> parent_class_obj = nullptr;
+    std::vector<std::string> actual_interfaces;
+    
+    // Handle parent class inheritance
+    if (!node.parent_class.empty()) {
+        auto parent_obj_val = resolve_variable(node.parent_class);
+        auto parent_as_class = std::dynamic_pointer_cast<class_object_t>(parent_obj_val);
+        auto parent_as_interface = std::dynamic_pointer_cast<interface_object_t>(parent_obj_val);
+        
+        if (parent_as_class) {
+            // It's a class - use as parent
+            if (parent_as_class->m_is_final) {
+                throw type_error_t("Cannot inherit from final class '" + node.parent_class + "'.");
+            }
+            parent_class_obj = parent_as_class;
+            class_obj->set_parent_class(parent_class_obj);
+        } else if (parent_as_interface) {
+            // It's an interface - add to interfaces list
+            actual_interfaces.push_back(node.parent_class);
+        } else {
+            throw type_error_t("'" + node.parent_class + "' is neither a class nor an interface.");
+        }
+    }
+    
+    // Process additional inherited items (from comma-separated list)
+    for (const auto& item_name : node.interfaces) {
+        auto item_obj_val = resolve_variable(item_name);
+        auto item_as_class = std::dynamic_pointer_cast<class_object_t>(item_obj_val);
+        auto item_as_interface = std::dynamic_pointer_cast<interface_object_t>(item_obj_val);
+        
+        if (item_as_class) {
+            // It's a class - check if we already have a parent class
+            if (parent_class_obj) {
+                throw type_error_t("Cannot inherit from multiple classes. Class '" + node.class_name + 
+                                 "' already inherits from '" + parent_class_obj->m_class_name + 
+                                 "' and cannot also inherit from '" + item_name + "'.");
+            }
+            if (item_as_class->m_is_final) {
+                throw type_error_t("Cannot inherit from final class '" + item_name + "'.");
+            }
+            parent_class_obj = item_as_class;
+            class_obj->set_parent_class(parent_class_obj);
+        } else if (item_as_interface) {
+            // It's an interface - add to interfaces list
+            actual_interfaces.push_back(item_name);
+        } else {
+            throw type_error_t("'" + item_name + "' is neither a class nor an interface.");
+        }
+    }
+    
+    // If we have a parent class, inherit from it
+    if (parent_class_obj) {
+        
+        // Inherit member variables from parent
+        for (const auto& parent_var : parent_class_obj->m_member_variables) {
+            // Check if child class redefines this member variable
+            bool redefined = false;
+            for (const auto& child_var : node.member_variables) {
+                if (child_var->variable_name == parent_var.name) {
+                    redefined = true;
+                    break;
+                }
+            }
+            if (!redefined) {
+                class_obj->add_member_variable(parent_var);
+            }
+        }
+        
+        // Check abstract methods from parent are implemented
+        if (parent_class_obj->m_is_abstract && !node.is_abstract) {
+            for (const auto& [method_name, parent_method] : parent_class_obj->m_methods) {
+                if (parent_method && parent_method->is_abstract) {
+                    bool implemented = false;
+                    for (const auto& child_method : node.methods) {
+                        if (child_method->function_name == method_name && !child_method->is_abstract) {
+                            implemented = true;
+                            break;
+                        }
+                    }
+                    if (!implemented) {
+                        throw type_error_t("Class '" + node.class_name + "' must implement abstract method '" + 
+                                         method_name + "' from parent class '" + parent_class_obj->m_class_name + "'.");
+                    }
+                }
+            }
+        }
+    }
 
-    // Check and process interfaces
-    for (const auto& interface_name : node.interfaces) {
+    // Check and process interfaces (now using the validated list)
+    for (const auto& interface_name : actual_interfaces) {
         auto interface_obj_val = resolve_variable(interface_name);
         auto interface_obj = std::dynamic_pointer_cast<interface_object_t>(interface_obj_val);
         if (!interface_obj) {
@@ -3228,11 +3331,32 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     // Add all methods to the class
     for (auto& method : node.methods)
     {
-        if (method->function_name == "init" && contains_return_with_value(method->body.get())) {
+        if (method->function_name == "init" && method->body && contains_return_with_value(method->body.get())) {
             class_obj->m_has_invalid_init = true;
         }
+        
+        // Check that abstract methods don't have a body
+        if (method->is_abstract && method->body) {
+            throw syntax_error_t("Abstract method '" + method->function_name + "' cannot have a body.");
+        }
+        
+        // Check that non-abstract methods have a body
+        if (!method->is_abstract && !method->body) {
+            throw syntax_error_t("Non-abstract method '" + method->function_name + "' must have a body.");
+        }
+        
         auto cloned_method = method->clone();
         class_obj->add_method(method->function_name, std::shared_ptr<function_definition_t>(static_cast<function_definition_t*>(cloned_method.release())));
+    }
+    
+    // Check that non-abstract classes don't have abstract methods
+    if (!node.is_abstract) {
+        for (const auto& method : node.methods) {
+            if (method->is_abstract) {
+                throw type_error_t("Non-abstract class '" + node.class_name + 
+                                 "' cannot have abstract method '" + method->function_name + "'.");
+            }
+        }
     }
 
     // Add all member variables to the class
@@ -3376,6 +3500,10 @@ auto interpreter_t::visit(method_call_t& node) -> void
 
     node.object->accept(*this);
     auto obj = m_current_result;
+    
+    // Check if this is a super call
+    bool is_super = m_is_super_call;
+    m_is_super_call = false; // Reset the flag
 
     std::vector<std::shared_ptr<object_t>> args;
     for (auto& arg : node.arguments)
@@ -3529,8 +3657,19 @@ auto interpreter_t::visit(method_call_t& node) -> void
     auto class_instance = std::dynamic_pointer_cast<class_instance_t>(obj);
     if (class_instance)
     {
+        // For super calls, use the parent class's methods
+        std::shared_ptr<class_object_t> class_to_use = class_instance->m_class_obj;
+        if (is_super)
+        {
+            class_to_use = class_instance->m_class_obj->parent_class();
+            if (!class_to_use)
+            {
+                throw type_error_t("Class has no parent class for super call");
+            }
+        }
+        
         // Use overload resolver to find the best matching method
-        auto resolution_result = class_instance->m_class_obj->resolve_method_call(node.method_name, args);
+        auto resolution_result = class_to_use->resolve_method_call(node.method_name, args);
         if (!resolution_result.found_match)
         {
             throw attribute_error_t(resolution_result.error_message);
@@ -3685,6 +3824,49 @@ auto interpreter_t::visit(this_expression_t& node) -> void
     }
     throw name_error_t("'this' not available in current context");
     zephyr::current_error_location() = saved_location; // Restore after throwing (unreachable, but good practice)
+}
+
+auto interpreter_t::visit(super_expression_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::current_error_location();
+    zephyr::current_error_location().line = node.line;
+    zephyr::current_error_location().column = node.column;
+    zephyr::current_error_location().length = node.end_column - node.column + 1;
+
+    // Find 'this' in scope to get the current instance
+    std::shared_ptr<class_instance_t> current_instance;
+    for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it)
+    {
+        auto& scope = *it;
+        if (scope.find("this") != scope.end())
+        {
+            current_instance = std::dynamic_pointer_cast<class_instance_t>(scope["this"]);
+            if (current_instance)
+            {
+                break;
+            }
+        }
+    }
+    
+    if (!current_instance)
+    {
+        throw name_error_t("'super' not available in current context - must be inside a class method");
+    }
+    
+    // Get the parent class
+    auto parent_class = current_instance->m_class_obj->parent_class();
+    if (!parent_class)
+    {
+        throw type_error_t("Class '" + current_instance->m_class_obj->m_class_name + "' has no parent class");
+    }
+    
+    // Create a special "super" proxy that references the parent class methods but uses the current instance's data
+    // For now, we'll return the current instance but mark it for special handling in method calls
+    // The actual super method resolution will happen in method_call visitor
+    m_current_result = current_instance;
+    m_is_super_call = true;  // We'll need to add this flag to the interpreter
+    
+    zephyr::current_error_location() = saved_location;
 }
 
 auto interpreter_t::visit(member_assignment_t& node) -> void

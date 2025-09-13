@@ -1,0 +1,134 @@
+# Test error conditions for inheritance features
+
+# Test 1: Cannot instantiate abstract class
+abstract class AbstractBase {
+    x : int
+
+    abstract func do_something()
+}
+
+# Uncomment to test (should fail):
+# base = AbstractBase()  # Error: Cannot instantiate abstract class
+
+# Test 2: Cannot inherit from final class
+final class FinalClass {
+    func greet() {
+        print("Hello from final class")
+    }
+}
+
+# Uncomment to test (should fail):
+# class ChildOfFinal : FinalClass {  # Error: Cannot inherit from final class
+#     func greet() {
+#         print("Hello from child")
+#     }
+# }
+
+# Test 3: Must implement abstract methods
+abstract class AbstractWithMethods {
+    abstract func method1()
+    abstract func method2() : int
+
+    func concrete_method() {
+        print("This is a concrete method")
+    }
+}
+
+# Uncomment to test (should fail):
+# class IncompleteImpl : AbstractWithMethods {  # Error: Must implement all abstract methods
+#     func method1() {
+#         print("Only implementing method1")
+#     }
+#     # Missing method2 implementation
+# }
+
+# Test 4: Correct implementation of abstract class
+class CompleteImpl : AbstractWithMethods {
+    func method1() {
+        print("Implementing method1")
+    }
+
+    func method2() : int {
+        return 42
+    }
+}
+
+# Test 5: Abstract class can extend another abstract class
+abstract class AbstractChild : AbstractWithMethods {
+    abstract func method3()
+
+    # Can choose to implement some abstract methods
+    func method1() {
+        print("AbstractChild implements method1")
+    }
+    # method2 remains abstract
+}
+
+# Test 6: Concrete class must implement all remaining abstract methods
+class ConcreteGrandchild : AbstractChild {
+    func method2() : int {
+        return 100
+    }
+
+    func method3() {
+        print("Implementing method3")
+    }
+}
+
+# Test 7: Cannot have abstract methods in non-abstract class
+# Uncomment to test (should fail):
+# class RegularClass {  # Error: Non-abstract class cannot have abstract methods
+#     abstract func oops()
+# }
+
+# Test 8: Super keyword only works in class methods
+func standalone_function() {
+    # Uncomment to test (should fail):
+    # super.something()  # Error: 'super' not available outside class context
+    print("This is a standalone function")
+}
+
+# Test 9: Super requires parent class
+class NoParent {
+    func test_super() {
+        # Uncomment to test (should fail):
+        # super.anything()  # Error: Class has no parent class
+        print("This class has no parent")
+    }
+}
+
+# Main test function
+func main() {
+    print("=== Testing Error Conditions ===")
+
+    # Test correct implementations
+    print("\nTest: Correct abstract class implementation")
+    impl = CompleteImpl()
+    impl.method1()
+    print("method2 returns: " + str(impl.method2()))
+    impl.concrete_method()
+
+    print("\nTest: Abstract class inheritance chain")
+    grandchild = ConcreteGrandchild()
+    grandchild.method1()
+    print("method2 returns: " + str(grandchild.method2()))
+    grandchild.method3()
+    grandchild.concrete_method()
+
+    print("\nTest: Final class works normally")
+    final_obj = FinalClass()
+    final_obj.greet()
+
+    print("\nTest: Class without parent")
+    no_parent = NoParent()
+    no_parent.test_super()
+
+    print("\nTest: Standalone function")
+    standalone_function()
+
+    print("\n=== All Valid Tests Passed ===")
+    print("\nTo test error conditions, uncomment the relevant sections in the code.")
+    print("Each should produce an appropriate error message.")
+}
+
+main()

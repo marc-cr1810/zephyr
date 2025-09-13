@@ -1,0 +1,32 @@
+# Test super method calls
+
+class Animal {
+    name : string
+    age : int
+
+    func init(name : string, age : int) {
+        this.name = name
+        this.age = age
+    }
+
+    func get_info() : string {
+        return this.name + " is " + str(this.age) + " years old"
+    }
+}
+
+class Dog : Animal {
+    breed : string
+
+    func init(name : string, age : int, breed : string) {
+        super.init(name, age)
+        this.breed = breed
+    }
+
+    func get_info() : string {
+        return super.get_info() + " and is a " + this.breed
+    }
+}
+
+# Test super method calls
+dog = Dog("Max", 5, "Golden Retriever")
+print(dog.get_info())

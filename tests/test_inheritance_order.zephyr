@@ -1,0 +1,147 @@
+# Test that inheritance order is flexible - class and interfaces can be in any order
+
+# Define interfaces
+interface Printable {
+    func print_info()
+}
+
+interface Saveable {
+    func save()
+}
+
+interface Loadable {
+    func load()
+}
+
+# Define a base class
+class Document {
+    title : string
+    content : string
+
+    func init(title : string, content : string) {
+        this.title = title
+        this.content = content
+    }
+
+    func get_title() : string {
+        return this.title
+    }
+}
+
+# Test 1: Class first, then interfaces
+class TextDocument : Document, Printable, Saveable {
+    func init(title : string, content : string) {
+        super.init(title, content)
+    }
+
+    func print_info() {
+        print("Document: " + this.title)
+        print("Content: " + this.content)
+    }
+
+    func save() {
+        print("Saving text document: " + this.title)
+    }
+}
+
+# Test 2: Interface first, then class, then more interfaces
+class SpreadsheetDocument : Printable, Document, Saveable, Loadable {
+    rows : int
+    cols : int
+
+    func init(title : string, rows : int, cols : int) {
+        super.init(title, "Spreadsheet data")
+        this.rows = rows
+        this.cols = cols
+    }
+
+    func print_info() {
+        print("Spreadsheet: " + this.title)
+        print("Size: " + str(this.rows) + "x" + str(this.cols))
+    }
+
+    func save() {
+        print("Saving spreadsheet: " + this.title)
+    }
+
+    func load() {
+        print("Loading spreadsheet: " + this.title)
+    }
+}
+
+# Test 3: All interfaces in between class inheritance
+class PresentationDocument : Saveable, Loadable, Document, Printable {
+    slides : int
+
+    func init(title : string, slides : int) {
+        super.init(title, "Presentation content")
+        this.slides = slides
+    }
+
+    func save() {
+        print("Saving presentation: " + this.title)
+    }
+
+    func load() {
+        print("Loading presentation: " + this.title)
+    }
+
+    func print_info() {
+        print("Presentation: " + this.title)
+        print("Slides: " + str(this.slides))
+    }
+}
+
+# Test 4: Only interfaces (no class inheritance)
+class Metadata : Printable, Saveable, Loadable {
+    tags : list = []
+
+    func init() {
+        this.tags = ["important", "public", "v1.0"]
+    }
+
+    func print_info() {
+        print("Metadata tags: " + str(this.tags))
+    }
+
+    func save() {
+        print("Saving metadata")
+    }
+
+    func load() {
+        print("Loading metadata")
+    }
+}
+
+# Main test function
+func main() {
+    print("=== Test 1: Class First ===")
+    text_doc = TextDocument("Report", "This is a report.")
+    text_doc.print_info()
+    text_doc.save()
+    print("Title via method: " + text_doc.get_title())
+
+    print("\n=== Test 2: Interface, Class, Interfaces ===")
+    spreadsheet = SpreadsheetDocument("Budget", 100, 50)
+    spreadsheet.print_info()
+    spreadsheet.save()
+    spreadsheet.load()
+    print("Direct title access: " + spreadsheet.title)
+
+    print("\n=== Test 3: Mixed Order ===")
+    presentation = PresentationDocument("Q4 Results", 25)
+    presentation.print_info()
+    presentation.save()
+    presentation.load()
+
+    print("\n=== Test 4: Interfaces Only ===")
+    metadata = Metadata()
+    metadata.print_info()
+    metadata.save()
+    metadata.load()
+
+    print("\n=== All Tests Passed ===")
+    print("Inheritance order is flexible - the system correctly identifies classes vs interfaces!")
+}
+
+main()

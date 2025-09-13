@@ -75,6 +75,50 @@ auto class_instance_t::initialize_default_members() -> void
         return;
     }
 
+    // Initialize parent class member variables first (if any)
+    auto parent_class = m_class_obj->parent_class();
+    if (parent_class)
+    {
+        for (const auto& member_var : parent_class->m_member_variables)
+        {
+            // Check if this member is overridden in the child class
+            bool overridden = false;
+            for (const auto& child_var : m_class_obj->m_member_variables)
+            {
+                if (child_var.name == member_var.name)
+                {
+                    overridden = true;
+                    break;
+                }
+            }
+            
+            if (!overridden)
+            {
+                if (member_var.has_default)
+                {
+                    if (member_var.default_value)
+                    {
+                        m_members[member_var.name] = member_var.default_value;
+                    }
+                    else
+                    {
+                        m_members[member_var.name] = std::make_shared<none_object_t>();
+                    }
+                }
+                else
+                {
+                    m_members[member_var.name] = std::make_shared<none_object_t>();
+                }
+
+                if (member_var.is_const)
+                {
+                    mark_member_const(member_var.name);
+                }
+            }
+        }
+    }
+
+    // Initialize class's own member variables
     for (const auto& member_var : m_class_obj->m_member_variables)
     {
         if (member_var.has_default)

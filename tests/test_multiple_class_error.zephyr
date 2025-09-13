@@ -1,0 +1,46 @@
+# Test that multiple class inheritance is properly rejected
+
+# Define two base classes
+class Widget {
+    x : float
+    y : float
+
+    func init(x : float, y : float) {
+        this.x = x
+        this.y = y
+    }
+
+    func display() {
+        print("Widget at (" + str(this.x) + ", " + str(this.y) + ")")
+    }
+}
+
+class Component {
+    id : int
+    name : string
+
+    func init(id : int, name : string) {
+        this.id = id
+        this.name = name
+    }
+
+    func info() {
+        print("Component " + str(this.id) + ": " + this.name)
+    }
+}
+
+# This should fail - cannot inherit from multiple classes
+# The error should be: "Cannot inherit from multiple classes"
+class InvalidMultipleInheritance : Widget, Component {
+    func init() {
+        # This would be ambiguous - which parent to initialize?
+        super.init(0.0, 0.0)
+    }
+}
+
+func main() {
+    print("This should not execute - multiple class inheritance should be rejected")
+    invalid = InvalidMultipleInheritance()
+}
+
+main()

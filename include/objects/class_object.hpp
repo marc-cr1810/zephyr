@@ -50,6 +50,14 @@ public:
     auto resolve_method_call(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> overload_resolution_result_t;
     auto has_member_variable(const std::string& var_name) const -> bool;
     auto member_variable_info(const std::string& var_name) const -> member_variable_info_t;
+    
+    // Inheritance support
+    auto set_parent_class(std::shared_ptr<class_object_t> parent) -> void;
+    auto parent_class() const -> std::shared_ptr<class_object_t>;
+    auto has_method_including_parent(const std::string& method_name) const -> bool;
+    auto method_including_parent(const std::string& method_name) const -> std::shared_ptr<function_definition_t>;
+    auto has_member_variable_including_parent(const std::string& var_name) const -> bool;
+    auto member_variable_info_including_parent(const std::string& var_name) const -> member_variable_info_t;
 
 public:
     void add_interface(const std::string& interface_name);
@@ -57,11 +65,14 @@ public:
 
 public:
     std::string m_class_name;
+    std::shared_ptr<class_object_t> m_parent_class;
     std::vector<std::string> m_interfaces;
     std::map<std::string, std::shared_ptr<function_definition_t>> m_methods; // Keep for backward compatibility
     function_overload_resolver_t m_method_resolver; // New overload resolver for methods
     std::vector<member_variable_info_t> m_member_variables;
     bool m_has_invalid_init = false;
+    bool m_is_final = false;
+    bool m_is_abstract = false;
 
 private:
     auto validate_method_name(const std::string& method_name) const -> void;

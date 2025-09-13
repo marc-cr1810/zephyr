@@ -1,0 +1,161 @@
+# Test that only single class inheritance is allowed but multiple interfaces are fine
+
+# Define some interfaces
+interface Drawable {
+    func draw()
+}
+
+interface Clickable {
+    func on_click()
+}
+
+interface Resizable {
+    func resize(width : float, height : float)
+}
+
+# Define a base class
+class Widget {
+    x : float
+    y : float
+
+    func init(x : float, y : float) {
+        this.x = x
+        this.y = y
+    }
+
+    func move_to(x : float, y : float) {
+        this.x = x
+        this.y = y
+    }
+}
+
+# Test 1: Class can inherit from one class and multiple interfaces
+class Button : Widget, Drawable, Clickable {
+    label : string
+
+    func init(x : float, y : float, label : string) {
+        super.init(x, y)
+        this.label = label
+    }
+
+    func draw() {
+        print("Drawing button '" + this.label + "' at (" + str(this.x) + ", " + str(this.y) + ")")
+    }
+
+    func on_click() {
+        print("Button '" + this.label + "' was clicked!")
+    }
+}
+
+# Test 2: Can inherit from class and interfaces in any order
+class ResizableButton : Drawable, Widget, Clickable, Resizable {
+    label : string
+    width : float = 100.0
+    height : float = 30.0
+
+    func init(x : float, y : float, label : string) {
+        super.init(x, y)
+        this.label = label
+    }
+
+    func draw() {
+        print("Drawing resizable button '" + this.label + "' at (" + str(this.x) + ", " + str(this.y) + ") with size (" + str(this.width) + ", " + str(this.height) + ")")
+    }
+
+    func on_click() {
+        print("Resizable button '" + this.label + "' was clicked!")
+    }
+
+    func resize(width : float, height : float) {
+        this.width = width
+        this.height = height
+        print("Resized button to (" + str(this.width) + ", " + str(this.height) + ")")
+    }
+}
+
+# Test 3: Can implement only interfaces (no class inheritance)
+class Shape : Drawable, Resizable {
+    name : string
+    width : float
+    height : float
+
+    func init(name : string, width : float, height : float) {
+        this.name = name
+        this.width = width
+        this.height = height
+    }
+
+    func draw() {
+        print("Drawing shape '" + this.name + "' with size (" + str(this.width) + ", " + str(this.height) + ")")
+    }
+
+    func resize(width : float, height : float) {
+        this.width = width
+        this.height = height
+        print("Shape resized to (" + str(this.width) + ", " + str(this.height) + ")")
+    }
+}
+
+# Test 4: Define another class for multiple inheritance test
+class AnotherWidget {
+    id : int
+
+    func init(id : int) {
+        this.id = id
+    }
+}
+
+# Test 5: This should fail - cannot inherit from multiple classes
+# Uncomment to test (should produce an error):
+# class InvalidMultipleInheritance : Widget, AnotherWidget {
+#     func init() {
+#         super.init(0.0, 0.0)  # Which parent would this call?
+#     }
+# }
+
+# Test 6: But can inherit from a class that already inherits from another
+class SpecialButton : Button {
+    color : string
+
+    func init(x : float, y : float, label : string, color : string) {
+        super.init(x, y, label)
+        this.color = color
+    }
+
+    func draw() {
+        print("Drawing " + this.color + " button '" + this.label + "' at (" + str(this.x) + ", " + str(this.y) + ")")
+    }
+}
+
+# Main test function
+func main() {
+    print("=== Test 1: Class + Multiple Interfaces ===")
+    button = Button(10.0, 20.0, "OK")
+    button.draw()
+    button.on_click()
+    button.move_to(50.0, 60.0)
+    button.draw()
+
+    print("\n=== Test 2: Mixed Order Inheritance ===")
+    resizable = ResizableButton(100.0, 100.0, "Resize Me")
+    resizable.draw()
+    resizable.on_click()
+    resizable.resize(150.0, 50.0)
+    resizable.draw()
+
+    print("\n=== Test 3: Multiple Interfaces Only ===")
+    shape = Shape("Circle", 50.0, 50.0)
+    shape.draw()
+    shape.resize(75.0, 75.0)
+
+    print("\n=== Test 4: Multi-level Inheritance ===")
+    special = SpecialButton(0.0, 0.0, "Special", "red")
+    special.draw()
+    special.on_click()
+
+    print("\n=== All Tests Passed ===")
+    print("Single class inheritance with multiple interfaces works correctly!")
+    print("To test that multiple class inheritance fails, uncomment the InvalidMultipleInheritance class.")
+}
+
+main()

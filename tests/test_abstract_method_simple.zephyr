@@ -1,0 +1,22 @@
+# Test single abstract method
+
+abstract class Shape {
+    abstract func area() : float
+}
+
+class Square : Shape {
+    side : float
+
+    func init(side : float) {
+        this.side = side
+    }
+
+    func area() : float {
+        return this.side * this.side
+    }
+}
+
+# Test
+square = Square(5.0)
+print("Square area: " + str(square.area()))
+print("Abstract method test passed!")

@@ -63,6 +63,7 @@ public:
     auto visit(method_call_t& node) -> void override;
     auto visit(member_access_t& node) -> void override;
     auto visit(this_expression_t& node) -> void override;
+    auto visit(super_expression_t& node) -> void override;
     auto visit(member_assignment_t& node) -> void override;
     auto visit(assignment_t& node) -> void override;
     auto visit(const_declaration_t& node) -> void override;
@@ -153,6 +154,9 @@ private:
     
     // Function overloading support
     std::vector<function_overload_resolver_t> m_function_resolvers; // One per scope level
+    
+    // Super call tracking
+    bool m_is_super_call = false;
 
     // Module system variables
     std::shared_ptr<module_loader_t> m_module_loader;

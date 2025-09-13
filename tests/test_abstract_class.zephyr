@@ -1,0 +1,72 @@
+# Test abstract classes
+
+abstract class Shape {
+    color : string
+
+    func init(color : string) {
+        this.color = color
+    }
+
+    abstract func area() : float
+    abstract func perimeter() : float
+
+    func describe() {
+        print("This is a " + this.color + " shape")
+    }
+}
+
+class Rectangle : Shape {
+    width : float
+    height : float
+
+    func init(color : string, width : float, height : float) {
+        super.init(color)
+        this.width = width
+        this.height = height
+    }
+
+    func area() : float {
+        return this.width * this.height
+    }
+
+    func perimeter() : float {
+        return 2.0 * (this.width + this.height)
+    }
+}
+
+class Circle : Shape {
+    radius : float
+
+    func init(color : string, radius : float) {
+        super.init(color)
+        this.radius = radius
+    }
+
+    func area() : float {
+        return 3.14159 * this.radius * this.radius
+    }
+
+    func perimeter() : float {
+        return 2.0 * 3.14159 * this.radius
+    }
+}
+
+# Test abstract class implementation
+print("=== Testing Abstract Classes ===")
+
+rect = Rectangle("red", 10.0, 5.0)
+rect.describe()
+print("Rectangle area: " + str(rect.area()))
+print("Rectangle perimeter: " + str(rect.perimeter()))
+
+print("")
+
+circle = Circle("blue", 7.0)
+circle.describe()
+print("Circle area: " + str(circle.area()))
+print("Circle perimeter: " + str(circle.perimeter()))
+
+# The following would cause an error if uncommented (cannot instantiate abstract class):
+# shape = Shape("green")
+
+print("\nAbstract class test passed!")

@@ -299,6 +299,11 @@ auto this_expression_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
+auto super_expression_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
 auto member_assignment_t::accept(ast_visitor_t& visitor) -> void
 {
     visitor.visit(*this);
@@ -569,6 +574,11 @@ auto function_call_t::clone() const -> std::unique_ptr<ast_node_t>
 auto this_expression_t::clone() const -> std::unique_ptr<ast_node_t>
 {
     return std::make_unique<this_expression_t>(*this);
+}
+
+auto super_expression_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    return std::make_unique<super_expression_t>(*this);
 }
 
 auto ternary_expression_t::clone() const -> std::unique_ptr<ast_node_t>
@@ -932,6 +942,7 @@ auto function_definition_t::clone() const -> std::unique_ptr<ast_node_t>
         explicit_return_type,
         async,
         is_internal,
+        is_abstract,
         line, column, end_line, end_column);
 }
 
@@ -976,7 +987,7 @@ auto class_definition_t::clone() const -> std::unique_ptr<ast_node_t>
     {
         new_methods.push_back(m ? std::unique_ptr<function_definition_t>(static_cast<function_definition_t*>(m->clone().release())) : nullptr);
     }
-    return std::make_unique<class_definition_t>(class_name, interfaces, std::move(new_members), std::move(new_methods), is_internal, line, column, end_line, end_column);
+    return std::make_unique<class_definition_t>(class_name, parent_class, interfaces, std::move(new_members), std::move(new_methods), is_internal, is_final, is_abstract, line, column, end_line, end_column);
 }
 
 auto program_t::clone() const -> std::unique_ptr<ast_node_t>

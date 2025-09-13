@@ -51,16 +51,21 @@ auto class_object_t::add_method(const std::string& method_name, std::shared_ptr<
             m_methods[method_name] = method;
         }
         
-        // Create function object and add to overload resolver
-        auto func_obj = std::make_shared<function_object_t>(
-            method->parameters, 
-            std::unique_ptr<block_t>(static_cast<block_t*>(method->body->clone().release())), 
-            method->return_type_name, 
-            method->explicit_return_type, 
-            method->async
-        );
-        
-        m_method_resolver.add_overload(method_name, method->parameters, func_obj);
+        // Only add non-abstract methods to the overload resolver
+        // Abstract methods define the interface but cannot be called
+        if (!method->is_abstract)
+        {
+            // Create function object and add to overload resolver
+            auto func_obj = std::make_shared<function_object_t>(
+                method->parameters, 
+                std::unique_ptr<block_t>(static_cast<block_t*>(method->body->clone().release())), 
+                method->return_type_name, 
+                method->explicit_return_type, 
+                method->async
+            );
+            
+            m_method_resolver.add_overload(method_name, method->parameters, func_obj);
+        }
     }
 }
 
@@ -82,22 +87,51 @@ auto class_object_t::add_member_variable(const member_variable_info_t& var_info)
 
 auto class_object_t::has_method(const std::string& method_name) const -> bool
 {
-    return m_method_resolver.has_function(method_name);
+    // Check this class's methods
+    if (m_method_resolver.has_function(method_name)) {
+        return true;
+    }
+    
+    // Check parent class's methods
+    if (m_parent_class) {
+        return m_parent_class->has_method(method_name);
+    }
+    
+    return false;
 }
 
 auto class_object_t::method(const std::string& method_name) const -> std::shared_ptr<function_definition_t>
 {
+    // Check this class's methods
     auto it = m_methods.find(method_name);
     if (it != m_methods.end())
     {
         return it->second;
     }
+    
+    // Check parent class's methods
+    if (m_parent_class)
+    {
+        return m_parent_class->method(method_name);
+    }
+    
     throw attribute_error_t("Method '" + method_name + "' not found in class '" + m_class_name + "'");
 }
 
 auto class_object_t::resolve_method_call(const std::string& method_name, const std::vector<std::shared_ptr<object_t>>& args) -> overload_resolution_result_t
 {
-    return m_method_resolver.resolve_call(method_name, args);
+    // Try to resolve in this class first
+    auto result = m_method_resolver.resolve_call(method_name, args);
+    if (result.found_match) {
+        return result;
+    }
+    
+    // If not found and we have a parent class, try there
+    if (m_parent_class) {
+        return m_parent_class->resolve_method_call(method_name, args);
+    }
+    
+    return result;
 }
 
 auto class_object_t::has_member_variable(const std::string& var_name) const -> bool
@@ -122,6 +156,82 @@ auto class_object_t::member_variable_info(const std::string& var_name) const -> 
         }
     }
     throw attribute_error_t("Member variable '" + var_name + "' not found in class '" + m_class_name + "'");
+}
+
+auto class_object_t::set_parent_class(std::shared_ptr<class_object_t> parent) -> void
+{
+    m_parent_class = parent;
+}
+
+auto class_object_t::parent_class() const -> std::shared_ptr<class_object_t>
+{
+    return m_parent_class;
+}
+
+auto class_object_t::has_method_including_parent(const std::string& method_name) const -> bool
+{
+    if (has_method(method_name))
+    {
+        return true;
+    }
+    
+    if (m_parent_class)
+    {
+        return m_parent_class->has_method_including_parent(method_name);
+    }
+    
+    return false;
+}
+
+auto class_object_t::method_including_parent(const std::string& method_name) const -> std::shared_ptr<function_definition_t>
+{
+    if (has_method(method_name))
+    {
+        return method(method_name);
+    }
+    
+    if (m_parent_class)
+    {
+        return m_parent_class->method_including_parent(method_name);
+    }
+    
+    throw attribute_error_t("Method '" + method_name + "' not found in class '" + m_class_name + "' or its parent classes");
+}
+
+auto class_object_t::has_member_variable_including_parent(const std::string& var_name) const -> bool
+{
+    for (const auto& var : m_member_variables)
+    {
+        if (var.name == var_name)
+        {
+            return true;
+        }
+    }
+    
+    if (m_parent_class)
+    {
+        return m_parent_class->has_member_variable_including_parent(var_name);
+    }
+    
+    return false;
+}
+
+auto class_object_t::member_variable_info_including_parent(const std::string& var_name) const -> member_variable_info_t
+{
+    for (const auto& var : m_member_variables)
+    {
+        if (var.name == var_name)
+        {
+            return var;
+        }
+    }
+    
+    if (m_parent_class)
+    {
+        return m_parent_class->member_variable_info_including_parent(var_name);
+    }
+    
+    throw attribute_error_t("Member variable '" + var_name + "' not found in class '" + m_class_name + "' or its parent classes");
 }
 
 auto class_object_t::validate_method_name(const std::string& method_name) const -> void

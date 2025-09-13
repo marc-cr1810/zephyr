@@ -1,0 +1,185 @@
+# Test basic class inheritance
+class Animal {
+    name : string
+    age : int
+
+    func init(name : string, age : int) {
+        this.name = name
+        this.age = age
+    }
+
+    func speak() {
+        print("The animal makes a sound")
+    }
+
+    func get_info() : string {
+        return this.name + " is " + str(this.age) + " years old"
+    }
+}
+
+class Dog : Animal {
+    breed : string
+
+    func init(name : string, age : int, breed : string) {
+        super.init(name, age)
+        this.breed = breed
+    }
+
+    func speak() {
+        print(this.name + " barks!")
+    }
+
+    func get_breed() : string {
+        return this.breed
+    }
+
+    func get_full_info() : string {
+        return super.get_info() + " and is a " + this.breed
+    }
+}
+
+# Test final class
+final class Cat : Animal {
+    func init(name : string, age : int) {
+        super.init(name, age)
+    }
+
+    func speak() {
+        print(this.name + " meows!")
+    }
+}
+
+# This should fail - cannot inherit from final class
+# class Kitten : Cat {
+#     func init(name : string) {
+#         super.init(name, 0)
+#     }
+# }
+
+# Test abstract class
+abstract class Shape {
+    color : string
+
+    func init(color : string) {
+        this.color = color
+    }
+
+    abstract func area() : float
+    abstract func perimeter() : float
+
+    func describe() {
+        print("This is a " + this.color + " shape")
+    }
+}
+
+class Rectangle : Shape {
+    width : float
+    height : float
+
+    func init(color : string, width : float, height : float) {
+        super.init(color)
+        this.width = width
+        this.height = height
+    }
+
+    func area() : float {
+        return this.width * this.height
+    }
+
+    func perimeter() : float {
+        return 2.0 * (this.width + this.height)
+    }
+}
+
+class Circle : Shape {
+    radius : float
+
+    func init(color : string, radius : float) {
+        super.init(color)
+        this.radius = radius
+    }
+
+    func area() : float {
+        return 3.14159 * this.radius * this.radius
+    }
+
+    func perimeter() : float {
+        return 2.0 * 3.14159 * this.radius
+    }
+}
+
+# Test abstract class with partial implementation
+abstract class Vehicle {
+    speed : float = 0.0
+
+    func accelerate(amount : float) {
+        this.speed = this.speed + amount
+    }
+
+    func brake(amount : float) {
+        this.speed = this.speed - amount
+        if this.speed < 0.0 {
+            this.speed = 0.0
+        }
+    }
+
+    abstract func max_speed() : float
+}
+
+class Car : Vehicle {
+    func max_speed() : float {
+        return 200.0
+    }
+}
+
+class Bicycle : Vehicle {
+    func max_speed() : float {
+        return 30.0
+    }
+}
+
+# Main test code
+func main() {
+    # Test basic inheritance
+    print("=== Testing Basic Inheritance ===")
+    dog = Dog("Max", 5, "Golden Retriever")
+    dog.speak()
+    print(dog.get_info())
+    print(dog.get_breed())
+    print(dog.get_full_info())
+
+    print("\n=== Testing Final Class ===")
+    cat = Cat("Whiskers", 3)
+    cat.speak()
+    print(cat.get_info())
+
+    print("\n=== Testing Abstract Classes ===")
+    rect = Rectangle("red", 10.0, 5.0)
+    rect.describe()
+    print("Rectangle area: " + str(rect.area()))
+    print("Rectangle perimeter: " + str(rect.perimeter()))
+
+    circle = Circle("blue", 7.0)
+    circle.describe()
+    print("Circle area: " + str(circle.area()))
+    print("Circle perimeter: " + str(circle.perimeter()))
+
+    print("\n=== Testing Abstract Class with Partial Implementation ===")
+    car = Car()
+    car.accelerate(50.0)
+    print("Car speed after acceleration: " + str(car.speed))
+    print("Car max speed: " + str(car.max_speed()))
+
+    bike = Bicycle()
+    bike.accelerate(15.0)
+    print("Bicycle speed after acceleration: " + str(bike.speed))
+    print("Bicycle max speed: " + str(bike.max_speed()))
+
+    # Test that abstract class cannot be instantiated
+    # This should fail:
+    # shape = Shape("green")
+
+    print("\n=== All tests completed successfully! ===")
+}
+
+main()

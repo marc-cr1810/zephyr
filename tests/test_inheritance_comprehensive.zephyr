@@ -1,0 +1,296 @@
+# Comprehensive test of class inheritance features
+
+# Test 1: Basic inheritance with method override
+class Animal {
+    name : string
+    age : int
+
+    func init(name : string, age : int) {
+        this.name = name
+        this.age = age
+    }
+
+    func speak() {
+        print("The " + this.name + " makes a sound")
+    }
+
+    func get_info() : string {
+        return this.name + " is " + str(this.age) + " years old"
+    }
+}
+
+class Dog : Animal {
+    breed : string
+
+    func init(name : string, age : int, breed : string) {
+        super.init(name, age)
+        this.breed = breed
+    }
+
+    func speak() {
+        print(this.name + " barks: Woof woof!")
+    }
+
+    func wag_tail() {
+        print(this.name + " is wagging its tail")
+    }
+}
+
+class Cat : Animal {
+    indoor : bool
+
+    func init(name : string, age : int, indoor : bool) {
+        super.init(name, age)
+        this.indoor = indoor
+    }
+
+    func speak() {
+        print(this.name + " meows: Meow!")
+    }
+
+    func purr() {
+        print(this.name + " is purring")
+    }
+}
+
+# Test 2: Multi-level inheritance
+class Puppy : Dog {
+    is_trained : bool = false
+
+    func init(name : string, breed : string) {
+        super.init(name, 0, breed)
+    }
+
+    func train() {
+        this.is_trained = true
+        print(this.name + " has been trained!")
+    }
+}
+
+# Test 3: Final class
+final class GoldenRetriever : Dog {
+    func init(name : string, age : int) {
+        super.init(name, age, "Golden Retriever")
+    }
+
+    func fetch() {
+        print(this.name + " loves to fetch!")
+    }
+}
+
+# Test 4: Abstract class with mixed methods
+abstract class Shape {
+    color : string
+    x : float
+    y : float
+
+    func init(color : string, x : float, y : float) {
+        this.color = color
+        this.x = x
+        this.y = y
+    }
+
+    abstract func area() : float
+    abstract func perimeter() : float
+
+    func move(dx : float, dy : float) {
+        this.x = this.x + dx
+        this.y = this.y + dy
+    }
+
+    func describe() : string {
+        return "A " + this.color + " shape at (" + str(this.x) + ", " + str(this.y) + ")"
+    }
+}
+
+class Rectangle : Shape {
+    width : float
+    height : float
+
+    func init(color : string, x : float, y : float, width : float, height : float) {
+        super.init(color, x, y)
+        this.width = width
+        this.height = height
+    }
+
+    func area() : float {
+        return this.width * this.height
+    }
+
+    func perimeter() : float {
+        return 2.0 * (this.width + this.height)
+    }
+}
+
+class Circle : Shape {
+    radius : float
+
+    func init(color : string, x : float, y : float, radius : float) {
+        super.init(color, x, y)
+        this.radius = radius
+    }
+
+    func area() : float {
+        return 3.14159 * this.radius * this.radius
+    }
+
+    func perimeter() : float {
+        return 2.0 * 3.14159 * this.radius
+    }
+}
+
+# Test 5: Abstract class inheritance chain
+abstract class Vehicle {
+    max_speed : float
+    current_speed : float = 0.0
+
+    func init(max_speed : float) {
+        this.max_speed = max_speed
+    }
+
+    func accelerate(amount : float) {
+        this.current_speed = this.current_speed + amount
+        if this.current_speed > this.max_speed {
+            this.current_speed = this.max_speed
+        }
+    }
+
+    func brake(amount : float) {
+        this.current_speed = this.current_speed - amount
+        if this.current_speed < 0.0 {
+            this.current_speed = 0.0
+        }
+    }
+
+    abstract func fuel_type() : string
+}
+
+abstract class MotorVehicle : Vehicle {
+    engine_size : float
+
+    func init(max_speed : float, engine_size : float) {
+        super.init(max_speed)
+        this.engine_size = engine_size
+    }
+
+    func fuel_type() : string {
+        return "gasoline"
+    }
+}
+
+class Car : MotorVehicle {
+    num_doors : int
+
+    func init(max_speed : float, engine_size : float, num_doors : int) {
+        super.init(max_speed, engine_size)
+        this.num_doors = num_doors
+    }
+
+    func honk() {
+        print("Beep beep!")
+    }
+}
+
+class Bicycle : Vehicle {
+    num_gears : int
+
+    func init(num_gears : int) {
+        super.init(30.0)
+        this.num_gears = num_gears
+    }
+
+    func fuel_type() : string {
+        return "human power"
+    }
+
+    func ring_bell() {
+        print("Ring ring!")
+    }
+}
+
+# Main test function
+func main() {
+    print("=== Test 1: Basic Inheritance ===")
+    dog = Dog("Buddy", 3, "Labrador")
+    dog.speak()
+    print(dog.get_info())
+    dog.wag_tail()
+
+    cat = Cat("Whiskers", 2, true)
+    cat.speak()
+    print(cat.get_info())
+    cat.purr()
+
+    print("\n=== Test 2: Multi-level Inheritance ===")
+    puppy = Puppy("Max", "Beagle")
+    puppy.speak()
+    print(puppy.get_info())
+    puppy.wag_tail()
+    print("Is trained: " + str(puppy.is_trained))
+    puppy.train()
+    print("Is trained: " + str(puppy.is_trained))
+
+    print("\n=== Test 3: Final Class ===")
+    golden = GoldenRetriever("Charlie", 4)
+    golden.speak()
+    golden.fetch()
+    print("Breed: " + golden.breed)
+
+    print("\n=== Test 4: Abstract Class with Mixed Methods ===")
+    rect = Rectangle("red", 10.0, 20.0, 5.0, 3.0)
+    print(rect.describe())
+    print("Rectangle area: " + str(rect.area()))
+    print("Rectangle perimeter: " + str(rect.perimeter()))
+    rect.move(5.0, -5.0)
+    print("After move: " + rect.describe())
+
+    circle = Circle("blue", 0.0, 0.0, 7.0)
+    print(circle.describe())
+    print("Circle area: " + str(circle.area()))
+    print("Circle perimeter: " + str(circle.perimeter()))
+
+    print("\n=== Test 5: Abstract Class Inheritance Chain ===")
+    car = Car(200.0, 2.0, 4)
+    print("Car fuel type: " + car.fuel_type())
+    print("Car engine size: " + str(car.engine_size))
+    print("Car doors: " + str(car.num_doors))
+    car.accelerate(50.0)
+    print("Car speed: " + str(car.current_speed))
+    car.honk()
+
+    bike = Bicycle(21)
+    print("Bicycle fuel type: " + bike.fuel_type())
+    print("Bicycle gears: " + str(bike.num_gears))
+    bike.accelerate(15.0)
+    print("Bicycle speed: " + str(bike.current_speed))
+    bike.ring_bell()
+
+    print("\n=== Test 6: Super Calls in Methods ===")
+    class Parent {
+        func greet() : string {
+            return "Hello from Parent"
+        }
+
+        func calculate(x : int) : int {
+            return x * 2
+        }
+    }
+
+    class Child : Parent {
+        func greet() : string {
+            return super.greet() + " and Child"
+        }
+
+        func calculate(x : int) : int {
+            return super.calculate(x) + 10
+        }
+    }
+
+    child = Child()
+    print(child.greet())
+    print("Calculate 5: " + str(child.calculate(5)))
+
+    print("\n=== All Tests Completed Successfully! ===")
+}
+
+main()

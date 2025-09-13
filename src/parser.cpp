@@ -168,7 +168,9 @@ std::unique_ptr<statement_t> parser_t::statement() {
         return function_definition();
     } else if (m_current_token.type == token_type_e::async) {
         return function_definition();
-    } else if (m_current_token.type == token_type_e::class_token) {
+    } else if (m_current_token.type == token_type_e::final_token || 
+               m_current_token.type == token_type_e::abstract_token ||
+               m_current_token.type == token_type_e::class_token) {
         return class_definition();
     } else if (m_current_token.type == token_type_e::interface_token) {
         return interface_definition();
@@ -281,7 +283,7 @@ std::unique_ptr<statement_t> parser_t::statement() {
         return continue_statement();
     } else if (m_current_token.type == token_type_e::try_token) {
         return try_catch_statement();
-    } else if ((m_current_token.type == token_type_e::name || m_current_token.type == token_type_e::this_token) &&
+    } else if ((m_current_token.type == token_type_e::name || m_current_token.type == token_type_e::this_token || m_current_token.type == token_type_e::super_token) &&
                m_lexer.peek_next_token().type == token_type_e::dot) {
         // Check if this is a member assignment
         token_t first_token = m_current_token;
@@ -843,6 +845,100 @@ std::unique_ptr<expression_t> parser_t::factor() {
         }
 
         return expr;
+    } else if (token.type == token_type_e::super_token) {
+        eat(token_type_e::super_token);
+        std::unique_ptr<expression_t> expr = std::make_unique<super_expression_t>(token.line, token.column, token.line, token.column + token.text.length() - 1);
+
+        // Handle chained member access/method calls and indexing in any order
+        while (m_current_token.type == token_type_e::dot || m_current_token.type == token_type_e::lbracket || m_current_token.type == token_type_e::question_dot || (m_current_token.type == token_type_e::question && m_lexer.peek_next_token().type == token_type_e::lbracket)) {
+            if (m_current_token.type == token_type_e::dot) {
+                eat(token_type_e::dot);
+                std::string member_name(m_current_token.text);
+                token_t member_token = m_current_token;
+                eat(token_type_e::name);
+
+                if (m_current_token.type == token_type_e::lparen) {
+                    // Method call - continue the chain
+                    expr = method_call(std::move(expr), member_name, member_token);
+                } else {
+                    // Member access - continue the chain
+                    expr = member_access(std::move(expr), member_name, member_token);
+                }
+            } else if (m_current_token.type == token_type_e::question_dot) { // New optional chaining
+                token_t optional_chain_token = m_current_token;
+                eat(token_type_e::question_dot);
+                if (m_current_token.type == token_type_e::name) {
+                    std::string member_name(m_current_token.text);
+                    token_t member_token = m_current_token;
+                    eat(token_type_e::name);
+                    if (m_current_token.type == token_type_e::lparen) {
+                        // Optional method call
+                        std::vector<std::unique_ptr<expression_t>> arguments;
+                        eat(token_type_e::lparen);
+                        if (m_current_token.type != token_type_e::rparen) {
+                            arguments.push_back(expression());
+                            while (m_current_token.type == token_type_e::comma) {
+                                eat(token_type_e::comma);
+                                arguments.push_back(expression());
+                            }
+                        }
+                        token_t rparen_token = m_current_token;
+                        eat(token_type_e::rparen);
+                        expr = std::make_unique<optional_method_call_t>(std::move(expr), member_name, std::move(arguments), optional_chain_token.line, optional_chain_token.column, rparen_token.line, rparen_token.column);
+                    } else {
+                        // Optional member access
+                        expr = std::make_unique<optional_member_access_t>(std::move(expr), member_name, optional_chain_token.line, optional_chain_token.column, member_token.line, member_token.column);
+                    }
+                } else if (m_current_token.type == token_type_e::lbracket) {
+                    // Optional index access
+                    token_t lbracket_token = m_current_token;
+                    eat(token_type_e::lbracket);
+                    auto index_expr = expression();
+                    token_t rbracket_token = m_current_token;
+                    eat(token_type_e::rbracket);
+                    expr = std::make_unique<optional_index_access_t>(std::move(expr), std::move(index_expr), optional_chain_token.line, optional_chain_token.column, rbracket_token.line, rbracket_token.column);
+                } else {
+                    zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                    throw zephyr::syntax_error_t("Expected member name, method call, or index access after '?.'");
+                }
+            } else if (m_current_token.type == token_type_e::question && m_lexer.peek_next_token().type == token_type_e::lbracket) { // Optional Index Access (?[])
+                token_t question_token = m_current_token;
+                eat(token_type_e::question); // Consume '?'
+                token_t lbracket_token = m_current_token;
+                eat(token_type_e::lbracket);
+                auto index_expr = expression();
+                token_t rbracket_token = m_current_token;
+                eat(token_type_e::rbracket);
+                expr = std::make_unique<optional_index_access_t>(std::move(expr), std::move(index_expr), question_token.line, question_token.column, rbracket_token.line, rbracket_token.column);
+            } else if (m_current_token.type == token_type_e::lbracket) {
+                // Index access - continue the chain
+                expr = index_access(std::move(expr));
+            }
+        }
+
+        // Check for postfix increment/decrement after all chaining is complete
+        if (m_current_token.type == token_type_e::increment || m_current_token.type == token_type_e::decrement) {
+            bool is_increment = (m_current_token.type == token_type_e::increment);
+            token_t op_token = m_current_token;
+            eat(m_current_token.type);
+
+            if (auto member_node = dynamic_cast<member_access_t*>(expr.get())) {
+                // Member increment/decrement (super.member++)
+                auto object = std::unique_ptr<expression_t>(member_node->object.release());
+                std::string member_name = member_node->member_name;
+                return std::make_unique<member_increment_decrement_t>(std::move(object), member_name, is_increment, false, token.line, token.column, op_token.line, op_token.column + 1);
+            } else if (auto index_node = dynamic_cast<index_access_t*>(expr.get())) {
+                // Indexed increment/decrement (super[i]++)
+                auto target = std::unique_ptr<expression_t>(index_node->object.release());
+                auto index = std::unique_ptr<expression_t>(index_node->index.release());
+                return std::make_unique<indexed_increment_decrement_t>(std::move(target), std::move(index), is_increment, false, token.line, token.column, op_token.line, op_token.column + 1);
+            } else {
+                zephyr::current_error_location() = {op_token.line, op_token.column, 1};
+                throw zephyr::syntax_error_t("Postfix increment/decrement not supported on this expression type.");
+            }
+        }
+
+        return expr;
     } else if (token.type == token_type_e::name || token.type == token_type_e::const_token) { // Added token_type_e::const_token
         // Look ahead for arrow to detect lambda expression
         token_t next_token = m_lexer.peek_next_token();
@@ -1288,12 +1384,20 @@ std::unique_ptr<index_access_t> parser_t::index_access(std::unique_ptr<expressio
 std::unique_ptr<function_definition_t> parser_t::function_definition() {
     token_t func_token = m_current_token;
     bool async = false;
-
+    bool is_abstract = false;
+    
+    // Check for abstract modifier
+    if (m_current_token.type == token_type_e::abstract_token) {
+        is_abstract = true;
+        eat(token_type_e::abstract_token);
+    }
+    
+    // Check for async modifier
     if (m_current_token.type == token_type_e::async) {
         async = true;
         eat(token_type_e::async);
     }
-
+    
     eat(token_type_e::func);
     token_t name_token = m_current_token;
     eat(token_type_e::name);
@@ -1354,8 +1458,13 @@ std::unique_ptr<function_definition_t> parser_t::function_definition() {
         eat(token_type_e::name);
     }
 
-    auto body = block();
-    return std::make_unique<function_definition_t>(name_token.text, std::move(parameters), std::move(body), return_type_name, explicit_return_type, async, false,
+    // Abstract functions don't have a body
+    std::unique_ptr<block_t> body = nullptr;
+    if (!is_abstract) {
+        body = block();
+    }
+    
+    return std::make_unique<function_definition_t>(name_token.text, std::move(parameters), std::move(body), return_type_name, explicit_return_type, async, false, is_abstract,
                                                func_token.line, func_token.column, m_current_token.line, m_current_token.column);
 }
 
@@ -1879,20 +1988,55 @@ std::unique_ptr<lambda_expression_t> parser_t::lambda_expression() {
 
 std::unique_ptr<class_definition_t> parser_t::class_definition() {
     token_t class_token = m_current_token;
+    
+    // Check for class modifiers (final, abstract)
+    bool is_final = false;
+    bool is_abstract = false;
+    
+    if (m_current_token.type == token_type_e::final_token) {
+        is_final = true;
+        eat(token_type_e::final_token);
+    } else if (m_current_token.type == token_type_e::abstract_token) {
+        is_abstract = true;
+        eat(token_type_e::abstract_token);
+    }
+    
     eat(token_type_e::class_token);
 
     std::string class_name(m_current_token.text);
     eat(token_type_e::name);
 
+    // Parse parent class and/or interfaces after colon
+    std::string parent_class;
     std::vector<std::string> interfaces;
+    
     if (m_current_token.type == token_type_e::colon) {
         eat(token_type_e::colon);
-        interfaces.push_back(std::string(m_current_token.text));
+        
+        // Collect all inherited items
+        std::vector<std::string> inherited_items;
+        inherited_items.push_back(std::string(m_current_token.text));
         eat(token_type_e::name);
+        
         while (m_current_token.type == token_type_e::comma) {
             eat(token_type_e::comma);
-            interfaces.push_back(std::string(m_current_token.text));
+            inherited_items.push_back(std::string(m_current_token.text));
             eat(token_type_e::name);
+        }
+        
+        // Now we need to determine which are classes and which are interfaces
+        // This will be checked at interpretation time when we can look up the symbols
+        // For now, store all items and let the interpreter validate
+        if (inherited_items.size() == 1) {
+            // Single inheritance - could be class or interface
+            parent_class = inherited_items[0];
+        } else {
+            // Multiple inheritance - need to check at runtime
+            // Store first as potential parent, rest as potential interfaces
+            parent_class = inherited_items[0];
+            for (size_t i = 1; i < inherited_items.size(); ++i) {
+                interfaces.push_back(inherited_items[i]);
+            }
         }
     }
 
@@ -1923,7 +2067,9 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
 
     // Parse method definitions
     std::vector<std::unique_ptr<function_definition_t>> methods;
-    while (m_current_token.type == token_type_e::func || m_current_token.type == token_type_e::async) {
+    while (m_current_token.type == token_type_e::func || 
+           m_current_token.type == token_type_e::async ||
+           m_current_token.type == token_type_e::abstract_token) {
         auto method = function_definition();
         methods.push_back(std::unique_ptr<function_definition_t>(static_cast<function_definition_t*>(method.release())));
     }
@@ -1933,10 +2079,13 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
 
     return std::make_unique<class_definition_t>(
         class_name,
+        parent_class,
         std::move(interfaces),
         std::move(member_variables),
         std::move(methods),
         false,
+        is_final,
+        is_abstract,
         class_token.line,
         class_token.column,
         end_token.line,
@@ -2079,6 +2228,9 @@ std::unique_ptr<member_assignment_t> parser_t::member_assignment() {
     if (m_current_token.type == token_type_e::this_token) {
         eat(token_type_e::this_token);
         object = std::make_unique<this_expression_t>(start_token.line, start_token.column, start_token.end_line, start_token.end_column);
+    } else if (m_current_token.type == token_type_e::super_token) {
+        eat(token_type_e::super_token);
+        object = std::make_unique<super_expression_t>(start_token.line, start_token.column, start_token.end_line, start_token.end_column);
     } else {
         std::string name(m_current_token.text);
         eat(token_type_e::name);
@@ -2349,6 +2501,14 @@ auto parser_t::internal_declaration() -> std::unique_ptr<statement_t>
     else if (m_current_token.type == token_type_e::class_token)
     {
         // Internal class
+        auto class_def = class_definition();
+        class_def->is_internal = true;
+        return class_def;
+    }
+    else if (m_current_token.type == token_type_e::final_token || 
+             m_current_token.type == token_type_e::abstract_token)
+    {
+        // Internal class with modifiers
         auto class_def = class_definition();
         class_def->is_internal = true;
         return class_def;

@@ -89,6 +89,11 @@ enum class token_type_e
     await,
     spawn,
     const_token,
+    
+    // Class inheritance tokens
+    final_token,
+    abstract_token,
+    super_token,
 
     // Module system tokens
     import_token,
