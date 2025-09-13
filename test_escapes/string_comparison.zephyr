@@ -1,0 +1,110 @@
+# String Types Comparison in Zephyr
+
+print("=" * 60)
+print("STRING TYPES IN ZEPHYR")
+print("=" * 60)
+print("")
+
+# 1. Regular Strings - Process escape sequences
+print("1. REGULAR STRINGS (process escape sequences)")
+print("-" * 40)
+regular1 = "Line 1\nLine 2\tTabbed"
+regular2 = 'Path: C:\\Users\\Docs'
+print("Double quotes: " + regular1)
+print("Single quotes: " + regular2)
+print("")
+
+# 2. Raw Strings - Keep backslashes literal
+print("2. RAW STRINGS (r-prefix, no escape processing)")
+print("-" * 40)
+raw1 = r"Line 1\nLine 2\tTabbed"
+raw2 = r'Path: C:\Users\Docs'
+raw3 = r"Regex: \d{3}-\d{2}-\d{4}"
+print("Double quotes: " + raw1)
+print("Single quotes: " + raw2)
+print("Regex pattern: " + raw3)
+print("")
+
+# 3. Multi-line Strings - Span multiple lines
+print("3. MULTI-LINE STRINGS (triple quotes)")
+print("-" * 40)
+multi1 = """This is line 1
+This is line 2
+This is line 3"""
+print("Triple double quotes:")
+print(multi1)
+print("")
+
+multi2 = '''SELECT * FROM users
+WHERE age > 18
+ORDER BY name'''
+print("Triple single quotes:")
+print(multi2)
+print("")
+
+# 4. F-strings - String interpolation
+print("4. F-STRINGS (formatted strings)")
+print("-" * 40)
+name = "Alice"
+age = 30
+fstring1 = f"Hello, {name}! You are {age} years old."
+fstring2 = f"Math: 2 + 2 = {2 + 2}"
+fstring3 = f"Path: C:\\Users\\{name}\\Documents"
+print(fstring1)
+print(fstring2)
+print(fstring3)
+print("")
+
+# 5. Combining Features
+print("5. COMBINING FEATURES")
+print("-" * 40)
+
+# Multi-line with escape sequences
+combined1 = """Header
+\tIndented line
+\t\tDouble indented
+Footer"""
+print("Multi-line with tabs:")
+print(combined1)
+print("")
+
+# Multi-line with regular string concatenation
+user = "Bob"
+combined2 = """Welcome """ + user + """!
+Your account has been created.
+Please check your email."""
+print("Multi-line with concatenation:")
+print(combined2)
+print("")
+
+# Practical example: Building a configuration
+print("6. PRACTICAL EXAMPLE")
+print("-" * 40)
+
+config_path = r"C:\Program Files\MyApp\config.ini"
+config_content = """
+[Database]
+host = localhost
+port = 5432
+name = myapp_db
+
+[Logging]
+level = INFO
+file = app.log
+"""
+
+print("Config path (raw string): " + config_path)
+print("Config content (multi-line):" + config_content)
+
+# Summary table
+summary = """
+╔════════════════╦═══════════════════════════════════════╗
+║ String Type    ║ Description                           ║
+╠════════════════╬═══════════════════════════════════════╣
+║ "..." or '...' ║ Regular strings (process escapes)    ║
+║ r"..." r'...'  ║ Raw strings (literal backslashes)    ║
+║ \"\"\"...\"\"\" ║ Multi-line strings (preserve format) ║
+║ f"..."         ║ F-strings (interpolation)             ║
+╚════════════════╩═══════════════════════════════════════╝
+"""
+print(summary)

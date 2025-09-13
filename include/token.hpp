@@ -59,6 +59,8 @@ enum class token_type_e
     name,
     number,
     string,
+    raw_string,
+    multiline_string,
     fstring,
     true_token,
     false_token,

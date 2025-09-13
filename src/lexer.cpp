@@ -120,7 +120,56 @@ auto lexer_t::next_token() -> token_t
         return '\0';
     };
 
-    // String literals (raw view, no un-escaping)
+    // Raw string literals (r"..." or r'...')
+    if (current_char == 'r' && (peek() == '"' || peek() == '\''))
+    {
+        char quote_type = peek();
+        size_t literal_start_pos = m_position;
+        m_position += 2; // Skip r and the opening quote
+        size_t content_start_pos = m_position;
+
+        // For raw strings, don't process escape sequences at all
+        while (m_position < m_source.length())
+        {
+            if (m_source[m_position] == quote_type)
+            {
+                // Check if this quote is escaped with a backslash
+                // In raw strings, backslash doesn't escape, so we just check for the quote
+                break;
+            }
+            
+            if (m_source[m_position] == '\n')
+            {
+                m_line++;
+                m_column = 1;
+            }
+            else
+            {
+                m_column++;
+            }
+            m_position++;
+        }
+        size_t content_length = m_position - content_start_pos;
+
+        if (m_position < m_source.length()) {
+            m_position++; // Skip closing quote
+            m_column++;
+        }
+        size_t full_literal_length = m_position - literal_start_pos;
+
+        token_t token = {
+            token_type_e::raw_string,
+            std::string_view(m_source.data() + content_start_pos, content_length),
+            m_line,
+            start_column,
+            literal_start_pos,
+            m_line,
+            m_column - 1
+        };
+        return token;
+    }
+
+    // F-string literals (f"..." or f'...')
     if (current_char == 'f' && (peek() == '"' || peek() == '\''))
     {
         char quote_type = peek();
@@ -155,6 +204,79 @@ auto lexer_t::next_token() -> token_t
         return token;
     }
 
+    // Multi-line string literals (""" ... """ or ''' ... ''')
+    if ((current_char == '"' && peek() == '"' && peek(2) == '"') ||
+        (current_char == '\'' && peek() == '\'' && peek(2) == '\''))
+    {
+        char quote_type = current_char;
+        size_t literal_start_pos = m_position;
+        int start_line = m_line;
+        m_position += 3; // Skip opening triple quotes
+        m_column += 3;
+        size_t content_start_pos = m_position;
+
+        // Read until we find closing triple quotes
+        while (m_position + 2 < m_source.length())
+        {
+            if (m_source[m_position] == quote_type &&
+                m_source[m_position + 1] == quote_type &&
+                m_source[m_position + 2] == quote_type)
+            {
+                break;
+            }
+            
+            if (m_source[m_position] == '\n')
+            {
+                m_line++;
+                m_column = 1;
+            }
+            else
+            {
+                m_column++;
+            }
+            
+            // Handle escape sequences in multi-line strings
+            if (m_source[m_position] == '\\' && m_position + 1 < m_source.length())
+            {
+                m_position++;
+                if (m_source[m_position] == '\n')
+                {
+                    m_line++;
+                    m_column = 1;
+                }
+                else
+                {
+                    m_column++;
+                }
+            }
+            m_position++;
+        }
+        
+        size_t content_length = m_position - content_start_pos;
+        
+        // Skip closing triple quotes if found
+        if (m_position + 2 < m_source.length() &&
+            m_source[m_position] == quote_type &&
+            m_source[m_position + 1] == quote_type &&
+            m_source[m_position + 2] == quote_type)
+        {
+            m_position += 3;
+            m_column += 3;
+        }
+
+        token_t token = {
+            token_type_e::multiline_string,
+            std::string_view(m_source.data() + content_start_pos, content_length),
+            start_line,
+            start_column,
+            literal_start_pos,
+            m_line,
+            m_column - 1
+        };
+        return token;
+    }
+
+    // Regular string literals (single or double quotes)
     if (current_char == '\'' || current_char == '"')
     {
         size_t literal_start_pos = m_position;

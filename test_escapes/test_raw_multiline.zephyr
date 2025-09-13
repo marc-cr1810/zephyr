@@ -1,0 +1,113 @@
+# Test file for raw strings and multi-line strings in Zephyr
+
+print("=== Raw Strings ===")
+
+# Raw strings don't process escape sequences
+path = r"C:\Users\Documents\file.txt"
+print("Windows path: " + path)
+
+regex = r"\d{3}-\d{2}-\d{4}"
+print("Regex pattern: " + regex)
+
+# Raw string with backslashes
+raw_backslash = r"Line 1\nLine 2\tTabbed"
+print("Raw backslash test: " + raw_backslash)
+
+# Raw string with special characters
+special = r"Tab: \t Newline: \n Backslash: \\"
+print("Special chars: " + special)
+
+print("")
+print("=== Multi-line Strings ===")
+
+# Basic multi-line string
+message = """Hello World!
+This is a multi-line string.
+It can span multiple lines
+without needing explicit \n characters."""
+print(message)
+
+print("")
+
+# Multi-line string with indentation
+code_example = """
+    func fibonacci(n) {
+        if n <= 1 {
+            return n
+        }
+        return fibonacci(n - 1) + fibonacci(n - 2)
+    }
+"""
+print("Code example:" + code_example)
+
+# Multi-line string with single quotes
+poem = '''Roses are red,
+Violets are blue,
+Multi-line strings are great,
+And Zephyr is too!'''
+print(poem)
+
+print("")
+
+# Multi-line string with escape sequences (should be processed)
+formatted = """First line
+\tIndented second line
+\t\tDouble indented third line
+Last line with a quote: \"Hello!\""""
+print("Formatted text:")
+print(formatted)
+
+print("")
+
+# Mixing raw and regular strings
+print("=== Mixing String Types ===")
+regular = "Path with escapes: C:\\Users\\Docs"
+raw = r"Path without escapes: C:\Users\Docs"
+print(regular)
+print(raw)
+
+# Multi-line string in a variable
+sql_query = """
+SELECT users.name, orders.total
+FROM users
+JOIN orders ON users.id = orders.user_id
+WHERE orders.date >= '2024-01-01'
+ORDER BY orders.total DESC
+"""
+print("SQL Query:" + sql_query)
+
+# Testing empty multi-line strings
+empty_multi = """"""
+print("Empty multi-line: '" + empty_multi + "'")
+
+# Multi-line string with quotes inside
+tricky = """This has "quotes" inside it"""
+print("Tricky: " + tricky)
+
+print("")
+print("=== Combined Usage ===")
+
+# Using in functions
+func process_path(path) {
+    print("Processing: " + path)
+}
+
+process_path(r"C:\Program Files\Zephyr\bin")
+process_path("C:\\Program Files\\Zephyr\\bin")
+
+# Multi-line string as function documentation
+func calculate_area(radius) {
+    """
+    Calculate the area of a circle.
+
+    Parameters:
+        radius - The radius of the circle
+
+    Returns:
+        The area of the circle
+    """
+    return 3.14159 * radius * radius
+}
+
+area = calculate_area(5)
+print("Area of circle with radius 5: " + str(area))

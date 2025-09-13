@@ -43,6 +43,8 @@ std::string token_type_to_string(token_type_e type) {
         case token_type_e::interface_token: return "interface";
         case token_type_e::number: return "number";
         case token_type_e::string: return "string";
+        case token_type_e::raw_string: return "raw_string";
+        case token_type_e::multiline_string: return "multiline_string";
         case token_type_e::true_token: return "true";
         case token_type_e::false_token: return "false";
         case token_type_e::none: return "none";
@@ -671,6 +673,15 @@ std::unique_ptr<expression_t> parser_t::factor() {
         eat(token_type_e::string);
         std::string processed = process_escape_sequences(std::string(token.text));
         return std::make_unique<string_literal_t>(processed, token.line, token.column, token.line, token.column + token.text.length() - 1);
+    } else if (token.type == token_type_e::raw_string) {
+        eat(token_type_e::raw_string);
+        // Raw strings don't process escape sequences
+        return std::make_unique<string_literal_t>(token.text, token.line, token.column, token.end_line, token.end_column);
+    } else if (token.type == token_type_e::multiline_string) {
+        eat(token_type_e::multiline_string);
+        // Multi-line strings process escape sequences
+        std::string processed = process_escape_sequences(std::string(token.text));
+        return std::make_unique<string_literal_t>(processed, token.line, token.column, token.end_line, token.end_column);
     } else if (token.type == token_type_e::fstring) {
         eat(token_type_e::fstring);
         std::vector<std::unique_ptr<expression_t>> parts;

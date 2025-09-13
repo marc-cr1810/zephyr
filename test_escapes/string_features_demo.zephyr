@@ -1,0 +1,178 @@
+# Demonstration of Raw and Multi-line String Features in Zephyr
+
+print("=" * 50)
+print("RAW STRINGS (r-prefix)")
+print("=" * 50)
+
+# Raw strings preserve backslashes literally - perfect for:
+
+# 1. Windows file paths
+windows_path = r"C:\Users\Documents\Projects\file.txt"
+print("Windows path: " + windows_path)
+
+# 2. Regular expressions
+email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+print("Email regex: " + email_regex)
+
+phone_regex = r"\(\d{3}\) \d{3}-\d{4}"
+print("Phone regex: " + phone_regex)
+
+# 3. LaTeX or mathematical notation
+latex_formula = r"\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}"
+print("LaTeX formula: " + latex_formula)
+
+# 4. Escape sequences shown literally
+escape_demo = r'These are literal: \n \t \r \\ \" '
+print("Escape sequences: " + escape_demo)
+
+print("")
+print("=" * 50)
+print("MULTI-LINE STRINGS (triple quotes)")
+print("=" * 50)
+
+# Multi-line strings preserve formatting and process escape sequences
+
+# 1. JSON data
+json_data = """
+{
+    "name": "John Doe",
+    "age": 30,
+    "email": "john@example.com",
+    "address": {
+        "street": "123 Main St",
+        "city": "New York"
+    }
+}
+"""
+print("JSON example:" + json_data)
+
+# 2. SQL queries
+sql_query = """
+SELECT
+    customers.name,
+    COUNT(orders.id) as order_count,
+    SUM(orders.total) as total_spent
+FROM customers
+LEFT JOIN orders ON customers.id = orders.customer_id
+WHERE customers.created_at >= '2024-01-01'
+GROUP BY customers.id
+HAVING order_count > 5
+ORDER BY total_spent DESC
+LIMIT 10
+"""
+print("SQL query:" + sql_query)
+
+# 3. HTML templates
+html_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>This is a multi-line HTML template.</p>
+</body>
+</html>
+"""
+print("HTML template:" + html_template)
+
+# 4. Documentation strings
+help_text = """
+Usage: zephyr [options] <file>
+
+Options:
+    -h, --help      Show this help message
+    -v, --version   Show version information
+    -d, --debug     Enable debug mode
+    -o, --output    Specify output file
+
+Examples:
+    zephyr script.zephyr
+    zephyr -d -o output.txt script.zephyr
+"""
+print("Help text:" + help_text)
+
+# 5. ASCII art
+ascii_art = """
+    ╔══════════════════╗
+    ║   ZEPHYR LANG    ║
+    ╠══════════════════╣
+    ║  ▄▄▄▄▄▄▄▄▄▄▄▄▄  ║
+    ║  ▀▀▀▀█▀▀▀▀▀▀▀▀  ║
+    ║      █           ║
+    ║     ███          ║
+    ║    █████         ║
+    ║   ███████        ║
+    ╚══════════════════╝
+"""
+print(ascii_art)
+
+# 6. Multi-line with escape sequences (processed)
+formatted_text = """
+Shopping List:
+\t• Milk
+\t• Bread
+\t• Eggs
+\t• Cheese
+
+Notes:
+\t\"Remember to check expiry dates\"
+\tTotal budget: $50.00
+"""
+print("Formatted list:" + formatted_text)
+
+print("")
+print("=" * 50)
+print("PRACTICAL EXAMPLES")
+print("=" * 50)
+
+# Function with multi-line documentation
+func parse_config(config_path) {
+    """
+    Parse a configuration file and return settings.
+
+    Args:
+        config_path: Path to the configuration file
+
+    Returns:
+        A dictionary containing the parsed settings
+
+    Example:
+        settings = parse_config("/etc/app/config.ini")
+    """
+    print("Parsing config from: " + config_path)
+    return {"debug": true, "port": 8080}
+}
+
+settings = parse_config(r"C:\Config\app.ini")
+print("Settings: " + str(settings))
+
+# Combining raw and regular strings
+func build_command(executable, args) {
+    raw_path = r"C:\Program Files\App\bin" + r"\" + executable
+    regular = "\nExecuting with args: " + args
+    return raw_path + regular
+}
+
+cmd = build_command("app.exe", "--verbose")
+print("Command: " + cmd)
+
+# Multi-line string in a list
+messages = [
+    """Welcome to Zephyr!
+This is message 1.""",
+    """Thank you for using our language.
+This is message 2.""",
+    r"Raw path: C:\Users\Public"
+]
+
+for msg in messages {
+    print("Message: " + msg)
+    print("-" * 30)
+}
+
+print("")
+print("=" * 50)
+print("String features successfully demonstrated!")
+print("=" * 50)
