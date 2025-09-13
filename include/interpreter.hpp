@@ -53,6 +53,7 @@ public:
     auto visit(logical_not_op_t& node) -> void override;
     auto visit(unary_op_t& node) -> void override;
     auto visit(index_access_t& node) -> void override;
+    auto visit(slice_expression_t& node) -> void override;
     auto visit(optional_index_access_t& node) -> void override;
     auto visit(optional_member_access_t& node) -> void override;
     auto visit(optional_method_call_t& node) -> void override;

@@ -1,6 +1,7 @@
 #include "types/list_type.hpp"
 #include "objects/objects.hpp"
 #include "errors.hpp"
+#include <algorithm>
 
 namespace zephyr
 {
@@ -122,6 +123,91 @@ auto list_type_t::length(std::shared_ptr<object_t> self) -> int
 {
     auto self_list = std::static_pointer_cast<list_object_t>(self);
     return static_cast<int>(self_list->elements().size());
+}
+
+auto list_type_t::slice(std::shared_ptr<object_t> self,
+                        std::shared_ptr<object_t> start,
+                        std::shared_ptr<object_t> end,
+                        std::shared_ptr<object_t> step) -> std::shared_ptr<object_t>
+{
+    auto self_list = std::static_pointer_cast<list_object_t>(self);
+    const auto& elements = self_list->elements();
+    int list_length = static_cast<int>(elements.size());
+    
+    // Parse start index (default to 0)
+    int start_idx = 0;
+    if (start && start->type()->name() != "none") {
+        if (auto start_int = std::dynamic_pointer_cast<int_object_t>(start)) {
+            start_idx = start_int->value();
+            if (start_idx < 0) {
+                start_idx += list_length;
+            }
+            start_idx = std::max(0, std::min(start_idx, list_length));
+        } else {
+            throw type_error_t("Slice indices must be integers or None");
+        }
+    }
+    
+    // Parse end index (default to length)
+    int end_idx = list_length;
+    if (end && end->type()->name() != "none") {
+        if (auto end_int = std::dynamic_pointer_cast<int_object_t>(end)) {
+            end_idx = end_int->value();
+            if (end_idx < 0) {
+                end_idx += list_length;
+            }
+            end_idx = std::max(0, std::min(end_idx, list_length));
+        } else {
+            throw type_error_t("Slice indices must be integers or None");
+        }
+    }
+    
+    // Parse step (default to 1)
+    int step_val = 1;
+    if (step && step->type()->name() != "none") {
+        if (auto step_int = std::dynamic_pointer_cast<int_object_t>(step)) {
+            step_val = step_int->value();
+            if (step_val == 0) {
+                throw value_error_t("Slice step cannot be zero");
+            }
+        } else {
+            throw type_error_t("Slice step must be an integer");
+        }
+    }
+    
+    // Build the result list
+    std::vector<std::shared_ptr<object_t>> result;
+    if (step_val > 0) {
+        // Forward iteration
+        for (int i = start_idx; i < end_idx; i += step_val) {
+            result.push_back(elements[i]);
+        }
+    } else {
+        // Backward iteration
+        // When step is negative, swap the default start and end
+        if (!start && !end) {
+            start_idx = list_length - 1;
+            end_idx = -1;
+        } else if (!start) {
+            start_idx = list_length - 1;
+        } else if (!end) {
+            end_idx = -1;
+        }
+        
+        // Swap if necessary for negative step
+        if (start_idx < end_idx && step_val < 0) {
+            std::swap(start_idx, end_idx);
+            end_idx--;
+        }
+        
+        for (int i = start_idx; i > end_idx; i += step_val) {
+            if (i >= 0 && i < list_length) {
+                result.push_back(elements[i]);
+            }
+        }
+    }
+    
+    return std::make_shared<list_object_t>(result);
 }
 
 } // namespace zephyr

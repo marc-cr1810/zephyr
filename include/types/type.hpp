@@ -47,6 +47,12 @@ public:
     // Container operations
     virtual auto contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> item) -> bool;
     virtual auto length(std::shared_ptr<object_t> self) -> int;
+    
+    // Slicing operation
+    virtual auto slice(std::shared_ptr<object_t> self, 
+                      std::shared_ptr<object_t> start, 
+                      std::shared_ptr<object_t> end, 
+                      std::shared_ptr<object_t> step) -> std::shared_ptr<object_t>;
 };
 
 }

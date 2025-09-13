@@ -1,0 +1,139 @@
+# Slicing Demo - A powerful feature for strings and lists in Zephyr
+
+print("=" * 50)
+print("SLICING SYNTAX: object[start:end:step]")
+print("=" * 50)
+print("")
+
+# =====================================
+# STRING SLICING
+# =====================================
+print("STRING SLICING EXAMPLES")
+print("-" * 30)
+
+s = "Python"
+print("String: \"" + s + "\"")
+print("")
+
+# Basic slicing
+print("s[0:3]   = \"" + s[0:3] + "\"")     # "Pyt"
+print("s[2:]    = \"" + s[2:] + "\"")      # "thon"
+print("s[:4]    = \"" + s[:4] + "\"")      # "Pyth"
+print("s[:]     = \"" + s[:] + "\"")       # "Python" (copy)
+print("")
+
+# Negative indices
+print("s[-3:]   = \"" + s[-3:] + "\"")     # "hon"
+print("s[:-2]   = \"" + s[:-2] + "\"")     # "Pyth"
+print("s[-4:-1] = \"" + s[-4:-1] + "\"")   # "tho"
+print("")
+
+# Step parameter
+print("s[::2]   = \"" + s[::2] + "\"")     # "Pto"
+print("s[1::2]  = \"" + s[1::2] + "\"")    # "yhn"
+print("s[::-1]  = \"" + s[::-1] + "\"")    # "nohtyP" (reverse)
+print("")
+
+# =====================================
+# LIST SLICING
+# =====================================
+print("LIST SLICING EXAMPLES")
+print("-" * 30)
+
+nums = [10, 20, 30, 40, 50, 60]
+print("List: " + str(nums))
+print("")
+
+# Basic slicing
+print("nums[1:4]   = " + str(nums[1:4]))    # [20, 30, 40]
+print("nums[3:]    = " + str(nums[3:]))     # [40, 50, 60]
+print("nums[:3]    = " + str(nums[:3]))     # [10, 20, 30]
+print("nums[:]     = " + str(nums[:]))      # [10, 20, 30, 40, 50, 60] (copy)
+print("")
+
+# Negative indices
+print("nums[-2:]   = " + str(nums[-2:]))    # [50, 60]
+print("nums[:-2]   = " + str(nums[:-2]))    # [10, 20, 30, 40]
+print("nums[-4:-1] = " + str(nums[-4:-1]))  # [30, 40, 50]
+print("")
+
+# Step parameter
+print("nums[::2]   = " + str(nums[::2]))    # [10, 30, 50]
+print("nums[1::2]  = " + str(nums[1::2]))   # [20, 40, 60]
+print("nums[::-1]  = " + str(nums[::-1]))   # [60, 50, 40, 30, 20, 10] (reverse)
+print("")
+
+# =====================================
+# PRACTICAL EXAMPLES
+# =====================================
+print("PRACTICAL APPLICATIONS")
+print("-" * 30)
+
+# 1. Palindrome checker
+func is_palindrome(text) {
+    return text == text[::-1]
+}
+
+words = ["level", "hello", "radar", "world"]
+for word in words {
+    if is_palindrome(word) {
+        print("✓ \"" + word + "\" is a palindrome")
+    } else {
+        print("✗ \"" + word + "\" is not a palindrome")
+    }
+}
+print("")
+
+# 2. Get first and last n elements
+data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+n = 3
+print("Original: " + str(data))
+print("First " + str(n) + ": " + str(data[:n]))
+print("Last " + str(n) + ": " + str(data[-n:]))
+print("Without first and last: " + str(data[1:-1]))
+print("")
+
+# 3. Reverse operations
+text = "Hello World"
+print("Original: \"" + text + "\"")
+print("Reversed: \"" + text[::-1] + "\"")
+print("Every 2nd char: \"" + text[::2] + "\"")
+print("Every 2nd char reversed: \"" + text[::-2] + "\"")
+print("")
+
+# 4. List rotation
+func rotate_left(lst, n) {
+    # Move first n elements to the end
+    return lst[n:] + lst[:n]
+}
+
+func rotate_right(lst, n) {
+    # Move last n elements to the beginning
+    return lst[-n:] + lst[:-n]
+}
+
+items = ["A", "B", "C", "D", "E"]
+print("Original: " + str(items))
+print("Rotate left by 2: " + str(rotate_left(items, 2)))
+print("Rotate right by 2: " + str(rotate_right(items, 2)))
+print("")
+
+# 5. Split into halves
+numbers = [1, 2, 3, 4, 5, 6, 7, 8]
+mid = len(numbers) / 2
+first_half = numbers[:mid]
+second_half = numbers[mid:]
+print("Full list: " + str(numbers))
+print("First half: " + str(first_half))
+print("Second half: " + str(second_half))
+print("")
+
+print("=" * 50)
+print("KEY POINTS:")
+print("- Negative indices count from the end")
+print("- Omitted start defaults to 0")
+print("- Omitted end defaults to length")
+print("- Omitted step defaults to 1")
+print("- Negative step reverses direction")
+print("- Slicing never raises index errors")
+print("=" * 50)

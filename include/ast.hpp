@@ -51,6 +51,7 @@ class pipe_op_t;
 class logical_not_op_t;
 class unary_op_t;
 class index_access_t;
+class slice_expression_t;
 class assignment_t;
 class const_declaration_t;
 class compound_assignment_t;
@@ -113,6 +114,7 @@ public:
     virtual auto visit(logical_not_op_t& node) -> void = 0;
     virtual auto visit(unary_op_t& node) -> void = 0;
     virtual auto visit(index_access_t& node) -> void = 0;
+    virtual auto visit(slice_expression_t& node) -> void = 0;
     virtual auto visit(optional_index_access_t& node) -> void = 0;
     virtual auto visit(optional_member_access_t& node) -> void = 0;
     virtual auto visit(optional_method_call_t& node) -> void = 0;
@@ -535,6 +537,31 @@ public:
 public:
     std::unique_ptr<expression_t> object;
     std::unique_ptr<expression_t> index;
+};
+
+class slice_expression_t : public expression_t
+{
+public:
+    slice_expression_t(std::unique_ptr<expression_t> object, 
+                       std::unique_ptr<expression_t> start, 
+                       std::unique_ptr<expression_t> end,
+                       std::unique_ptr<expression_t> step,
+                       int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), 
+          object(std::move(object)), 
+          start(std::move(start)), 
+          end(std::move(end)),
+          step(std::move(step))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
+
+    std::unique_ptr<expression_t> object;
+    std::unique_ptr<expression_t> start;  // nullptr means from beginning
+    std::unique_ptr<expression_t> end;    // nullptr means to end
+    std::unique_ptr<expression_t> step;   // nullptr means step of 1
 };
 
 class optional_index_access_t : public expression_t

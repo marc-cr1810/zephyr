@@ -1387,13 +1387,47 @@ std::unique_ptr<list_literal_t> parser_t::list_literal() {
     return list_node;
 }
 
-std::unique_ptr<index_access_t> parser_t::index_access(std::unique_ptr<expression_t> list_expr) {
+std::unique_ptr<expression_t> parser_t::index_access(std::unique_ptr<expression_t> list_expr) {
     token_t bracket_token = m_current_token;
     eat(token_type_e::lbracket);
-    auto index_expr = expression();
-    token_t rbracket_token = m_current_token;
-    eat(token_type_e::rbracket);
-    return std::make_unique<index_access_t>(std::move(list_expr), std::move(index_expr), bracket_token.line, bracket_token.column, rbracket_token.line, rbracket_token.column);
+    
+    // Check for slice notation
+    std::unique_ptr<expression_t> start = nullptr;
+    std::unique_ptr<expression_t> end = nullptr;
+    std::unique_ptr<expression_t> step = nullptr;
+    
+    // Parse start (optional)
+    if (m_current_token.type != token_type_e::colon) {
+        start = expression();
+    }
+    
+    // Check if this is a slice or regular index
+    if (m_current_token.type == token_type_e::colon) {
+        // This is a slice
+        eat(token_type_e::colon);
+        
+        // Parse end (optional)
+        if (m_current_token.type != token_type_e::rbracket && m_current_token.type != token_type_e::colon) {
+            end = expression();
+        }
+        
+        // Parse step (optional)
+        if (m_current_token.type == token_type_e::colon) {
+            eat(token_type_e::colon);
+            if (m_current_token.type != token_type_e::rbracket) {
+                step = expression();
+            }
+        }
+        
+        token_t rbracket_token = m_current_token;
+        eat(token_type_e::rbracket);
+        return std::make_unique<slice_expression_t>(std::move(list_expr), std::move(start), std::move(end), std::move(step), bracket_token.line, bracket_token.column, rbracket_token.line, rbracket_token.column);
+    } else {
+        // Regular index access
+        token_t rbracket_token = m_current_token;
+        eat(token_type_e::rbracket);
+        return std::make_unique<index_access_t>(std::move(list_expr), std::move(start), bracket_token.line, bracket_token.column, rbracket_token.line, rbracket_token.column);
+    }
 }
 
 std::unique_ptr<function_definition_t> parser_t::function_definition() {

@@ -46,7 +46,7 @@ private:
 
     auto list_literal() -> std::unique_ptr<list_literal_t>;
     auto dictionary_literal() -> std::unique_ptr<dictionary_literal_t>;
-    auto index_access(std::unique_ptr<expression_t> list_expression) -> std::unique_ptr<index_access_t>;
+    auto index_access(std::unique_ptr<expression_t> list_expression) -> std::unique_ptr<expression_t>;
     auto function_definition() -> std::unique_ptr<function_definition_t>;
     auto return_statement() -> std::unique_ptr<return_statement_t>;
     auto assignment_statement() -> std::unique_ptr<assignment_t>;

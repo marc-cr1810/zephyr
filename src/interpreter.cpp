@@ -1078,7 +1078,42 @@ auto interpreter_t::visit(index_access_t& node) -> void
     node.index->accept(*this);
     auto index_obj = m_current_result;
 
-    m_current_result = list_obj->item(index_obj);
+    m_current_result = list_obj->type()->item(list_obj, index_obj);
+    zephyr::current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(slice_expression_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::current_error_location();
+    zephyr::current_error_location().line = node.line;
+    zephyr::current_error_location().column = node.column;
+    zephyr::current_error_location().length = node.end_column - node.column + 1;
+
+    node.object->accept(*this);
+    auto obj = m_current_result;
+    
+    // Get slice parameters
+    std::shared_ptr<object_t> start_obj = nullptr;
+    std::shared_ptr<object_t> end_obj = nullptr;
+    std::shared_ptr<object_t> step_obj = nullptr;
+    
+    if (node.start) {
+        node.start->accept(*this);
+        start_obj = m_current_result;
+    }
+    
+    if (node.end) {
+        node.end->accept(*this);
+        end_obj = m_current_result;
+    }
+    
+    if (node.step) {
+        node.step->accept(*this);
+        step_obj = m_current_result;
+    }
+    
+    // Call the slice method on the object's type
+    m_current_result = obj->type()->slice(obj, start_obj, end_obj, step_obj);
     zephyr::current_error_location() = saved_location;
 }
 

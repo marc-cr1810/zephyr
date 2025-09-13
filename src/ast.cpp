@@ -99,6 +99,11 @@ auto index_access_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
+auto slice_expression_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
 auto assignment_t::accept(ast_visitor_t& visitor) -> void
 {
     visitor.visit(*this);
@@ -512,7 +517,19 @@ auto index_access_t::clone() const -> std::unique_ptr<ast_node_t>
     return std::make_unique<index_access_t>(
         object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
         index ? std::unique_ptr<expression_t>(static_cast<expression_t*>(index->clone().release())) : nullptr,
-        line, column, end_line, end_column);
+        line, column, end_line, end_column
+    );
+}
+
+auto slice_expression_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    return std::make_unique<slice_expression_t>(
+        object ? std::unique_ptr<expression_t>(static_cast<expression_t*>(object->clone().release())) : nullptr,
+        start ? std::unique_ptr<expression_t>(static_cast<expression_t*>(start->clone().release())) : nullptr,
+        end ? std::unique_ptr<expression_t>(static_cast<expression_t*>(end->clone().release())) : nullptr,
+        step ? std::unique_ptr<expression_t>(static_cast<expression_t*>(step->clone().release())) : nullptr,
+        line, column, end_line, end_column
+    );
 }
 
 auto optional_index_access_t::clone() const -> std::unique_ptr<ast_node_t>

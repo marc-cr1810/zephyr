@@ -87,7 +87,15 @@ auto type_t::contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> 
 
 auto type_t::length(std::shared_ptr<object_t> self) -> int
 {
-    throw type_error_t("Object of type " + self->type()->name() + " has no length");
+    throw type_error_t("Type '" + name() + "' does not support length operation");
+}
+
+auto type_t::slice(std::shared_ptr<object_t> self, 
+                   std::shared_ptr<object_t> start, 
+                   std::shared_ptr<object_t> end, 
+                   std::shared_ptr<object_t> step) -> std::shared_ptr<object_t>
+{
+    throw type_error_t("Type '" + name() + "' does not support slicing");
 }
 
 }

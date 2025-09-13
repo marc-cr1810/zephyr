@@ -24,6 +24,10 @@ public:
     auto compare(std::shared_ptr<object_t> self, std::shared_ptr<object_t> other) -> int override;
     auto contains(std::shared_ptr<object_t> self, std::shared_ptr<object_t> item) -> bool override;
     auto length(std::shared_ptr<object_t> self) -> int override;
+    auto slice(std::shared_ptr<object_t> self, 
+               std::shared_ptr<object_t> start, 
+               std::shared_ptr<object_t> end, 
+               std::shared_ptr<object_t> step) -> std::shared_ptr<object_t> override;
 
     static auto get_instance() -> std::shared_ptr<string_type_t>;
 

@@ -1,0 +1,208 @@
+# Test file for slicing feature in Zephyr
+# Supports slicing for both strings and lists
+
+print("=" * 60)
+print("SLICING IN ZEPHYR")
+print("=" * 60)
+print("")
+
+# ==========================================
+# STRING SLICING
+# ==========================================
+print("STRING SLICING")
+print("-" * 40)
+
+text = "Hello, World!"
+print("Original string: " + text)
+print("Length: " + str(len(text)))
+print("")
+
+# Basic slicing
+print("Basic slicing:")
+print("text[0:5]   = " + text[0:5])      # "Hello"
+print("text[7:12]  = " + text[7:12])     # "World"
+print("text[7:]    = " + text[7:])       # "World!"
+print("text[:5]    = " + text[:5])       # "Hello"
+print("text[:]     = " + text[:])        # "Hello, World!" (copy)
+print("")
+
+# Negative indices
+print("Negative indices:")
+print("text[-6:]   = " + text[-6:])      # "World!"
+print("text[:-7]   = " + text[:-7])      # "Hello,"
+print("text[-6:-1] = " + text[-6:-1])    # "World"
+print("")
+
+# Step parameter
+print("With step:")
+print("text[::2]   = " + text[::2])      # "Hlo ol!"
+print("text[1::2]  = " + text[1::2])     # "el,Wrd"
+print("text[::3]   = " + text[::3])      # "Hl r!"
+print("")
+
+# Reverse string
+print("Reverse (negative step):")
+print("text[::-1]  = " + text[::-1])     # "!dlroW ,olleH"
+print("text[::-2]  = " + text[::-2])     # "!lo olH"
+print("")
+
+# ==========================================
+# LIST SLICING
+# ==========================================
+print("LIST SLICING")
+print("-" * 40)
+
+numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+print("Original list: " + str(numbers))
+print("Length: " + str(len(numbers)))
+print("")
+
+# Basic slicing
+print("Basic slicing:")
+print("numbers[2:5]   = " + str(numbers[2:5]))      # [2, 3, 4]
+print("numbers[5:]    = " + str(numbers[5:]))       # [5, 6, 7, 8, 9]
+print("numbers[:3]    = " + str(numbers[:3]))       # [0, 1, 2]
+print("numbers[:]     = " + str(numbers[:]))        # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] (copy)
+print("")
+
+# Negative indices
+print("Negative indices:")
+print("numbers[-3:]   = " + str(numbers[-3:]))      # [7, 8, 9]
+print("numbers[:-3]   = " + str(numbers[:-3]))      # [0, 1, 2, 3, 4, 5, 6]
+print("numbers[-5:-2] = " + str(numbers[-5:-2]))    # [5, 6, 7]
+print("")
+
+# Step parameter
+print("With step:")
+print("numbers[::2]   = " + str(numbers[::2]))      # [0, 2, 4, 6, 8]
+print("numbers[1::2]  = " + str(numbers[1::2]))     # [1, 3, 5, 7, 9]
+print("numbers[::3]   = " + str(numbers[::3]))      # [0, 3, 6, 9]
+print("")
+
+# Reverse list
+print("Reverse (negative step):")
+print("numbers[::-1]  = " + str(numbers[::-1]))     # [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+print("numbers[::-2]  = " + str(numbers[::-2]))     # [9, 7, 5, 3, 1]
+print("")
+
+# ==========================================
+# ADVANCED EXAMPLES
+# ==========================================
+print("ADVANCED EXAMPLES")
+print("-" * 40)
+
+# String manipulation
+alphabet = "abcdefghijklmnopqrstuvwxyz"
+print("Alphabet: " + alphabet)
+print("Every 5th letter: " + alphabet[::5])         # "afkpuz"
+print("First 10 letters: " + alphabet[:10])         # "abcdefghij"
+print("Last 10 letters: " + alphabet[-10:])         # "qrstuvwxyz"
+print("Middle portion: " + alphabet[10:20])         # "klmnopqrst"
+print("")
+
+# List manipulation
+fruits = ["apple", "banana", "cherry", "date", "elderberry", "fig", "grape"]
+print("Fruits: " + str(fruits))
+print("First 3: " + str(fruits[:3]))
+print("Last 3: " + str(fruits[-3:]))
+print("Every other: " + str(fruits[::2]))
+print("Reversed: " + str(fruits[::-1]))
+print("")
+
+# Palindrome check using slicing
+func is_palindrome(s) {
+    # Simple palindrome check (doesn't handle spaces or case)
+    return s == s[::-1]
+}
+
+test_words = ["racecar", "hello", "madam", "world", "noon"]
+for word in test_words {
+    if is_palindrome(word) {
+        print("'" + word + "' is a palindrome")
+    } else {
+        print("'" + word + "' is not a palindrome")
+    }
+}
+print("")
+
+# Extract sublists
+data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print("Original data: " + str(data))
+first_half = data[:len(data) / 2]
+second_half = data[len(data) / 2:]
+print("First half: " + str(first_half))
+print("Second half: " + str(second_half))
+print("")
+
+# String extraction
+email = "user@example.com"
+at_index = 4  # Position of @ in "user@example.com"
+username = email[:at_index]
+domain = email[at_index + 1:]
+print("Email: " + email)
+print("Username: " + username)
+print("Domain: " + domain)
+print("")
+
+# Create a pattern
+pattern = "abc"
+repeated = pattern + pattern + pattern  # Repeat 3 times manually
+print("Pattern repeated: " + repeated)
+print("Every 3rd char: " + repeated[::3])  # "aaa"
+print("")
+
+# ==========================================
+# PRACTICAL USE CASES
+# ==========================================
+print("PRACTICAL USE CASES")
+print("-" * 40)
+
+# 1. Remove first and last elements
+items = [10, 20, 30, 40, 50]
+middle = items[1:-1]
+print("Original: " + str(items))
+print("Without first and last: " + str(middle))
+print("")
+
+# 2. Get file extension
+filename = "document.pdf"
+extension = filename[-3:]
+print("Filename: " + filename)
+print("Extension: " + extension)
+print("")
+
+# 3. Split string into chunks
+text = "abcdefghijklmnop"
+chunk_size = 4
+chunks = []
+i = 0
+while i < len(text) {
+    if i + chunk_size <= len(text) {
+        append(chunks, text[i:i+chunk_size])
+    } else {
+        append(chunks, text[i:])
+    }
+    i = i + chunk_size
+}
+print("Text: " + text)
+print("Chunks of 4: " + str(chunks))
+print("")
+
+# 4. Rotate a list
+func rotate_left(lst, n) {
+    return lst[n:] + lst[:n]
+}
+
+func rotate_right(lst, n) {
+    return lst[-n:] + lst[:-n]
+}
+
+original = [1, 2, 3, 4, 5]
+print("Original: " + str(original))
+print("Rotate left by 2: " + str(rotate_left(original, 2)))
+print("Rotate right by 2: " + str(rotate_right(original, 2)))
+print("")
+
+print("=" * 60)
+print("Slicing tests completed successfully!")
+print("=" * 60)
