@@ -1,0 +1,33 @@
+# Simple demonstration of escape sequences in Zephyr
+
+print("=== Basic Escape Sequences ===")
+print("Line 1\nLine 2\nLine 3")
+print("")
+
+print("=== Tab Alignment ===")
+print("Name:\tJohn")
+print("Age:\t25")
+print("City:\tNew York")
+print("")
+
+print("=== Quotes in Strings ===")
+print("She said, \"Hello, World!\"")
+print('It\'s a beautiful day!')
+print("")
+
+print("=== Backslash ===")
+print("Path: C:\\Users\\Documents\\file.txt")
+print("Escape sequence: \\n represents newline")
+print("")
+
+print("=== Unicode Characters ===")
+print("Symbols: \u2665 \u2605 \u263A")  # heart, star, smiley
+print("Greek: \u03B1 \u03B2 \u03B3")     # alpha, beta, gamma
+print("Emoji: \U0001F600 \U0001F44D")    # grinning face, thumbs up
+print("")
+
+print("=== In F-Strings ===")
+name = "Alice"
+message = "Hello"
+print(f"{message},\n\t{name}!")
+print(f"Escaped in f-string: \\{name}\\ has {len(name)} characters")

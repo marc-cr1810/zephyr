@@ -85,6 +85,9 @@ private:
     auto parse_imported_symbols() -> std::vector<std::string>;
     auto parse_namespace_import() -> std::string; // returns alias name
     auto internal_declaration() -> std::unique_ptr<statement_t>;
+    
+    // String processing helper
+    static auto process_escape_sequences(const std::string& str) -> std::string;
 
 private:
     struct for_each_head_struct_t

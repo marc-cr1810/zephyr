@@ -3,6 +3,7 @@
 #include "error_context.hpp"
 #include <string>
 #include <memory>
+#include <cctype>
 #include "ast.hpp"
 
 namespace zephyr
@@ -668,7 +669,8 @@ std::unique_ptr<expression_t> parser_t::factor() {
         return std::make_unique<float_literal_t>(std::stod(std::string(token.text)), token.line, token.column, token.line, token.column + token.text.length() - 1);
     } else if (token.type == token_type_e::string) {
         eat(token_type_e::string);
-        return std::make_unique<string_literal_t>(token.text, token.line, token.column, token.line, token.column + token.text.length() - 1);
+        std::string processed = process_escape_sequences(std::string(token.text));
+        return std::make_unique<string_literal_t>(processed, token.line, token.column, token.line, token.column + token.text.length() - 1);
     } else if (token.type == token_type_e::fstring) {
         eat(token_type_e::fstring);
         std::vector<std::unique_ptr<expression_t>> parts;
@@ -676,7 +678,8 @@ std::unique_ptr<expression_t> parser_t::factor() {
         for (size_t i = 0; i < token.text.length(); ++i) {
             if (token.text[i] == '{') {
                 if (!current_part.empty()) {
-                    parts.push_back(std::make_unique<string_literal_t>(current_part, token.line, token.column, token.line, token.column + current_part.length() - 1));
+                    std::string processed = process_escape_sequences(current_part);
+                    parts.push_back(std::make_unique<string_literal_t>(processed, token.line, token.column, token.line, token.column + current_part.length() - 1));
                     current_part.clear();
                 }
                 i++; // Skip '{'
@@ -701,7 +704,8 @@ std::unique_ptr<expression_t> parser_t::factor() {
             }
         }
         if (!current_part.empty()) {
-            parts.push_back(std::make_unique<string_literal_t>(current_part, token.line, token.column, token.line, token.column + current_part.length() - 1));
+            std::string processed = process_escape_sequences(current_part);
+            parts.push_back(std::make_unique<string_literal_t>(processed, token.line, token.column, token.line, token.column + current_part.length() - 1));
         }
         return std::make_unique<fstring_t>(std::move(parts), token.line, token.column, token.line, token.column + token.text.length() - 1);
     } else if (token.type == token_type_e::true_token) {
@@ -2535,6 +2539,208 @@ auto parser_t::is_import_statement_lookahead() -> bool
 auto parser_t::is_internal_declaration_lookahead() -> bool
 {
     return m_current_token.type == token_type_e::internal_token;
+}
+
+auto parser_t::process_escape_sequences(const std::string& str) -> std::string
+{
+    std::string result;
+    result.reserve(str.length());
+    
+    for (size_t i = 0; i < str.length(); ++i)
+    {
+        if (str[i] == '\\' && i + 1 < str.length())
+        {
+            char next = str[i + 1];
+            switch (next)
+            {
+                case 'n':
+                    result += '\n';
+                    i++; // Skip the escaped character
+                    break;
+                case 't':
+                    result += '\t';
+                    i++;
+                    break;
+                case 'r':
+                    result += '\r';
+                    i++;
+                    break;
+                case '\\':
+                    result += '\\';
+                    i++;
+                    break;
+                case '"':
+                    result += '"';
+                    i++;
+                    break;
+                case '\'':
+                    result += '\'';
+                    i++;
+                    break;
+                case 'b':
+                    result += '\b';
+                    i++;
+                    break;
+                case 'f':
+                    result += '\f';
+                    i++;
+                    break;
+                case 'v':
+                    result += '\v';
+                    i++;
+                    break;
+                case '0':
+                    result += '\0';
+                    i++;
+                    break;
+                case 'x':
+                    // Hex escape sequence \xHH
+                    if (i + 3 < str.length() && std::isxdigit(str[i + 2]) && std::isxdigit(str[i + 3]))
+                    {
+                        std::string hex_str = str.substr(i + 2, 2);
+                        char hex_char = static_cast<char>(std::stoi(hex_str, nullptr, 16));
+                        result += hex_char;
+                        i += 3; // Skip \xHH
+                    }
+                    else
+                    {
+                        // Invalid hex escape, keep as-is
+                        result += '\\';
+                        result += 'x';
+                        i++;
+                    }
+                    break;
+                case 'u':
+                    // Unicode escape sequence \uHHHH (4 hex digits)
+                    if (i + 5 < str.length())
+                    {
+                        bool valid = true;
+                        for (size_t j = 2; j <= 5; ++j)
+                        {
+                            if (!std::isxdigit(str[i + j]))
+                            {
+                                valid = false;
+                                break;
+                            }
+                        }
+                        if (valid)
+                        {
+                            std::string hex_str = str.substr(i + 2, 4);
+                            unsigned int code_point = std::stoi(hex_str, nullptr, 16);
+                            
+                            // Convert Unicode code point to UTF-8
+                            if (code_point <= 0x7F)
+                            {
+                                result += static_cast<char>(code_point);
+                            }
+                            else if (code_point <= 0x7FF)
+                            {
+                                result += static_cast<char>(0xC0 | (code_point >> 6));
+                                result += static_cast<char>(0x80 | (code_point & 0x3F));
+                            }
+                            else
+                            {
+                                result += static_cast<char>(0xE0 | (code_point >> 12));
+                                result += static_cast<char>(0x80 | ((code_point >> 6) & 0x3F));
+                                result += static_cast<char>(0x80 | (code_point & 0x3F));
+                            }
+                            i += 5; // Skip \uHHHH
+                        }
+                        else
+                        {
+                            // Invalid unicode escape, keep as-is
+                            result += '\\';
+                            result += 'u';
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        result += '\\';
+                        result += 'u';
+                        i++;
+                    }
+                    break;
+                case 'U':
+                    // Unicode escape sequence \UHHHHHHHH (8 hex digits)
+                    if (i + 9 < str.length())
+                    {
+                        bool valid = true;
+                        for (size_t j = 2; j <= 9; ++j)
+                        {
+                            if (!std::isxdigit(str[i + j]))
+                            {
+                                valid = false;
+                                break;
+                            }
+                        }
+                        if (valid)
+                        {
+                            std::string hex_str = str.substr(i + 2, 8);
+                            unsigned int code_point = std::stoul(hex_str, nullptr, 16);
+                            
+                            // Convert Unicode code point to UTF-8
+                            if (code_point <= 0x7F)
+                            {
+                                result += static_cast<char>(code_point);
+                            }
+                            else if (code_point <= 0x7FF)
+                            {
+                                result += static_cast<char>(0xC0 | (code_point >> 6));
+                                result += static_cast<char>(0x80 | (code_point & 0x3F));
+                            }
+                            else if (code_point <= 0xFFFF)
+                            {
+                                result += static_cast<char>(0xE0 | (code_point >> 12));
+                                result += static_cast<char>(0x80 | ((code_point >> 6) & 0x3F));
+                                result += static_cast<char>(0x80 | (code_point & 0x3F));
+                            }
+                            else if (code_point <= 0x10FFFF)
+                            {
+                                result += static_cast<char>(0xF0 | (code_point >> 18));
+                                result += static_cast<char>(0x80 | ((code_point >> 12) & 0x3F));
+                                result += static_cast<char>(0x80 | ((code_point >> 6) & 0x3F));
+                                result += static_cast<char>(0x80 | (code_point & 0x3F));
+                            }
+                            else
+                            {
+                                // Invalid Unicode code point, keep as-is
+                                result += '\\';
+                                result += 'U';
+                                i++;
+                            }
+                            i += 9; // Skip \UHHHHHHHH
+                        }
+                        else
+                        {
+                            // Invalid unicode escape, keep as-is
+                            result += '\\';
+                            result += 'U';
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        result += '\\';
+                        result += 'U';
+                        i++;
+                    }
+                    break;
+                default:
+                    // Unknown escape sequence, keep the backslash and character as-is
+                    result += '\\';
+                    result += next;
+                    i++;
+                    break;
+            }
+        }
+        else
+        {
+            result += str[i];
+        }
+    }
+    
+    return result;
 }
 
 }

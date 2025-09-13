@@ -1,0 +1,61 @@
+# Test file for escape sequences in Zephyr
+
+# Test newline escape
+print("Hello\nWorld")
+print("First line\nSecond line\nThird line")
+
+# Test tab escape
+print("Name\tAge\tCity")
+print("John\t25\tNew York")
+print("Jane\t30\tLos Angeles")
+
+# Test carriage return
+print("Progress: 0%\rProgress: 100%")
+
+# Test backslash escape
+print("This is a backslash: \\")
+print("Path: C:\\Users\\Documents\\file.txt")
+
+# Test quote escapes
+print("She said, \"Hello!\"")
+print('It\'s a beautiful day')
+print("Mixed: \"It's a 'nested' quote\"")
+
+# Test other special characters
+print("Backspace: ABC\bD")
+print("Form feed: Page 1\fPage 2")
+print("Vertical tab: Line 1\vLine 2")
+
+# Test null character (may not be visible)
+print("Before\0After")
+
+# Test hex escape sequences
+print("Hex A: \x41")
+print("Hex heart: \x3C\x33")
+print("Hex smiley: \x01")
+
+# Test Unicode escape sequences
+print("Unicode smiley: \u263A")
+print("Unicode heart: \u2764")
+print("Unicode star: \u2605")
+print("Unicode lambda: \u03BB")
+print("Unicode Chinese: \u4E2D\u6587")
+
+# Test 8-digit Unicode escape sequences
+print("Unicode emoji (8-digit): \U0001F600")
+print("Unicode mathematical bold A: \U0001D400")
+
+# Test in f-strings
+name = "Alice"
+age = 25
+print(f"Name:\t{name}\nAge:\t{age}")
+print(f"Path: C:\\Users\\{name}\\Documents")
+
+# Test combinations
+print("Line 1\n\tIndented line 2\n\t\tDouble indented line 3")
+print("Quote: \"Hello\"\nTab:\tIndented\nBackslash: \\")
+
+# Test raw strings (if backslash not followed by valid escape)
+print("Invalid escape: \q remains as \\q")
+print("Invalid hex: \xGG remains as \\xGG")
+print("Incomplete Unicode: \u12 remains as \\u12")
