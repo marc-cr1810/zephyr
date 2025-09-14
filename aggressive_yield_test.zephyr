@@ -1,0 +1,65 @@
+# Aggressive Yield Test - Force maximum yielding with debug output
+print("=== Aggressive Yield Test ===")
+
+# Create functions with many operations to force yielding
+async func aggressive_worker(id, operations) {
+    print("AGGRESSIVE", id, "STARTING with", operations, "operations")
+
+    total = 0
+    for i = 0; i < operations; i++ {
+        # Force many function calls to trigger yield points
+        temp1 = str(i)  # Function call 1
+        temp2 = str(id) # Function call 2
+        temp3 = len(temp1) # Function call 3
+        temp4 = len(temp2) # Function call 4
+
+        # More operations
+        result = temp3 + temp4
+        total = total + result
+
+        # Progress every 10 operations
+        if i % 10 == 0 {
+            print("AGGRESSIVE", id, "progress:", i, "/", operations, "total:", total)
+        }
+    }
+
+    print("AGGRESSIVE", id, "COMPLETED with total:", total)
+    return total
+}
+
+print("1. Testing aggressive yielding with many function calls...")
+
+# Test with tasks that should definitely yield
+promises = [
+    spawn aggressive_worker(1, 50),
+    spawn aggressive_worker(2, 50),
+    spawn aggressive_worker(3, 50)
+]
+
+print("All aggressive workers spawned")
+
+# Use all() to wait concurrently
+results = await all(promises)
+
+print("Aggressive test results:", results)
+
+print("")
+print("2. Expected behavior with proper yielding:")
+print("- All STARTING messages should appear first")
+print("- Progress messages should be interleaved")
+print("- Tasks should not complete one by one")
+
+print("")
+print("3. If yielding works, you should see something like:")
+print("AGGRESSIVE 1 STARTING...")
+print("AGGRESSIVE 2 STARTING...")
+print("AGGRESSIVE 3 STARTING...")
+print("AGGRESSIVE 1 progress: 0 / 50...")
+print("AGGRESSIVE 2 progress: 0 / 50...")
+print("AGGRESSIVE 3 progress: 0 / 50...")
+print("AGGRESSIVE 1 progress: 10 / 50...")
+print("AGGRESSIVE 2 progress: 10 / 50...")
+print("... (interleaved progress)")
+
+print("")
+print("Current output above shows actual behavior")

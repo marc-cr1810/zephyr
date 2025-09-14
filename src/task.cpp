@@ -1,4 +1,5 @@
 #include "task.hpp"
+#include "async_scheduler.hpp"
 #include "objects/promise_object.hpp"
 #include "objects/none_object.hpp"
 #include <stdexcept>
@@ -18,16 +19,33 @@ task_t::task_t(int id, std::function<std::shared_ptr<object_t>()> func)
 
 auto task_t::execute() -> void
 {
-    if (m_state != task_state_e::pending) {
+    if (m_state != task_state_e::pending && m_state != task_state_e::suspended) {
         return; // Task already executed or in wrong state
     }
 
-    validate_state_transition(task_state_e::running);
-    m_state = task_state_e::running;
+    if (m_state == task_state_e::pending) {
+        validate_state_transition(task_state_e::running);
+        m_state = task_state_e::running;
+    } else if (m_state == task_state_e::suspended) {
+        // Resume from suspended state
+        validate_state_transition(task_state_e::running);
+        m_state = task_state_e::running;
+    }
 
     try {
-        m_result = m_execution_function();
+        // Execute the function with cooperative yielding support
+        if (!m_result) {
+            // First execution or no result yet
+            m_result = m_execution_function();
+        }
+        
+        // If we get here without yielding, the task completed
         complete(m_result);
+        
+    } catch (const zephyr::yield_exception_t& e) {
+        // Task yielded - suspend it (will be handled by scheduler)
+        suspend();
+        throw; // Re-throw for scheduler to catch
     } catch (const std::exception& e) {
         fail(e.what());
     }
@@ -35,7 +53,7 @@ auto task_t::execute() -> void
 
 auto task_t::suspend() -> void
 {
-    if (m_state == task_state_e::running) {
+    if (m_state == task_state_e::running || m_state == task_state_e::pending) {
         validate_state_transition(task_state_e::suspended);
         m_state = task_state_e::suspended;
     }
@@ -44,15 +62,25 @@ auto task_t::suspend() -> void
 auto task_t::resume(std::shared_ptr<object_t> value) -> void
 {
     if (m_state == task_state_e::suspended) {
-        m_result = value;
-        validate_state_transition(task_state_e::completed);
-        m_state = task_state_e::completed;
-
-        if (m_promise) {
-            m_promise->resolve(value ? value : std::make_shared<none_object_t>());
+        validate_state_transition(task_state_e::running);
+        m_state = task_state_e::running;
+        
+        // Resume execution with the provided value
+        if (m_continuation) {
+            // Use continuation if available
+            try {
+                m_continuation(value);
+                // Check if task completed after continuation
+                if (m_state == task_state_e::running) {
+                    complete(m_result ? m_result : value);
+                }
+            } catch (const std::exception& e) {
+                fail(e.what());
+            }
+        } else {
+            // No continuation - just complete with the value
+            complete(value ? value : std::make_shared<none_object_t>());
         }
-
-        notify_dependents();
     }
 }
 
@@ -90,7 +118,7 @@ auto task_t::fail(const std::string& error) -> void
 
 auto task_t::is_ready() const -> bool
 {
-    if (m_state == task_state_e::pending) {
+    if (m_state == task_state_e::pending || m_state == task_state_e::suspended) {
         return has_completed_dependencies();
     }
     return false;
@@ -159,6 +187,7 @@ auto task_t::validate_state_transition(task_state_e new_state) const -> void
 
         case task_state_e::suspended:
             valid = (new_state == task_state_e::running ||
+                    new_state == task_state_e::suspended ||
                     new_state == task_state_e::completed ||
                     new_state == task_state_e::failed);
             break;

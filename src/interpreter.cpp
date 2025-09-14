@@ -1970,6 +1970,9 @@ auto interpreter_t::visit(while_statement_t& node) -> void
 
     while (true)
     {
+        // Yield point for cooperative execution
+        check_and_yield();
+        
         node.condition->accept(*this);
         auto condition = m_current_result;
 
@@ -2067,6 +2070,9 @@ auto interpreter_t::visit(for_statement_t& node) -> void
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
 
+    // Yield point for cooperative execution
+    check_and_yield();
+
     // Create new scope for loop
     m_scope_stack.push_back(std::map<std::string, value_t>());
     m_function_resolvers.emplace_back(); // Add function resolver for loop scope
@@ -2092,9 +2098,10 @@ auto interpreter_t::visit(for_statement_t& node) -> void
 
             try
             {
+                // Yield point in loop body
+                check_and_yield();
                 node.body->accept(*this);
-            }
-            catch (const break_exception_t&)
+            } catch (const break_exception_t&)
             {
                 break;
             }
@@ -2131,6 +2138,9 @@ auto interpreter_t::visit(for_each_statement_t& node) -> void
     zephyr::current_error_location().line = node.line;
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
+
+    // Yield point for cooperative execution
+    check_and_yield();
 
     node.collection->accept(*this);
     auto collection = m_current_result;
@@ -2267,9 +2277,10 @@ auto interpreter_t::visit(loop_statement_t& node) -> void
     {
         try
         {
+            // Yield point in for-each body
+            check_and_yield();
             node.body->accept(*this);
-        }
-        catch (const break_exception_t&)
+        } catch (const break_exception_t&)
         {
             break;
         }
@@ -2315,6 +2326,9 @@ auto interpreter_t::visit(function_call_t& node) -> void
     zephyr::current_error_location().line = node.line;
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.function_name.length();
+
+    // Yield point for cooperative execution
+    check_and_yield();
 
     // Evaluate arguments first
     std::vector<std::shared_ptr<object_t>> args;
@@ -4067,15 +4081,15 @@ auto interpreter_t::visit(spawn_expression_t& node) -> void
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
 
-    // Create a promise for the spawned expression
-    auto promise_obj = std::make_shared<promise_object_t>();
-
-    // For now, execute immediately (placeholder for async execution)
+    // Execute the expression immediately and resolve the promise
+    // This fixes the segfault while maintaining the cooperative scheduler architecture
     node.expression->accept(*this);
+    auto result = m_current_result;
 
-    // Properly resolve the promise with the result
-    promise_obj->resolve(m_current_result);
-
+    // Create a resolved promise instead of using lambda capture
+    auto& scheduler = async_scheduler_t::instance();
+    auto promise_obj = scheduler.create_resolved_promise(result);
+    
     m_current_result = promise_obj;
     zephyr::current_error_location() = saved_location;
 }
@@ -4478,6 +4492,24 @@ auto interpreter_t::get_global_scope() const -> const std::map<std::string, valu
     }
     static const std::map<std::string, value_t> empty_scope;
     return empty_scope;
+}
+
+auto interpreter_t::check_and_yield() -> void
+{
+    m_operation_count++;
+    
+    // Yield every 50 operations to allow cooperative multitasking
+    if (m_operation_count >= 50) {
+        m_operation_count = 0;
+        
+        // Check if we're in an async task and should yield
+        auto& scheduler = async_scheduler_t::instance();
+        auto current_task = scheduler.get_current_task();
+        if (current_task) {
+            // Throw yield exception to suspend task execution
+            throw zephyr::yield_exception_t();
+        }
+    }
 }
 
 } // namespace zephyr

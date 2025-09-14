@@ -109,6 +109,9 @@ public:
     auto visit(bitwise_not_op_t& node) -> void override;
     auto visit(left_shift_op_t& node) -> void override;
     auto visit(right_shift_op_t& node) -> void override;
+    
+    // Cooperative execution support
+    auto check_and_yield() -> void;
     auto visit(import_statement_t& node) -> void override;
 
 public:
@@ -163,6 +166,9 @@ private:
     std::shared_ptr<module_loader_t> m_module_loader;
     std::shared_ptr<module_t> m_current_module;
     std::set<std::string> m_imported_modules; // Track imported modules to prevent double imports
+    
+    // Cooperative execution support
+    int m_operation_count = 0;
 
 protected:
     // Protected methods

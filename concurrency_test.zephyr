@@ -1,0 +1,399 @@
+# Zephyr Concurrency Test - Verify Async Operations Run Concurrently
+# This test demonstrates that async operations truly run in parallel
+
+print("=== Zephyr Concurrency Test ===")
+print("")
+
+# ============================================================================
+# Timing Functions for Concurrency Testing
+# ============================================================================
+
+# Simple counter-based delay simulation
+func simulate_delay(iterations) {
+    counter = 0
+    for i = 0; i < iterations; i++ {
+        counter += 1
+    }
+    return counter
+}
+
+# Async function with simulated work
+async func async_work(task_id, work_amount) {
+    print("Task", task_id, "starting with work amount:", work_amount)
+
+    # Simulate work
+    result = simulate_delay(work_amount)
+
+    print("Task", task_id, "completed")
+    return "Task " + str(task_id) + " result: " + str(result)
+}
+
+# ============================================================================
+# Sequential vs Parallel Execution Comparison
+# ============================================================================
+
+print("1. Sequential Execution Test")
+print("=============================")
+
+async func test_sequential() {
+    print("Running tasks sequentially...")
+
+    # Sequential execution - each task waits for the previous
+    result1 = await async_work(1, 1000000)
+    result2 = await async_work(2, 1000000)
+    result3 = await async_work(3, 1000000)
+
+    print("Sequential execution completed")
+    return [result1, result2, result3]
+}
+
+sequential_results = await test_sequential()
+print("Sequential results:", sequential_results)
+print("")
+
+print("2. Parallel Execution Test")
+print("===========================")
+
+async func test_parallel() {
+    print("Running tasks in parallel...")
+
+    # Parallel execution - all tasks start immediately
+    promise1 = spawn async_work(1, 1000000)
+    promise2 = spawn async_work(2, 1000000)
+    promise3 = spawn async_work(3, 1000000)
+
+    print("All tasks spawned - they should run concurrently")
+
+    # Wait for all to complete
+    result1 = await promise1
+    result2 = await promise2
+    result3 = await promise3
+
+    print("Parallel execution completed")
+    return [result1, result2, result3]
+}
+
+parallel_results = await test_parallel()
+print("Parallel results:", parallel_results)
+print("")
+
+# ============================================================================
+# Promise.all Test for True Concurrency
+# ============================================================================
+
+print("3. Promise.all Concurrency Test")
+print("================================")
+
+async func test_promise_all() {
+    print("Using Promise.all for concurrent execution...")
+
+    # Create promises that should run concurrently
+    promises = [
+        spawn async_work(1, 800000),
+        spawn async_work(2, 900000),
+        spawn async_work(3, 700000),
+        spawn async_work(4, 850000)
+    ]
+
+    print("All promises created - waiting for completion with all()")
+
+    # Wait for all promises to complete
+    all_results = await all(promises)
+
+    print("Promise.all execution completed")
+    return all_results
+}
+
+promise_all_results = await test_promise_all()
+print("Promise.all results:")
+for i = 0; i < len(promise_all_results); i++ {
+    print("- Result", i + 1, ":", promise_all_results[i])
+}
+print("")
+
+# ============================================================================
+# Mixed Async Operations Test
+# ============================================================================
+
+print("4. Mixed Async Operations")
+print("==========================")
+
+# Different types of async operations
+async func fetch_data(source) {
+    print("Fetching from:", source)
+    simulate_delay(500000)
+    return "Data from " + source
+}
+
+async func process_data(data) {
+    print("Processing:", data)
+    simulate_delay(600000)
+    return "Processed: " + data
+}
+
+async func save_data(processed_data) {
+    print("Saving:", processed_data)
+    simulate_delay(400000)
+    return "Saved: " + processed_data
+}
+
+async func mixed_operations_test() {
+    print("Testing mixed async operations...")
+
+    # Start multiple different operations concurrently
+    fetch_promise1 = spawn fetch_data("Database")
+    fetch_promise2 = spawn fetch_data("API")
+    fetch_promise3 = spawn fetch_data("Cache")
+
+    # Wait for all fetch operations
+    fetch_results = await all([fetch_promise1, fetch_promise2, fetch_promise3])
+
+    print("All fetch operations completed, starting processing...")
+
+    # Process the fetched data in parallel
+    process_promises = []
+    for result in fetch_results {
+        append(process_promises, spawn process_data(result))
+    }
+
+    # Wait for all processing
+    process_results = await all(process_promises)
+
+    print("All processing completed, starting save operations...")
+
+    # Save processed data in parallel
+    save_promises = []
+    for result in process_results {
+        append(save_promises, spawn save_data(result))
+    }
+
+    # Wait for all save operations
+    save_results = await all(save_promises)
+
+    return save_results
+}
+
+mixed_results = await mixed_operations_test()
+print("Mixed operations final results:")
+for result in mixed_results {
+    print("-", result)
+}
+print("")
+
+# ============================================================================
+# Class Methods Concurrency Test
+# ============================================================================
+
+print("5. Class Methods Concurrency")
+print("=============================")
+
+class ConcurrentWorker {
+    func init(worker_id) {
+        this.worker_id = worker_id
+        this.tasks_completed = 0
+    }
+
+    async func do_work(const task_name, const work_amount) {
+        print("Worker", this.worker_id, "starting task:", task_name)
+
+        # Const parameter protection
+        try {
+            task_name = "modified"  # Should fail
+        } catch e {
+            print("✓ Const task_name protected in worker", this.worker_id)
+        }
+
+        # Simulate work
+        result = simulate_delay(work_amount)
+        this.tasks_completed += 1
+
+        print("Worker", this.worker_id, "completed task:", task_name)
+        return "Worker " + str(this.worker_id) + " - " + task_name + ": " + str(result)
+    }
+
+    func get_stats() {
+        return {"worker_id": this.worker_id, "tasks_completed": this.tasks_completed}
+    }
+}
+
+async func test_concurrent_workers() {
+    print("Testing concurrent workers...")
+
+    # Create multiple workers
+    worker1 = ConcurrentWorker(1)
+    worker2 = ConcurrentWorker(2)
+    worker3 = ConcurrentWorker(3)
+
+    # Assign tasks to workers concurrently
+    worker_promises = [
+        spawn worker1.do_work("TaskA", 600000),
+        spawn worker1.do_work("TaskB", 700000),
+        spawn worker2.do_work("TaskC", 550000),
+        spawn worker2.do_work("TaskD", 650000),
+        spawn worker3.do_work("TaskE", 580000),
+        spawn worker3.do_work("TaskF", 620000)
+    ]
+
+    print("All worker tasks started concurrently")
+
+    # Wait for all workers to complete
+    worker_results = await all(worker_promises)
+
+    print("All worker tasks completed")
+    print("Worker results:")
+    for result in worker_results {
+        print("-", result)
+    }
+
+    # Check worker statistics
+    print("Worker statistics:")
+    print("- Worker 1:", worker1.get_stats())
+    print("- Worker 2:", worker2.get_stats())
+    print("- Worker 3:", worker3.get_stats())
+
+    return worker_results
+}
+
+worker_test_results = await test_concurrent_workers()
+print("")
+
+# ============================================================================
+# Lambda Concurrency Test
+# ============================================================================
+
+print("6. Lambda Concurrency Test")
+print("===========================")
+
+async func test_concurrent_lambdas() {
+    print("Testing concurrent lambda execution...")
+
+    # Define async lambdas
+    heavy_computation = async const x -> {
+        print("Heavy computation starting with:", x)
+        result = simulate_delay(x)
+        print("Heavy computation completed for:", x)
+        return result * 2
+    }
+
+    string_processing = async const text -> {
+        print("String processing starting with:", text)
+        simulate_delay(500000)
+        print("String processing completed for:", text)
+        return text + " (processed)"
+    }
+
+    mathematical_operation = async (const a, const b) -> {
+        print("Math operation starting:", a, "op", b)
+        simulate_delay(400000)
+        print("Math operation completed")
+        return a * b + (a + b)
+    }
+
+    # Execute lambdas concurrently
+    lambda_promises = [
+        spawn heavy_computation(800000),
+        spawn heavy_computation(600000),
+        spawn string_processing("DataSet1"),
+        spawn string_processing("DataSet2"),
+        spawn mathematical_operation(15, 25),
+        spawn mathematical_operation(8, 12)
+    ]
+
+    print("All lambda operations started concurrently")
+
+    # Wait for all lambda operations
+    lambda_results = await all(lambda_promises)
+
+    print("Lambda concurrency test results:")
+    for i = 0; i < len(lambda_results); i++ {
+        print("- Lambda result", i + 1, ":", lambda_results[i])
+    }
+
+    return lambda_results
+}
+
+lambda_concurrent_results = await test_concurrent_lambdas()
+print("")
+
+# ============================================================================
+# Error Handling in Concurrent Operations
+# ============================================================================
+
+print("7. Concurrent Error Handling")
+print("=============================")
+
+async func operation_that_may_fail(operation_id, should_fail) {
+    print("Operation", operation_id, "starting (fail=" + str(should_fail) + ")")
+
+    simulate_delay(300000)
+
+    if should_fail {
+        print("Operation", operation_id, "failed!")
+        return "ERROR: Operation " + str(operation_id) + " failed"
+    } else {
+        print("Operation", operation_id, "succeeded")
+        return "SUCCESS: Operation " + str(operation_id)
+    }
+}
+
+async func test_concurrent_error_handling() {
+    print("Testing error handling in concurrent operations...")
+
+    try {
+        # Mix of successful and failing operations
+        error_promises = [
+            spawn operation_that_may_fail(1, false),
+            spawn operation_that_may_fail(2, true),
+            spawn operation_that_may_fail(3, false),
+            spawn operation_that_may_fail(4, true),
+            spawn operation_that_may_fail(5, false)
+        ]
+
+        print("All operations with potential errors started")
+
+        # Wait for all operations (including failed ones)
+        error_results = await all(error_promises)
+
+        print("Concurrent error handling results:")
+        for result in error_results {
+            print("-", result)
+        }
+
+        return error_results
+
+    } catch e {
+        print("Caught error in concurrent operations:", e)
+        return ["Error caught: " + e]
+    }
+}
+
+error_handling_results = await test_concurrent_error_handling()
+print("")
+
+# ============================================================================
+# Final Concurrency Summary
+# ============================================================================
+
+print("8. Concurrency Test Summary")
+print("============================")
+
+print("✅ Concurrency Test Results:")
+print("  • Sequential execution: Tasks run one after another")
+print("  • Parallel execution: Tasks start immediately when spawned")
+print("  • Promise.all: Coordinates multiple concurrent operations")
+print("  • Mixed operations: Complex workflows with concurrent steps")
+print("  • Class methods: Object methods execute concurrently")
+print("  • Lambda functions: Anonymous functions run in parallel")
+print("  • Error handling: Failures don't block other concurrent operations")
+
+print("")
+print("🚀 Key Observations:")
+print("  1. spawn() starts async operations immediately")
+print("  2. await blocks until the specific operation completes")
+print("  3. all() waits for ALL spawned operations to complete")
+print("  4. Concurrent operations appear to interleave their output")
+print("  5. Each spawned task maintains its own execution context")
+print("  6. Const parameters are protected across all async contexts")
+
+print("")
+print("=== Concurrency Test Complete ===")

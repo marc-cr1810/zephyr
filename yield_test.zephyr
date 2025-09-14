@@ -1,0 +1,229 @@
+# Zephyr Yield Test - Force Tasks to Yield Control
+# This test creates tasks with many operations to trigger the yield mechanism
+
+print("=== Yield Test - Forcing Cooperative Execution ===")
+print("")
+
+# ============================================================================
+# Task with Many Operations to Force Yielding
+# ============================================================================
+
+print("1. Heavy Computation Test")
+print("==========================")
+
+async func heavy_task(task_id, iterations) {
+    print("TASK", task_id, "STARTING with", iterations, "iterations")
+
+    # Perform many operations to force yielding
+    total = 0
+    for i = 0; i < iterations; i++ {
+        # Multiple operations per iteration
+        temp1 = i * 2
+        temp2 = temp1 + 3
+        temp3 = temp2 * temp1
+        temp4 = temp3 + i
+        total = total + temp4
+
+        # More operations
+        if i % 100 == 0 {
+            # This should trigger yield after 50 operations
+            dummy = i + total
+        }
+    }
+
+    print("TASK", task_id, "COMPLETED with total:", total)
+    return "Task " + str(task_id) + " result: " + str(total)
+}
+
+print("Testing with tasks that have many operations...")
+print("Each task performs thousands of operations - should yield control")
+
+# Start multiple heavy tasks
+promise1 = spawn heavy_task(1, 1000)
+promise2 = spawn heavy_task(2, 1000)
+promise3 = spawn heavy_task(3, 1000)
+
+print("All heavy tasks spawned - if yielding works, we should see interleaved output")
+
+result1 = await promise1
+result2 = await promise2
+result3 = await promise3
+
+print("Heavy task results:")
+print("1:", result1)
+print("2:", result2)
+print("3:", result3)
+
+# ============================================================================
+# Task with Loop and Calculations
+# ============================================================================
+
+print("\n2. Loop-Heavy Tasks")
+print("====================")
+
+async func loop_heavy_task(task_id, loops) {
+    print("LOOP TASK", task_id, "starting with", loops, "loops")
+
+    result = 0
+    for outer = 0; outer < loops; outer++ {
+        inner_total = 0
+        for inner = 0; inner < 10; inner++ {
+            # Many arithmetic operations
+            calc1 = outer * inner
+            calc2 = calc1 + outer
+            calc3 = calc2 * 2
+            calc4 = calc3 + inner
+            calc5 = calc4 * outer
+            inner_total = inner_total + calc5
+        }
+        result = result + inner_total
+
+        if outer % 10 == 0 {
+            print("LOOP TASK", task_id, "progress:", outer, "/", loops)
+        }
+    }
+
+    print("LOOP TASK", task_id, "finished with result:", result)
+    return result
+}
+
+# Test loop-heavy tasks
+print("Starting loop-heavy tasks that should yield...")
+
+loop_promises = [
+    spawn loop_heavy_task(1, 50),
+    spawn loop_heavy_task(2, 50),
+    spawn loop_heavy_task(3, 50)
+]
+
+print("All loop tasks spawned")
+
+loop_results = await all(loop_promises)
+print("Loop task results:", loop_results)
+
+# ============================================================================
+# Mixed Operations Test
+# ============================================================================
+
+print("\n3. Mixed Operations Test")
+print("=========================")
+
+async func mixed_operations_task(task_id, work_amount) {
+    print("MIXED TASK", task_id, "starting")
+
+    # String operations
+    text = "Task " + str(task_id)
+    for i = 0; i < work_amount; i++ {
+        text = text + " op" + str(i)
+
+        # Arithmetic
+        math_result = i * i + i
+
+        # More string ops
+        if len(text) > 50 {
+            text = "Task " + str(task_id) + " reset"
+        }
+
+        # List operations
+        temp_list = [i, math_result, task_id]
+        list_sum = 0
+        for item in temp_list {
+            list_sum = list_sum + item
+        }
+    }
+
+    print("MIXED TASK", task_id, "completed")
+    return "Mixed task " + str(task_id) + " done"
+}
+
+# Test mixed operations
+print("Testing mixed operations that should trigger yields...")
+
+mixed_promises = [
+    spawn mixed_operations_task(1, 200),
+    spawn mixed_operations_task(2, 200),
+    spawn mixed_operations_task(3, 200),
+    spawn mixed_operations_task(4, 200)
+]
+
+print("All mixed tasks spawned")
+
+mixed_results = await all(mixed_promises)
+print("Mixed operation results:")
+for i = 0; i < len(mixed_results); i++ {
+    print("-", mixed_results[i])
+}
+
+# ============================================================================
+# Verification Test
+# ============================================================================
+
+print("\n4. Verification Test")
+print("=====================")
+
+print("Expected behavior with proper yielding:")
+print("1. All spawn calls should complete immediately")
+print("2. Tasks should start and print their initial messages")
+print("3. Tasks should interleave their progress messages")
+print("4. Heavy computation should not block other tasks")
+
+print("\nIf you see:")
+print("- All spawn messages appear first ✓")
+print("- Tasks start messages appear together ✓")
+print("- Progress messages are interleaved ✓")
+print("Then cooperative concurrency is working!")
+
+print("\nIf you see:")
+print("- Tasks complete one by one without interleaving ✗")
+print("- No progress messages during execution ✗")
+print("Then yielding is not working yet")
+
+# ============================================================================
+# Final Intensive Test
+# ============================================================================
+
+print("\n5. Intensive Cooperative Test")
+print("==============================")
+
+async func intensive_task(id, cycles) {
+    print("INTENSIVE", id, "STARTED")
+
+    accumulator = 0
+    for cycle = 0; cycle < cycles; cycle++ {
+        # Force many operations that should trigger yields
+        for batch = 0; batch < 20; batch++ {
+            temp_calc = cycle * batch
+            accumulator = accumulator + temp_calc
+
+            # String manipulation (more operations)
+            temp_str = "cycle" + str(cycle) + "batch" + str(batch)
+            str_len = len(temp_str)
+            accumulator = accumulator + str_len
+        }
+
+        # Progress marker
+        if cycle % 5 == 0 {
+            print("INTENSIVE", id, "at cycle", cycle, "/", cycles)
+        }
+    }
+
+    print("INTENSIVE", id, "FINISHED")
+    return accumulator
+}
+
+print("Running intensive cooperative test...")
+
+intensive_promises = [
+    spawn intensive_task("A", 25),
+    spawn intensive_task("B", 25),
+    spawn intensive_task("C", 25)
+]
+
+print("All intensive tasks launched - watching for interleaving...")
+
+intensive_results = await all(intensive_promises)
+print("Intensive results:", intensive_results)
+
+print("\n=== Yield Test Complete ===")
+print("If you saw interleaved output above, cooperative concurrency is working!")
+print("If not, we need to add more yield points or reduce the yield threshold.")

@@ -1,0 +1,40 @@
+# Simple Interleaving Test - Minimal test to verify cooperative execution
+print("=== Simple Interleaving Test ===")
+
+# Test 1: Basic interleaving with print statements
+async func worker(id) {
+    print("Worker", id, "- Start")
+    print("Worker", id, "- Step 1")
+    print("Worker", id, "- Step 2")
+    print("Worker", id, "- Step 3")
+    print("Worker", id, "- End")
+    return "Worker " + str(id) + " done"
+}
+
+print("Starting 3 workers...")
+
+# Spawn all workers
+promise1 = spawn worker(1)
+promise2 = spawn worker(2)
+promise3 = spawn worker(3)
+
+print("All workers spawned")
+
+# Wait for completion
+result1 = await promise1
+result2 = await promise2
+result3 = await promise3
+
+print("Results:", [result1, result2, result3])
+
+print("")
+print("Expected output if cooperative:")
+print("Worker 1 - Start")
+print("Worker 2 - Start")
+print("Worker 3 - Start")
+print("Worker 1 - Step 1")
+print("Worker 2 - Step 1")
+print("Worker 3 - Step 1")
+print("... (interleaved)")
+print("")
+print("Current output shows if truly concurrent or still sequential")
