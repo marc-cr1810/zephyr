@@ -1,0 +1,338 @@
+# Zephyr Plugin Usage Example
+# This script demonstrates how to use C++ plugins from Zephyr code
+
+print("=== Zephyr Plugin System Demo ===")
+
+# =============================================================================
+# Basic Plugin Import
+# =============================================================================
+
+print("\n1. Basic Plugin Import:")
+
+# Import entire plugin module
+import advanced_math from "math_plugin.so"
+
+# Test basic trigonometric functions
+angle = advanced_math.PI / 4  # 45 degrees
+sin_45 = advanced_math.sin(angle)
+cos_45 = advanced_math.cos(angle)
+tan_45 = advanced_math.tan(angle)
+
+print("sin(45°) =", sin_45)
+print("cos(45°) =", cos_45)
+print("tan(45°) =", tan_45)
+
+# Test power and root functions
+sqrt_16 = advanced_math.sqrt(16.0)
+cube_root_27 = advanced_math.cbrt(27.0)
+power_result = advanced_math.pow(2.0, 10.0)
+
+print("sqrt(16) =", sqrt_16)
+print("cbrt(27) =", cube_root_27)
+print("2^10 =", power_result)
+
+# =============================================================================
+# Named Imports
+# =============================================================================
+
+print("\n2. Named Imports:")
+
+# Import specific functions and constants
+import sin, cos, PI, E, sqrt, log from "math_plugin.so"
+
+# Use imported functions directly (no module prefix needed)
+print("Direct usage after named import:")
+print("sin(π/2) =", sin(PI / 2))
+print("cos(0) =", cos(0))
+print("ln(e) =", log(E))
+print("sqrt(π) =", sqrt(PI))
+
+# =============================================================================
+# Namespace Imports
+# =============================================================================
+
+print("\n3. Namespace Import:")
+
+# Import all symbols with alias
+import * as math from "math_plugin.so"
+
+# Use with namespace prefix
+print("Using namespace alias 'math':")
+print("math.exp(1) =", math.exp(1))
+print("math.log10(100) =", math.log10(100))
+print("math.degrees(math.PI) =", math.degrees(math.PI))
+print("math.radians(180) =", math.radians(180))
+
+# =============================================================================
+# Mathematical Constants
+# =============================================================================
+
+print("\n4. Mathematical Constants:")
+
+print("π (PI) =", math.PI)
+print("e (E) =", math.E)
+print("τ (TAU) =", math.TAU)
+print("φ (PHI - Golden Ratio) =", math.PHI)
+print("√2 (SQRT2) =", math.SQRT2)
+print("ln(2) (LN2) =", math.LN2)
+
+# =============================================================================
+# Advanced Mathematical Functions
+# =============================================================================
+
+print("\n5. Advanced Functions:")
+
+# Hyperbolic functions
+x = 1.0
+print("sinh(" + str(x) + ") =", math.sinh(x))
+print("cosh(" + str(x) + ") =", math.cosh(x))
+print("tanh(" + str(x) + ") =", math.tanh(x))
+
+# Inverse trigonometric functions
+print("asin(0.5) =", math.asin(0.5))
+print("acos(0.5) =", math.acos(0.5))
+print("atan(1.0) =", math.atan(1.0))
+print("atan2(1, 1) =", math.atan2(1, 1))
+
+# Rounding functions
+value = 3.7
+print("ceil(3.7) =", math.ceil(value))
+print("floor(3.7) =", math.floor(value))
+print("round(3.7) =", math.round(value))
+print("trunc(3.7) =", math.trunc(value))
+
+# =============================================================================
+# Variadic Functions (Multiple Arguments)
+# =============================================================================
+
+print("\n6. Variadic Functions:")
+
+# Min and max functions accept multiple arguments
+numbers = [3.2, 1.8, 4.7, 2.1, 5.9, 0.3]
+min_val = math.min(*numbers)  # Spread operator
+max_val = math.max(*numbers)
+
+print("Numbers:", numbers)
+print("Minimum:", min_val)
+print("Maximum:", max_val)
+
+# =============================================================================
+# Statistical Functions
+# =============================================================================
+
+print("\n7. Statistical Functions:")
+
+data = [1.2, 2.8, 3.1, 4.5, 2.7, 3.9, 1.8, 5.2, 2.4, 3.6]
+print("Data set:", data)
+
+sum_val = math.sum(data)
+mean_val = math.mean(data)
+median_val = math.median(data)
+
+print("Sum:", sum_val)
+print("Mean:", mean_val)
+print("Median:", median_val)
+
+# =============================================================================
+# Random Number Generation
+# =============================================================================
+
+print("\n8. Random Number Generation:")
+
+print("Random numbers:")
+for i in range(5) {
+    print("  Random float [0,1):", math.random())
+}
+
+print("Random integers:")
+for i in range(5) {
+    print("  Random int [1,10]:", math.randint(1, 10))
+}
+
+print("Uniform distribution:")
+for i in range(3) {
+    print("  Uniform [-5.0, 5.0]:", math.uniform(-5.0, 5.0))
+}
+
+print("Normal distribution:")
+for i in range(3) {
+    print("  Normal (μ=0, σ=1):", math.normal(0.0, 1.0))
+}
+
+# =============================================================================
+# Utility Functions
+# =============================================================================
+
+print("\n9. Utility Functions:")
+
+# Angle conversion
+degrees_180 = math.degrees(math.PI)
+radians_90 = math.radians(90)
+print("π radians =", degrees_180, "degrees")
+print("90 degrees =", radians_90, "radians")
+
+# Clamping
+clamped = math.clamp(7.5, 0.0, 10.0)
+print("clamp(7.5, 0, 10) =", clamped)
+
+clamped_out = math.clamp(-5.0, 0.0, 10.0)
+print("clamp(-5, 0, 10) =", clamped_out)
+
+# Linear interpolation
+lerp_result = math.lerp(10.0, 20.0, 0.3)
+print("lerp(10, 20, 0.3) =", lerp_result)
+
+# Special value checking
+test_vals = [1.0, math.INFINITY, math.NAN, 0.0]
+for val in test_vals {
+    print("Value", val, ":")
+    print("  isfinite:", math.isfinite(val))
+    print("  isinf:", math.isinf(val))
+    print("  isnan:", math.isnan(val))
+}
+
+# =============================================================================
+# Vector3D Class Usage
+# =============================================================================
+
+print("\n10. Vector3D Class:")
+
+# Create vectors
+v1 = math.Vector3D(1.0, 2.0, 3.0)
+v2 = math.Vector3D(4.0, 5.0, 6.0)
+
+print("Vector 1:", v1.to_string())
+print("Vector 2:", v2.to_string())
+
+# Vector properties
+print("V1 magnitude:", v1.magnitude())
+print("V2 magnitude:", v2.magnitude())
+
+# Vector operations
+dot_product = v1.dot(v2)
+cross_product = v1.cross(v2)
+sum_vector = v1.add(v2)
+diff_vector = v2.subtract(v1)
+scaled_vector = v1.scale(2.0)
+
+print("Dot product:", dot_product)
+print("Cross product:", cross_product.to_string())
+print("Sum:", sum_vector.to_string())
+print("Difference:", diff_vector.to_string())
+print("V1 scaled by 2:", scaled_vector.to_string())
+
+# Distance calculation
+distance = v1.distance_to(v2)
+print("Distance between vectors:", distance)
+
+# Normalization
+unit_vector = v1.normalized()
+print("V1 normalized:", unit_vector.to_string())
+print("Normalized magnitude:", unit_vector.magnitude())
+
+# =============================================================================
+# Complex Mathematical Expressions
+# =============================================================================
+
+print("\n11. Complex Expressions:")
+
+# Solve quadratic equation: ax² + bx + c = 0
+func solve_quadratic(a, b, c) {
+    discriminant = b * b - 4 * a * c
+
+    if discriminant < 0 {
+        return {"roots": "complex", "discriminant": discriminant}
+    } else if discriminant == 0 {
+        root = -b / (2 * a)
+        return {"roots": [root], "discriminant": discriminant}
+    } else {
+        sqrt_discriminant = math.sqrt(discriminant)
+        root1 = (-b + sqrt_discriminant) / (2 * a)
+        root2 = (-b - sqrt_discriminant) / (2 * a)
+        return {"roots": [root1, root2], "discriminant": discriminant}
+    }
+}
+
+# Test quadratic solver
+equations = [
+    {"a": 1, "b": -5, "c": 6},    # x² - 5x + 6 = 0
+    {"a": 1, "b": -4, "c": 4},    # x² - 4x + 4 = 0
+    {"a": 1, "b": 0, "c": 1}      # x² + 1 = 0
+]
+
+for eq in equations {
+    result = solve_quadratic(eq.a, eq.b, eq.c)
+    print("Equation: " + str(eq.a) + "x² + " + str(eq.b) + "x + " + str(eq.c) + " = 0")
+    print("  Result:", result)
+}
+
+# =============================================================================
+# Performance Test
+# =============================================================================
+
+print("\n12. Performance Test:")
+
+# Large computation using plugin functions
+func monte_carlo_pi(samples) {
+    inside_circle = 0
+
+    for i in range(samples) {
+        x = math.uniform(-1.0, 1.0)
+        y = math.uniform(-1.0, 1.0)
+
+        if math.hypot(x, y) <= 1.0 {
+            inside_circle += 1
+        }
+    }
+
+    return 4.0 * inside_circle / samples
+}
+
+print("Estimating π using Monte Carlo method...")
+estimated_pi = monte_carlo_pi(100000)
+error = math.abs(estimated_pi - math.PI)
+print("Estimated π:", estimated_pi)
+print("Actual π:", math.PI)
+print("Error:", error)
+print("Error percentage:", 100.0 * error / math.PI, "%")
+
+# =============================================================================
+# Error Handling with Plugins
+# =============================================================================
+
+print("\n13. Error Handling:")
+
+# Test functions that can throw errors
+test_cases = [
+    {"func": "sqrt", "args": [-1.0], "should_fail": true},
+    {"func": "log", "args": [0.0], "should_fail": true},
+    {"func": "asin", "args": [2.0], "should_fail": true},
+    {"func": "sqrt", "args": [16.0], "should_fail": false}
+]
+
+for test_case in test_cases {
+    try {
+        if test_case.func == "sqrt" {
+            result = math.sqrt(test_case.args[0])
+        } else if test_case.func == "log" {
+            result = math.log(test_case.args[0])
+        } else if test_case.func == "asin" {
+            result = math.asin(test_case.args[0])
+        }
+
+        print(test_case.func + "(" + str(test_case.args[0]) + ") =", result)
+
+    } catch (error) {
+        print(test_case.func + "(" + str(test_case.args[0]) + ") failed:", error)
+
+        if !test_case.should_fail {
+            print("  ERROR: This should not have failed!")
+        }
+    }
+}
+
+print("\n=== Plugin Demo Complete ===")
+print("The math plugin provides comprehensive mathematical functionality")
+print("accessible directly from Zephyr scripts with full type safety and")
+print("error handling. Performance-critical operations are executed in")
+print("native C++ code for optimal speed.")

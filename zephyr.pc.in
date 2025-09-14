@@ -1,0 +1,15 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Zephyr
+Description: Zephyr Programming Language - Plugin API and Core Library
+Version: @PROJECT_VERSION@
+URL: https://github.com/zephyr-lang/zephyr
+Requires:
+Requires.private:
+Conflicts:
+Libs: -L${libdir} -lzephyr
+Libs.private: -ldl -lpthread -lm
+Cflags: -I${includedir} -I${includedir}/zephyr
