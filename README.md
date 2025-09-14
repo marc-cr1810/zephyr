@@ -269,6 +269,41 @@ This project demonstrates a complete programming language implementation with:
 - Modern C++ design patterns and snake_case naming conventions
 - Modular architecture with separate object and type systems
 
+## Documentation
+
+### 📚 Complete Documentation
+For comprehensive documentation, see the [`docs/`](docs/) directory:
+
+- **[Documentation Index](docs/index.md)** - Complete guide to all documentation
+- **[Language Overview](docs/language_overview.md)** - Zephyr language features and syntax
+- **[Getting Started](docs/getting_started.md)** - Basic tutorial for the Zephyr language
+
+### 🚀 C++ API Documentation
+Zephyr provides a powerful C++ API for embedding and plugin development:
+
+- **[C++ API Overview](docs/cpp_api_overview.md)** - Architecture, features, and design philosophy
+- **[Getting Started with C++ API](docs/getting_started_cpp.md)** - Step-by-step tutorial and examples
+- **[C++ API User Guide](docs/cpp_api_guide.md)** - Comprehensive usage guide with examples
+- **[C++ API Reference](docs/cpp_api_reference.md)** - Complete API reference documentation
+
+### 🔌 Plugin Development
+Create dynamic plugins to extend Zephyr:
+
+- **[Plugin Development Guide](docs/plugin_development.md)** - Complete plugin creation tutorial
+- **[Plugin API Reference](docs/plugin_api_reference.md)** - Detailed plugin API documentation
+
+### ⚙️ Technical Implementation
+- **[Plugin System Implementation](docs/plugin_system_implementation.md)** - Technical architecture and status
+
+### 🤝 Community
+- **[Contributing Guidelines](docs/contributing.md)** - How to contribute to the project
+- **[FAQ](docs/faq.md)** - Frequently asked questions
+
+### 🔗 Quick Links
+- **New to Zephyr?** Start with [Language Overview](docs/language_overview.md)
+- **C++ Developer?** Check out [C++ API Overview](docs/cpp_api_overview.md)
+- **Want to create plugins?** See [Plugin Development Guide](docs/plugin_development.md)
+
 ## Language Philosophy
 
 Zephyr aims to provide:

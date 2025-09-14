@@ -1,5 +1,5 @@
-#include "objects/int_object.hpp"
-#include "types/int_type.hpp"
+#include "zephyr/objects/int_object.hpp"
+#include "zephyr/types/int_type.hpp"
 #include <string>
 #include <cmath> // Added for std::pow
 

@@ -1,11 +1,11 @@
-#include "function_overload_resolver.hpp"
-#include "objects/function_object.hpp"
-#include "objects/object.hpp"
-#include "objects/class_instance_object.hpp"
-#include "objects/class_object.hpp"
-#include "types/type.hpp"
-#include "ast.hpp"
-#include "errors.hpp"
+#include "zephyr/function_overload_resolver.hpp"
+#include "zephyr/objects/function_object.hpp"
+#include "zephyr/objects/object.hpp"
+#include "zephyr/objects/class_instance_object.hpp"
+#include "zephyr/objects/class_object.hpp"
+#include "zephyr/types/type.hpp"
+#include "zephyr/ast.hpp"
+#include "zephyr/errors.hpp"
 #include <algorithm>
 #include <sstream>
 

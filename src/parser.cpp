@@ -1,10 +1,10 @@
-#include "parser.hpp"
-#include "errors.hpp"
-#include "error_context.hpp"
+#include "zephyr/parser.hpp"
+#include "zephyr/errors.hpp"
+#include "zephyr/error_context.hpp"
 #include <string>
 #include <memory>
 #include <cctype>
-#include "ast.hpp"
+#include "zephyr/ast.hpp"
 
 namespace zephyr
 {

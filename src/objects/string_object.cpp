@@ -1,5 +1,5 @@
-#include "objects/string_object.hpp"
-#include "types/string_type.hpp"
+#include "zephyr/objects/string_object.hpp"
+#include "zephyr/types/string_type.hpp"
 
 namespace zephyr
 {

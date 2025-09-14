@@ -1,6 +1,6 @@
-#include "types/boolean_type.hpp"
-#include "objects/objects.hpp"
-#include "errors.hpp"
+#include "zephyr/types/boolean_type.hpp"
+#include "zephyr/objects/objects.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {

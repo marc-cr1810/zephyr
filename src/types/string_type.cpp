@@ -1,6 +1,6 @@
-#include "types/string_type.hpp"
-#include "objects/objects.hpp"
-#include "errors.hpp"
+#include "zephyr/types/string_type.hpp"
+#include "zephyr/objects/objects.hpp"
+#include "zephyr/errors.hpp"
 #include <algorithm>
 
 namespace zephyr

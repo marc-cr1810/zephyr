@@ -1,4 +1,4 @@
-#include "ast.hpp"
+#include "zephyr/ast.hpp"
 #include <iostream>
 
 namespace zephyr

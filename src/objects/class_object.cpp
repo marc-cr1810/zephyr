@@ -1,9 +1,9 @@
-#include "objects/class_object.hpp"
-#include "objects/class_instance_object.hpp"
-#include "objects/function_object.hpp"
-#include "types/function_type.hpp"
-#include "ast.hpp"
-#include "errors.hpp"
+#include "zephyr/objects/class_object.hpp"
+#include "zephyr/objects/class_instance_object.hpp"
+#include "zephyr/objects/function_object.hpp"
+#include "zephyr/types/function_type.hpp"
+#include "zephyr/ast.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {

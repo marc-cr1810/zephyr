@@ -1,7 +1,7 @@
-#include "types/interface_type.hpp"
-#include "objects/objects.hpp"
+#include "zephyr/types/interface_type.hpp"
+#include "zephyr/objects/objects.hpp"
 #include <stdexcept>
-#include "errors.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {

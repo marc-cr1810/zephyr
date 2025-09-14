@@ -1,24 +1,24 @@
-#include "interpreter.hpp"
-#include "function_overload_resolver.hpp"
-#include "module_loader.hpp"
-#include "error_context.hpp"
-#include "errors.hpp"
-#include "objects/function_object.hpp"
-#include "objects/lambda_object.hpp"
-#include "objects/class_object.hpp"
-#include "objects/interface_object.hpp"
-#include "objects/class_instance_object.hpp"
-#include "async_scheduler.hpp"
-#include "errors.hpp"
-#include "types/type.hpp"
+#include "zephyr/interpreter.hpp"
+#include "zephyr/function_overload_resolver.hpp"
+#include "zephyr/module_loader.hpp"
+#include "zephyr/error_context.hpp"
+#include "zephyr/errors.hpp"
+#include "zephyr/objects/function_object.hpp"
+#include "zephyr/objects/lambda_object.hpp"
+#include "zephyr/objects/class_object.hpp"
+#include "zephyr/objects/interface_object.hpp"
+#include "zephyr/objects/class_instance_object.hpp"
+#include "zephyr/async_scheduler.hpp"
+#include "zephyr/errors.hpp"
+#include "zephyr/types/type.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <filesystem>
 #include <memory>
 #include <cmath>
-#include "objects/module_object.hpp"
-#include "objects/function_object.hpp"
+#include "zephyr/objects/module_object.hpp"
+#include "zephyr/objects/function_object.hpp"
 
 namespace zephyr
 {
@@ -4420,10 +4420,10 @@ auto interpreter_t::visit(import_statement_t& node) -> void
                 variable(symbol_name, export_value);
             }
             
-            // If there's an alias for the module itself, create a module object
+            // If there's an alias for the module itself, create a filtered module object
             if (node.has_alias())
             {
-                auto module_obj = std::make_shared<module_object_t>(module, node.get_alias_name());
+                auto module_obj = std::make_shared<module_object_t>(module, node.get_alias_name(), node.get_imported_symbols());
                 variable(node.get_alias_name(), module_obj);
             }
             break;

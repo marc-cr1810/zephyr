@@ -1,5 +1,5 @@
-#include "objects/boolean_object.hpp"
-#include "types/boolean_type.hpp"
+#include "zephyr/objects/boolean_object.hpp"
+#include "zephyr/types/boolean_type.hpp"
 
 namespace zephyr
 {

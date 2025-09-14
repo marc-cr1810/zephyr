@@ -1,11 +1,12 @@
-#include "runtime.hpp"
-#include "module_loader.hpp"
-#include "lexer.hpp"
-#include "objects/object.hpp"
-#include "parser.hpp"
-#include "errors.hpp"
-#include "runtime_error.hpp"
-#include "types/type.hpp"
+#include "zephyr/runtime.hpp"
+#include "zephyr/module_loader.hpp"
+#include "zephyr/lexer.hpp"
+#include "zephyr/objects/object.hpp"
+#include "zephyr/parser.hpp"
+#include "zephyr/errors.hpp"
+#include "zephyr/runtime_error.hpp"
+#include "zephyr/types/type.hpp"
+#include "zephyr/api/zephyr_api.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -314,6 +315,10 @@ auto runtime_t::print_error(const std::string& message, const std::string& error
 auto runtime_t::initialize_module_system() -> void
 {
     m_module_loader = std::make_shared<module_loader_t>();
+    
+    // Create a standalone plugin loader for runtime use
+    auto plugin_loader = std::make_shared<api::plugin_loader_t>(nullptr);
+    m_module_loader->set_plugin_loader(plugin_loader);
 }
 
 auto runtime_t::create_main_module(const std::string& file_path, const std::string& source_code) -> std::shared_ptr<module_t>

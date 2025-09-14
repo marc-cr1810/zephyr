@@ -1,6 +1,6 @@
-#include "lexer.hpp"
-#include "error_context.hpp"
-#include "errors.hpp"
+#include "zephyr/lexer.hpp"
+#include "zephyr/error_context.hpp"
+#include "zephyr/errors.hpp"
 #include <cctype>
 #include <unordered_map>
 

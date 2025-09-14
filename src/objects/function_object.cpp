@@ -1,7 +1,7 @@
-#include "objects/function_object.hpp"
-#include "types/function_type.hpp"
-#include "ast.hpp"
-#include "errors.hpp"
+#include "zephyr/objects/function_object.hpp"
+#include "zephyr/types/function_type.hpp"
+#include "zephyr/ast.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {

@@ -1,8 +1,13 @@
-#include "module_loader.hpp"
-#include "interpreter.hpp"
-#include "parser.hpp"
-#include "lexer.hpp"
-#include "errors.hpp"
+#include "zephyr/module_loader.hpp"
+#include "zephyr/interpreter.hpp"
+#include "zephyr/parser.hpp"
+#include "zephyr/lexer.hpp"
+#include "zephyr/errors.hpp"
+#include "zephyr/api/native_module.hpp"
+#include "zephyr/api/type_converter.hpp"
+#include "zephyr/objects/builtin_function_object.hpp"
+#include "zephyr/objects/module_object.hpp"
+#include "zephyr/runtime_error.hpp"
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
@@ -15,6 +20,140 @@ namespace zephyr
 module_t::module_t(const std::string& name, const std::string& file_path)
     : m_name(name), m_file_path(file_path), m_is_executed(false)
 {
+}
+
+// =============================================================================
+// Plugin Module Implementation
+// =============================================================================
+
+plugin_module_t::plugin_module_t(const std::string& name, const std::string& file_path,
+                                std::shared_ptr<zephyr::api::plugin_interface_t> plugin)
+    : m_name(name), m_file_path(file_path), m_plugin(plugin), m_is_executed(false)
+{
+}
+
+auto plugin_module_t::get_name() const -> const std::string&
+{
+    return m_name;
+}
+
+auto plugin_module_t::get_file_path() const -> const std::string&
+{
+    return m_file_path;
+}
+
+auto plugin_module_t::is_executed() const -> bool
+{
+    return m_is_executed;
+}
+
+auto plugin_module_t::set_executed(bool executed) -> void
+{
+    m_is_executed = executed;
+}
+
+auto plugin_module_t::execute() -> void
+{
+    if (m_is_executed) {
+        return;
+    }
+    
+    try {
+        // Initialize the plugin
+        auto init_result = m_plugin->initialize(nullptr); // TODO: Pass engine
+        if (!init_result) {
+            throw import_error_t("Plugin initialization failed: " + init_result.error());
+        }
+        
+        // Create the native module
+        m_native_module = m_plugin->create_module();
+        if (!m_native_module) {
+            throw import_error_t("Plugin failed to create module");
+        }
+        
+        // Initialize the native module
+        auto module_init_result = m_native_module->initialize();
+        if (!module_init_result) {
+            throw import_error_t("Native module initialization failed: " + module_init_result.error());
+        }
+        
+        // Convert native module exports to Zephyr objects
+        auto exported_symbols = m_native_module->get_exported_symbols();
+        
+        for (const auto& symbol_name : exported_symbols) {
+            value_t zephyr_value = nullptr;
+            
+            // Try to get as function
+            if (m_native_module->has_function(symbol_name)) {
+                auto native_func = m_native_module->get_function(symbol_name);
+                if (native_func) {
+                    // Create a native function adapter (similar to zephyr_api.cpp)
+                    class plugin_function_adapter_t : public builtin_function_object_t {
+                    private:
+                        zephyr::api::native_function_t m_native_func;
+                        
+                    public:
+                        plugin_function_adapter_t(const zephyr::api::native_function_t& func, const std::string& name) 
+                            : builtin_function_object_t(nullptr, name), m_native_func(func) {}
+                        
+                        auto call(const std::vector<value_t>& args) -> value_t override {
+                            auto result = m_native_func(args);
+                            if (result) {
+                                return result.value();
+                            } else {
+                                throw import_error_t(result.error());
+                            }
+                        }
+                    };
+                    
+                    auto adapter = std::make_shared<plugin_function_adapter_t>(*native_func, symbol_name);
+                    zephyr_value = adapter;
+                }
+            }
+            // Try to get as constant
+            else if (m_native_module->has_constant(symbol_name)) {
+                auto constant_value = m_native_module->get_constant(symbol_name);
+                if (constant_value) {
+                    zephyr_value = *constant_value;
+                }
+            }
+            // Try to get as variable
+            else if (m_native_module->has_variable(symbol_name)) {
+                auto variable_value = m_native_module->get_variable(symbol_name);
+                if (variable_value) {
+                    zephyr_value = *variable_value;
+                }
+            }
+            
+            if (zephyr_value) {
+                m_exports[symbol_name] = zephyr_value;
+            }
+        }
+        
+        m_is_executed = true;
+        
+    } catch (const std::exception& e) {
+        throw import_error_t("Plugin execution failed: " + std::string(e.what()));
+    }
+}
+
+auto plugin_module_t::get_export(const std::string& symbol_name) const -> value_t
+{
+    auto it = m_exports.find(symbol_name);
+    if (it != m_exports.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+auto plugin_module_t::get_all_exports() const -> const std::map<std::string, value_t>&
+{
+    return m_exports;
+}
+
+auto plugin_module_t::get_plugin() const -> std::shared_ptr<zephyr::api::plugin_interface_t>
+{
+    return m_plugin;
 }
 
 auto module_t::get_name() const -> const std::string&
@@ -113,6 +252,8 @@ auto module_t::get_global_scope() const -> const std::map<std::string, value_t>&
 module_loader_t::module_loader_t()
 {
     initialize_search_paths();
+    // Plugin loader will be set later via set_plugin_loader()
+    m_plugin_loader = nullptr;
 }
 
 auto module_loader_t::initialize_search_paths() -> void
@@ -164,6 +305,30 @@ auto module_loader_t::load_module(const std::string& specifier,
 {
     // Resolve the module path
     std::string resolved_path = resolve_module_path(specifier, is_path_based, requesting_file_path);
+    
+    // Check if this is a plugin file
+    if (is_plugin_file(resolved_path)) {
+        // Load as plugin and convert to regular module interface
+        auto plugin_module = load_plugin_module(specifier, requesting_file_path);
+        if (!plugin_module) {
+            throw import_error_t("Failed to load plugin: " + specifier);
+        }
+        
+        // Create a regular module wrapper that delegates to the plugin module
+        auto module = std::make_shared<module_t>(plugin_module->get_name(), plugin_module->get_file_path());
+        
+        // Execute plugin module to populate exports
+        plugin_module->execute();
+        
+        // Copy exports from plugin module to regular module
+        for (const auto& [name, value] : plugin_module->get_all_exports()) {
+            module->add_export(name, value);
+        }
+        
+        // Cache and return
+        m_module_cache[resolved_path] = module;
+        return module;
+    }
     
     // Check if module is already cached
     auto it = m_module_cache.find(resolved_path);
@@ -329,6 +494,117 @@ auto module_loader_t::read_file_content(const std::string& path) const -> std::s
     }
     
     return content;
+}
+
+auto module_loader_t::load_plugin_module(const std::string& specifier,
+                                        const std::string& requesting_file_path) -> std::shared_ptr<plugin_module_t>
+{
+    // Resolve plugin path
+    std::string resolved_path = resolve_plugin_path(specifier, requesting_file_path);
+    
+    // Check if already cached
+    auto it = m_plugin_cache.find(resolved_path);
+    if (it != m_plugin_cache.end()) {
+        return it->second;
+    }
+    
+    try {
+        // Check if plugin loader is available
+        if (!m_plugin_loader) {
+            std::cerr << "Plugin loader not available for loading: " << resolved_path << std::endl;
+            return nullptr;
+        }
+        
+        // Load the plugin
+        auto plugin_result = m_plugin_loader->load_plugin(resolved_path);
+        if (!plugin_result) {
+
+            return nullptr;
+        }
+        
+        auto plugin = plugin_result.value();
+        
+        // Determine module name
+        std::filesystem::path path(resolved_path);
+        std::string module_name = path.stem().string();
+        
+        // Create plugin module
+        auto plugin_module = std::make_shared<plugin_module_t>(module_name, resolved_path, plugin);
+        
+        // Cache and return
+        m_plugin_cache[resolved_path] = plugin_module;
+        return plugin_module;
+        
+    } catch (const std::exception& e) {
+
+        return nullptr;
+    }
+}
+
+auto module_loader_t::is_plugin_file(const std::string& file_path) const -> bool
+{
+    std::filesystem::path path(file_path);
+    std::string extension = path.extension().string();
+    
+    // Convert to lowercase for comparison
+    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+    
+    return extension == ".so" || extension == ".dll" || extension == ".dylib";
+}
+
+auto module_loader_t::resolve_plugin_path(const std::string& specifier,
+                                         const std::string& requesting_file_path) const -> std::string
+{
+    // For plugins, we use similar logic to regular modules but look for plugin extensions
+    
+    // If it's already a path with plugin extension, resolve it directly
+    if (specifier.find('/') != std::string::npos || specifier.find('\\') != std::string::npos) {
+        if (is_plugin_file(specifier)) {
+            std::filesystem::path requesting_dir = std::filesystem::path(requesting_file_path).parent_path();
+            std::filesystem::path plugin_path = requesting_dir / specifier;
+            return make_absolute_path(plugin_path.string());
+        }
+    }
+    
+    // Try different plugin extensions
+    std::vector<std::string> extensions;
+#ifdef _WIN32
+    extensions = {".dll"};
+#elif defined(__APPLE__)
+    extensions = {".dylib", ".so"};
+#else
+    extensions = {".so"};
+#endif
+    
+    // Try in current directory first (relative to requesting file)
+    if (!requesting_file_path.empty()) {
+        std::filesystem::path requesting_dir = std::filesystem::path(requesting_file_path).parent_path();
+        
+        for (const auto& ext : extensions) {
+            std::filesystem::path candidate = requesting_dir / (specifier + ext);
+            if (file_exists(candidate.string())) {
+                return make_absolute_path(candidate.string());
+            }
+        }
+    }
+    
+    // Try search paths
+    for (const auto& search_path : m_search_paths) {
+        for (const auto& ext : extensions) {
+            std::filesystem::path candidate = std::filesystem::path(search_path) / (specifier + ext);
+            if (file_exists(candidate.string())) {
+                return make_absolute_path(candidate.string());
+            }
+        }
+    }
+    
+    // Not found
+    throw import_error_t("Plugin not found: " + specifier);
+}
+
+auto module_loader_t::set_plugin_loader(std::shared_ptr<zephyr::api::plugin_loader_t> plugin_loader) -> void
+{
+    m_plugin_loader = std::move(plugin_loader);
 }
 
 } // namespace zephyr

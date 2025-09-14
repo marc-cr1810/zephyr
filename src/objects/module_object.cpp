@@ -1,13 +1,18 @@
-#include "objects/module_object.hpp"
-#include "types/module_type.hpp"
-#include "module_loader.hpp"
-#include "errors.hpp"
+#include "zephyr/objects/module_object.hpp"
+#include "zephyr/types/module_type.hpp"
+#include "zephyr/module_loader.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {
 
 module_object_t::module_object_t(std::shared_ptr<module_t> module, const std::string& module_name)
-    : m_module(module), m_module_name(module_name)
+    : m_module(module), m_module_name(module_name), m_filter_symbols(false)
+{
+}
+
+module_object_t::module_object_t(std::shared_ptr<module_t> module, const std::string& module_name, const std::vector<std::string>& allowed_symbols)
+    : m_module(module), m_module_name(module_name), m_allowed_symbols(allowed_symbols), m_filter_symbols(true)
 {
 }
 
@@ -36,6 +41,24 @@ auto module_object_t::call_method(const std::string& method_name, const std::vec
 
 auto module_object_t::member(const std::string& member_name) -> std::shared_ptr<object_t>
 {
+    // If filtering is enabled, check if the symbol is allowed
+    if (m_filter_symbols)
+    {
+        bool allowed = false;
+        for (const auto& allowed_symbol : m_allowed_symbols)
+        {
+            if (allowed_symbol == member_name)
+            {
+                allowed = true;
+                break;
+            }
+        }
+        if (!allowed)
+        {
+            throw attribute_error_t("Module '" + m_module_name + "' has no export '" + member_name + "' (not imported)");
+        }
+    }
+
     auto export_value = m_module->get_export(member_name);
     if (!export_value)
     {
@@ -46,6 +69,24 @@ auto module_object_t::member(const std::string& member_name) -> std::shared_ptr<
 
 auto module_object_t::has_member(const std::string& name) const -> bool
 {
+    // If filtering is enabled, check if the symbol is allowed
+    if (m_filter_symbols)
+    {
+        bool allowed = false;
+        for (const auto& allowed_symbol : m_allowed_symbols)
+        {
+            if (allowed_symbol == name)
+            {
+                allowed = true;
+                break;
+            }
+        }
+        if (!allowed)
+        {
+            return false;
+        }
+    }
+
     return m_module->get_export(name) != nullptr;
 }
 

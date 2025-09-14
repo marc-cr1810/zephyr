@@ -1,7 +1,7 @@
-#include "task.hpp"
-#include "async_scheduler.hpp"
-#include "objects/promise_object.hpp"
-#include "objects/none_object.hpp"
+#include "zephyr/task.hpp"
+#include "zephyr/async_scheduler.hpp"
+#include "zephyr/objects/promise_object.hpp"
+#include "zephyr/objects/none_object.hpp"
 #include <stdexcept>
 
 namespace zephyr

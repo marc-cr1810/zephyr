@@ -1,5 +1,6 @@
-#include "runtime.hpp"
-#include "args.hpp"
+#include "zephyr/runtime.hpp"
+#include "zephyr/args.hpp"
+#include "zephyr/zephyr.hpp"
 #include <iostream>
 
 auto show_usage(const std::string& program_name) -> void
@@ -28,7 +29,7 @@ auto main(int argc, char* argv[]) -> int
             show_usage(args.program_name);
             break;
         case zephyr::execution_mode_t::SHOW_VERSION:
-            std::cout << "Zephyr Interpreter, version " << ZEPHYR_VERSION << std::endl;
+            std::cout << "Zephyr Interpreter, version " << ZEPHYR_VERSION_STRING << std::endl;
             break;
         case zephyr::execution_mode_t::INVALID:
             show_usage(args.program_name);

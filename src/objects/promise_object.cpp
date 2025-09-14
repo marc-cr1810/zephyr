@@ -1,5 +1,5 @@
-#include "objects/promise_object.hpp"
-#include "types/promise_type.hpp"
+#include "zephyr/objects/promise_object.hpp"
+#include "zephyr/types/promise_type.hpp"
 
 namespace zephyr
 {

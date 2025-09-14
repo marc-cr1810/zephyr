@@ -1,7 +1,7 @@
-#include "objects/lambda_object.hpp"
-#include "types/lambda_type.hpp"
-#include "ast.hpp"
-#include "errors.hpp"
+#include "zephyr/objects/lambda_object.hpp"
+#include "zephyr/types/lambda_type.hpp"
+#include "zephyr/ast.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {

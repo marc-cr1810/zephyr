@@ -1,5 +1,5 @@
-#include "objects/interface_object.hpp"
-#include "types/interface_type.hpp"
+#include "zephyr/objects/interface_object.hpp"
+#include "zephyr/types/interface_type.hpp"
 
 namespace zephyr
 {

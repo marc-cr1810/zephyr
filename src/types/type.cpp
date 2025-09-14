@@ -1,6 +1,6 @@
-#include "types/type.hpp"
-#include "objects/object.hpp"
-#include "errors.hpp"
+#include "zephyr/types/type.hpp"
+#include "zephyr/objects/object.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {

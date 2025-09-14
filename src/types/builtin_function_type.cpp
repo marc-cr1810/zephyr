@@ -1,6 +1,6 @@
-#include "types/builtin_function_type.hpp"
-#include "objects/object.hpp"
-#include "errors.hpp"
+#include "zephyr/types/builtin_function_type.hpp"
+#include "zephyr/objects/object.hpp"
+#include "zephyr/errors.hpp"
 
 namespace zephyr
 {

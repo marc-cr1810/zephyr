@@ -1,5 +1,5 @@
-#include "objects/dictionary_object.hpp"
-#include "types/dictionary_type.hpp"
+#include "zephyr/objects/dictionary_object.hpp"
+#include "zephyr/types/dictionary_type.hpp"
 #include <sstream>
 
 namespace zephyr

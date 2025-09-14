@@ -1,8 +1,8 @@
-#include "types/class_type.hpp"
-#include "objects/class_object.hpp"
-#include "objects/object.hpp"
-#include "errors.hpp"
-#include "objects/class_instance_object.hpp"
+#include "zephyr/types/class_type.hpp"
+#include "zephyr/objects/class_object.hpp"
+#include "zephyr/objects/object.hpp"
+#include "zephyr/errors.hpp"
+#include "zephyr/objects/class_instance_object.hpp"
 
 namespace zephyr
 {
