@@ -13,6 +13,9 @@ namespace zephyr
 {
 
 // Forward declarations
+namespace api {
+    class engine_t;
+}
 class interpreter_t;
 using value_t = std::shared_ptr<object_t>;
 
@@ -79,6 +82,7 @@ class module_loader_t
 public:
     // Functions
     module_loader_t();
+    module_loader_t(zephyr::api::engine_t* engine);
     
     auto load_module(const std::string& specifier, 
                     bool is_path_based, 
@@ -96,6 +100,7 @@ public:
                            const std::string& requesting_file_path) -> std::shared_ptr<plugin_module_t>;
     auto is_plugin_file(const std::string& file_path) const -> bool;
     auto set_plugin_loader(std::shared_ptr<zephyr::api::plugin_loader_t> plugin_loader) -> void;
+    auto set_engine(zephyr::api::engine_t* engine) -> void;
 
 private:
     // Functions
@@ -113,6 +118,7 @@ private:
     std::vector<std::string> m_search_paths;                          // Search paths from ZEPHYRPATH
     std::vector<std::string> m_loading_stack;                         // Current loading stack for circular dependency detection
     std::shared_ptr<zephyr::api::plugin_loader_t> m_plugin_loader;   // Plugin dynamic loader
+    zephyr::api::engine_t* m_engine;                                  // Engine reference for native modules
 };
 
 } // namespace zephyr

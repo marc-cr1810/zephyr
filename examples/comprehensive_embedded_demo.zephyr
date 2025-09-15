@@ -1,0 +1,456 @@
+#!/usr/bin/env zephyr
+
+# Comprehensive Embedded Demo Script
+# This script demonstrates using the C++ classes and functions
+# from the comprehensive_embedded_example.cpp through Zephyr
+
+import game_engine
+import math_utils
+
+print("=== Zephyr Game Engine Demo ===")
+print("Demonstrating C++ integration with Zephyr scripting")
+print("")
+
+# Global game state
+var game_state = {
+    players: [],
+    enemies: [],
+    powerups: [],
+    total_score: 0,
+    game_time: 0.0
+}
+
+# Helper function to create a formatted entity report
+func create_entity_report(entity_id: int, entity_type: string) -> string {
+    info = game_engine.get_entity_info(entity_id)
+    return entity_type + " [ID: " + str(entity_id) + "] - " + info
+}
+
+# Main game initialization
+func initialize_game() -> void {
+    print("=== Initializing Game World ===")
+
+    # Create main player
+    player_id = game_engine.create_player("Zephyr Hero")
+    game_state.players.append(player_id)
+
+    # Position player at center
+    game_engine.set_entity_position(player_id, 0.0, 0.0, 0.0)
+
+    print("Created player:", create_entity_report(player_id, "Player"))
+
+    # Create initial enemies in a circle around player
+    enemy_count = 6
+    radius = 8.0
+
+    for i in range(enemy_count) {
+        angle = (i * 2.0 * math_utils.PI) / enemy_count
+        x = radius * cos(angle)  # Using built-in cos function
+        y = radius * sin(angle)  # Using built-in sin function
+
+        enemy_types = ["Goblin", "Orc", "Skeleton", "Wolf", "Troll", "Spider"]
+        enemy_type = enemy_types[i % len(enemy_types)]
+        enemy_name = enemy_type + "_" + str(i + 1)
+
+        enemy_id = game_engine.create_enemy(enemy_name, enemy_type)
+        game_engine.set_entity_position(enemy_id, x, y, 0.0)
+        game_state.enemies.append(enemy_id)
+
+        print("Created enemy:", create_entity_report(enemy_id, "Enemy"))
+    }
+
+    # Create some power-ups scattered around
+    powerup_types = ["Health", "Mana", "Strength", "Speed", "Shield"]
+    powerup_values = [25.0, 30.0, 15.0, 10.0, 20.0]
+
+    for i in range(len(powerup_types)) {
+        x = math_utils.random_range(-12.0, 12.0)
+        y = math_utils.random_range(-12.0, 12.0)
+
+        powerup_name = powerup_types[i] + "_Boost"
+        powerup_id = game_engine.create_powerup(powerup_name, powerup_types[i], powerup_values[i])
+        game_engine.set_entity_position(powerup_id, x, y, 0.0)
+        game_state.powerups.append(powerup_id)
+
+        print("Created power-up:", create_entity_report(powerup_id, "PowerUp"))
+    }
+
+    print("Game world initialized with", game_engine.get_entity_count(), "entities")
+    print("")
+}
+
+# Player progression system
+func level_up_player() -> void {
+    if len(game_state.players) == 0 {
+        return
+    }
+
+    player_id = game_state.players[0]
+
+    print("=== Player Progression ===")
+
+    # Grant experience based on current score
+    exp_bonus = game_state.total_score * 10 + math_utils.random_int(50, 150)
+    game_engine.player_gain_exp(player_id, exp_bonus)
+
+    print("Player gained", exp_bonus, "experience points!")
+
+    # Add some legendary items
+    legendary_items = [
+        "Excalibur", "Staff of Wisdom", "Boots of Speed",
+        "Cloak of Invisibility", "Ring of Power", "Amulet of Protection"
+    ]
+
+    items_found = math_utils.random_int(1, 3)
+    for i in range(items_found) {
+        item_index = math_utils.random_int(0, len(legendary_items) - 1)
+        item = legendary_items[item_index]
+        game_engine.player_add_item(player_id, item)
+        print("Found legendary item:", item)
+    }
+
+    # Display updated player status
+    inventory = game_engine.get_player_inventory(player_id)
+    print("Player inventory:", inventory)
+    print("")
+}
+
+# Combat simulation
+func simulate_combat_round() -> void {
+    if len(game_state.players) == 0 or len(game_state.enemies) == 0 {
+        return
+    }
+
+    player_id = game_state.players[0]
+    print("=== Combat Round ===")
+
+    # Calculate distances to all enemies
+    enemy_distances = []
+    for enemy_id in game_state.enemies {
+        # Get positions (simplified - in real game we'd store positions)
+        distance = math_utils.random_range(1.0, 15.0)  # Simulated distance
+        enemy_distances.append({
+            id: enemy_id,
+            distance: distance
+        })
+    }
+
+    # Sort enemies by distance (closest first)
+    # Simple bubble sort implementation in Zephyr
+    for i in range(len(enemy_distances)) {
+        for j in range(len(enemy_distances) - 1 - i) {
+            if enemy_distances[j].distance > enemy_distances[j + 1].distance {
+                temp = enemy_distances[j]
+                enemy_distances[j] = enemy_distances[j + 1]
+                enemy_distances[j + 1] = temp
+            }
+        }
+    }
+
+    # Attack closest enemies
+    attacks = math_utils.clamp_int(len(enemy_distances), 1, 3)
+    for i in range(attacks) {
+        enemy = enemy_distances[i]
+        damage = math_utils.random_range(20.0, 50.0)
+        hit_chance = math_utils.clamp_double(1.0 - (enemy.distance / 20.0), 0.3, 0.95)
+
+        if math_utils.random_range(0.0, 1.0) <= hit_chance {
+            print("Hit enemy", enemy.id, "for", int(damage), "damage! (Distance:", enemy.distance, ")")
+            game_state.total_score += int(damage)
+        } else {
+            print("Missed enemy", enemy.id, "at distance", enemy.distance)
+        }
+    }
+
+    print("Combat round completed. Total score:", game_state.total_score)
+    print("")
+}
+
+# Advanced mathematical demonstrations
+func demonstrate_math_features() -> void {
+    print("=== Advanced Math Demonstrations ===")
+
+    # Vector operations simulation
+    print("Vector and geometric calculations:")
+
+    # Simulate trajectory calculation
+    initial_velocity = 25.0
+    angle_degrees = 45.0
+    gravity = 9.81
+
+    angle_radians = angle_degrees * math_utils.DEG_TO_RAD
+    max_range = (initial_velocity * initial_velocity * sin(2 * angle_radians)) / gravity
+    max_height = (initial_velocity * initial_velocity * sin(angle_radians) * sin(angle_radians)) / (2 * gravity)
+
+    print("Projectile motion (", initial_velocity, "m/s at", angle_degrees, "°):")
+    print("  Maximum range:", max_range, "meters")
+    print("  Maximum height:", max_height, "meters")
+
+    # Statistical analysis of random data
+    print("\nStatistical analysis:")
+    sample_size = 50
+    samples = []
+
+    for i in range(sample_size) {
+        # Generate normally distributed-ish samples using Box-Muller approximation
+        u1 = math_utils.random_range(0.001, 0.999)
+        u2 = math_utils.random_range(0.001, 0.999)
+        z = sqrt(-2.0 * log(u1)) * cos(2.0 * math_utils.PI * u2)
+        sample = 50.0 + z * 10.0  # Mean=50, StdDev=10
+
+        samples.append(sample)
+    }
+
+    # Calculate statistics
+    sum_val = 0.0
+    min_val = samples[0]
+    max_val = samples[0]
+
+    for sample in samples {
+        sum_val += sample
+        if sample < min_val {
+            min_val = sample
+        }
+        if sample > max_val {
+            max_val = sample
+        }
+    }
+
+    mean = sum_val / len(samples)
+
+    # Calculate variance
+    variance_sum = 0.0
+    for sample in samples {
+        diff = sample - mean
+        variance_sum += diff * diff
+    }
+    variance = variance_sum / (len(samples) - 1)
+    std_dev = sqrt(variance)
+
+    print("Sample statistics (n=" + str(len(samples)) + "):")
+    print("  Mean:", mean)
+    print("  Min:", min_val)
+    print("  Max:", max_val)
+    print("  Standard deviation:", std_dev)
+
+    # Interpolation examples
+    print("\nInterpolation examples:")
+    waypoints = [
+        {x: 0.0, y: 0.0},
+        {x: 10.0, y: 5.0},
+        {x: 20.0, y: -3.0},
+        {x: 30.0, y: 8.0}
+    ]
+
+    for t in [0.0, 0.25, 0.5, 0.75, 1.0] {
+        # Linear interpolation between first and last waypoint
+        lerped_x = math_utils.lerp(waypoints[0].x, waypoints[len(waypoints)-1].x, t)
+        lerped_y = math_utils.lerp(waypoints[0].y, waypoints[len(waypoints)-1].y, t)
+        print("  t=" + str(t) + ": (" + str(lerped_x) + ", " + str(lerped_y) + ")")
+    }
+
+    print("")
+}
+
+# Game loop simulation
+func run_game_simulation() -> void {
+    print("=== Game Simulation ===")
+
+    simulation_duration = 10.0  # seconds
+    time_step = 0.2            # 200ms updates
+    steps = int(simulation_duration / time_step)
+
+    print("Running", steps, "simulation steps over", simulation_duration, "seconds")
+
+    for step in range(steps) {
+        current_time = step * time_step
+
+        # Update game world
+        game_engine.update_world(time_step)
+
+        # Every second, perform game actions
+        if step % 5 == 0 {  # Every 5 steps (1 second)
+            print("--- Step", step, "(t=" + str(current_time) + "s) ---")
+
+            # Show current statistics
+            stats = game_engine.get_statistics()
+            print(stats)
+
+            # Occasionally trigger events
+            event_chance = math_utils.random_int(1, 100)
+
+            if event_chance <= 20 {  # 20% chance
+                simulate_combat_round()
+            } else if event_chance <= 35 {  # 15% chance
+                print("Player discovers new area and gains bonus XP!")
+                if len(game_state.players) > 0 {
+                    bonus_exp = math_utils.random_int(25, 75)
+                    game_engine.player_gain_exp(game_state.players[0], bonus_exp)
+                    game_state.total_score += bonus_exp
+                }
+            } else if event_chance <= 45 {  # 10% chance
+                print("New enemy spawned in the distance!")
+                spawn_types = ["Bandit", "Wraith", "Golem"]
+                spawn_type = spawn_types[math_utils.random_int(0, len(spawn_types) - 1)]
+                spawn_name = spawn_type + "_Spawn_" + str(step)
+
+                spawn_id = game_engine.create_enemy(spawn_name, spawn_type)
+                spawn_x = math_utils.random_range(-20.0, 20.0)
+                spawn_y = math_utils.random_range(-20.0, 20.0)
+                game_engine.set_entity_position(spawn_id, spawn_x, spawn_y, 0.0)
+                game_state.enemies.append(spawn_id)
+            }
+
+            print("")
+        }
+
+        # Update game state time
+        game_state.game_time = current_time
+    }
+
+    # Level up player based on performance
+    if game_state.total_score > 100 {
+        level_up_player()
+    }
+
+    print("Simulation completed!")
+    print("Final score:", game_state.total_score)
+    print("Final game time:", game_state.game_time, "seconds")
+    print("")
+}
+
+# Data structure and algorithm demonstration
+func demonstrate_algorithms() -> void {
+    print("=== Algorithm Demonstrations ===")
+
+    # Sorting algorithms
+    print("Sorting algorithm comparison:")
+
+    # Generate random data
+    data_size = 20
+    original_data = []
+    for i in range(data_size) {
+        original_data.append(math_utils.random_int(1, 100))
+    }
+
+    print("Original data:", original_data)
+
+    # Bubble sort implementation
+    bubble_data = original_data[:]  # Copy array
+    comparisons = 0
+
+    for i in range(len(bubble_data)) {
+        for j in range(len(bubble_data) - 1 - i) {
+            comparisons += 1
+            if bubble_data[j] > bubble_data[j + 1] {
+                temp = bubble_data[j]
+                bubble_data[j] = bubble_data[j + 1]
+                bubble_data[j + 1] = temp
+            }
+        }
+    }
+
+    print("Bubble sorted:", bubble_data)
+    print("Bubble sort comparisons:", comparisons)
+
+    # Selection sort implementation
+    selection_data = original_data[:]
+    comparisons = 0
+
+    for i in range(len(selection_data)) {
+        min_idx = i
+        for j in range(i + 1, len(selection_data)) {
+            comparisons += 1
+            if selection_data[j] < selection_data[min_idx] {
+                min_idx = j
+            }
+        }
+        if min_idx != i {
+            temp = selection_data[i]
+            selection_data[i] = selection_data[min_idx]
+            selection_data[min_idx] = temp
+        }
+    }
+
+    print("Selection sorted:", selection_data)
+    print("Selection sort comparisons:", comparisons)
+
+    # Search algorithms
+    print("\nSearch algorithm demonstration:")
+    sorted_data = bubble_data  # Use already sorted data
+    target = sorted_data[len(sorted_data) / 2]  # Pick middle element
+
+    # Linear search
+    linear_steps = 0
+    linear_found = false
+    for i in range(len(sorted_data)) {
+        linear_steps += 1
+        if sorted_data[i] == target {
+            linear_found = true
+            print("Linear search found", target, "at index", i, "in", linear_steps, "steps")
+            break
+        }
+    }
+
+    # Binary search
+    binary_steps = 0
+    left = 0
+    right = len(sorted_data) - 1
+    binary_found = false
+
+    while left <= right {
+        binary_steps += 1
+        mid = (left + right) / 2
+
+        if sorted_data[mid] == target {
+            binary_found = true
+            print("Binary search found", target, "at index", mid, "in", binary_steps, "steps")
+            break
+        } else if sorted_data[mid] < target {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+
+    print("Search efficiency: Binary search used", binary_steps, "steps vs Linear search", linear_steps, "steps")
+    print("")
+}
+
+# Main execution
+func main() -> void {
+    print("Starting comprehensive embedded demo...")
+    print("")
+
+    # Initialize the game world
+    initialize_game()
+
+    # Run mathematical demonstrations
+    demonstrate_math_features()
+
+    # Show algorithm examples
+    demonstrate_algorithms()
+
+    # Run the main game simulation
+    run_game_simulation()
+
+    # Final statistics and cleanup
+    print("=== Final Report ===")
+    final_stats = game_engine.get_statistics()
+    print(final_stats)
+
+    print("\nDemo completed successfully!")
+    print("This demo showcased:")
+    print("✅ C++ class integration with Zephyr")
+    print("✅ Mathematical computations and utilities")
+    print("✅ Game entity management and simulation")
+    print("✅ Algorithm implementations in Zephyr")
+    print("✅ Real-time system updates")
+    print("✅ Statistical analysis and data processing")
+    print("✅ Complex control flow and data structures")
+
+    return 0
+}
+
+# Execute main function
+exit(main())

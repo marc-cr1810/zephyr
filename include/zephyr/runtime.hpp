@@ -59,7 +59,12 @@ private:
     // Variables
     async_scheduler_t& m_scheduler;
     std::vector<std::unique_ptr<program_t>> m_alive_programs; // For REPL object lifetime
+
+public:
+    // Module system access
+    auto get_module_loader() -> std::shared_ptr<module_loader_t>;
     
+private:
     // Module system variables
     std::shared_ptr<module_loader_t> m_module_loader;
 };

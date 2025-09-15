@@ -3575,8 +3575,9 @@ auto interpreter_t::visit(method_call_t& node) -> void
         // Check if it's a function object
         auto function_obj = std::dynamic_pointer_cast<function_object_t>(export_value);
         auto builtin_function_obj = std::dynamic_pointer_cast<builtin_function_object_t>(export_value);
+        auto class_obj = std::dynamic_pointer_cast<class_object_t>(export_value);
         
-        if (!function_obj && !builtin_function_obj)
+        if (!function_obj && !builtin_function_obj && !class_obj)
         {
             throw type_error_t("'" + node.method_name + "' is not a function");
         }
@@ -3585,6 +3586,80 @@ auto interpreter_t::visit(method_call_t& node) -> void
         if (builtin_function_obj)
         {
             m_current_result = builtin_function_obj->call(args);
+            zephyr::current_error_location() = saved_location;
+            return;
+        }
+        
+        // Handle class instantiation from modules
+        if (class_obj)
+        {
+            // Use the existing class instantiation logic from function_call_t
+            if (class_obj->m_has_invalid_init) {
+                throw type_error_t("init method cannot return a value.");
+            }
+            
+            // Check if trying to instantiate an abstract class
+            if (class_obj->m_is_abstract) {
+                throw type_error_t("Cannot instantiate abstract class '" + class_obj->m_class_name + "'.");
+            }
+
+            // Create a new instance of this class
+            auto instance = std::make_shared<class_instance_t>(class_obj);
+
+            // Check if the class has an 'init' method
+            if (class_obj->has_method("init"))
+            {
+                // Use overload resolver to find the best matching init method
+                auto resolution_result = class_obj->resolve_method_call("init", args);
+                if (!resolution_result.found_match)
+                {
+                    throw type_error_t("No matching 'init' method found for given arguments in class '" + class_obj->m_class_name + "'.\n" + resolution_result.error_message);
+                }
+
+                auto init_method = resolution_result.selected_function;
+
+                // Store the current 'this' value (if any) to restore later
+                value_t saved_this = nullptr;
+                try {
+                    saved_this = resolve_variable("this");
+                } catch (...) {
+                    // 'this' doesn't exist yet, that's fine
+                }
+
+                // Set up the method call environment
+                enter_function_scope();
+                variable("this", instance);
+
+                // Set up parameters
+                for (size_t i = 0; i < args.size(); ++i)
+                {
+                    variable(init_method->m_parameters[i].name, args[i]);
+                }
+
+                try
+                {
+                    // Execute the init method
+                    init_method->m_body->accept(*this);
+                    exit_function_scope();
+                }
+                catch (const std::exception& e)
+                {
+                    exit_function_scope();
+                    throw;
+                }
+
+                // Restore the previous 'this' value
+                if (saved_this)
+                {
+                    variable("this", saved_this);
+                }
+            }
+            else if (!args.empty())
+            {
+                throw type_error_t("Class '" + class_obj->m_class_name + "' has no 'init' method, but arguments were provided.");
+            }
+
+            m_current_result = instance;
             zephyr::current_error_location() = saved_location;
             return;
         }

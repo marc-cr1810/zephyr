@@ -321,6 +321,11 @@ auto runtime_t::initialize_module_system() -> void
     m_module_loader->set_plugin_loader(plugin_loader);
 }
 
+auto runtime_t::get_module_loader() -> std::shared_ptr<module_loader_t>
+{
+    return m_module_loader;
+}
+
 auto runtime_t::create_main_module(const std::string& file_path, const std::string& source_code) -> std::shared_ptr<module_t>
 {
     auto main_module = std::make_shared<module_t>("__main__", file_path);

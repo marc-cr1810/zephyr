@@ -1,0 +1,158 @@
+# Class Export Plugin Usage Example
+# This example demonstrates how to use plugins that export class-like functionality
+
+print("=== Class Export Plugin Example ===")
+print()
+
+# Import the class export plugin
+import "../build/examples/class_export_plugin.so"
+
+print("1. Plugin Information:")
+print("   Name:", class_export_plugin.PLUGIN_NAME)
+print("   Version:", class_export_plugin.VERSION)
+print("   Supports Classes:", class_export_plugin.SUPPORTS_CLASSES)
+print("   Mathematical Constants:")
+print("     PI =", class_export_plugin.PI)
+print("     E =", class_export_plugin.E)
+print("     SQRT2 =", class_export_plugin.SQRT2)
+print()
+
+print("2. Vector2D Class Examples:")
+print("   Creating vectors...")
+
+# Create vector objects using constructor functions
+vec1 = class_export_plugin.Vector2D(3, 4)
+print("   vec1 =", vec1)
+
+vec2 = class_export_plugin.Vector2D(1, 2)
+print("   vec2 =", vec2)
+
+# Use vector operations
+magnitude1 = class_export_plugin.vector_magnitude(3, 4)
+print("   Magnitude of vec1:", magnitude1)
+
+# Add vectors
+vec_sum = class_export_plugin.vector_add(3, 4, 1, 2)
+print("   vec1 + vec2 =", vec_sum)
+
+# Create unit vectors
+unit_x = class_export_plugin.Vector2D(1, 0)
+unit_y = class_export_plugin.Vector2D(0, 1)
+print("   Unit X:", unit_x)
+print("   Unit Y:", unit_y)
+print()
+
+print("3. Rectangle Class Examples:")
+print("   Creating rectangles...")
+
+# Create rectangle objects
+rect1 = class_export_plugin.Rectangle(5, 3)
+print("   rect1 =", rect1)
+
+rect2 = class_export_plugin.Rectangle(4, 4)  # Square
+print("   rect2 =", rect2)
+
+# Calculate areas
+area1 = class_export_plugin.rectangle_area(5, 3)
+area2 = class_export_plugin.rectangle_area(4, 4)
+print("   Area of rect1:", area1)
+print("   Area of rect2 (square):", area2)
+
+# Create rectangles with different dimensions
+wide_rect = class_export_plugin.Rectangle(10, 2)
+tall_rect = class_export_plugin.Rectangle(2, 8)
+print("   Wide rectangle:", wide_rect, "area =", class_export_plugin.rectangle_area(10, 2))
+print("   Tall rectangle:", tall_rect, "area =", class_export_plugin.rectangle_area(2, 8))
+print()
+
+print("4. Counter Class Examples:")
+print("   Creating counters...")
+
+# Create counter objects with different names and initial values
+counter1 = class_export_plugin.Counter("main_counter", 0)
+print("   counter1 =", counter1)
+
+counter2 = class_export_plugin.Counter("page_views", 100)
+print("   counter2 =", counter2)
+
+counter3 = class_export_plugin.Counter("downloads", 50)
+print("   counter3 =", counter3)
+print()
+
+print("5. Practical Use Cases:")
+print()
+
+print("   A. Geometry calculations:")
+# Calculate area of a room
+room_length = 12.5
+room_width = 8.0
+room = class_export_plugin.Rectangle(room_length, room_width)
+room_area = class_export_plugin.rectangle_area(room_length, room_width)
+print("     Room dimensions:", room)
+print("     Room area:", room_area, "square meters")
+
+# Calculate distance between two points
+point1_x = 0
+point1_y = 0
+point2_x = 6
+point2_y = 8
+distance = class_export_plugin.vector_magnitude(point2_x - point1_x, point2_y - point1_y)
+print("     Distance from (0,0) to (6,8):", distance, "units")
+print()
+
+print("   B. Physics simulation:")
+# Simulate velocity and position
+velocity = class_export_plugin.Vector2D(15, 20)
+print("     Initial velocity:", velocity)
+
+# Calculate velocity magnitude (speed)
+speed = class_export_plugin.vector_magnitude(15, 20)
+print("     Speed:", speed, "units/second")
+
+# Simulate movement over time (adding velocity vectors)
+position1 = class_export_plugin.vector_add(0, 0, 15, 20)  # After 1 second
+position2 = class_export_plugin.vector_add(15, 20, 15, 20)  # After 2 seconds
+print("     Position after 1 second:", position1)
+print("     Position after 2 seconds:", position2)
+print()
+
+print("   C. Application counters:")
+# Different types of counters for a web application
+session_counter = class_export_plugin.Counter("sessions", 0)
+error_counter = class_export_plugin.Counter("errors", 0)
+success_counter = class_export_plugin.Counter("successes", 0)
+
+print("     Application metrics:")
+print("       Sessions:", session_counter)
+print("       Errors:", error_counter)
+print("       Successes:", success_counter)
+print()
+
+print("6. Mathematical Applications:")
+print()
+
+# Use mathematical constants in calculations
+circle_radius = 5.0
+circle_area_formula = "π × r²"
+circle_area = class_export_plugin.PI * circle_radius * circle_radius
+print("   Circle with radius", circle_radius, ":")
+print("     Formula:", circle_area_formula)
+print("     Area:", circle_area)
+
+# Natural exponential calculations
+print("   Natural exponential constant E:", class_export_plugin.E)
+print("   E² ≈", class_export_plugin.E * class_export_plugin.E)
+
+# Square root calculations
+diagonal_length = class_export_plugin.SQRT2 * 10  # Diagonal of 10x10 square
+print("   Diagonal of 10×10 square:", diagonal_length)
+print()
+
+print("=== Class Export Plugin Example Complete ===")
+print()
+print("Key takeaways:")
+print("- Plugins can export class-like functionality using constructor functions")
+print("- Constructor functions create and return string representations of objects")
+print("- Mathematical operations and utility functions work seamlessly with plugin classes")
+print("- This pattern allows C++ classes to be used naturally in Zephyr code")
+print("- Constants and metadata can be exported alongside class functionality")

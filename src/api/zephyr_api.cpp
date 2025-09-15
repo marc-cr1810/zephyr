@@ -65,6 +65,13 @@ auto engine_t::initialize_engine() -> void {
     m_interpreter = std::make_unique<interpreter_t>();
     m_plugin_loader = std::make_unique<plugin_loader_t>(this);
     
+    // Connect interpreter to runtime's module loader
+    if (m_runtime && m_runtime->get_module_loader()) {
+        m_interpreter->set_module_loader(m_runtime->get_module_loader());
+        // Set engine reference in module loader for native module support
+        m_runtime->get_module_loader()->set_engine(this);
+    }
+    
     // Setup builtin modules
     setup_builtin_modules();
     

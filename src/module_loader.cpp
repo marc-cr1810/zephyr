@@ -1,10 +1,11 @@
 #include "zephyr/module_loader.hpp"
 #include "zephyr/interpreter.hpp"
-#include "zephyr/parser.hpp"
 #include "zephyr/lexer.hpp"
+#include "zephyr/parser.hpp"
 #include "zephyr/errors.hpp"
 #include "zephyr/api/native_module.hpp"
 #include "zephyr/api/type_converter.hpp"
+#include "zephyr/api/zephyr_api.hpp"
 #include "zephyr/objects/builtin_function_object.hpp"
 #include "zephyr/objects/module_object.hpp"
 #include "zephyr/runtime_error.hpp"
@@ -113,6 +114,17 @@ auto plugin_module_t::execute() -> void
                     
                     auto adapter = std::make_shared<plugin_function_adapter_t>(*native_func, symbol_name);
                     zephyr_value = adapter;
+                }
+            }
+            // Try to get as class
+            else if (m_native_module->has_class(symbol_name)) {
+                auto native_class = m_native_module->get_class(symbol_name);
+                if (native_class) {
+                    // Create Zephyr class object from native class
+                    auto class_result = (*native_class)->create_zephyr_class(symbol_name);
+                    if (class_result) {
+                        zephyr_value = class_result.value();
+                    }
                 }
             }
             // Try to get as constant
@@ -259,6 +271,15 @@ module_loader_t::module_loader_t()
     initialize_search_paths();
     // Plugin loader will be set later via set_plugin_loader()
     m_plugin_loader = nullptr;
+    m_engine = nullptr;
+}
+
+module_loader_t::module_loader_t(zephyr::api::engine_t* engine)
+{
+    initialize_search_paths();
+    // Plugin loader will be set later via set_plugin_loader()
+    m_plugin_loader = nullptr;
+    m_engine = engine;
 }
 
 auto module_loader_t::initialize_search_paths() -> void
@@ -308,6 +329,77 @@ auto module_loader_t::load_module(const std::string& specifier,
                                  bool is_path_based, 
                                  const std::string& requesting_file_path) -> std::shared_ptr<module_t>
 {
+    // First check if this is a registered native module (not path-based)
+    if (!is_path_based && m_engine) {
+        if (m_engine->has_module(specifier)) {
+            auto native_module = m_engine->get_module(specifier);
+            if (native_module) {
+                // Create a wrapper module for the native module
+                auto module = std::make_shared<module_t>(specifier, "<native>");
+                
+                // Convert native module exports to Zephyr objects
+                auto exported_symbols = native_module->get_exported_symbols();
+                
+                for (const auto& symbol_name : exported_symbols) {
+                    value_t zephyr_value = nullptr;
+                    
+                    // Try to get as function
+                    if (native_module->has_function(symbol_name)) {
+                        auto native_func = native_module->get_function(symbol_name);
+                        if (native_func) {
+                            // Create a dummy function pointer for the adapter
+                            auto dummy_func = [](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+                                return std::make_shared<none_object_t>();
+                            };
+                            
+                            // Create a native function adapter
+                            class native_function_adapter_t : public builtin_function_object_t {
+                            private:
+                                zephyr::api::native_function_t m_native_func;
+                                
+                            public:
+                                native_function_adapter_t(const zephyr::api::native_function_t& func, const std::string& name, builtin_function_ptr_t dummy) 
+                                    : builtin_function_object_t(dummy, name), m_native_func(func) {}
+                                
+                                auto call(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> override {
+                                    auto result = m_native_func(args);
+                                    if (result) {
+                                        return result.value();
+                                    } else {
+                                        throw std::runtime_error(result.error());
+                                    }
+                                }
+                            };
+                            
+                            zephyr_value = std::make_shared<native_function_adapter_t>(*native_func, symbol_name, dummy_func);
+                        }
+                    }
+                    // Try to get as constant
+                    else if (native_module->has_constant(symbol_name)) {
+                        auto constant_value = native_module->get_constant(symbol_name);
+                        if (constant_value) {
+                            zephyr_value = *constant_value;
+                        }
+                    }
+                    // Try to get as variable
+                    else if (native_module->has_variable(symbol_name)) {
+                        auto variable_value = native_module->get_variable(symbol_name);
+                        if (variable_value) {
+                            zephyr_value = *variable_value;
+                        }
+                    }
+                    
+                    if (zephyr_value) {
+                        module->add_export(symbol_name, zephyr_value);
+                    }
+                }
+                
+                module->set_executed(true);
+                return module;
+            }
+        }
+    }
+    
     // Resolve the module path
     std::string resolved_path = resolve_module_path(specifier, is_path_based, requesting_file_path);
     
@@ -610,6 +702,11 @@ auto module_loader_t::resolve_plugin_path(const std::string& specifier,
 auto module_loader_t::set_plugin_loader(std::shared_ptr<zephyr::api::plugin_loader_t> plugin_loader) -> void
 {
     m_plugin_loader = std::move(plugin_loader);
+}
+
+auto module_loader_t::set_engine(zephyr::api::engine_t* engine) -> void
+{
+    m_engine = engine;
 }
 
 } // namespace zephyr

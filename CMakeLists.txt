@@ -149,6 +149,18 @@ option(BUILD_PLUGIN_EXAMPLES "Build plugin examples" OFF)
 if(BUILD_PLUGIN_EXAMPLES)
     # Math plugin example
     add_subdirectory(examples/plugins)
+
+    # Class export plugin example
+    add_library(class_export_plugin SHARED examples/class_export_plugin.cpp)
+    target_include_directories(class_export_plugin PRIVATE include)
+    target_link_libraries(class_export_plugin zephyr_shared)
+
+    # Set plugin properties
+    set_target_properties(class_export_plugin PROPERTIES
+        PREFIX ""
+        OUTPUT_NAME "class_export_plugin"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
+    )
 endif()
 
 # =============================================================================
@@ -158,13 +170,32 @@ endif()
 option(BUILD_EMBEDDING_EXAMPLE "Build embedding example" OFF)
 
 if(BUILD_EMBEDDING_EXAMPLE)
-    add_executable(embedding_example examples/embedding_example.cpp)
-    target_link_libraries(embedding_example zephyr_shared)
+    # Note: embedding_example.cpp disabled due to API compatibility issues
+    # add_executable(embedding_example examples/embedding_example.cpp)
+    # target_link_libraries(embedding_example zephyr_shared)
 
-    # Copy to bin directory
-    add_custom_command(TARGET embedding_example POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:embedding_example> ${CMAKE_SOURCE_DIR}/bin/
-        COMMENT "Copying embedding example to bin directory"
+    # Note: embedded_native_classes.cpp disabled due to API compatibility issues
+    # add_executable(embedded_native_classes examples/embedded_native_classes.cpp)
+    # target_link_libraries(embedded_native_classes zephyr_shared)
+
+    # Comprehensive embedded example
+    add_executable(comprehensive_embedded_example examples/comprehensive_embedded_example.cpp)
+    target_link_libraries(comprehensive_embedded_example zephyr_shared)
+
+    # Copy comprehensive embedded example to bin directory
+    add_custom_command(TARGET comprehensive_embedded_example POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:comprehensive_embedded_example> ${CMAKE_SOURCE_DIR}/bin/
+        COMMENT "Copying comprehensive embedded example to bin directory"
+    )
+
+    # Minimal embedded example (fully working)
+    add_executable(minimal_embedded_example examples/minimal_embedded_example.cpp)
+    target_link_libraries(minimal_embedded_example zephyr_shared)
+
+    # Copy minimal embedded example to bin directory
+    add_custom_command(TARGET minimal_embedded_example POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:minimal_embedded_example> ${CMAKE_SOURCE_DIR}/bin/
+        COMMENT "Copying minimal embedded example to bin directory"
     )
 endif()
 
