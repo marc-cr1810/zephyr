@@ -1,0 +1,39 @@
+# Test the original class export plugin to see how it works
+print("=== Testing Original Plugin ===")
+
+# Import the original plugin
+import "../build/examples/class_export_plugin.so"
+
+print("1. Testing constants:")
+print("   PLUGIN_NAME:", class_export_plugin.PLUGIN_NAME)
+print("   VERSION:", class_export_plugin.VERSION)
+print("   PI:", class_export_plugin.PI)
+print()
+
+print("2. Testing Vector2D constructor:")
+vec = class_export_plugin.Vector2D(3, 4)
+print("   Vector2D(3, 4) =", vec)
+print()
+
+print("3. Testing vector operations:")
+magnitude = class_export_plugin.vector_magnitude(3, 4)
+print("   magnitude(3, 4) =", magnitude)
+
+vec_sum = class_export_plugin.vector_add(3, 4, 1, 2)
+print("   vector_add(3, 4, 1, 2) =", vec_sum)
+print()
+
+print("4. Testing Rectangle:")
+rect = class_export_plugin.Rectangle(5, 3)
+print("   Rectangle(5, 3) =", rect)
+
+area = class_export_plugin.rectangle_area(5, 3)
+print("   rectangle_area(5, 3) =", area)
+print()
+
+print("5. Testing Counter:")
+counter = class_export_plugin.Counter("test", 10)
+print("   Counter('test', 10) =", counter)
+print()
+
+print("=== Original Plugin Test Complete ===")

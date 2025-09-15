@@ -24,7 +24,7 @@ using property_getter_t = std::function<value_result_t()>;
 using property_setter_t = std::function<void_result_t(const value_t&)>;
 
 // Native class interface for C++ classes exposed to Zephyr
-class native_class_t {
+class native_class_t : public std::enable_shared_from_this<native_class_t> {
 public:
     virtual ~native_class_t() = default;
     
@@ -98,6 +98,9 @@ public:
     
     // Create Zephyr class object from this native class
     auto create_zephyr_class(const std::string& name) -> value_result_t;
+    
+    // Access methods
+    auto get_methods() const -> const std::map<std::string, native_function_t>& { return m_methods; }
     
     // Metadata
     auto set_name(const std::string& name) -> void { m_name = name; }

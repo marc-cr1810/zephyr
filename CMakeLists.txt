@@ -161,6 +161,44 @@ if(BUILD_PLUGIN_EXAMPLES)
         OUTPUT_NAME "class_export_plugin"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
     )
+
+    # Improved class export plugin example with full member access
+    add_library(class_export_plugin_improved SHARED
+        examples/class_export_plugin_improved.cpp
+        src/api/cpp_object_wrapper.cpp)
+    target_include_directories(class_export_plugin_improved PRIVATE include)
+    target_link_libraries(class_export_plugin_improved zephyr_shared)
+
+    # Set plugin properties for improved plugin
+    set_target_properties(class_export_plugin_improved PROPERTIES
+        PREFIX ""
+        OUTPUT_NAME "class_export_plugin_improved"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
+    )
+
+    # Working class export plugin with full functionality
+    add_library(working_class_export SHARED examples/working_class_export.cpp)
+    target_include_directories(working_class_export PRIVATE include)
+    target_link_libraries(working_class_export zephyr_shared)
+
+    # Set plugin properties for working plugin
+    set_target_properties(working_class_export PROPERTIES
+        PREFIX ""
+        OUTPUT_NAME "working_class_export"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
+    )
+
+    # Proper class export plugin using native_class_t
+    add_library(proper_class_export SHARED examples/proper_class_export_plugin.cpp)
+    target_include_directories(proper_class_export PRIVATE include)
+    target_link_libraries(proper_class_export zephyr_shared)
+
+    # Set plugin properties for proper plugin
+    set_target_properties(proper_class_export PROPERTIES
+        PREFIX ""
+        OUTPUT_NAME "proper_class_export"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/examples"
+    )
 endif()
 
 # =============================================================================

@@ -1,4 +1,5 @@
 #include "zephyr/module_loader.hpp"
+#include <iostream>
 #include "zephyr/interpreter.hpp"
 #include "zephyr/lexer.hpp"
 #include "zephyr/parser.hpp"
@@ -84,8 +85,9 @@ auto plugin_module_t::execute() -> void
         for (const auto& symbol_name : exported_symbols) {
             value_t zephyr_value = nullptr;
             
-            // Try to get as function
+            // Try to get as function first
             if (m_native_module->has_function(symbol_name)) {
+                std::cout << "DEBUG: '" << symbol_name << "' is a function" << std::endl;
                 auto native_func = m_native_module->get_function(symbol_name);
                 if (native_func) {
                     // Create a native function adapter (similar to zephyr_api.cpp)
@@ -118,17 +120,25 @@ auto plugin_module_t::execute() -> void
             }
             // Try to get as class
             else if (m_native_module->has_class(symbol_name)) {
+                std::cout << "DEBUG: '" << symbol_name << "' is a class" << std::endl;
                 auto native_class = m_native_module->get_class(symbol_name);
                 if (native_class) {
+                    std::cout << "DEBUG: Creating Zephyr class for '" << symbol_name << "'" << std::endl;
                     // Create Zephyr class object from native class
                     auto class_result = (*native_class)->create_zephyr_class(symbol_name);
                     if (class_result) {
+                        std::cout << "DEBUG: Successfully created Zephyr class for '" << symbol_name << "'" << std::endl;
                         zephyr_value = class_result.value();
+                    } else {
+                        std::cout << "DEBUG: Failed to create Zephyr class for '" << symbol_name << "': " << class_result.error() << std::endl;
                     }
+                } else {
+                    std::cout << "DEBUG: native_class is null for '" << symbol_name << "'" << std::endl;
                 }
             }
             // Try to get as constant
             else if (m_native_module->has_constant(symbol_name)) {
+                std::cout << "DEBUG: '" << symbol_name << "' is a constant" << std::endl;
                 auto constant_value = m_native_module->get_constant(symbol_name);
                 if (constant_value) {
                     zephyr_value = *constant_value;
@@ -136,14 +146,20 @@ auto plugin_module_t::execute() -> void
             }
             // Try to get as variable
             else if (m_native_module->has_variable(symbol_name)) {
+                std::cout << "DEBUG: '" << symbol_name << "' is a variable" << std::endl;
                 auto variable_value = m_native_module->get_variable(symbol_name);
                 if (variable_value) {
                     zephyr_value = *variable_value;
                 }
+            } else {
+                std::cout << "DEBUG: '" << symbol_name << "' is not a function, class, constant, or variable" << std::endl;
             }
             
             if (zephyr_value) {
+                std::cout << "DEBUG: Added '" << symbol_name << "' to exports" << std::endl;
                 m_exports[symbol_name] = zephyr_value;
+            } else {
+                std::cout << "DEBUG: No zephyr_value created for '" << symbol_name << "'" << std::endl;
             }
         }
         

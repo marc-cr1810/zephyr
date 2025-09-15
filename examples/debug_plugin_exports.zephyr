@@ -1,0 +1,106 @@
+# Debug script to see what's actually exported by the plugin
+print("=== Debugging Plugin Exports ===")
+print()
+
+# Import the improved plugin
+import "../build/examples/class_export_plugin_improved.so"
+
+print("1. Checking what's exported by the plugin:")
+
+# Get all available attributes/exports
+try:
+    # Try to access the plugin module directly
+    print("   Plugin module loaded successfully")
+
+    # Check for constants first
+    try:
+        print("   PLUGIN_NAME:", class_export_plugin_improved.PLUGIN_NAME)
+    except:
+        print("   PLUGIN_NAME: not found")
+
+    try:
+        print("   VERSION:", class_export_plugin_improved.VERSION)
+    except:
+        print("   VERSION: not found")
+
+    try:
+        print("   SUPPORTS_MEMBER_ACCESS:", class_export_plugin_improved.SUPPORTS_MEMBER_ACCESS)
+    except:
+        print("   SUPPORTS_MEMBER_ACCESS: not found")
+
+    try:
+        print("   PI:", class_export_plugin_improved.PI)
+    except:
+        print("   PI: not found")
+
+    print()
+
+    # Try to access the classes
+    print("2. Checking for exported classes:")
+
+    try:
+        vec_constructor = class_export_plugin_improved.Vector2D
+        print("   Vector2D: found -", type(vec_constructor))
+    except Exception as e:
+        print("   Vector2D: NOT FOUND -", str(e))
+
+    try:
+        rect_constructor = class_export_plugin_improved.Rectangle
+        print("   Rectangle: found -", type(rect_constructor))
+    except Exception as e:
+        print("   Rectangle: NOT FOUND -", str(e))
+
+    try:
+        counter_constructor = class_export_plugin_improved.Counter
+        print("   Counter: found -", type(counter_constructor))
+    except Exception as e:
+        print("   Counter: NOT FOUND -", str(e))
+
+    print()
+
+    # Try to access utility functions
+    print("3. Checking for utility functions:")
+
+    try:
+        vector_add = class_export_plugin_improved.vector_add
+        print("   vector_add: found -", type(vector_add))
+    except Exception as e:
+        print("   vector_add: NOT FOUND -", str(e))
+
+    try:
+        vector_dot = class_export_plugin_improved.vector_dot
+        print("   vector_dot: found -", type(vector_dot))
+    except Exception as e:
+        print("   vector_dot: NOT FOUND -", str(e))
+
+    print()
+
+    # If Vector2D is found, try to create an instance
+    print("4. Testing class instantiation:")
+
+    try:
+        vec_constructor = class_export_plugin_improved.Vector2D
+        print("   Attempting to create Vector2D instance...")
+
+        # Try with no arguments first
+        try:
+            vec = vec_constructor()
+            print("   Default constructor works! Created:", type(vec))
+        except Exception as e:
+            print("   Default constructor failed:", str(e))
+
+        # Try with arguments
+        try:
+            vec = vec_constructor(3.0, 4.0)
+            print("   Parameterized constructor works! Created:", type(vec))
+        except Exception as e:
+            print("   Parameterized constructor failed:", str(e))
+
+    except Exception as e:
+        print("   Cannot test instantiation - Vector2D not accessible:", str(e))
+
+except Exception as e:
+    print("   Failed to load plugin:", str(e))
+
+print()
+print("=== Debug Complete ===")

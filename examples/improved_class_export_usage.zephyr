@@ -1,0 +1,222 @@
+# Improved Class Export Plugin Usage Example
+# This example demonstrates the new export_class functionality with full member access
+
+print("=== Improved Class Export Plugin Example ===")
+print()
+
+# Import the improved class export plugin
+import "../build/examples/class_export_plugin_improved.so"
+
+print("1. Plugin Information:")
+print("   Name:", class_export_plugin_improved.PLUGIN_NAME)
+print("   Version:", class_export_plugin_improved.VERSION)
+print("   Supports Member Access:", class_export_plugin_improved.SUPPORTS_MEMBER_ACCESS)
+print("   Supports Method Calls:", class_export_plugin_improved.SUPPORTS_METHOD_CALLS)
+print("   Mathematical Constants:")
+print("     PI =", class_export_plugin_improved.PI)
+print("     E =", class_export_plugin_improved.E)
+print("     SQRT2 =", class_export_plugin_improved.SQRT2)
+print()
+
+print("2. Vector2D Class with Member Access:")
+print("   Creating vectors...")
+
+# Create vector objects - these are now real class instances!
+vec1 = class_export_plugin_improved.Vector2D(3.0, 4.0)
+vec2 = class_export_plugin_improved.Vector2D(1.0, 2.0)
+
+print("   vec1 =", vec1.to_string())
+print("   vec2 =", vec2.to_string())
+
+# Access and modify member variables directly!
+print("   Direct member access:")
+print("     vec1.x =", vec1.x)
+print("     vec1.y =", vec1.y)
+print("     vec2.x =", vec2.x)
+print("     vec2.y =", vec2.y)
+
+# Modify member variables
+print("   Modifying vec1...")
+vec1.x = 5.0
+vec1.y = 12.0
+print("   vec1 after modification =", vec1.to_string())
+print("   vec1.x =", vec1.x, ", vec1.y =", vec1.y)
+
+# Call methods on the instances
+print("   Method calls:")
+print("     vec1.magnitude() =", vec1.magnitude())
+print("     vec2.magnitude() =", vec2.magnitude())
+
+# Create unit vector by normalizing
+unit_vec = class_export_plugin_improved.Vector2D(3.0, 4.0)
+print("   Before normalization:", unit_vec.to_string(), "magnitude =", unit_vec.magnitude())
+unit_vec.normalize()
+print("   After normalization:", unit_vec.to_string(), "magnitude =", unit_vec.magnitude())
+
+# Use utility functions with class instances
+vec_sum = class_export_plugin_improved.vector_add(vec1, vec2)
+print("   vec1 + vec2 =", vec_sum.to_string())
+
+dot_product = class_export_plugin_improved.vector_dot(vec1, vec2)
+print("   vec1 · vec2 =", dot_product)
+print()
+
+print("3. Rectangle Class with Member Access:")
+print("   Creating rectangles...")
+
+# Create rectangle objects with member access
+rect1 = class_export_plugin_improved.Rectangle(5.0, 3.0)
+rect2 = class_export_plugin_improved.Rectangle(4.0, 4.0)
+
+print("   rect1 =", rect1.to_string())
+print("   rect2 =", rect2.to_string())
+
+# Access member variables directly
+print("   Direct member access:")
+print("     rect1.width =", rect1.width)
+print("     rect1.height =", rect1.height)
+print("     rect2.width =", rect2.width)
+print("     rect2.height =", rect2.height)
+
+# Calculate properties using methods
+print("   Method calls:")
+print("     rect1.area() =", rect1.area())
+print("     rect1.perimeter() =", rect1.perimeter())
+print("     rect1.is_square() =", rect1.is_square())
+print("     rect2.area() =", rect2.area())
+print("     rect2.is_square() =", rect2.is_square())
+
+# Modify dimensions directly
+print("   Modifying rectangle dimensions...")
+rect1.width = 10.0
+rect1.height = 6.0
+print("   rect1 after modification =", rect1.to_string())
+print("   New area =", rect1.area())
+
+# Scale rectangle using method
+print("   Scaling rect2 by factor 1.5...")
+rect2.scale(1.5)
+print("   rect2 after scaling =", rect2.to_string())
+print("   New area =", rect2.area())
+print()
+
+print("4. Counter Class with Member Access:")
+print("   Creating counters...")
+
+# Create counter objects with member access
+counter1 = class_export_plugin_improved.Counter("page_views", 100)
+counter2 = class_export_plugin_improved.Counter("downloads")
+
+print("   counter1 =", counter1.to_string())
+print("   counter2 =", counter2.to_string())
+
+# Access and modify member variables
+print("   Direct member access:")
+print("     counter1.name =", counter1.name)
+print("     counter1.value =", counter1.value)
+print("     counter2.name =", counter2.name)
+print("     counter2.value =", counter2.value)
+
+# Modify members directly
+print("   Modifying counter properties...")
+counter2.name = "user_sessions"
+counter2.value = 250
+print("   counter2 after modification =", counter2.to_string())
+
+# Use counter methods
+print("   Counter operations:")
+print("     counter1.increment() =", counter1.increment())
+print("     counter1.increment() =", counter1.increment())
+print("     counter1.value is now:", counter1.value)
+
+print("     counter2.decrement() =", counter2.decrement())
+print("     counter2.value is now:", counter2.value)
+
+counter1.reset()
+print("     After counter1.reset(), value =", counter1.value)
+
+# Change name using method
+counter1.set_name("new_counter")
+print("     After set_name, counter1 =", counter1.to_string())
+print()
+
+print("5. Advanced Usage Patterns:")
+print()
+
+print("   A. Vector mathematics with member access:")
+# Create vectors for physics simulation
+velocity = class_export_plugin_improved.Vector2D(10.0, 15.0)
+acceleration = class_export_plugin_improved.Vector2D(0.5, -2.0)
+
+print("     Initial velocity:", velocity.to_string())
+print("     Acceleration:", acceleration.to_string())
+
+# Update velocity over time (v = v + a*t, where t=1)
+velocity.x = velocity.x + acceleration.x
+velocity.y = velocity.y + acceleration.y
+
+print("     Velocity after 1 time unit:", velocity.to_string())
+print("     Speed =", velocity.magnitude())
+
+print("   B. Dynamic rectangle resizing:")
+# Create a dynamic rectangle
+dynamic_rect = class_export_plugin_improved.Rectangle(1.0, 1.0)
+print("     Starting rectangle:", dynamic_rect.to_string())
+
+# Grow the rectangle in steps
+for i in range(1, 4):
+    scale_factor = 1.0 + i * 0.5
+    dynamic_rect.width = scale_factor
+    dynamic_rect.height = scale_factor * 0.8
+    print("     Step", i, ":", dynamic_rect.to_string(), "area =", dynamic_rect.area())
+
+print("   C. Counter arrays simulation:")
+# Create multiple counters for different metrics
+metrics = []
+metric_names = ["requests", "errors", "successes", "timeouts"]
+
+for i in range(4):
+    counter = class_export_plugin_improved.Counter(metric_names[i], i * 10)
+    print("     Created:", counter.to_string())
+
+print()
+
+print("6. Mathematical Applications with Constants:")
+print()
+
+# Circle calculations using vectors and constants
+radius_vector = class_export_plugin_improved.Vector2D(5.0, 0.0)
+radius = radius_vector.magnitude()
+circle_area = class_export_plugin_improved.PI * radius * radius
+circle_circumference = 2.0 * class_export_plugin_improved.PI * radius
+
+print("   Circle with radius vector:", radius_vector.to_string())
+print("   Radius =", radius)
+print("   Area = π × r² =", circle_area)
+print("   Circumference = 2π × r =", circle_circumference)
+
+# Exponential decay simulation
+decay_counter = class_export_plugin_improved.Counter("particles", 1000)
+decay_rate = 1.0 / class_export_plugin_improved.E  # 1/e decay
+
+print("   Exponential decay simulation:")
+print("     Initial particles:", decay_counter.value)
+
+for step in range(3):
+    decay_counter.value = int(decay_counter.value * decay_rate)
+    print("     After step", step + 1, ":", decay_counter.value, "particles")
+
+print()
+
+print("=== Improved Class Export Plugin Example Complete ===")
+print()
+print("Key improvements demonstrated:")
+print("- Direct access to public member variables (obj.member)")
+print("- Method calls on class instances (obj.method())")
+print("- Real object instances instead of string representations")
+print("- Seamless integration with Zephyr's object system")
+print("- Type safety and automatic conversions")
+print("- Memory management handled automatically")
+print()
+print("This shows how C++ classes can be fully integrated into Zephyr")
+print("with natural syntax and full functionality!")

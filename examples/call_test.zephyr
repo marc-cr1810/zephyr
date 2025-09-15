@@ -1,0 +1,23 @@
+# Simple call test without type() function
+print("=== Call Test ===")
+
+# Import the plugin
+import "../build/examples/class_export_plugin_improved.so"
+
+print("Checking Vector2D:")
+print("Vector2D =", class_export_plugin_improved.Vector2D)
+
+print("Attempting to call Vector2D()...")
+vec = class_export_plugin_improved.Vector2D()
+print("Success! Created vec =", vec)
+
+print("Testing member access...")
+print("Attempting to access vec.x...")
+x_value = vec.x
+print("Success! vec.x =", x_value)
+
+print("Testing member modification...")
+vec.x = 5.0
+print("Set vec.x = 5.0")
+new_x = vec.x
+print("New vec.x =", new_x)

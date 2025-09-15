@@ -1,0 +1,93 @@
+# Test script for proper class export using native_class_t
+print("=== Testing Proper Class Export ===")
+print()
+
+# Import the proper class export plugin
+import "../build/examples/proper_class_export.so"
+
+print("1. Plugin Information:")
+print("   Name:", proper_class_export.PLUGIN_NAME)
+print("   Version:", proper_class_export.VERSION)
+print("   PI:", proper_class_export.PI)
+print()
+
+print("2. Testing Vector2D class creation:")
+
+# Test default constructor
+print("   Creating default Vector2D...")
+vec1 = proper_class_export.Vector2D()
+print("   vec1 created:", vec1)
+print("   vec1.to_string():", vec1.to_string())
+
+# Test parameterized constructor
+print("   Creating Vector2D(3.0, 4.0)...")
+vec2 = proper_class_export.Vector2D(3.0, 4.0)
+print("   vec2 created:", vec2)
+print("   vec2.to_string():", vec2.to_string())
+
+print()
+print("3. Testing member access:")
+
+# Test accessing member variables
+print("   Attempting to access vec2.x...")
+x_value = vec2.x
+print("   Success! vec2.x =", x_value)
+
+print("   Attempting to access vec2.y...")
+y_value = vec2.y
+print("   Success! vec2.y =", y_value)
+
+print()
+print("4. Testing member modification:")
+
+# Test modifying member variables
+print("   Setting vec2.x = 6.0...")
+vec2.x = 6.0
+print("   Setting vec2.y = 8.0...")
+vec2.y = 8.0
+
+print("   After modification:")
+print("   vec2.x =", vec2.x)
+print("   vec2.y =", vec2.y)
+print("   vec2.to_string():", vec2.to_string())
+
+print()
+print("5. Testing method calls:")
+
+# Test method calls
+print("   Calling vec2.magnitude()...")
+magnitude = vec2.magnitude()
+print("   vec2.magnitude() =", magnitude)
+
+print("   Calling vec2.normalize()...")
+vec2.normalize()
+print("   After normalization:")
+print("   vec2.to_string():", vec2.to_string())
+print("   vec2.magnitude() =", vec2.magnitude())
+
+print()
+print("6. Testing multiple instances:")
+
+# Create multiple instances to test independence
+vec3 = proper_class_export.Vector2D(1.0, 1.0)
+vec4 = proper_class_export.Vector2D(2.0, 3.0)
+
+print("   vec3:", vec3.to_string())
+print("   vec4:", vec4.to_string())
+
+# Modify one and check the other is unaffected
+vec3.x = 10.0
+print("   After modifying vec3.x:")
+print("   vec3:", vec3.to_string())
+print("   vec4:", vec4.to_string(), "(should be unchanged)")
+
+print()
+print("=== Proper Class Export Test Complete ===")
+print()
+print("Key achievements:")
+print("- ✅ Real class instances created using export_class")
+print("- ✅ Direct member variable access (obj.member)")
+print("- ✅ Member variable modification (obj.member = value)")
+print("- ✅ Method calls on instances (obj.method())")
+print("- ✅ Multiple independent instances")
+print("- ✅ Proper integration with Zephyr's native class system")

@@ -1,0 +1,18 @@
+# Type check test - see what Vector2D actually is
+print("=== Type Check Test ===")
+
+# Import the plugin
+import "../build/examples/class_export_plugin_improved.so"
+
+print("Checking Vector2D type:")
+print("Vector2D =", class_export_plugin_improved.Vector2D)
+print("Type of Vector2D:", type(class_export_plugin_improved.Vector2D))
+
+# Try to see if it has a call method
+print("Checking if Vector2D is callable...")
+
+# Check what happens when we try to call it
+print("Attempting to call Vector2D()...")
+result = class_export_plugin_improved.Vector2D()
+print("Result:", result)
+print("Result type:", type(result))
