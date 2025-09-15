@@ -94,7 +94,12 @@ auto plugin_module_t::execute() -> void
                         
                     public:
                         plugin_function_adapter_t(const zephyr::api::native_function_t& func, const std::string& name) 
-                            : builtin_function_object_t(nullptr, name), m_native_func(func) {}
+                            : builtin_function_object_t(dummy_function, name), m_native_func(func) {}
+                        
+                        static value_t dummy_function(const std::vector<value_t>& args) {
+                            // This should never be called since call() is overridden
+                            throw std::runtime_error("Dummy function called - virtual dispatch failed");
+                        }
                         
                         auto call(const std::vector<value_t>& args) -> value_t override {
                             auto result = m_native_func(args);

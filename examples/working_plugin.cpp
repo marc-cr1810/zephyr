@@ -62,20 +62,4 @@ private:
 } // namespace zephyr::api
 
 // Plugin export functions
-extern "C" ZEPHYR_EXPORT int zephyr_get_api_version() {
-    return 1;
-}
-
-extern "C" ZEPHYR_EXPORT zephyr::api::plugin_interface_t* zephyr_create_plugin() {
-    try {
-        return new zephyr::api::working_plugin_t();
-    } catch (const std::exception&) {
-        return nullptr;
-    } catch (...) {
-        return nullptr;
-    }
-}
-
-extern "C" ZEPHYR_EXPORT void zephyr_destroy_plugin(zephyr::api::plugin_interface_t* plugin) {
-    delete plugin;
-}
+ZEPHYR_PLUGIN(zephyr::api::working_plugin_t)

@@ -128,8 +128,8 @@ public:
 
 private:
     struct loaded_plugin_t {
-        std::unique_ptr<dynamic_library_t> library;
         std::shared_ptr<plugin_interface_t> plugin;
+        std::unique_ptr<dynamic_library_t> library;
         plugin_info_t info;
         std::string resolved_path;
         
@@ -137,8 +137,8 @@ private:
                        std::shared_ptr<plugin_interface_t> plug,
                        plugin_info_t inf,
                        std::string path)
-            : library(std::move(lib))
-            , plugin(std::move(plug))
+            : plugin(std::move(plug))
+            , library(std::move(lib))
             , info(std::move(inf))
             , resolved_path(std::move(path)) {}
     };

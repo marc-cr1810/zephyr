@@ -3574,9 +3574,19 @@ auto interpreter_t::visit(method_call_t& node) -> void
         
         // Check if it's a function object
         auto function_obj = std::dynamic_pointer_cast<function_object_t>(export_value);
-        if (!function_obj)
+        auto builtin_function_obj = std::dynamic_pointer_cast<builtin_function_object_t>(export_value);
+        
+        if (!function_obj && !builtin_function_obj)
         {
             throw type_error_t("'" + node.method_name + "' is not a function");
+        }
+        
+        // Handle builtin functions from plugins
+        if (builtin_function_obj)
+        {
+            m_current_result = builtin_function_obj->call(args);
+            zephyr::current_error_location() = saved_location;
+            return;
         }
         
         // Execute the function directly using interpreter logic (similar to function_call_t)

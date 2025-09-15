@@ -25,7 +25,9 @@ dynamic_library_t::dynamic_library_t(const std::string& path)
     : m_path(path), m_handle(nullptr), m_loaded(false) {}
 
 dynamic_library_t::~dynamic_library_t() {
-    unload();
+    // TODO: Temporarily disable unloading to prevent segfault during plugin cleanup
+    // The library will remain loaded until process termination
+    // unload();
 }
 
 dynamic_library_t::dynamic_library_t(dynamic_library_t&& other) noexcept
@@ -570,7 +572,11 @@ auto plugin_loader_t::create_plugin_instance(dynamic_library_t& library) -> resu
     
     // Attempt to create plugin instance
     try {
-        auto raw_plugin = (*create_func)();
+        // Use a safer explicit cast approach
+        typedef plugin_interface_t* (*safe_create_func_t)();
+        safe_create_func_t safe_create = reinterpret_cast<safe_create_func_t>(create_func);
+        
+        auto raw_plugin = safe_create();
         
         if (!raw_plugin) {
             return result_t<std::shared_ptr<plugin_interface_t>>::error(
@@ -578,12 +584,8 @@ auto plugin_loader_t::create_plugin_instance(dynamic_library_t& library) -> resu
             );
         }
         
-        // Create shared_ptr with custom deleter to avoid library lifetime issues
-        std::shared_ptr<plugin_interface_t> plugin(raw_plugin, [](plugin_interface_t* p) {
-            // Skip calling destroy function to avoid segfault when library may be unloaded
-            // TODO: Fix proper library lifetime management
-        });
-        
+        // Create shared_ptr with default deleter (disable custom deleter to debug segfault)
+        std::shared_ptr<plugin_interface_t> plugin(raw_plugin);
         return result_t<std::shared_ptr<plugin_interface_t>>::success(plugin);
         
     } catch (const std::exception& e) {

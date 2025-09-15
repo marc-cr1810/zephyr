@@ -91,7 +91,7 @@ target_link_options(zephyr PRIVATE -rdynamic)
 # Generate version info
 string(TIMESTAMP VERSION_MONTH_PADDED "%m" UTC)
 string(TIMESTAMP VERSION_DAY_PADDED "%d" UTC)
-set(ZEPHYR_VERSION_STRING "v${CURRENT_YEAR}-${VERSION_MONTH_PADDED}-${VERSION_DAY_PADDED}")
+set(ZEPHYR_VERSION_STRING "v${CURRENT_YEAR}.${VERSION_MONTH_PADDED}.${VERSION_DAY_PADDED}")
 
 # Add version definitions to all targets that need them
 target_compile_definitions(zephyr PRIVATE
