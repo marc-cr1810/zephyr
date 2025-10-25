@@ -107,9 +107,31 @@ std::unique_ptr<program_t> parser_t::program() {
 
     auto program_node = std::make_unique<program_t>(start_line, start_column, start_line, start_column);
 
-    std::unique_ptr<statement_t> last_statement = nullptr;
+    int last_statement_line = -1;
     while(m_current_token.type != token_type_e::end_of_file) {
+        // Check for statement separation requirement
+        if (last_statement_line != -1) {
+            // If we have a previous statement, check if we need proper separation
+            int current_line = m_current_token.line;
+            
+            // Allow semicolons to separate statements on the same line
+            if (m_current_token.type == token_type_e::semicolon) {
+                eat(token_type_e::semicolon);
+                // After eating semicolon, check if we're at end of file
+                if (m_current_token.type == token_type_e::end_of_file) {
+                    break;
+                }
+            }
+            // Otherwise, require that statements be on different lines
+            else if (current_line == last_statement_line) {
+                zephyr::current_error_location() = {current_line, m_current_token.column, 1};
+                throw zephyr::syntax_error_t("Multiple statements on the same line must be separated by semicolons.");
+            }
+        }
+        
+        int stmt_start_line = m_current_token.line;
         auto stmt = statement();
+        last_statement_line = stmt_start_line;
         program_node->add_statement(std::move(stmt));
     }
 
