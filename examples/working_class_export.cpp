@@ -4,8 +4,11 @@
 #include "zephyr/objects/float_object.hpp"
 #include "zephyr/objects/string_object.hpp"
 #include "zephyr/objects/dictionary_object.hpp"
+#include "zephyr/objects/boolean_object.hpp"
+#include "zephyr/objects/none_object.hpp"
 #include <memory>
 #include <unordered_map>
+#include <cmath>
 
 using namespace zephyr::api;
 using namespace zephyr;
@@ -17,6 +20,52 @@ using namespace zephyr;
  * It uses a hybrid approach combining export_function with object handles stored
  * in a registry, allowing for member variable access and method calls.
  */
+
+// Example C++ classes to export
+class Vector2D {
+public:
+    double x, y;
+    Vector2D(double x = 0, double y = 0) : x(x), y(y) {}
+    double magnitude() const { return std::sqrt(x*x + y*y); }
+    void normalize() { 
+        double mag = magnitude();
+        if (mag > 0) { x /= mag; y /= mag; }
+    }
+    Vector2D add(const Vector2D& other) const {
+        return Vector2D(x + other.x, y + other.y);
+    }
+    std::string to_string() const { 
+        return "Vector2D(" + std::to_string(x) + ", " + std::to_string(y) + ")"; 
+    }
+};
+
+class Rectangle {
+public:
+    double width, height;
+    Rectangle(double w = 0, double h = 0) : width(w), height(h) {}
+    double area() const { return width * height; }
+    double perimeter() const { return 2 * (width + height); }
+    bool is_square() const { return width == height; }
+    void resize(double w, double h) { width = w; height = h; }
+    void scale(double factor) { width *= factor; height *= factor; }
+    std::string to_string() const { 
+        return "Rectangle(" + std::to_string(width) + ", " + std::to_string(height) + ")"; 
+    }
+};
+
+class Counter {
+public:
+    int value;
+    std::string name;
+    Counter(const std::string& n = "default", int initial = 0) : name(n), value(initial) {}
+    int increment() { return ++value; }
+    int decrement() { return --value; }
+    void reset() { value = 0; }
+    void set_name(const std::string& n) { name = n; }
+    std::string to_string() const { 
+        return name + "_Counter(" + std::to_string(value) + ")"; 
+    }
+};
 
 // Forward declarations
 class ObjectRegistry;
@@ -61,7 +110,6 @@ private:
 };
 
 // Initialize global registry
-std::unique_ptr<ObjectRegistry> g_object_registry = nullptr;
 
 // Helper to create object handle objects that store the handle and class info
 class ObjectHandle : public object_t {
@@ -147,17 +195,15 @@ public:
             }
         } else if (class_name_ == "Counter") {
             auto obj = ObjectRegistry::instance().get_object<Counter>(handle_);
-            if (obj) {
-                if (member_name == "value") {
-                    if (auto int_val = std::dynamic_pointer_cast<int_object_t>(value)) {
-                        obj->value = int_val->value();
-                        return;
-                    }
-                } else if (member_name == "name") {
-                    if (auto str_val = std::dynamic_pointer_cast<string_object_t>(value)) {
-                        obj->name = str_val->value();
-                        return;
-                    }
+            if (member_name == "value") {
+                if (auto int_val = std::dynamic_pointer_cast<int_object_t>(value)) {
+                    obj->value = int_val->value();
+                    return;
+                }
+            } else if (member_name == "name") {
+                if (auto str_val = std::dynamic_pointer_cast<string_object_t>(value)) {
+                    obj->name = str_val->value();
+                    return;
                 }
             }
         }
@@ -173,7 +219,7 @@ public:
                     return std::make_shared<float_object_t>(obj->magnitude());
                 } else if (method_name == "normalize" && args.empty()) {
                     obj->normalize();
-                    return std::make_shared<zephyr::none_object_t>();
+                    return std::make_shared<none_object_t>();
                 } else if (method_name == "to_string" && args.empty()) {
                     return std::make_shared<string_object_t>(obj->to_string());
                 }
@@ -186,13 +232,20 @@ public:
                 } else if (method_name == "perimeter" && args.empty()) {
                     return std::make_shared<float_object_t>(obj->perimeter());
                 } else if (method_name == "is_square" && args.empty()) {
-                    return std::make_shared<zephyr::boolean_object_t>(obj->is_square());
+                    return std::make_shared<boolean_object_t>(obj->is_square());
                 } else if (method_name == "to_string" && args.empty()) {
                     return std::make_shared<string_object_t>(obj->to_string());
+                } else if (method_name == "resize" && args.size() == 2) {
+                    if (auto width_obj = std::dynamic_pointer_cast<float_object_t>(args[0])) {
+                        if (auto height_obj = std::dynamic_pointer_cast<float_object_t>(args[1])) {
+                            obj->resize(width_obj->value(), height_obj->value());
+                            return std::make_shared<none_object_t>();
+                        }
+                    }
                 } else if (method_name == "scale" && args.size() == 1) {
                     if (auto factor = std::dynamic_pointer_cast<float_object_t>(args[0])) {
                         obj->scale(factor->value());
-                        return std::make_shared<zephyr::none_object_t>();
+                        return std::make_shared<none_object_t>();
                     }
                 }
             }
@@ -205,13 +258,13 @@ public:
                     return std::make_shared<int_object_t>(obj->decrement());
                 } else if (method_name == "reset" && args.empty()) {
                     obj->reset();
-                    return std::make_shared<zephyr::none_object_t>();
+                    return std::make_shared<none_object_t>();
                 } else if (method_name == "to_string" && args.empty()) {
                     return std::make_shared<string_object_t>(obj->to_string());
                 } else if (method_name == "set_name" && args.size() == 1) {
                     if (auto name = std::dynamic_pointer_cast<string_object_t>(args[0])) {
                         obj->set_name(name->value());
-                        return std::make_shared<zephyr::none_object_t>();
+                        return std::make_shared<none_object_t>();
                     }
                 }
             }
@@ -224,89 +277,7 @@ private:
     std::string class_name_;
 };
 
-// C++ class definitions
-class Vector2D {
-public:
-    double x, y;
-    
-    Vector2D(double x = 0.0, double y = 0.0) : x(x), y(y) {}
-    
-    double magnitude() const {
-        return std::sqrt(x * x + y * y);
-    }
-    
-    void normalize() {
-        double mag = magnitude();
-        if (mag > 0.0) {
-            x /= mag;
-            y /= mag;
-        }
-    }
-    
-    Vector2D add(const Vector2D& other) const {
-        return Vector2D(x + other.x, y + other.y);
-    }
-    
-    std::string to_string() const {
-        return "Vector2D(" + std::to_string(x) + ", " + std::to_string(y) + ")";
-    }
-};
 
-class Rectangle {
-public:
-    double width, height;
-    
-    Rectangle(double w = 0.0, double h = 0.0) : width(w), height(h) {}
-    
-    double area() const {
-        return width * height;
-    }
-    
-    double perimeter() const {
-        return 2 * (width + height);
-    }
-    
-    bool is_square() const {
-        return std::abs(width - height) < 1e-9;
-    }
-    
-    void scale(double factor) {
-        width *= factor;
-        height *= factor;
-    }
-    
-    std::string to_string() const {
-        return "Rectangle(" + std::to_string(width) + " x " + std::to_string(height) + ")";
-    }
-};
-
-class Counter {
-public:
-    int value;
-    std::string name;
-    
-    Counter(const std::string& n = "counter", int initial = 0) : name(n), value(initial) {}
-    
-    int increment() {
-        return ++value;
-    }
-    
-    int decrement() {
-        return --value;
-    }
-    
-    void reset() {
-        value = 0;
-    }
-    
-    void set_name(const std::string& new_name) {
-        name = new_name;
-    }
-    
-    std::string to_string() const {
-        return "Counter('" + name + "': " + std::to_string(value) + ")";
-    }
-};
 
 // Plugin module implementation
 class working_class_export_module_t : public native_module_t {
