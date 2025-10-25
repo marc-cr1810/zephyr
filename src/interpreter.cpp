@@ -4579,6 +4579,40 @@ auto interpreter_t::get_global_scope() const -> const std::map<std::string, valu
     return empty_scope;
 }
 
+auto interpreter_t::set_global_variable(const std::string& name, value_t value) -> void
+{
+    if (!m_scope_stack.empty())
+    {
+        auto& global_scope = m_scope_stack[0]; // Access the global scope
+        global_scope[name] = value;
+    }
+}
+
+auto interpreter_t::has_global_variable(const std::string& name) const -> bool
+{
+    if (!m_scope_stack.empty())
+    {
+        const auto& global_scope = m_scope_stack[0];
+        return global_scope.find(name) != global_scope.end();
+    }
+    return false;
+}
+
+auto interpreter_t::remove_global_variable(const std::string& name) -> bool
+{
+    if (!m_scope_stack.empty())
+    {
+        auto& global_scope = m_scope_stack[0];
+        auto it = global_scope.find(name);
+        if (it != global_scope.end())
+        {
+            global_scope.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
 auto interpreter_t::check_and_yield() -> void
 {
     m_operation_count++;

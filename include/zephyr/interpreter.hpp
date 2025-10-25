@@ -121,6 +121,11 @@ public:
     auto get_current_module() const -> std::shared_ptr<module_t>;
     auto update_module_name_variable() -> void;
     auto get_global_scope() const -> const std::map<std::string, value_t>&;
+    
+    // Global variable management API
+    auto set_global_variable(const std::string& name, value_t value) -> void;
+    auto has_global_variable(const std::string& name) const -> bool;
+    auto remove_global_variable(const std::string& name) -> bool;
 
     // Public member variables
     bool debug_mode;

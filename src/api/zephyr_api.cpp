@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
+#include <set>
 
 namespace zephyr::api {
 
@@ -146,8 +147,13 @@ auto engine_t::start_repl() -> void {
 
 auto engine_t::set_global_value(const std::string& name, const value_t& value) -> void {
     if (m_interpreter) {
-        // TODO: Need to implement public API for setting global variables
-        // For now, we'll store in a local registry and merge during execution
+        // Use the new interpreter API to set global variables directly
+        m_interpreter->set_global_variable(name, value);
+        
+        // Also remove from local registry to avoid duplication
+        m_global_variables.erase(name);
+    } else {
+        // Fallback to local registry if interpreter is not available
         m_global_variables[name] = value;
     }
 }
@@ -155,17 +161,19 @@ auto engine_t::set_global_value(const std::string& name, const value_t& value) -
 auto engine_t::get_global_value(const std::string& name) -> std::optional<value_t> {
     if (m_interpreter) {
         try {
-            // Check local registry first
-            auto local_it = m_global_variables.find(name);
-            if (local_it != m_global_variables.end()) {
-                return local_it->second;
-            }
-            // Check interpreter's global scope
+            // Check interpreter's global scope first (primary source of truth)
             const auto& global_scope = m_interpreter->get_global_scope();
             auto it = global_scope.find(name);
             if (it != global_scope.end()) {
                 return it->second;
             }
+            
+            // Fallback to local registry for API-set values that haven't been propagated yet
+            auto local_it = m_global_variables.find(name);
+            if (local_it != m_global_variables.end()) {
+                return local_it->second;
+            }
+            
             return std::nullopt;
         } catch (const std::exception&) {
             return std::nullopt;
@@ -175,31 +183,76 @@ auto engine_t::get_global_value(const std::string& name) -> std::optional<value_
 }
 
 auto engine_t::has_global(const std::string& name) -> bool {
-    return get_global_value(name).has_value();
+    if (m_interpreter && m_interpreter->has_global_variable(name)) {
+        return true;
+    }
+    
+    // Also check local registry
+    return m_global_variables.find(name) != m_global_variables.end();
 }
 
 auto engine_t::remove_global(const std::string& name) -> bool {
-    // This would require extending the interpreter interface
-    // For now, we'll return false to indicate not supported
-    return false;
+    bool removed = false;
+    
+    if (m_interpreter) {
+        // Use the new interpreter API to remove global variables directly
+        removed = m_interpreter->remove_global_variable(name);
+    }
+    
+    // Also remove from local registry if it exists
+    auto it = m_global_variables.find(name);
+    if (it != m_global_variables.end()) {
+        m_global_variables.erase(it);
+        removed = true;
+    }
+    
+    return removed;
 }
 
 auto engine_t::list_globals() -> std::vector<std::string> {
     std::vector<std::string> globals;
+    std::set<std::string> unique_names; // Prevent duplicates
+    
+    // Add variables from interpreter's global scope (primary source)
+    if (m_interpreter) {
+        try {
+            const auto& global_scope = m_interpreter->get_global_scope();
+            for (const auto& [name, _] : global_scope) {
+                if (unique_names.insert(name).second) {
+                    globals.push_back(name);
+                }
+            }
+        } catch (const std::exception&) {
+            // Continue with other sources if this fails
+        }
+    }
     
     // Add registered functions
     for (const auto& [name, _] : m_registered_functions) {
-        globals.push_back(name);
+        if (unique_names.insert(name).second) {
+            globals.push_back(name);
+        }
     }
     
     // Add registered classes
     for (const auto& [name, _] : m_registered_classes) {
-        globals.push_back(name);
+        if (unique_names.insert(name).second) {
+            globals.push_back(name);
+        }
     }
     
     // Add registered modules
     for (const auto& [name, _] : m_registered_modules) {
-        globals.push_back(name);
+        if (unique_names.insert(name).second) {
+            globals.push_back(name);
+        }
+    }
+    
+    // Add any remaining local registry items (fallback)
+    for (const auto& [name, _] : m_global_variables) {
+        if (unique_names.insert(name).second) {
+            globals.push_back(name);
+        }
     }
     
     return globals;
@@ -430,11 +483,23 @@ auto engine_t::is_async_enabled() const -> bool {
 
 auto engine_t::add_import_path(const std::string& path) -> void {
     m_import_paths.push_back(path);
-    // TODO: Add to module loader when available
+    
+    // Integrate with runtime's module loader
+    if (m_runtime && m_runtime->get_module_loader()) {
+        m_runtime->get_module_loader()->add_import_path(path);
+    }
 }
 
 auto engine_t::get_import_paths() -> std::vector<std::string> {
-    return m_import_paths;
+    std::vector<std::string> all_paths = m_import_paths;
+    
+    // Include paths from module loader if available
+    if (m_runtime && m_runtime->get_module_loader()) {
+        auto module_paths = m_runtime->get_module_loader()->get_import_paths();
+        all_paths.insert(all_paths.end(), module_paths.begin(), module_paths.end());
+    }
+    
+    return all_paths;
 }
 
 auto engine_t::set_stdout_handler(std::function<void(const std::string&)> handler) -> void {

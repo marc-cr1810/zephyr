@@ -101,6 +101,12 @@ public:
     auto is_plugin_file(const std::string& file_path) const -> bool;
     auto set_plugin_loader(std::shared_ptr<zephyr::api::plugin_loader_t> plugin_loader) -> void;
     auto set_engine(zephyr::api::engine_t* engine) -> void;
+    
+    // Search path management
+    auto add_import_path(const std::string& path) -> void;
+    auto remove_import_path(const std::string& path) -> void;
+    auto get_import_paths() const -> std::vector<std::string>;
+    auto clear_import_paths() -> void;
 
 private:
     // Functions

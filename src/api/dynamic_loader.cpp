@@ -25,9 +25,7 @@ dynamic_library_t::dynamic_library_t(const std::string& path)
     : m_path(path), m_handle(nullptr), m_loaded(false) {}
 
 dynamic_library_t::~dynamic_library_t() {
-    // TODO: Temporarily disable unloading to prevent segfault during plugin cleanup
-    // The library will remain loaded until process termination
-    // unload();
+    unload();
 }
 
 dynamic_library_t::dynamic_library_t(dynamic_library_t&& other) noexcept

@@ -725,4 +725,32 @@ auto module_loader_t::set_engine(zephyr::api::engine_t* engine) -> void
     m_engine = engine;
 }
 
+auto module_loader_t::add_import_path(const std::string& path) -> void
+{
+    // Add path if it doesn't already exist
+    if (std::find(m_search_paths.begin(), m_search_paths.end(), path) == m_search_paths.end()) {
+        m_search_paths.push_back(path);
+    }
+}
+
+auto module_loader_t::remove_import_path(const std::string& path) -> void
+{
+    m_search_paths.erase(
+        std::remove(m_search_paths.begin(), m_search_paths.end(), path),
+        m_search_paths.end()
+    );
+}
+
+auto module_loader_t::get_import_paths() const -> std::vector<std::string>
+{
+    return m_search_paths;
+}
+
+auto module_loader_t::clear_import_paths() -> void
+{
+    m_search_paths.clear();
+    // Re-initialize with default paths
+    initialize_search_paths();
+}
+
 } // namespace zephyr
