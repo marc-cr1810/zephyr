@@ -74,7 +74,18 @@ auto int_type_t::divide(std::shared_ptr<object_t> self, std::shared_ptr<object_t
         {
             throw zero_division_error_t("Division by zero");
         }
-        return std::make_shared<int_object_t>(std::static_pointer_cast<int_object_t>(self)->value() / other_int->value());
+        
+        int left_val = std::static_pointer_cast<int_object_t>(self)->value();
+        int right_val = other_int->value();
+        
+        // Check if division results in a whole number
+        if (left_val % right_val == 0) {
+            // Integer division with no remainder - return integer
+            return std::make_shared<int_object_t>(left_val / right_val);
+        } else {
+            // Fractional result - promote to float
+            return std::make_shared<float_object_t>(static_cast<double>(left_val) / static_cast<double>(right_val));
+        }
     }
     else if (auto other_float = std::dynamic_pointer_cast<float_object_t>(other))
     {
