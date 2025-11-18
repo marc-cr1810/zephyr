@@ -1,0 +1,477 @@
+# Comprehensive Number Format Test
+# This example demonstrates hexadecimal, binary, and octal number literals
+# integrated with all language features
+
+print("=== Comprehensive Number Format Test ===")
+print()
+
+# ============================================================================
+# 1. Basic Number Format Validation
+# ============================================================================
+
+print("1. Basic Number Format Validation")
+print("=================================")
+
+# All represent the value 255
+decimal = 255
+hex_val = 0xFF
+bin_val = 0b11111111
+oct_val = 0o377
+
+print("  Decimal 255 =", decimal)
+print("  Hex 0xFF =", hex_val)
+print("  Binary 0b11111111 =", bin_val)
+print("  Octal 0o377 =", oct_val)
+
+# Verify they're all equal
+if hex_val == bin_val and bin_val == oct_val and oct_val == decimal {
+    print("  ✓ All formats represent the same value!")
+} else {
+    print("  ✗ Error: Values don't match")
+}
+
+# Case sensitivity tests
+print("  Case Variations:")
+print("    0x10 =", 0x10, "| 0X10 =", 0X10)
+print("    0b1010 =", 0b1010, "| 0B1010 =", 0B1010)
+print("    0o12 =", 0o12, "| 0O12 =", 0O12)
+
+# Cross-format verification
+print("  42 in all formats:")
+print("    Decimal: 42 =", 42)
+print("    Hex: 0x2A =", 0x2A)
+print("    Binary: 0b101010 =", 0b101010)
+print("    Octal: 0o52 =", 0o52)
+print("    All equal?", 42 == 0x2A and 0x2A == 0b101010 and 0b101010 == 0o52)
+print()
+
+# ============================================================================
+# 2. Arithmetic Operations
+# ============================================================================
+
+print("2. Arithmetic Operations")
+print("========================")
+
+# Basic arithmetic with mixed formats
+result1 = 0x10 + 0b1010      # 16 + 10 = 26
+result2 = 0o20 * 0x2         # 16 * 2 = 32
+result3 = 0b1111 - 0o7       # 15 - 7 = 8
+result4 = 0xFF / 0b11        # 255 / 3 = 85
+
+print("  0x10 + 0b1010 =", result1, "(16 + 10 = 26)")
+print("  0o20 * 0x2 =", result2, "(16 * 2 = 32)")
+print("  0b1111 - 0o7 =", result3, "(15 - 7 = 8)")
+print("  0xFF / 0b11 =", result4, "(255 / 3 = 85)")
+
+# Bitwise operations
+bitwise1 = 0xFF & 0b11110000  # 255 & 240 = 240
+bitwise2 = 0x0F | 0b11110000  # 15 | 240 = 255
+bitwise3 = 0xFF ^ 0o377       # 255 ^ 255 = 0
+
+print("  Bitwise Operations:")
+print("    0xFF & 0b11110000 =", bitwise1, "(255 & 240 = 240)")
+print("    0x0F | 0b11110000 =", bitwise2, "(15 | 240 = 255)")
+print("    0xFF ^ 0o377 =", bitwise3, "(255 ^ 255 = 0)")
+
+# Complex expressions
+complex1 = (0x10 + 0b1010) * 0o2   # (16 + 10) * 2 = 52
+complex2 = 0xFF - (0b10000000 + 0o10)  # 255 - (128 + 8) = 119
+
+print("  Complex Expressions:")
+print("    (0x10 + 0b1010) * 0o2 =", complex1, "(expected 52)")
+print("    0xFF - (0b10000000 + 0o10) =", complex2, "(expected 119)")
+print()
+
+# ============================================================================
+# 3. Functions with Number Formats
+# ============================================================================
+
+print("3. Functions with Number Formats")
+print("=================================")
+
+func test_hex_function(x) {
+    return x * 0x10  # Multiply by 16
+}
+
+func test_binary_function(mask) {
+    value = 0b11110000  # 240 in decimal
+    return value & mask
+}
+
+func test_octal_function(permissions) {
+    base = 0o600       # 384 in decimal
+    return base | permissions
+}
+
+func test_mixed_args(hex_val, bin_val, oct_val) {
+    return hex_val + bin_val + oct_val
+}
+
+func_result1 = test_hex_function(0x5)      # 5 * 16 = 80
+func_result2 = test_binary_function(0b1111) # 240 & 15 = 0
+func_result3 = test_octal_function(0o44)    # 384 | 36 = 420
+func_result4 = test_mixed_args(0x10, 0b1000, 0o20)  # 16 + 8 + 16 = 40
+
+print("  test_hex_function(0x5) =", func_result1, "(expected 80)")
+print("  test_binary_function(0b1111) =", func_result2, "(expected 0)")
+print("  test_octal_function(0o44) =", func_result3, "(expected 420)")
+print("  test_mixed_args(0x10, 0b1000, 0o20) =", func_result4, "(expected 40)")
+
+# Function returning mixed formats
+func get_constants() {
+    return [0xFF, 0b11111111, 0o377]
+}
+
+constants = get_constants()
+print("  Function returning mixed formats:", constants)
+print()
+
+# ============================================================================
+# 4. Classes with Number Formats
+# ============================================================================
+
+print("4. Classes with Number Formats")
+print("===============================")
+
+class NumberFormatter {
+    func init(base_value) {
+        this.base = base_value
+        this.hex_constant = 0xA0
+        this.bin_mask = 0b1111
+        this.oct_mode = 0o755
+    }
+
+    func add_hex(hex_val) {
+        return this.base + hex_val
+    }
+
+    func multiply_binary(bin_val) {
+        return this.base * bin_val
+    }
+
+    func combine_octal(oct_val) {
+        return this.base | oct_val
+    }
+
+    func get_info() {
+        return {
+            "base": this.base,
+            "hex_constant": this.hex_constant,
+            "bin_mask": this.bin_mask,
+            "oct_mode": this.oct_mode
+        }
+    }
+}
+
+formatter = NumberFormatter(0x100)  # 256 in decimal
+
+hex_result = formatter.add_hex(0xFF)        # 256 + 255 = 511
+bin_result = formatter.multiply_binary(0b11) # 256 * 3 = 768
+oct_result = formatter.combine_octal(0o77)  # 256 | 63 = 319
+info_result = formatter.get_info()
+
+print("  formatter.add_hex(0xFF) =", hex_result, "(expected 511)")
+print("  formatter.multiply_binary(0b11) =", bin_result, "(expected 768)")
+print("  formatter.combine_octal(0o77) =", oct_result, "(expected 319)")
+print("  formatter info:", info_result)
+print()
+
+# ============================================================================
+# 5. Lambda Functions with Number Formats
+# ============================================================================
+
+print("5. Lambda Functions with Number Formats")
+print("========================================")
+
+hex_lambda = x -> x + 0xA0        # Add 160
+bin_lambda = x -> x ^ 0b1010      # XOR with 10
+oct_lambda = x -> x * 0o10        # Multiply by 8
+
+# Multi-parameter lambda
+combine_lambda = (a, b, c) -> (a & 0xFF) + (b << 0x4) + (c | 0o7)
+
+test_val = 42
+
+hex_lambda_result = hex_lambda(test_val)  # 42 + 160 = 202
+bin_lambda_result = bin_lambda(test_val)  # 42 ^ 10 = 32
+oct_lambda_result = oct_lambda(test_val)  # 42 * 8 = 336
+combine_result = combine_lambda(0xFF, 0b10, 0o5)
+
+print("  hex_lambda(42) =", hex_lambda_result, "(expected 202)")
+print("  bin_lambda(42) =", bin_lambda_result, "(expected 32)")
+print("  oct_lambda(42) =", oct_lambda_result, "(expected 336)")
+print("  combine_lambda(0xFF, 0b10, 0o5) =", combine_result)
+print()
+
+# ============================================================================
+# 6. Control Flow with Number Formats
+# ============================================================================
+
+print("6. Control Flow with Number Formats")
+print("===================================")
+
+flags = 0b1010  # Binary flags
+status = 0x200  # Hex status code
+mode = 0o755    # Octal permissions
+
+# If statements
+if flags & 0b0010 {
+    print("  ✓ Flag bit 1 is set (binary check)")
+}
+
+if status == 0x200 {
+    print("  ✓ Status is 512 (hex comparison)")
+}
+
+if mode > 0o700 {
+    print("  ✓ Mode has execute permissions (octal comparison)")
+}
+
+# Loop with hex counter
+print("  Loop with hex counter:")
+for i = 0x0; i < 0x5; i = i + 0x1 {
+    print("    Hex counter:", i)
+}
+
+# While loop with binary countdown
+print("  Binary countdown:")
+countdown = 0b100  # Start at 4
+while countdown > 0b000 {
+    print("    Binary countdown:", countdown)
+    countdown = countdown - 0b001
+}
+
+# Switch statement with mixed formats
+test_switch = 0x10
+switch test_switch {
+    case 0b10000: {  # 16 in binary
+        print("  ✓ Switch matched binary case for", test_switch)
+    }
+    case 0o20: {     # 16 in octal
+        print("  This shouldn't print")
+    }
+    default: {
+        print("  Switch default case")
+    }
+}
+print()
+
+# ============================================================================
+# 7. Data Structures with Number Formats
+# ============================================================================
+
+print("7. Data Structures with Number Formats")
+print("======================================")
+
+# Lists with mixed number formats
+mixed_list = [42, 0x2A, 0b101010, 0o52]
+print("  Mixed number list:", mixed_list)
+
+# Verify all elements are equal
+all_equal = true
+for i = 1; i < len(mixed_list); i = i + 1 {
+    if mixed_list[i] != mixed_list[0] {
+        all_equal = false
+        break
+    }
+}
+print("  All elements equal?", all_equal)
+
+# Dictionary with number format keys and values
+number_dict = {
+    0x10: "hex_key_16",
+    0b1000: "binary_key_8",
+    0o12: "octal_key_10",
+    "colors": {
+        "red": 0xFF0000,
+        "green": 0x00FF00,
+        "blue": 0x0000FF
+    },
+    "permissions": [0o644, 0o755, 0o777],
+    "flags": 0b11110000
+}
+
+print("  Dictionary access:")
+print("    Key 16 ->", number_dict[0x10])
+print("    Key 8 ->", number_dict[0b1000])
+print("    Key 10 ->", number_dict[0o12])
+print("    Colors:", number_dict["colors"])
+print("    Permissions:", number_dict["permissions"])
+print("    Flags:", number_dict["flags"])
+print()
+
+# ============================================================================
+# 8. Edge Cases and Boundary Tests
+# ============================================================================
+
+print("8. Edge Cases and Boundary Tests")
+print("=================================")
+
+# Zero values in different formats
+zero_hex = 0x0
+zero_bin = 0b0
+zero_oct = 0o0
+
+print("  Zero values:")
+print("    Hex (0x0):", zero_hex)
+print("    Binary (0b0):", zero_bin)
+print("    Octal (0o0):", zero_oct)
+print("    All zeros equal?", zero_hex == zero_bin and zero_bin == zero_oct)
+
+# Maximum safe values
+max_4bit = 0xF        # 15
+max_8bit = 0xFF       # 255
+max_12bit = 0xFFF     # 4095
+
+print("  Maximum values:")
+print("    Max 4-bit (0xF):", max_4bit)
+print("    Max 8-bit (0xFF):", max_8bit)
+print("    Max 12-bit (0xFFF):", max_12bit)
+
+# Case sensitivity verification
+upper_hex = 0XABC
+lower_hex = 0xabc
+mixed_hex = 0xAbC
+
+print("  Case sensitivity:")
+print("    Upper hex (0XABC):", upper_hex)
+print("    Lower hex (0xabc):", lower_hex)
+print("    Mixed hex (0xAbC):", mixed_hex)
+print("    All hex equal?", upper_hex == lower_hex and lower_hex == mixed_hex)
+
+# Single digit numbers
+single_hex = 0x1
+single_bin = 0b1
+single_oct = 0o1
+
+print("  Single digits:")
+print("    0x1 =", single_hex, "| 0b1 =", single_bin, "| 0o1 =", single_oct)
+print()
+
+# ============================================================================
+# 9. Real-World Use Cases
+# ============================================================================
+
+print("9. Real-World Use Cases")
+print("=======================")
+
+# Memory address calculations
+base_address = 0x10000000
+page_offset = 0x1000
+final_address = base_address + page_offset
+print("  Memory: base 0x10000000 + offset 0x1000 =", final_address)
+
+# File permissions (Unix-style)
+read_only = 0o444      # r--r--r--
+read_write = 0o644     # rw-r--r--
+executable = 0o755     # rwxr-xr-x
+full_access = 0o777    # rwxrwxrwx
+
+print("  File permissions:")
+print("    Read-only (0o444) =", read_only)
+print("    Read-write (0o644) =", read_write)
+print("    Executable (0o755) =", executable)
+print("    Full access (0o777) =", full_access)
+
+# Bit flags for features
+flag_debug = 0b0001
+flag_verbose = 0b0010
+flag_logging = 0b0100
+flag_testing = 0b1000
+
+all_flags = flag_debug | flag_verbose | flag_logging | flag_testing
+print("  Feature flags:")
+print("    Debug:", flag_debug, "| Verbose:", flag_verbose)
+print("    Logging:", flag_logging, "| Testing:", flag_testing)
+print("    Combined flags:", all_flags, "(should be 15)")
+
+# Network ports and status codes
+http_port = 0x50       # Port 80
+https_port = 0x1BB     # Port 443
+ssh_port = 0x16        # Port 22
+status_ok = 0x200      # HTTP 200 OK
+status_error = 0x1F4   # HTTP 500
+
+print("  Network values:")
+print("    HTTP port (0x50):", http_port)
+print("    HTTPS port (0x1BB):", https_port)
+print("    SSH port (0x16):", ssh_port)
+print("    Status OK (0x200):", status_ok)
+print("    Status Error (0x1F4):", status_error)
+
+# Color manipulation (RGB values)
+pixel_color = 0xFF8040  # Orange color
+red_component = (pixel_color >> 16) & 0xFF
+green_component = (pixel_color >> 8) & 0xFF
+blue_component = pixel_color & 0xFF
+
+print("  Color extraction from 0xFF8040:")
+print("    Red component:", red_component)
+print("    Green component:", green_component)
+print("    Blue component:", blue_component)
+
+# Bit mask operations
+mask_upper_byte = 0xFF00
+mask_lower_byte = 0x00FF
+test_value = 0x1234
+
+upper_result = test_value & mask_upper_byte
+lower_result = test_value & mask_lower_byte
+
+print("  Bit masking 0x1234:")
+print("    Upper byte (& 0xFF00):", upper_result)
+print("    Lower byte (& 0x00FF):", lower_result)
+print()
+
+# ============================================================================
+# 10. Integration with Variables and Constants
+# ============================================================================
+
+print("10. Integration with Variables and Constants")
+print("============================================")
+
+# Constants with different number formats
+const MAX_BUFFER = 0x1000
+const DEFAULT_MODE = 0o644
+const FEATURE_FLAGS = 0b11110000
+
+print("  Constants:")
+print("    MAX_BUFFER (0x1000) =", MAX_BUFFER)
+print("    DEFAULT_MODE (0o644) =", DEFAULT_MODE)
+print("    FEATURE_FLAGS (0b11110000) =", FEATURE_FLAGS)
+
+# Variable assignments and updates
+config_value = 0xFF
+config_value = config_value | 0b10000000  # Set bit
+config_value = config_value & 0o377       # Mask with octal
+
+print("  Variable operations:")
+print("    Final config_value:", config_value)
+
+# List of mixed format constants
+SYSTEM_CONSTANTS = [
+    0x400,      # 1024 bytes
+    0b1000,     # 8 flags
+    0o755,      # File permissions
+    0xFF        # Max 8-bit value
+]
+
+print("  System constants:", SYSTEM_CONSTANTS)
+print()
+
+print("=== Comprehensive Number Format Test Completed Successfully! ===")
+print()
+print("Summary:")
+print("- ✓ Basic number format validation")
+print("- ✓ Arithmetic and bitwise operations")
+print("- ✓ Function integration")
+print("- ✓ Class and method support")
+print("- ✓ Lambda function compatibility")
+print("- ✓ Control flow integration")
+print("- ✓ Data structure support")
+print("- ✓ Edge case handling")
+print("- ✓ Real-world use case examples")
+print("- ✓ Variable and constant integration")
+print()
+print("All number formats (decimal, hex, binary, octal) work seamlessly")
+print("with all Zephyr language features!")

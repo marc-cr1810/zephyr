@@ -14,6 +14,7 @@ Zephyr is a powerful scripting language that combines the simplicity of dynamic 
 - **Functional Programming**: Lambda expressions, closures, and higher-order functions
 - **Asynchronous Programming**: Full async/await support with parallel execution
 - **Modern Syntax**: Clean, readable syntax with compound assignment operators
+- **Multiple Number Formats**: Support for decimal, hexadecimal (0x), binary (0b), and octal (0o) literals
 - **Built-in Data Structures**: Lists, dictionaries, and complex nesting support
 - **Error Handling**: Try-catch blocks and comprehensive error reporting
 - **String Operations**: Advanced string manipulation and formatting

@@ -259,6 +259,9 @@ unary
 
 factor
     : NUMBER
+    | HEX_NUMBER
+    | BINARY_NUMBER
+    | OCTAL_NUMBER
     | FLOAT
     | STRING
     | FSTRING
@@ -425,6 +428,9 @@ INTERNAL: 'internal';
 */
 NAME: [a-zA-Z_] [a-zA-Z0-9_]*;
 NUMBER: [0-9]+;
+HEX_NUMBER: '0' [xX] [0-9a-fA-F]+;
+BINARY_NUMBER: '0' [bB] [01]+;
+OCTAL_NUMBER: '0' [oO] [0-7]+;
 FLOAT: [0-9]+ '.' [0-9]+;
 STRING: '"' ( '\\"' | ~["\r\n] )* '"';
 FSTRING: 'f"' ( '\\{' | '\\}' | '{' ~[}]* '}' | ~["\r\n] )* '"';

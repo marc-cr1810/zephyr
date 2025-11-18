@@ -688,6 +688,36 @@ std::unique_ptr<expression_t> parser_t::factor() {
     } else if (token.type == token_type_e::number) {
         eat(token_type_e::number);
         return std::make_unique<number_t>(std::stoi(std::string(token.text)), token.line, token.column, token.line, token.column + token.text.length() - 1);
+    } else if (token.type == token_type_e::hex_number) {
+        eat(token_type_e::hex_number);
+        std::string hex_str = std::string(token.text).substr(2); // Skip "0x" or "0X"
+        try {
+            int value = std::stoi(hex_str, nullptr, 16);
+            return std::make_unique<number_t>(value, token.line, token.column, token.line, token.column + token.text.length() - 1);
+        } catch (const std::exception&) {
+            zephyr::current_error_location() = {token.line, token.column, static_cast<int>(token.text.length())};
+            throw zephyr::syntax_error_t("Hexadecimal number too large: " + std::string(token.text));
+        }
+    } else if (token.type == token_type_e::binary_number) {
+        eat(token_type_e::binary_number);
+        std::string bin_str = std::string(token.text).substr(2); // Skip "0b" or "0B"
+        try {
+            int value = std::stoi(bin_str, nullptr, 2);
+            return std::make_unique<number_t>(value, token.line, token.column, token.line, token.column + token.text.length() - 1);
+        } catch (const std::exception&) {
+            zephyr::current_error_location() = {token.line, token.column, static_cast<int>(token.text.length())};
+            throw zephyr::syntax_error_t("Binary number too large: " + std::string(token.text));
+        }
+    } else if (token.type == token_type_e::octal_number) {
+        eat(token_type_e::octal_number);
+        std::string oct_str = std::string(token.text).substr(2); // Skip "0o" or "0O"
+        try {
+            int value = std::stoi(oct_str, nullptr, 8);
+            return std::make_unique<number_t>(value, token.line, token.column, token.line, token.column + token.text.length() - 1);
+        } catch (const std::exception&) {
+            zephyr::current_error_location() = {token.line, token.column, static_cast<int>(token.text.length())};
+            throw zephyr::syntax_error_t("Octal number too large: " + std::string(token.text));
+        }
     } else if (token.type == token_type_e::float_token) {
         eat(token_type_e::float_token);
         return std::make_unique<float_literal_t>(std::stod(std::string(token.text)), token.line, token.column, token.line, token.column + token.text.length() - 1);

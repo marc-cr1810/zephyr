@@ -311,10 +311,62 @@ auto lexer_t::next_token() -> token_t
         return token;
     }
 
-    // Numbers (including floats)
+    // Numbers (including floats, hex, binary, octal)
     if (isdigit(current_char))
     {
         size_t num_start = m_position;
+        
+        // Check for special number formats (0x, 0b, 0o)
+        if (current_char == '0' && m_position + 1 < m_source.length())
+        {
+            char second_char = m_source[m_position + 1];
+            
+            // Hexadecimal: 0x or 0X
+            if (second_char == 'x' || second_char == 'X')
+            {
+                m_position += 2; // Skip '0x'
+                while (m_position < m_source.length() && 
+                       (isdigit(m_source[m_position]) || 
+                        (m_source[m_position] >= 'a' && m_source[m_position] <= 'f') ||
+                        (m_source[m_position] >= 'A' && m_source[m_position] <= 'F')))
+                {
+                    m_position++;
+                }
+                size_t length = m_position - num_start;
+                m_position = num_start; // reset for make_token
+                return make_token(token_type_e::hex_number, std::string_view(m_source.data() + num_start, length));
+            }
+            
+            // Binary: 0b or 0B
+            if (second_char == 'b' || second_char == 'B')
+            {
+                m_position += 2; // Skip '0b'
+                while (m_position < m_source.length() && 
+                       (m_source[m_position] == '0' || m_source[m_position] == '1'))
+                {
+                    m_position++;
+                }
+                size_t length = m_position - num_start;
+                m_position = num_start; // reset for make_token
+                return make_token(token_type_e::binary_number, std::string_view(m_source.data() + num_start, length));
+            }
+            
+            // Octal: 0o or 0O
+            if (second_char == 'o' || second_char == 'O')
+            {
+                m_position += 2; // Skip '0o'
+                while (m_position < m_source.length() && 
+                       (m_source[m_position] >= '0' && m_source[m_position] <= '7'))
+                {
+                    m_position++;
+                }
+                size_t length = m_position - num_start;
+                m_position = num_start; // reset for make_token
+                return make_token(token_type_e::octal_number, std::string_view(m_source.data() + num_start, length));
+            }
+        }
+        
+        // Regular decimal numbers (integers and floats)
         bool is_float = false;
         while (m_position < m_source.length() && (isdigit(m_source[m_position]) || m_source[m_position] == '.'))
         {
