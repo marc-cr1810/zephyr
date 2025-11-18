@@ -996,7 +996,7 @@ print("=====================================")
 # Utility lambdas for data access
 get_first_element = list -> list[0]
 get_last_element = list -> list[len(list) - 1]
-get_middle_element = list -> list[len(list) / 2]
+get_middle_element = list -> list[int(len(list) / 2)]
 
 test_data_list = ["apple", "banana", "cherry", "date", "elderberry"]
 print("Test list:", test_data_list)

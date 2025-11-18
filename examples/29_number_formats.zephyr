@@ -246,6 +246,7 @@ test_switch = 0x10
 switch test_switch {
     case 0b10000: {  # 16 in binary
         print("  ✓ Switch matched binary case for", test_switch)
+        break
     }
     case 0o20: {     # 16 in octal
         print("  This shouldn't print")
