@@ -1,0 +1,63 @@
+# Simple With Statement Test
+
+print("=== Simple With Statement Test ===")
+
+# Test 1: Basic with statement with integer
+print("Test 1: Integer context manager")
+with int(42) as i {
+    print("Integer value:", i)
+    print("Type:", type(i))
+    result = i * 2
+    print("Double:", result)
+}
+print("Integer is out of scope now")
+
+print("")
+
+# Test 2: Basic file I/O with default mode
+print("Test 2: Basic file I/O")
+
+# Create a test file
+with open("simple_test.txt", "w") as file {
+    file.write("Hello, Zephyr!\n")
+    file.write("This is a test file.\n")
+    file.write("Created with with statement.\n")
+}
+print("File created successfully")
+
+# Read the file back
+with open("simple_test.txt") as file {
+    content = file.read()
+    print("File content:")
+    print(content)
+}
+
+print("")
+
+# Test 3: File append mode
+print("Test 3: File append mode")
+with open("simple_test.txt", "a") as file {
+    file.write("Appended line.\n")
+}
+
+with open("simple_test.txt", "r") as file {
+    updated_content = file.read()
+    print("Updated file content:")
+    print(updated_content)
+}
+
+print("")
+
+# Test 4: Error handling
+print("Test 4: Error handling")
+try {
+    with open("nonexistent.txt", "r") as file {
+        content = file.read()
+    }
+} catch e {
+    print("Caught expected error:", e)
+}
+
+print("")
+
+print("=== Simple With Statement Test Complete ===")

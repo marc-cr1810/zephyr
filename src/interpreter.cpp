@@ -18,6 +18,7 @@
 #include <memory>
 #include <cmath>
 #include "zephyr/objects/module_object.hpp"
+#include "zephyr/objects/file_object.hpp"
 #include "zephyr/objects/function_object.hpp"
 
 namespace zephyr
@@ -503,6 +504,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
         s_builtin_functions["zip"] = std::make_shared<builtin_function_object_t>(zip_builtin, "zip");
         s_builtin_functions["all"] = std::make_shared<builtin_function_object_t>(all_builtin, "all");
         s_builtin_functions["exit"] = std::make_shared<builtin_function_object_t>(exit_builtin, "exit");
+        s_builtin_functions["open"] = std::make_shared<builtin_function_object_t>(open_builtin, "open");
         s_builtins_initialized = true;
     }
 
@@ -3028,6 +3030,111 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
         current_scope[node.exception_variable_name] = std::make_shared<string_object_t>(e.what());
         node.catch_block->accept(*this);
     }
+    zephyr::current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(with_statement_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::current_error_location();
+    zephyr::current_error_location().line = node.line;
+    zephyr::current_error_location().column = node.column;
+    zephyr::current_error_location().length = node.end_column - node.column + 1;
+
+    // Evaluate the context expression
+    node.context_expression->accept(*this);
+    auto context_obj = m_current_result;
+    
+    if (!context_obj) {
+        throw value_error_t("with statement context expression evaluated to null");
+    }
+    
+    // Call __enter__ method on the context object
+    std::shared_ptr<object_t> entered_value = nullptr;
+    try {
+        entered_value = context_obj->__enter__();
+    } catch (const std::exception& e) {
+        throw value_error_t("Error in context manager __enter__: " + std::string(e.what()));
+    }
+    
+    if (!entered_value) {
+        // If __enter__ returns null, use the original object
+        entered_value = context_obj;
+    }
+    
+    // Create new scope for the with block
+    m_scope_stack.emplace_back();
+    
+    // Bind the variable to the entered value
+    auto& current_scope = m_scope_stack.back();
+    current_scope[node.variable_name] = entered_value;
+    
+    // Exception handling variables
+    std::shared_ptr<object_t> exception_type = nullptr;
+    std::shared_ptr<object_t> exception_value = nullptr;
+    std::shared_ptr<object_t> traceback = nullptr;
+    bool exception_occurred = false;
+    
+    try {
+        // Execute the block
+        node.body->accept(*this);
+    } catch (const value_error_t& e) {
+        exception_occurred = true;
+        exception_type = std::make_shared<string_object_t>("runtime_error");
+        exception_value = std::make_shared<string_object_t>(e.what());
+        
+        // Pop scope before calling __exit__
+        m_scope_stack.pop_back();
+        
+        // Call __exit__ with exception info
+        bool suppress_exception = false;
+        try {
+            suppress_exception = context_obj->__exit__(exception_type, exception_value, traceback);
+        } catch (const std::exception& exit_error) {
+            // If __exit__ throws, that becomes the new exception
+            throw value_error_t("Error in context manager __exit__: " + std::string(exit_error.what()));
+        }
+        
+        zephyr::current_error_location() = saved_location;
+        
+        // Re-throw the original exception unless __exit__ suppressed it
+        if (!suppress_exception) {
+            throw;
+        }
+        
+        return;  // Exception was suppressed
+        
+    } catch (const std::exception& e) {
+        exception_occurred = true;
+        exception_type = std::make_shared<string_object_t>("exception");
+        exception_value = std::make_shared<string_object_t>(e.what());
+        
+        m_scope_stack.pop_back();
+        
+        bool suppress_exception = false;
+        try {
+            suppress_exception = context_obj->__exit__(exception_type, exception_value, traceback);
+        } catch (const std::exception& exit_error) {
+            throw value_error_t("Error in context manager __exit__: " + std::string(exit_error.what()));
+        }
+        
+        zephyr::current_error_location() = saved_location;
+        
+        if (!suppress_exception) {
+            throw;
+        }
+        
+        return;
+    }
+    
+    // Normal exit path - no exception occurred
+    m_scope_stack.pop_back();
+    
+    try {
+        context_obj->__exit__(exception_type, exception_value, traceback);
+    } catch (const std::exception& e) {
+        throw value_error_t("Error in context manager __exit__: " + std::string(e.what()));
+    }
+    
     zephyr::current_error_location() = saved_location;
 }
 

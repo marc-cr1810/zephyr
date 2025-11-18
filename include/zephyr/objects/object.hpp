@@ -48,6 +48,15 @@ public:
 
     // Container operations
     virtual auto contains(std::shared_ptr<object_t> item) -> bool;
+
+    // Context manager operations
+    virtual auto __enter__() -> std::shared_ptr<object_t>;
+    virtual auto __exit__(std::shared_ptr<object_t> exc_type = nullptr,
+                          std::shared_ptr<object_t> exc_value = nullptr,
+                          std::shared_ptr<object_t> traceback = nullptr) -> bool;
+
+    // Clone operation for copying objects
+    virtual auto clone() const -> std::shared_ptr<object_t>;
 };
 
 }

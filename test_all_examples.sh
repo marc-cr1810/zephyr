@@ -48,6 +48,11 @@ examples=(
     "23_built_in_functions.zephyr"
     "24_explicit_typing_and_init_restrictions.zephyr"
     "25_bitwise_operations.zephyr"
+    "26_function_overloading.zephyr"
+    "27_interface_overloading.zephyr"
+    "28_class_export_plugin_usage.zephyr"
+    "29_number_formats.zephyr"
+    "30_with_statement_file_io.zephyr"
 )
 
 # Counters

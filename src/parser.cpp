@@ -308,6 +308,8 @@ std::unique_ptr<statement_t> parser_t::statement() {
         return continue_statement();
     } else if (m_current_token.type == token_type_e::try_token) {
         return try_catch_statement();
+    } else if (m_current_token.type == token_type_e::with_token) {
+        return with_statement();
     } else if ((m_current_token.type == token_type_e::name || m_current_token.type == token_type_e::this_token || m_current_token.type == token_type_e::super_token) &&
                m_lexer.peek_next_token().type == token_type_e::dot) {
         // Check if this is a member assignment
@@ -2356,6 +2358,39 @@ std::unique_ptr<member_assignment_t> parser_t::member_assignment() {
         start_token.column,
         value->end_line,
         value->end_column
+    );
+}
+
+std::unique_ptr<with_statement_t> parser_t::with_statement() {
+    token_t with_token = m_current_token;
+    eat(token_type_e::with_token);
+
+    // Parse the context expression
+    auto context_expr = expression();
+
+    // Expect 'as' keyword
+    eat(token_type_e::as_token);
+
+    // Parse the variable name
+    if (m_current_token.type != token_type_e::name) {
+        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+        throw zephyr::syntax_error_t("Expected variable name after 'as' in with statement");
+    }
+
+    std::string variable_name = std::string(m_current_token.text);
+    eat(token_type_e::name);
+
+    // Parse the block
+    auto body = block();
+
+    return std::make_unique<with_statement_t>(
+        std::move(context_expr), 
+        variable_name, 
+        std::move(body),
+        with_token.line, 
+        with_token.column, 
+        body->end_line, 
+        body->end_column
     );
 }
 

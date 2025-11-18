@@ -254,6 +254,11 @@ auto try_catch_statement_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
+auto with_statement_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
 auto program_t::accept(ast_visitor_t& visitor) -> void
 {
     visitor.visit(*this);
@@ -960,6 +965,15 @@ auto function_definition_t::clone() const -> std::unique_ptr<ast_node_t>
         async,
         is_internal,
         is_abstract,
+        line, column, end_line, end_column);
+}
+
+auto with_statement_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    return std::make_unique<with_statement_t>(
+        context_expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(context_expression->clone().release())) : nullptr,
+        variable_name,
+        body ? std::unique_ptr<block_t>(static_cast<block_t*>(body->clone().release())) : nullptr,
         line, column, end_line, end_column);
 }
 

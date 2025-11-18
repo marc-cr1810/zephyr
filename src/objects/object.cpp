@@ -95,4 +95,26 @@ auto object_t::contains(std::shared_ptr<object_t> item) -> bool
     return type()->contains(shared_from_this(), item);
 }
 
+// Context manager operations - default implementations
+auto object_t::__enter__() -> std::shared_ptr<object_t>
+{
+    // Default behavior: return self
+    return shared_from_this();
+}
+
+auto object_t::__exit__(std::shared_ptr<object_t> exc_type,
+                        std::shared_ptr<object_t> exc_value,
+                        std::shared_ptr<object_t> traceback) -> bool
+{
+    // Default behavior: no cleanup, don't suppress exceptions
+    return false;
+}
+
+// Clone operation - default implementation
+auto object_t::clone() const -> std::shared_ptr<object_t>
+{
+    // Default behavior: objects cannot be cloned
+    throw value_error_t("Object of type '" + type()->name() + "' cannot be cloned");
+}
+
 }

@@ -30,6 +30,7 @@ class typed_const_declaration_t;
 class empty_declaration_t;
 class empty_typed_declaration_t;
 class member_variable_declaration_t;
+class with_statement_t;
 
 // AST Node Forward Declarations
 class number_t;
@@ -149,6 +150,7 @@ public:
     virtual auto visit(break_statement_t& node) -> void = 0;
     virtual auto visit(continue_statement_t& node) -> void = 0;
     virtual auto visit(try_catch_statement_t& node) -> void = 0;
+    virtual auto visit(with_statement_t& node) -> void = 0;
     virtual auto visit(list_destructuring_assignment_t& node) -> void = 0;
     virtual auto visit(switch_statement_t& node) -> void = 0;
     virtual auto visit(case_statement_t& node) -> void = 0;
@@ -1495,6 +1497,22 @@ public:
 
 public:
     std::vector<std::unique_ptr<statement_t>> statements;
+};
+
+class with_statement_t : public statement_t
+{
+public:
+    with_statement_t(std::unique_ptr<expression_t> context_expression, std::string_view variable_name, std::unique_ptr<block_t> body, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), context_expression(std::move(context_expression)), variable_name(variable_name), body(std::move(body))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
+
+    std::unique_ptr<expression_t> context_expression;
+    std::string variable_name;
+    std::unique_ptr<block_t> body;
 };
 
 class import_statement_t : public statement_t

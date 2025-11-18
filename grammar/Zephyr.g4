@@ -59,11 +59,16 @@ statement
     | breakStatement
     | continueStatement
     | tryCatchStatement
+    | withStatement
     | importStatement
     ;
 
 tryCatchStatement
     : TRY block CATCH (LPAREN)? NAME (RPAREN)? block
+    ;
+
+withStatement
+    : WITH expression AS NAME block
     ;
 
 breakStatement
@@ -397,6 +402,8 @@ INTERFACE: 'interface';
 THIS: 'this';
 TRY: 'try';
 CATCH: 'catch';
+WITH: 'with';
+AS: 'as';
 BREAK: 'break';
 CONTINUE: 'continue';
 ASYNC: 'async';

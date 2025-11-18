@@ -96,6 +96,7 @@ public:
     auto visit(break_statement_t& node) -> void override;
     auto visit(continue_statement_t& node) -> void override;
     auto visit(try_catch_statement_t& node) -> void override;
+    auto visit(with_statement_t& node) -> void override;
     auto visit(list_destructuring_assignment_t& node) -> void override;
     auto visit(switch_statement_t& node) -> void override;
     auto visit(case_statement_t& node) -> void override;

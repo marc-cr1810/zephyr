@@ -88,6 +88,8 @@ enum class token_type_e
     this_token,
     try_token,
     catch_token,
+    with_token,
+    as_token,
     break_token,
     continue_token,
     async,
@@ -104,7 +106,6 @@ enum class token_type_e
     import_token,
     from_token,
     internal_token,
-    as_token,
     star,
 
     // End of file

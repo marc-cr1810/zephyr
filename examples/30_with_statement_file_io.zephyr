@@ -1,0 +1,217 @@
+# Zephyr With Statement and File I/O Demo
+# This demonstrates the key features of the with statement implementation
+
+print("=== Zephyr With Statement Demo ===")
+
+# ============================================================================
+# 1. With statement works with any object type
+# ============================================================================
+
+print("\n1. Universal Context Manager Support")
+print("====================================")
+
+# Built-in types automatically work with 'with'
+with int(42) as number {
+    print("Integer in context:", number)
+    result = number * 2
+    print("Doubled:", result)
+}
+print("Integer is now out of scope")
+
+with [1, 2, 3, 4, 5] as numbers {
+    print("List in context:", numbers)
+    total = 0
+    for n in numbers {
+        total += n
+    }
+    print("Sum:", total)
+}
+print("List is now out of scope")
+
+# ============================================================================
+# 2. File I/O with all standard modes
+# ============================================================================
+
+print("\n2. Complete File I/O Support")
+print("=============================")
+
+# Write mode
+print("Creating file with write mode...")
+with open("demo.txt", "w") as file {
+    file.write("Hello, Zephyr!\n")
+    file.write("This demonstrates file I/O.\n")
+    file.write("Files are automatically closed.\n")
+}
+
+# Read mode (default)
+print("Reading file (default mode):")
+with open("demo.txt") as file {
+    content = file.read()
+    print("Content:")
+    print(content)
+}
+
+# Append mode
+print("Appending to file...")
+with open("demo.txt", "a") as file {
+    file.write("This line was appended.\n")
+}
+
+# Read updated file
+with open("demo.txt", "r") as file {
+    lines = file.readlines()
+    print("Total lines:", len(lines))
+    print("Last line:", lines[len(lines)-1])
+}
+
+# ============================================================================
+# 3. All file reading methods
+# ============================================================================
+
+print("\n3. File Reading Methods")
+print("=======================")
+
+with open("demo.txt", "r") as file {
+    # Read specific number of characters
+    chunk = file.read(10)
+    print("First 10 chars:", chunk)
+
+    # Read one line
+    line = file.readline()
+    print("Next line:", line)
+
+    # Get current position
+    pos = file.tell()
+    print("Current position:", pos)
+
+    # Seek to beginning
+    file.seek(0)
+
+    # Read all lines
+    all_lines = file.readlines()
+    print("All lines:", len(all_lines), "lines")
+}
+
+# ============================================================================
+# 4. Binary file operations
+# ============================================================================
+
+print("\n4. Binary File Operations")
+print("=========================")
+
+# Write binary data
+binary_data = [72, 101, 108, 108, 111, 33]  # "Hello!" in ASCII
+with open("binary_demo.bin", "wb") as file {
+    file.write_bytes(binary_data)
+}
+print("Binary data written:", binary_data)
+
+# Read binary data
+with open("binary_demo.bin", "rb") as file {
+    data = file.read_bytes()
+    print("Binary data read:", data)
+}
+
+# ============================================================================
+# 5. Exclusive creation and read/write modes
+# ============================================================================
+
+print("\n5. Advanced File Modes")
+print("======================")
+
+# Exclusive creation (fails if file exists)
+try {
+    with open("exclusive.txt", "x") as file {
+        file.write("Created exclusively\n")
+    }
+    print("✓ Exclusive creation succeeded")
+} catch e {
+    print("File already exists")
+}
+
+# Read/write mode
+with open("demo.txt", "r+") as file {
+    first_chars = file.read(5)
+    print("Read:", first_chars)
+
+    # Write at current position
+    file.write("***")
+
+    # Read rest
+    file.seek(0)
+    modified = file.read()
+    print("Modified file preview:", modified[:50] + "...")
+}
+
+# ============================================================================
+# 6. Error handling and automatic cleanup
+# ============================================================================
+
+print("\n6. Error Handling & Cleanup")
+print("===========================")
+
+# File not found
+try {
+    with open("missing.txt", "r") as file {
+        content = file.read()
+    }
+} catch e {
+    print("✓ Handled missing file:", e)
+}
+
+# Write to read-only file
+try {
+    with open("demo.txt", "r") as file {
+        file.write("This should fail")
+    }
+} catch e {
+    print("✓ Handled read-only write:", e)
+}
+
+# Exception in block (file still gets closed)
+try {
+    with open("demo.txt", "r") as file {
+        data = file.read(20)
+        print("Read 20 chars successfully")
+
+        # Cause error
+        error = 10 / 0
+    }
+} catch e {
+    print("✓ Exception handled, file auto-closed:", e)
+}
+
+# ============================================================================
+# 7. Nested with statements
+# ============================================================================
+
+print("\n7. Nested With Statements")
+print("=========================")
+
+print("Copying file with nested with statements:")
+with open("demo.txt", "r") as source {
+    with open("copy.txt", "w") as dest {
+        content = source.read()
+        dest.write("=== COPY ===\n")
+        dest.write(content)
+        dest.write("=== END ===\n")
+        print("File copied successfully")
+    }
+}
+
+# Verify copy
+with open("copy.txt", "r") as file {
+    copy_content = file.read()
+    print("Copy length:", len(copy_content), "characters")
+}
+
+print("\n=== Demo Complete ===")
+print("✓ With statement works with all object types")
+print("✓ All file modes supported: r, w, a, x, r+, w+, a+")
+print("✓ Binary modes: rb, wb, ab")
+print("✓ All file methods: read, readline, readlines, write")
+print("✓ File positioning: seek, tell")
+print("✓ Automatic resource cleanup")
+print("✓ Exception safety")
+print("✓ Nested with statements")
+print("\nFiles created: demo.txt, binary_demo.bin, exclusive.txt, copy.txt")

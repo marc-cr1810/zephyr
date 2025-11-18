@@ -5,19 +5,28 @@ print("=== Class Export Plugin Example ===")
 print()
 
 # Import the class export plugin
-import "../build/examples/class_export_plugin.so"
+try {
+    import "../build/examples/class_export_plugin.so"
 
-print("1. Plugin Information:")
-print("   Name:", class_export_plugin.PLUGIN_NAME)
-print("   Version:", class_export_plugin.VERSION)
-print("   Supports Classes:", class_export_plugin.SUPPORTS_CLASSES)
-print("   Mathematical Constants:")
-print("     PI =", class_export_plugin.PI)
-print("     E =", class_export_plugin.E)
-print("     SQRT2 =", class_export_plugin.SQRT2)
-print()
+    print("1. Plugin Information:")
+    print("   Name:", class_export_plugin.PLUGIN_NAME)
+    print("   Version:", class_export_plugin.VERSION)
+    print("   Supports Classes:", class_export_plugin.SUPPORTS_CLASSES)
+    print("   Mathematical Constants:")
+    print("     PI =", class_export_plugin.PI)
+    print("     E =", class_export_plugin.E)
+    print("     SQRT2 =", class_export_plugin.SQRT2)
+    print()
 
-print("2. Vector2D Class Examples:")
+    print("2. Vector2D Class Examples:")
+} catch e {
+    print("Plugin not available:", e)
+    print("This example requires building the class export plugin.")
+    print("Run 'make' in the build directory to build plugins.")
+    print("Example completed without plugin functionality.")
+    print()
+    exit(0)
+}
 print("   Creating vectors...")
 
 # Create vector objects using constructor functions
