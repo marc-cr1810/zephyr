@@ -807,7 +807,7 @@ class MergeSort {
             return arr
         }
 
-        mid = len(arr) / 2
+        mid = int(len(arr) / 2)
         left = []
         right = []
 
