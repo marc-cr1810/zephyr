@@ -1,0 +1,15 @@
+# Simple Exception Test to Debug Issues
+
+print("Testing basic exception creation...")
+
+# Test 1: Create a simple exception object
+try {
+    exception = RuntimeError("Test message")
+    print("Created exception:", exception)
+    print("Exception type:", exception.type)
+    print("Exception message:", exception.message)
+} catch (e) {
+    print("Error creating exception:", e)
+}
+
+print("Test completed.")

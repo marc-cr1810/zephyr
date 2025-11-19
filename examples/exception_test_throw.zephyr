@@ -1,0 +1,16 @@
+# Simple Throw Test to Debug Issues
+
+print("Testing basic exception throwing...")
+
+# Test 1: Basic throw and catch
+try {
+    print("About to throw exception...")
+    throw RuntimeError("Basic throw test")
+    print("This should not be reached")
+} catch (e) {
+    print("Caught exception:", e)
+    print("Exception type:", e.type)
+    print("Exception message:", e.message)
+}
+
+print("Test completed.")

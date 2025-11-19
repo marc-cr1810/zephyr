@@ -62,6 +62,7 @@ private:
     auto break_statement() -> std::unique_ptr<break_statement_t>;
     auto continue_statement() -> std::unique_ptr<continue_statement_t>;
     auto try_catch_statement() -> std::unique_ptr<try_catch_statement_t>;
+    auto throw_statement() -> std::unique_ptr<throw_statement_t>;
     auto with_statement() -> std::unique_ptr<with_statement_t>;
     auto function_call(std::string function_name, token_t name_token) -> std::unique_ptr<function_call_t>;
     auto lambda_expression() -> std::unique_ptr<lambda_expression_t>;

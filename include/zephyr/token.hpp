@@ -89,6 +89,8 @@ enum class token_type_e
     this_token,
     try_token,
     catch_token,
+    finally_token,
+    throw_token,
     with_token,
     as_token,
     break_token,

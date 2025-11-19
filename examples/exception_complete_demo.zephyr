@@ -1,0 +1,240 @@
+# Complete Exception Handling Demo for Zephyr
+# This demonstrates all working exception handling features
+
+print("=== Zephyr Complete Exception Handling Demo ===\n")
+
+# Test 1: Basic Exception Creation and Properties
+print("Test 1: Exception Object Properties")
+ex = RuntimeError("Test message")
+print("Exception object:", ex)
+print("Exception type:", ex.type)
+print("Exception message:", ex.message)
+print()
+
+# Test 2: Basic Throw and Catch
+print("Test 2: Basic Throw and Catch")
+try {
+    throw RuntimeError("Basic runtime error")
+} catch (e) {
+    print("Caught:", e.type, "-", e.message)
+}
+print()
+
+# Test 3: Typed Exception Catching with 'as' keyword
+print("Test 3: Typed Exception Catching")
+try {
+    throw IndexError("Array index out of bounds")
+} catch (e as IndexError) {
+    print("Caught specific IndexError:", e.message)
+} catch (e) {
+    print("This should not execute")
+}
+print()
+
+# Test 4: Multiple Catch Blocks (Exception Chaining)
+print("Test 4: Multiple Catch Blocks")
+func test_exception_types(error_type) {
+    try {
+        if error_type == "index" {
+            throw IndexError("Index out of range")
+        } else if error_type == "type" {
+            throw TypeError("Type mismatch")
+        } else if error_type == "value" {
+            throw ValueError("Invalid value")
+        } else {
+            throw RuntimeError("Unknown error type")
+        }
+    } catch (e as IndexError) {
+        print("→ Caught IndexError:", e.message)
+    } catch (e as TypeError) {
+        print("→ Caught TypeError:", e.message)
+    } catch (e as ValueError) {
+        print("→ Caught ValueError:", e.message)
+    } catch (e) {
+        print("→ Caught generic exception:", e.message)
+    }
+}
+
+test_exception_types("index")
+test_exception_types("type")
+test_exception_types("value")
+test_exception_types("other")
+print()
+
+# Test 5: Blank Catch (No Exception Variable)
+print("Test 5: Blank Catch Block")
+try {
+    throw RuntimeError("Error we don't need to access")
+} catch {
+    print("Caught exception without accessing it")
+}
+print()
+
+# Test 6: Finally Blocks Always Execute
+print("Test 6: Finally Blocks")
+func test_finally(should_throw) {
+    print("  Starting function with should_throw =", should_throw)
+    try {
+        print("  In try block")
+        if should_throw {
+            throw RuntimeError("Error in try")
+        }
+        print("  Try completed successfully")
+    } catch (e) {
+        print("  In catch block:", e.message)
+    } finally {
+        print("  Finally block executed")
+    }
+    print("  Function completed")
+}
+
+print("Case A: No exception")
+test_finally(false)
+print()
+
+print("Case B: Exception thrown and caught")
+test_finally(true)
+print()
+
+# Test 7: Try-Finally Without Catch
+print("Test 7: Try-Finally Without Catch")
+try {
+    print("Only try and finally, no catch")
+} finally {
+    print("Finally executed without catch block")
+}
+print()
+
+# Test 8: All Exception Types
+print("Test 8: Different Exception Types")
+exception_types = [
+    "IndexError",
+    "TypeError",
+    "ValueError",
+    "KeyError",
+    "AttributeError",
+    "ZeroDivisionError",
+    "OverflowError"
+]
+
+for exc_type in exception_types {
+    try {
+        message = "Example " + exc_type + " message"
+        if exc_type == "IndexError" {
+            throw IndexError(message)
+        } else if exc_type == "TypeError" {
+            throw TypeError(message)
+        } else if exc_type == "ValueError" {
+            throw ValueError(message)
+        } else if exc_type == "KeyError" {
+            throw KeyError(message)
+        } else if exc_type == "AttributeError" {
+            throw AttributeError(message)
+        } else if exc_type == "ZeroDivisionError" {
+            throw ZeroDivisionError(message)
+        } else if exc_type == "OverflowError" {
+            throw OverflowError(message)
+        }
+    } catch (e) {
+        print("→", e.type + ":", e.message)
+    }
+}
+print()
+
+# Test 9: Nested Try-Catch with Finally
+print("Test 9: Nested Exception Handling")
+try {
+    print("Outer try block")
+    try {
+        print("Inner try block")
+        throw ValueError("Inner exception")
+    } catch (e as ValueError) {
+        print("Inner catch:", e.message)
+        throw TypeError("New exception from inner catch")
+    } finally {
+        print("Inner finally block")
+    }
+} catch (e as TypeError) {
+    print("Outer catch:", e.message)
+} finally {
+    print("Outer finally block")
+}
+print()
+
+# Test 10: Exception Propagation Through Function Calls
+print("Test 10: Exception Propagation")
+func level_three() {
+    throw RuntimeError("Error from level 3")
+}
+
+func level_two() {
+    level_three()
+}
+
+func level_one() {
+    try {
+        level_two()
+    } catch (e) {
+        print("Caught propagated exception:", e.message)
+    }
+}
+
+level_one()
+print()
+
+# Test 11: Practical Example - Safe Operations
+print("Test 11: Safe Dictionary Access")
+func safe_dict_get(dict, key, default_value) {
+    try {
+        if key in dict {
+            print("Key found:", key, "->", dict[key])
+        } else {
+            throw KeyError("Key '" + str(key) + "' not found")
+        }
+    } catch (e as KeyError) {
+        print("Key not found, using default:", default_value)
+    } finally {
+        print("Dictionary access completed")
+    }
+}
+
+test_dict = {"name": "Alice", "age": 30}
+print("Test dictionary:", test_dict)
+
+safe_dict_get(test_dict, "name", "Unknown")
+safe_dict_get(test_dict, "city", "N/A")
+print()
+
+# Test 12: Exception Chaining Pattern
+print("Test 12: Exception Handling Patterns")
+func validate_user_input(input_value) {
+    try {
+        if input_value == none {
+            throw ValueError("Input cannot be none")
+        }
+        if str(input_value) == "" {
+            throw ValueError("Input cannot be empty")
+        }
+        if len(str(input_value)) < 3 {
+            throw ValueError("Input too short")
+        }
+        print("Valid input:", input_value)
+    } catch (e as ValueError) {
+        print("Validation failed:", e.message)
+        throw RuntimeError("User input validation failed: " + e.message)
+    }
+}
+
+test_inputs = ["Hello", "Hi", "", none]
+for input in test_inputs {
+    try {
+        print("Testing input:", input)
+        validate_user_input(input)
+    } catch (e) {
+        print("Final error:", e.message)
+    }
+    print("---")
+}
+
+print("\n=== Exception Handling Demo Complete ===")
+print("All exception handling features demonstrated successfully!")

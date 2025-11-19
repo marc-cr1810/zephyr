@@ -918,10 +918,39 @@ auto return_statement_t::clone() const -> std::unique_ptr<ast_node_t>
 
 auto try_catch_statement_t::clone() const -> std::unique_ptr<ast_node_t>
 {
-    return std::make_unique<try_catch_statement_t>(
+    auto cloned = std::make_unique<try_catch_statement_t>(
         try_block ? std::unique_ptr<block_t>(static_cast<block_t*>(try_block->clone().release())) : nullptr,
-        exception_variable_name,
-        catch_block ? std::unique_ptr<block_t>(static_cast<block_t*>(catch_block->clone().release())) : nullptr,
+        line, column, end_line, end_column);
+    
+    // Clone catch clauses
+    for (const auto& clause : catch_clauses) {
+        auto cloned_clause = std::make_unique<catch_clause_t>(
+            clause->exception_variable_name,
+            clause->exception_type_name,
+            clause->has_exception_type,
+            clause->has_variable,
+            clause->catch_block ? std::unique_ptr<block_t>(static_cast<block_t*>(clause->catch_block->clone().release())) : nullptr
+        );
+        cloned->add_catch_clause(std::move(cloned_clause));
+    }
+    
+    // Clone finally block if it exists
+    if (finally_block) {
+        cloned->set_finally_block(std::unique_ptr<block_t>(static_cast<block_t*>(finally_block->clone().release())));
+    }
+    
+    return cloned;
+}
+
+auto throw_statement_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto throw_statement_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    return std::make_unique<throw_statement_t>(
+        exception_expression ? std::unique_ptr<expression_t>(static_cast<expression_t*>(exception_expression->clone().release())) : nullptr,
         line, column, end_line, end_column);
 }
 

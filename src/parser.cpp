@@ -60,6 +60,8 @@ std::string token_type_to_string(token_type_e type) {
         case token_type_e::in: return "in";
         case token_type_e::try_token: return "try";
         case token_type_e::catch_token: return "catch";
+        case token_type_e::finally_token: return "finally";
+        case token_type_e::throw_token: return "throw";
         case token_type_e::end_of_file: return "end_of_file";
         case token_type_e::unknown: return "unknown";
         default: return ""; // Should not happen
@@ -308,6 +310,8 @@ std::unique_ptr<statement_t> parser_t::statement() {
         return continue_statement();
     } else if (m_current_token.type == token_type_e::try_token) {
         return try_catch_statement();
+    } else if (m_current_token.type == token_type_e::throw_token) {
+        return throw_statement();
     } else if (m_current_token.type == token_type_e::with_token) {
         return with_statement();
     } else if ((m_current_token.type == token_type_e::name || m_current_token.type == token_type_e::this_token || m_current_token.type == token_type_e::super_token) &&
@@ -1829,32 +1833,107 @@ std::unique_ptr<try_catch_statement_t> parser_t::try_catch_statement() {
     eat(token_type_e::try_token);
 
     auto try_block = block();
-
-    eat(token_type_e::catch_token);
-
-    bool has_lparen = false;
-    if (m_current_token.type == token_type_e::lparen) {
-        eat(token_type_e::lparen);
-        has_lparen = true;
-    }
-
-    std::string exception_variable_name(m_current_token.text);
-    eat(token_type_e::name);
-
-    if (has_lparen) {
-        eat(token_type_e::rparen);
-    }
-
-    auto catch_block = block();
-
-    return std::make_unique<try_catch_statement_t>(
+    
+    auto try_catch_stmt = std::make_unique<try_catch_statement_t>(
         std::move(try_block),
-        exception_variable_name,
-        std::move(catch_block),
         try_token.line,
         try_token.column,
-        catch_block->end_line,
-        catch_block->end_column
+        try_token.end_line,
+        try_token.end_column
+    );
+
+    // Parse zero or more catch blocks
+    while (m_current_token.type == token_type_e::catch_token) {
+        eat(token_type_e::catch_token);
+        
+        std::string exception_variable_name;
+        std::string exception_type_name;
+        bool has_exception_type = false;
+        bool has_variable = true;
+        
+        if (m_current_token.type == token_type_e::lbrace) {
+            // Blank catch: catch { ... }
+            has_variable = false;
+        } else if (m_current_token.type == token_type_e::lparen) {
+            // Typed catch: catch (e as ExceptionType) { ... } or catch (e) { ... }
+            eat(token_type_e::lparen);
+            
+            if (m_current_token.type == token_type_e::name) {
+                exception_variable_name = m_current_token.text;
+                eat(token_type_e::name);
+                
+                if (m_current_token.type == token_type_e::as_token) {
+                    eat(token_type_e::as_token);
+                    if (m_current_token.type == token_type_e::name) {
+                        exception_type_name = m_current_token.text;
+                        has_exception_type = true;
+                        eat(token_type_e::name);
+                    } else {
+                        zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+                        throw zephyr::syntax_error_t("Expected exception type name after 'as'");
+                    }
+                }
+            }
+            eat(token_type_e::rparen);
+        } else if (m_current_token.type == token_type_e::name) {
+            // Simple catch: catch e { ... }
+            exception_variable_name = m_current_token.text;
+            eat(token_type_e::name);
+        } else {
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            throw zephyr::syntax_error_t("Expected '(' or exception variable name or '{' after catch");
+        }
+
+        auto catch_block = block();
+        
+        auto catch_clause = std::make_unique<catch_clause_t>(
+            exception_variable_name,
+            exception_type_name,
+            has_exception_type,
+            has_variable,
+            std::move(catch_block)
+        );
+        
+        try_catch_stmt->add_catch_clause(std::move(catch_clause));
+    }
+    
+    // Parse optional finally block
+    if (m_current_token.type == token_type_e::finally_token) {
+        eat(token_type_e::finally_token);
+        auto finally_block = block();
+        try_catch_stmt->set_finally_block(std::move(finally_block));
+        
+        // Update end position to include finally block
+        try_catch_stmt->end_line = try_catch_stmt->finally_block->end_line;
+        try_catch_stmt->end_column = try_catch_stmt->finally_block->end_column;
+    } else if (!try_catch_stmt->catch_clauses.empty()) {
+        // Update end position to last catch block
+        auto& last_catch = try_catch_stmt->catch_clauses.back();
+        try_catch_stmt->end_line = last_catch->catch_block->end_line;
+        try_catch_stmt->end_column = last_catch->catch_block->end_column;
+    }
+    
+    // Ensure we have at least catch blocks or finally block
+    if (try_catch_stmt->catch_clauses.empty() && !try_catch_stmt->finally_block) {
+        zephyr::current_error_location() = {try_token.line, try_token.column, 1};
+        throw zephyr::syntax_error_t("Try statement must have at least one catch block or a finally block");
+    }
+
+    return try_catch_stmt;
+}
+
+std::unique_ptr<throw_statement_t> parser_t::throw_statement() {
+    token_t throw_token = m_current_token;
+    eat(token_type_e::throw_token);
+    
+    auto exception_expr = expression();
+    
+    return std::make_unique<throw_statement_t>(
+        std::move(exception_expr),
+        throw_token.line,
+        throw_token.column,
+        throw_token.end_line,
+        throw_token.end_column
     );
 }
 

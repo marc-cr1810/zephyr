@@ -1,0 +1,214 @@
+# Comprehensive Exception Handling Test for Zephyr
+# This file demonstrates all the exception handling features:
+# 1. Basic try-catch with exception objects
+# 2. Typed catches with 'as' keyword
+# 3. Multiple catch blocks (chaining)
+# 4. Blank catch blocks
+# 5. Finally blocks
+# 6. Throwing exceptions
+
+print("=== Zephyr Exception Handling Comprehensive Test ===\n")
+
+# Test 1: Basic exception throwing and catching
+print("Test 1: Basic Exception Throwing and Catching")
+try {
+    throw RuntimeError("This is a basic runtime error")
+} catch (e) {
+    print("Caught exception:", e)
+    print("Exception type:", e.type)
+    print("Exception message:", e.message)
+}
+print()
+
+# Test 2: Typed catch with 'as' keyword
+print("Test 2: Typed Exception Catching")
+try {
+    throw IndexError("List index out of range")
+} catch (e as IndexError) {
+    print("Caught specific IndexError:", e.message)
+} catch (e) {
+    print("This shouldn't be reached for IndexError")
+}
+print()
+
+# Test 3: Multiple catch blocks (exception chaining)
+print("Test 3: Multiple Catch Blocks")
+func test_multiple_exceptions(error_type) {
+    try {
+        if error_type == "index" {
+            throw IndexError("Index out of bounds")
+        } else if error_type == "type" {
+            throw TypeError("Wrong type provided")
+        } else if error_type == "value" {
+            throw ValueError("Invalid value")
+        } else {
+            throw RuntimeError("Unknown error")
+        }
+    } catch (e as IndexError) {
+        print("Caught IndexError:", e.message)
+    } catch (e as TypeError) {
+        print("Caught TypeError:", e.message)
+    } catch (e as ValueError) {
+        print("Caught ValueError:", e.message)
+    } catch (e) {
+        print("Caught generic exception:", e.message)
+    }
+}
+
+test_multiple_exceptions("index")
+test_multiple_exceptions("type")
+test_multiple_exceptions("value")
+test_multiple_exceptions("other")
+print()
+
+# Test 4: Blank catch (no exception variable)
+print("Test 4: Blank Catch Block")
+try {
+    throw RuntimeError("Error without variable access")
+} catch {
+    print("Caught exception but don't need to access it")
+}
+print()
+
+# Test 5: Finally blocks
+print("Test 5: Finally Blocks")
+func test_finally(should_throw) {
+    try {
+        print("In try block")
+        if should_throw {
+            throw RuntimeError("Error in try block")
+        }
+        print("Try block completed successfully")
+    } catch (e) {
+        print("In catch block:", e.message)
+    } finally {
+        print("Finally block always executes")
+    }
+    print("After try-catch-finally")
+}
+
+print("Case A: No exception thrown")
+test_finally(false)
+print()
+
+print("Case B: Exception thrown and caught")
+test_finally(true)
+print()
+
+# Test 6: Finally block without catch
+print("Test 6: Finally Block Without Catch")
+try {
+    print("Try block with only finally")
+} finally {
+    print("Finally block executed")
+}
+print()
+
+# Test 7: Nested try-catch blocks
+print("Test 7: Nested Try-Catch Blocks")
+try {
+    print("Outer try block")
+    try {
+        print("Inner try block")
+        throw ValueError("Inner exception")
+    } catch (e as ValueError) {
+        print("Inner catch:", e.message)
+        throw TypeError("Exception from inner catch")
+    } finally {
+        print("Inner finally block")
+    }
+} catch (e as TypeError) {
+    print("Outer catch:", e.message)
+} finally {
+    print("Outer finally block")
+}
+print()
+
+# Test 8: Different exception types
+print("Test 8: Different Exception Types")
+exception_types = [
+    ["IndexError", "Array index out of bounds"],
+    ["TypeError", "Cannot convert string to number"],
+    ["ValueError", "Invalid input value"],
+    ["KeyError", "Dictionary key not found"],
+    ["AttributeError", "Object has no such attribute"],
+    ["ZeroDivisionError", "Cannot divide by zero"],
+    ["OverflowError", "Number too large"]
+]
+
+for type_info in exception_types {
+    exception_name = type_info[0]
+    message = type_info[1]
+
+    try {
+        if exception_name == "IndexError" {
+            throw IndexError(message)
+        } else if exception_name == "TypeError" {
+            throw TypeError(message)
+        } else if exception_name == "ValueError" {
+            throw ValueError(message)
+        } else if exception_name == "KeyError" {
+            throw KeyError(message)
+        } else if exception_name == "AttributeError" {
+            throw AttributeError(message)
+        } else if exception_name == "ZeroDivisionError" {
+            throw ZeroDivisionError(message)
+        } else if exception_name == "OverflowError" {
+            throw OverflowError(message)
+        }
+    } catch (e) {
+        print("Caught", e.type + ":", e.message)
+    }
+}
+print()
+
+# Test 9: Exception propagation
+print("Test 9: Exception Propagation")
+func inner_function() {
+    throw RuntimeError("Error from inner function")
+}
+
+func middle_function() {
+    inner_function()
+}
+
+func outer_function() {
+    try {
+        middle_function()
+    } catch (e) {
+        print("Caught propagated exception:", e.message)
+    }
+}
+
+outer_function()
+print()
+
+# Test 10: Real-world simulation - list access with error handling
+print("Test 10: Real-world Simulation - Safe List Access")
+func safe_list_access(list, index) {
+    try {
+        if index < 0 or index >= len(list) {
+            throw IndexError("Index " + str(index) + " out of range for list of length " + str(len(list)))
+        }
+        return list[index]
+    } catch (e as IndexError) {
+        print("Safe access failed:", e.message)
+        return none
+    } finally {
+        print("List access attempt completed")
+    }
+}
+
+test_list = [1, 2, 3, 4, 5]
+print("List:", test_list)
+
+# Valid access
+result = safe_list_access(test_list, 2)
+print("Result:", result)
+
+# Invalid access
+result = safe_list_access(test_list, 10)
+print("Result:", result)
+print()
+
+print("=== All Exception Handling Tests Completed ===")

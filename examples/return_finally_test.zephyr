@@ -1,0 +1,88 @@
+# Test for return statement issue in try-finally blocks
+
+print("=== Return Statement in Try-Finally Test ===\n")
+
+# Test 1: Simple return in try with finally
+print("Test 1: Simple return in try with finally")
+func test_simple_return() {
+    try {
+        print("In try block, about to return")
+        return "success"
+    } finally {
+        print("In finally block")
+    }
+    print("This should never be reached")
+}
+
+result = test_simple_return()
+print("Result:", result)
+print()
+
+# Test 2: Return in try, exception in finally
+print("Test 2: Return in try, exception in finally")
+func test_return_with_finally_exception() {
+    try {
+        print("In try block, about to return")
+        return "try_value"
+    } finally {
+        print("In finally block, throwing exception")
+        throw RuntimeError("Exception in finally")
+    }
+}
+
+try {
+    result = test_return_with_finally_exception()
+    print("Result:", result)
+} catch (e) {
+    print("Caught exception from finally:", e.message)
+}
+print()
+
+# Test 3: Exception in try, return in catch, finally executes
+print("Test 3: Exception in try, return in catch, finally executes")
+func test_exception_catch_return() {
+    try {
+        print("In try block, throwing exception")
+        throw ValueError("Try exception")
+    } catch (e) {
+        print("In catch block, about to return")
+        return "catch_value"
+    } finally {
+        print("In finally block after catch return")
+    }
+}
+
+result = test_exception_catch_return()
+print("Result:", result)
+print()
+
+# Test 4: Multiple returns with finally
+print("Test 4: Multiple return paths with finally")
+func test_multiple_returns(path) {
+    try {
+        if path == "early" {
+            print("Taking early return path")
+            return "early_return"
+        }
+        if path == "exception" {
+            print("Taking exception path")
+            throw RuntimeError("Test exception")
+        }
+        print("Taking normal path")
+        return "normal_return"
+    } catch (e) {
+        print("In catch, returning catch value")
+        return "catch_return"
+    } finally {
+        print("Finally block executed for path:", path)
+    }
+}
+
+for path in ["early", "normal", "exception"] {
+    print("Testing path:", path)
+    result = test_multiple_returns(path)
+    print("Result:", result)
+    print("---")
+}
+
+print("\n=== Return Finally Test Complete ===")

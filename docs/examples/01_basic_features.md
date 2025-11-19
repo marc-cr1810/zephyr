@@ -48,6 +48,88 @@ neg = -a            # Unary minus for negative numbers
 neg_float = -3.5    # Negative float
 
 # Comparison operators return booleans
+equal = (a == b)        # Equality check
+not_equal = (a != b)    # Inequality check
+less = (a < b)          # Less than
+greater = (a > b)       # Greater than
+less_eq = (a <= b)      # Less than or equal
+greater_eq = (a >= b)   # Greater than or equal
+
+---
+
+## Basic Error Handling
+
+Zephyr provides robust exception handling to manage errors gracefully. This allows your programs to handle unexpected situations without crashing.
+
+### Simple Try-Catch
+
+```zephyr
+try {
+    # Code that might cause an error
+    result = 10 / 0  # This would cause a ZeroDivisionError
+    print("Result:", result)
+} catch (e) {
+    # Handle any error
+    print("An error occurred:", e.message)
+    print("Error type:", e.type)
+}
+```
+
+### Handling Specific Error Types
+
+You can catch specific types of errors using the `as` keyword:
+
+```zephyr
+try {
+    numbers = [1, 2, 3]
+    value = numbers[10]  # IndexError - trying to access non-existent index
+} catch (e as IndexError) {
+    print("Index out of bounds:", e.message)
+} catch (e) {
+    print("Some other error:", e.message)
+}
+```
+
+### Creating and Throwing Exceptions
+
+You can create and throw your own exceptions:
+
+```zephyr
+func validate_age(age) {
+    if age < 0 {
+        throw ValueError("Age cannot be negative")
+    }
+    if age > 150 {
+        throw ValueError("Age seems unrealistic")
+    }
+    return age
+}
+
+try {
+    user_age = validate_age(-5)
+} catch (e as ValueError) {
+    print("Invalid age:", e.message)
+}
+```
+
+### Always Execute Code with Finally
+
+Use `finally` blocks to ensure cleanup code always runs:
+
+```zephyr
+try {
+    # Open a file or resource
+    data = load_important_data()
+    process_data(data)
+} catch (e) {
+    print("Processing failed:", e.message)
+} finally {
+    # This always executes, even if there's an error
+    print("Cleanup completed")
+}
+```
+
+---
 is_equal = a == b
 is_not_equal = a != b
 is_greater = a > b

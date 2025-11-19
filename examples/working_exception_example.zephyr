@@ -1,0 +1,349 @@
+# Working Exception Handling Example
+# This example demonstrates Zephyr's exception handling system with working syntax
+
+print("=== Working Exception Handling Example ===")
+print()
+
+# Example 1: Basic Exception Handling
+print("Example 1: Basic Exception Handling")
+
+func safe_divide(a, b) {
+    try {
+        if b == 0 {
+            throw ZeroDivisionError("Cannot divide by zero")
+        }
+        return a / b
+    } catch (e as ZeroDivisionError) {
+        print("Division by zero caught:", e.message)
+        return 0
+    } catch (e) {
+        print("Unexpected error:", e.message)
+        return none
+    }
+}
+
+print("10 / 2 =", safe_divide(10, 2))
+print("10 / 0 =", safe_divide(10, 0))
+print()
+
+# Example 2: User Input Validation
+print("Example 2: User Input Validation")
+
+func validate_age(age_input) {
+    try {
+        age = int(age_input)
+
+        if age < 0 {
+            throw ValueError("Age cannot be negative")
+        }
+
+        if age > 150 {
+            throw ValueError("Age must be realistic")
+        }
+
+        return age
+    } catch (e as ValueError) {
+        print("Age validation failed:", e.message)
+        return none
+    } catch (e as TypeError) {
+        print("Age must be a number:", e.message)
+        return none
+    }
+}
+
+test_ages = ["25", "-5", "200", "abc"]
+for age_str in test_ages {
+    result = validate_age(age_str)
+    if result != none {
+        print("Valid age:", result)
+    } else {
+        print("Invalid age input:", age_str)
+    }
+}
+print()
+
+# Example 3: Resource Management with Finally
+print("Example 3: Resource Management with Finally")
+
+func process_file(filename) {
+    file_status = "closed"
+
+    try {
+        print("Opening file:", filename)
+
+        if filename == "missing.txt" {
+            throw IOError("File not found")
+        }
+
+        file_status = "open"
+        print("File opened successfully")
+
+        if filename == "corrupted.txt" {
+            throw IOError("File corrupted")
+        }
+
+        print("Processing file data...")
+        return "File processed successfully"
+
+    } catch (e as IOError) {
+        print("File error:", e.message)
+        return "File processing failed"
+    } finally {
+        if file_status == "open" {
+            print("Closing file:", filename)
+            file_status = "closed"
+        }
+        print("Cleanup completed")
+    }
+}
+
+test_files = ["data.txt", "missing.txt", "corrupted.txt"]
+for filename in test_files {
+    result = process_file(filename)
+    print("Result:", result)
+    print("---")
+}
+print()
+
+# Example 4: Multiple Exception Types
+print("Example 4: Multiple Exception Types")
+
+func process_data(data) {
+    try {
+        if data == none {
+            throw ValueError("Data cannot be none")
+        }
+
+        if type(data) != "list" {
+            throw TypeError("Data must be a list")
+        }
+
+        if len(data) == 0 {
+            throw IndexError("Data list is empty")
+        }
+
+        total = 0
+        for item in data {
+            total = total + item
+        }
+
+        return total
+
+    } catch (e as ValueError) {
+        print("Value error:", e.message)
+        return 0
+    } catch (e as TypeError) {
+        print("Type error:", e.message)
+        return 0
+    } catch (e as IndexError) {
+        print("Index error:", e.message)
+        return 0
+    } catch (e) {
+        print("Unknown error:", e.type, "-", e.message)
+        return 0
+    }
+}
+
+test_data = [
+    [1, 2, 3, 4, 5],
+    [],
+    "not a list",
+    none
+]
+
+for data in test_data {
+    result = process_data(data)
+    print("Data:", data, "-> Result:", result)
+}
+print()
+
+# Example 5: Exception in Loops with Control Flow
+print("Example 5: Exception Handling in Loops")
+
+func process_list_items(items) {
+    processed = []
+
+    for i in range(len(items)) {
+        item = items[i]
+        try {
+            if item == "skip" {
+                print("Skipping item", i)
+                continue
+            }
+
+            if item == "break" {
+                print("Breaking at item", i)
+                break
+            }
+
+            if item == "error" {
+                throw RuntimeError("Processing error at item " + str(i))
+            }
+
+            processed_item = "processed_" + str(item)
+            append(processed, processed_item)
+            print("Processed item", i, ":", processed_item)
+
+        } catch (e) {
+            print("Error processing item", i, ":", e.message)
+            continue
+        } finally {
+            print("Cleanup for item", i)
+        }
+    }
+
+    return processed
+}
+
+test_items = ["item1", "skip", "item3", "error", "item5", "break", "item7"]
+results = process_list_items(test_items)
+print("Final results:", results)
+print()
+
+# Example 6: Nested Try-Catch
+print("Example 6: Nested Exception Handling")
+
+func outer_operation(should_fail_outer, should_fail_inner) {
+    try {
+        print("Starting outer operation")
+
+        try {
+            print("Starting inner operation")
+
+            if should_fail_inner {
+                throw ValueError("Inner operation failed")
+            }
+
+            print("Inner operation succeeded")
+
+        } catch (e as ValueError) {
+            print("Caught inner exception:", e.message)
+            throw RuntimeError("Inner failure caused outer failure")
+        } finally {
+            print("Inner operation cleanup")
+        }
+
+        if should_fail_outer {
+            throw TypeError("Outer operation failed")
+        }
+
+        print("Outer operation succeeded")
+        return "Success"
+
+    } catch (e as RuntimeError) {
+        print("Caught runtime error:", e.message)
+        return "Failed due to inner error"
+    } catch (e as TypeError) {
+        print("Caught type error:", e.message)
+        return "Failed due to outer error"
+    } finally {
+        print("Outer operation cleanup")
+    }
+}
+
+test_cases = [
+    {"outer": false, "inner": false},
+    {"outer": false, "inner": true},
+    {"outer": true, "inner": false}
+]
+
+for test_case in test_cases {
+    print("Test case - outer fail:", test_case["outer"], "inner fail:", test_case["inner"])
+    result = outer_operation(test_case["outer"], test_case["inner"])
+    print("Result:", result)
+    print("=" * 40)
+}
+print()
+
+# Example 7: Exception Object Properties
+print("Example 7: Exception Object Properties")
+
+func demonstrate_exception_properties() {
+    try {
+        throw RuntimeError("This is a demonstration error")
+    } catch (e) {
+        print("Exception details:")
+        print("  Type:", e.type)
+        print("  Message:", e.message)
+        print("  Cause:", e.cause)
+        print("  Full exception:", e)
+    }
+}
+
+demonstrate_exception_properties()
+print()
+
+# Example 8: Custom Exception Creation
+print("Example 8: Custom Exception Creation")
+
+func create_custom_exceptions() {
+    exceptions = [
+        IndexError("Array index out of bounds"),
+        TypeError("Cannot convert string to number"),
+        ValueError("Invalid email format"),
+        KeyError("Dictionary key not found"),
+        AttributeError("Object has no such attribute"),
+        ZeroDivisionError("Division by zero attempted"),
+        OverflowError("Number too large"),
+        RuntimeError("General runtime error")
+    ]
+
+    for ex in exceptions {
+        try {
+            throw ex
+        } catch (e) {
+            print("Caught", e.type + ":", e.message)
+        }
+    }
+}
+
+create_custom_exceptions()
+print()
+
+# Example 9: Exception Handling with Return Statements
+print("Example 9: Exception Handling with Returns")
+
+func operation_with_return() {
+    try {
+        print("Performing operation...")
+        return "operation_result"
+    } catch (e) {
+        print("Operation failed:", e.message)
+        return "failure_result"
+    } finally {
+        print("Operation cleanup (always executes)")
+    }
+}
+
+func operation_with_exception_and_return() {
+    try {
+        print("Performing risky operation...")
+        throw RuntimeError("Operation failed")
+        return "this_wont_be_reached"
+    } catch (e) {
+        print("Handling error:", e.message)
+        return "recovered_result"
+    } finally {
+        print("Risky operation cleanup")
+    }
+}
+
+result1 = operation_with_return()
+print("Result 1:", result1)
+
+result2 = operation_with_exception_and_return()
+print("Result 2:", result2)
+print()
+
+print("=== Working Exception Handling Example Complete ===")
+print("Successfully demonstrated:")
+print("✓ Basic try-catch exception handling")
+print("✓ Typed exception catching with 'as' keyword")
+print("✓ Multiple catch blocks for different exception types")
+print("✓ Finally blocks for cleanup code")
+print("✓ Exception handling in loops with break/continue")
+print("✓ Nested try-catch blocks")
+print("✓ Exception object properties and methods")
+print("✓ Custom exception creation and throwing")
+print("✓ Return statements in try-catch-finally blocks")
+print("✓ All built-in exception types (IndexError, TypeError, etc.)")

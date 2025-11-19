@@ -1,0 +1,451 @@
+# Practical Exception Handling Example
+# This example demonstrates real-world usage of Zephyr's exception handling system
+
+print("=== Practical Exception Handling Example ===\n")
+
+# Example 1: User Input Validation System
+print("Example 1: User Input Validation System")
+
+class UserValidator {
+    func validate_email(email) {
+        try {
+            if email == none {
+                throw ValueError("Email cannot be none")
+            }
+
+            email_str = str(email)
+            if len(email_str) == 0 {
+                throw ValueError("Email cannot be empty")
+            }
+
+            if not ("@" in email_str) {
+                throw ValueError("Email must contain @ symbol")
+            }
+
+            if not ("." in email_str) {
+                throw ValueError("Email must contain domain extension")
+            }
+
+            return email_str
+        } catch (e as ValueError) {
+            print("Email validation failed:", e.message)
+            throw RuntimeError("Invalid email format: " + e.message)
+        }
+    }
+
+    func validate_age(age) {
+        try {
+            age_num = int(age)
+
+            if age_num < 0 {
+                throw ValueError("Age cannot be negative")
+            }
+
+            if age_num > 150 {
+                throw ValueError("Age must be realistic (0-150)")
+            }
+
+            return age_num
+        } catch (e as ValueError) {
+            if ("invalid literal" in e.message) {
+                throw TypeError("Age must be a valid number")
+            } else {
+                throw e  # Re-throw validation errors
+            }
+        }
+    }
+}
+
+# Test the validator
+validator = UserValidator()
+
+test_data = [
+    {"email": "user@example.com", "age": "25"},
+    {"email": "invalid-email", "age": "30"},
+    {"email": "test@domain.com", "age": "abc"},
+    {"email": none, "age": "45"},
+    {"email": "valid@test.org", "age": "-5"}
+]
+
+for i in range(len(test_data)) {
+    data = test_data[i]
+    print("Testing user", i + 1)
+    try {
+        email = validator.validate_email(data["email"])
+        age = validator.validate_age(data["age"])
+        print("✓ Valid user - Email:", email, "Age:", age)
+    } catch (e as RuntimeError) {
+        print("✗ User validation failed:", e.message)
+    } catch (e as TypeError) {
+        print("✗ Type error:", e.message)
+    } catch (e) {
+        print("✗ Unexpected error:", e.type, "-", e.message)
+    }
+    print("---")
+}
+
+print()
+
+# Example 2: File Processing with Resource Management
+print("Example 2: Safe File Processing System")
+
+class FileProcessor {
+    func process_data_file(filename, operation) {
+        file_handle = none
+        processed_lines = 0
+
+        try {
+            print("Opening file:", filename)
+            # Simulate file operations
+            if filename == "nonexistent.txt" {
+                throw IOError("File not found: " + filename)
+            }
+
+            if filename == "corrupted.txt" {
+                throw IOError("File is corrupted and cannot be read")
+            }
+
+            # Simulate successful file opening
+            file_handle = {"name": filename, "status": "open"}
+            print("File opened successfully")
+
+            # Simulate processing
+            sample_data = ["line1: data", "line2: more data", "line3: final data"]
+
+            for line in sample_data {
+                try {
+                    if operation == "fail_on_line2" and ("line2" in line) {
+                        throw ValueError("Processing failed on line 2")
+                    }
+
+                    # Process the line
+                    result = operation + "(" + line + ")"
+                    print("Processed:", result)
+                    processed_lines = processed_lines + 1
+
+                } catch (e as ValueError) {
+                    print("Line processing error:", e.message)
+                    # Continue with other lines
+                    continue
+                }
+
+            return {
+                "success": true,
+                "processed_lines": processed_lines,
+                "total_lines": len(sample_data)
+            }
+
+        } catch (e as IOError) {
+            print("File I/O error:", e.message)
+            return {"success": false, "error": e.message}
+
+        } catch (e) {
+            print("Unexpected processing error:", e.message)
+            return {"success": false, "error": "Processing failed: " + e.message}
+
+        } finally {
+            # Cleanup always happens
+            if file_handle != none {
+                print("Closing file:", file_handle["name"])
+                file_handle["status"] = "closed"
+            }
+            print("File processing cleanup completed")
+        }
+    }
+}
+
+# Test file processing
+processor = FileProcessor()
+
+test_files = [
+    {"filename": "data.txt", "operation": "uppercase"},
+    {"filename": "nonexistent.txt", "operation": "lowercase"},
+    {"filename": "corrupted.txt", "operation": "reverse"},
+    {"filename": "test.txt", "operation": "fail_on_line2"}
+]
+
+for test in test_files {
+    print("Processing:", test["filename"])
+    result = processor.process_data_file(test["filename"], test["operation"])
+
+    if result["success"] {
+        print("✓ Success! Processed", result["processed_lines"], "of", result["total_lines"], "lines")
+    } else {
+        print("✗ Failed:", result["error"])
+    }
+    print("=" * 40)
+}
+
+print()
+
+# Example 3: Network-like Operations with Retry Logic
+print("Example 3: Network Operations with Retry Logic")
+
+class NetworkClient {
+    func __init__() {
+        self.connection_attempts = 0
+        self.max_retries = 3
+    }
+
+    func connect(server_address) {
+        attempts = 0
+
+        while attempts < self.max_retries {
+            attempts = attempts + 1
+            self.connection_attempts = self.connection_attempts + 1
+
+            try {
+                print("Attempt", attempts, "- Connecting to:", server_address)
+
+                # Simulate network conditions
+                if server_address == "unreachable.com" {
+                    throw IOError("Network unreachable")
+                }
+
+                if server_address == "timeout.com" and attempts < 2 {
+                    throw IOError("Connection timeout")
+                }
+
+                if server_address == "refused.com" and attempts < 3 {
+                    throw IOError("Connection refused")
+                }
+
+                # Success case
+                print("✓ Connected successfully to", server_address)
+                return {"connected": true, "server": server_address, "attempts": attempts}
+
+            } catch (e as IOError) {
+                print("Connection failed:", e.message)
+
+                if attempts >= self.max_retries {
+                    print("Max retries exceeded for", server_address)
+                    throw RuntimeError("Failed to connect after " + str(self.max_retries) + " attempts: " + e.message)
+                }
+
+                print("Retrying in 1 second...")
+                # In real code, you'd use sleep(1)
+
+            } finally {
+                print("Attempt", attempts, "completed")
+        }
+    }
+
+    func send_data(data, connection_info) {
+        try {
+            if connection_info == none or not connection_info["connected"] {
+                throw RuntimeError("No active connection")
+            }
+
+            if data == none or len(str(data)) == 0 {
+                throw ValueError("Cannot send empty data")
+            }
+
+            print("Sending data to", connection_info["server"] + ":", str(data))
+            return {"sent": true, "bytes": len(str(data))}
+
+        } catch (e as ValueError) {
+            print("Data validation error:", e.message)
+            throw e
+        } catch (e as RuntimeError) {
+            print("Connection error:", e.message)
+            throw e
+        }
+    }
+}
+
+# Test network operations
+client = NetworkClient()
+
+servers = ["example.com", "timeout.com", "unreachable.com", "refused.com"]
+
+for server in servers {
+    print("Testing connection to:", server)
+
+    try {
+        connection = client.connect(server)
+
+        try {
+            result = client.send_data("Hello, World!", connection)
+            print("✓ Data sent successfully:", result["bytes"], "bytes")
+        } catch (e as ValueError) {
+            print("✗ Data send failed:", e.message)
+        }
+
+    } catch (e as RuntimeError) {
+        print("✗ Connection failed completely:", e.message)
+    } catch (e) {
+        print("✗ Unexpected error:", e.type, "-", e.message)
+    }
+
+    print("=" * 50)
+}
+
+print("\nTotal connection attempts:", client.connection_attempts)
+
+print()
+
+# Example 4: Data Processing Pipeline with Error Recovery
+print("Example 4: Data Processing Pipeline")
+
+func create_processing_pipeline() {
+    return [
+        {"name": "validation", "func": validate_data_item},
+        {"name": "transformation", "func": transform_data_item},
+        {"name": "enrichment", "func": enrich_data_item},
+        {"name": "output", "func": output_data_item}
+    ]
+}
+
+func validate_data_item(item) {
+    if item == none {
+        throw ValueError("Data item cannot be none")
+    }
+    if "id" not in item {
+        throw ValueError("Data item must have an 'id' field")
+    }
+    return item
+}
+
+func transform_data_item(item) {
+    if item["id"] == "ERROR" {
+        throw RuntimeError("Transformation failed for item: " + str(item["id"]))
+    }
+    item["transformed"] = true
+    return item
+}
+
+func enrich_data_item(item) {
+    if item["id"] == "SKIP" {
+        throw ValueError("Item marked for skipping")
+    }
+    item["enriched"] = true
+    item["timestamp"] = "2024-01-01"
+    return item
+}
+
+func output_data_item(item) {
+    print("Final processed item:", item)
+    return item
+}
+
+func process_data_batch(data_items) {
+    pipeline = create_processing_pipeline()
+    results = {"processed": [], "failed": [], "summary": {}}
+
+    for item in data_items {
+        item_id = "unknown"
+        if item != none {
+            if "id" in item {
+                item_id = item["id"]
+            }
+        } else {
+            item_id = "none"
+        }
+        print("Processing item:", item_id)
+
+        current_item = item
+        failed = false
+        failure_stage = ""
+        failure_reason = ""
+
+        try {
+            for stage in pipeline {
+                try {
+                    current_item = stage["func"](current_item)
+                } catch (e as ValueError) {
+                    if stage["name"] == "enrichment" and "skipping" in e.message {
+                        print("Item", item_id, "skipped at", stage["name"])
+                        failed = true
+                        failure_stage = stage["name"]
+                        failure_reason = "Skipped: " + e.message
+                        break
+                    } else {
+                        throw e  # Re-throw for other validation errors
+                    }
+                } catch (e) {
+                    failed = true
+                    failure_stage = stage["name"]
+                    failure_reason = e.type + ": " + e.message
+                    throw e
+                }
+
+            if not failed {
+                append(results["processed"], current_item)
+                print("✓ Item", item_id, "processed successfully")
+            }
+
+        } catch (e) {
+            error_info = {
+                "original_item": item,
+                "failed_at": failure_stage,
+                "reason": failure_reason if failure_reason != "" else e.message,
+                "error_type": e.type
+            }
+            append(results["failed"], error_info)
+            print("✗ Item", item_id, "failed at", failure_stage + ":", e.message)
+
+        } finally {
+            print("Item", item_id, "processing completed")
+        }
+
+        print("---")
+    }
+
+    # Generate summary
+    total_items = len(data_items)
+    successful_count = len(results["processed"])
+    success_rate = 0
+    if total_items > 0 {
+        success_rate = (successful_count * 100) / total_items
+    }
+
+    results["summary"] = {
+        "total_items": total_items,
+        "successful": successful_count,
+        "failed": len(results["failed"]),
+        "success_rate": success_rate
+    }
+
+    return results
+}
+
+# Test data processing pipeline
+test_data = [
+    {"id": "item1", "name": "Valid Item 1"},
+    {"id": "item2", "name": "Valid Item 2"},
+    {"id": "ERROR", "name": "This will fail at transformation"},
+    {"id": "SKIP", "name": "This will be skipped at enrichment"},
+    none,  # This will fail at validation
+    {"name": "No ID item"},  # This will fail at validation
+    {"id": "item6", "name": "Valid Item 6"}
+]
+
+print("Processing batch of", len(test_data), "items")
+batch_results = process_data_batch(test_data)
+
+print()
+print("=== BATCH PROCESSING SUMMARY ===")
+summary = batch_results["summary"]
+print("Total items:", summary["total_items"])
+print("Successful:", summary["successful"])
+print("Failed:", summary["failed"])
+print("Success rate:", str(summary["success_rate"]) + "%")
+
+if len(batch_results["failed"]) > 0 {
+    print()
+    print("Failed items:")
+    for failure in batch_results["failed"] {
+        print("- Failed at", failure["failed_at"] + ":", failure["reason"])
+    }
+}
+
+print()
+print("=== End of Practical Exception Handling Examples ===")
+print("This example demonstrated:")
+print("✓ User input validation with custom exceptions")
+print("✓ Resource management with finally blocks")
+print("✓ Retry logic with exception handling")
+print("✓ Data processing pipelines with error recovery")
+print("✓ Comprehensive error reporting and logging")
+print("✓ Multiple exception types and typed catching")
+print("✓ Exception chaining and context preservation")

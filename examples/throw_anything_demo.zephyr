@@ -1,0 +1,229 @@
+# Throw Anything Demo
+# Demonstrates Zephyr's ability to throw and catch ANY object type
+
+print("=== Throw Anything Demo ===")
+print("Zephyr allows throwing any object, not just exceptions!")
+print()
+
+# Test 1: Basic Types
+print("1. Throwing Basic Types:")
+
+try {
+    throw 42
+} catch (val) {
+    print("  Integer:", val, "→ Math:", val + 10)
+}
+
+try {
+    throw "Hello World"
+} catch (msg) {
+    print("  String:", msg, "→ Length:", len(msg))
+}
+
+try {
+    throw true
+} catch (flag) {
+    print("  Boolean:", flag, "→ Negated:", not flag)
+}
+
+try {
+    throw [1, 2, 3, 4, 5]
+} catch (arr) {
+    total = 0
+    for item in arr {
+        total = total + item
+    }
+    print("  List:", arr, "→ Sum:", total)
+}
+
+try {
+    throw {"name": "Alice", "age": 30}
+} catch (obj) {
+    print("  Dict: name =", obj["name"], ", age =", obj["age"])
+}
+
+print()
+
+# Test 2: Functions
+print("2. Throwing Functions:")
+
+func greet(name) {
+    return "Hello, " + name + "!"
+}
+
+try {
+    throw greet
+} catch (func_obj) {
+    print("  Caught function:", func_obj("Bob"))
+}
+
+try {
+    multiplier = x -> x * 3
+    throw multiplier
+} catch (lambda_obj) {
+    print("  Caught lambda: 7 * 3 =", lambda_obj(7))
+}
+
+print()
+
+# Test 3: Custom Objects
+print("3. Throwing Custom Objects:")
+
+class Person {
+    func __init__(name, age) {
+        self.name = name
+        self.age = age
+    }
+
+    func greet() {
+        return "Hi, I'm " + self.name
+    }
+}
+
+try {
+    person = Person("Charlie", 25)
+    throw person
+} catch (p) {
+    print("  Caught person:", p.greet(), "- Age:", p.age)
+}
+
+print()
+
+# Test 4: Error Information Objects
+print("4. Rich Error Information:")
+
+func risky_operation(should_fail) {
+    if should_fail {
+        # Instead of a simple exception, throw rich error info
+        throw {
+            "error": true,
+            "code": 500,
+            "message": "Operation failed",
+            "details": {
+                "reason": "Network timeout",
+                "retry_after": 30,
+                "contact": "support@example.com"
+            },
+            "timestamp": "2024-01-01T12:00:00"
+        }
+    }
+    return "Success!"
+}
+
+try {
+    result = risky_operation(true)
+} catch (error_info) {
+    print("  Rich error caught:")
+    print("    Code:", error_info["code"])
+    print("    Message:", error_info["message"])
+    print("    Reason:", error_info["details"]["reason"])
+    print("    Retry after:", error_info["details"]["retry_after"], "seconds")
+}
+
+print()
+
+# Test 5: Control Flow with Thrown Objects
+print("5. Control Flow Patterns:")
+
+func get_config(env) {
+    if env == "prod" {
+        return {"db": "prod-db", "debug": false}
+    } else if env == "dev" {
+        return {"db": "dev-db", "debug": true}
+    } else {
+        # Throw default config instead of returning it
+        throw {"db": "default-db", "debug": false, "fallback": true}
+    }
+}
+
+environments = ["prod", "dev", "test"]
+
+for env in environments {
+    print("  Environment:", env)
+    try {
+        config = get_config(env)
+        print("    Normal config: db =", config["db"])
+    } catch (default_config) {
+        print("    Using fallback config: db =", default_config["db"])
+        print("    Fallback mode:", default_config["fallback"])
+    }
+}
+
+print()
+
+# Test 6: Mixed with Real Exceptions
+print("6. Mixed with Real Exception Objects:")
+
+func test_mixed(throw_type) {
+    if throw_type == "exception" {
+        throw RuntimeError("Real exception object")
+    } else if throw_type == "number" {
+        throw 999
+    } else {
+        throw "Just a string"
+    }
+}
+
+test_types = ["exception", "number", "string"]
+
+for test_type in test_types {
+    try {
+        test_mixed(test_type)
+    } catch (e as RuntimeError) {
+        print("  Caught RuntimeError:", e.message, "(type:", e.type + ")")
+    } catch (val) {
+        print("  Caught non-exception:", val, "(type:" , type(val) + ")")
+    }
+}
+
+print()
+
+# Test 7: Practical Example - Validation Results
+print("7. Practical Validation Example:")
+
+func validate_email(email) {
+    if email == none {
+        throw {"valid": false, "field": "email", "error": "required"}
+    }
+
+    if len(email) == 0 {
+        throw {"valid": false, "field": "email", "error": "empty"}
+    }
+
+    if not ("@" in email) {
+        throw {
+            "valid": false,
+            "field": "email",
+            "error": "format",
+            "suggestion": "Email must contain @"
+        }
+    }
+
+    return {"valid": true, "email": email}
+}
+
+test_emails = ["user@example.com", "", none, "invalid-email"]
+
+for email in test_emails {
+    print("  Validating:", email)
+    try {
+        result = validate_email(email)
+        print("    ✓ Valid:", result["email"])
+    } catch (validation_result) {
+        print("    ✗ Invalid -", validation_result["error"])
+        if "suggestion" in validation_result {
+            print("      Tip:", validation_result["suggestion"])
+        }
+    }
+}
+
+print()
+print("=== Demo Complete ===")
+print()
+print("KEY BENEFITS:")
+print("✓ Any object can be thrown - ultimate flexibility")
+print("✓ Caught objects keep their original type and properties")
+print("✓ Rich error information beyond simple exception messages")
+print("✓ Creative control flow patterns")
+print("✓ Works alongside traditional exception handling")
+print("✓ Enables powerful error handling architectures")

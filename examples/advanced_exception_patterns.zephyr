@@ -1,0 +1,551 @@
+# Advanced Exception Handling Patterns
+# This example showcases sophisticated exception handling patterns and edge cases
+
+print("=== Advanced Exception Handling Patterns ===\n")
+
+# Pattern 1: Exception Context Managers
+print("Pattern 1: Exception Context Managers")
+
+class ResourceManager {
+    func __init__(resource_name) {
+        self.resource_name = resource_name
+        self.acquired = false
+        self.cleanup_called = false
+    }
+
+    func acquire() {
+        if self.resource_name == "failing_resource" {
+            throw IOError("Failed to acquire resource: " + self.resource_name)
+        }
+        self.acquired = true
+        print("✓ Acquired resource:", self.resource_name)
+        return self
+    }
+
+    func release() {
+        if self.acquired {
+            print("✓ Released resource:", self.resource_name)
+            self.acquired = false
+        }
+        self.cleanup_called = true
+    }
+
+    func use_resource() {
+        if not self.acquired {
+            throw RuntimeError("Resource not acquired: " + self.resource_name)
+        }
+
+        if self.resource_name == "unstable_resource" {
+            throw RuntimeError("Resource operation failed")
+        }
+
+        print("✓ Using resource:", self.resource_name)
+        return "Resource operation result"
+    }
+}
+
+func with_resource_manager(resource_name, operation) {
+    manager = ResourceManager(resource_name)
+    try {
+        manager.acquire()
+        return operation(manager)
+    } finally {
+        manager.release()
+    }
+}
+
+# Test resource manager pattern
+test_resources = ["stable_resource", "failing_resource", "unstable_resource"]
+
+for resource in test_resources {
+    print("Testing resource:", resource)
+    try {
+        result = with_resource_manager(resource, func(mgr) {
+            return mgr.use_resource()
+        })
+        print("Result:", result)
+    } catch (e as IOError) {
+        print("Resource acquisition failed:", e.message)
+    } catch (e as RuntimeError) {
+        print("Resource operation failed:", e.message)
+    } catch (e) {
+        print("Unexpected error:", e.type, "-", e.message)
+    }
+    print("---")
+}
+
+print()
+
+# Pattern 2: Exception Hierarchies and Inheritance Simulation
+print("Pattern 2: Exception Classification System")
+
+class ExceptionClassifier {
+    func classify_error(error) {
+        error_type = error.type
+        error_message = error.message
+
+        if error_type == "IndexError" {
+            return {"category": "DataAccess", "severity": "Medium", "recoverable": true}
+        } else if error_type == "TypeError" {
+            return {"category": "TypeSystem", "severity": "High", "recoverable": false}
+        } else if error_type == "ValueError" {
+            if "validation" in error_message {
+                return {"category": "UserInput", "severity": "Low", "recoverable": true}
+            } else {
+                return {"category": "DataIntegrity", "severity": "High", "recoverable": false}
+            }
+        } else if error_type == "IOError" {
+            return {"category": "System", "severity": "Medium", "recoverable": true}
+        } else {
+            return {"category": "Unknown", "severity": "Critical", "recoverable": false}
+        }
+    }
+
+    func handle_classified_error(error, classification) {
+        print("Error Classification:")
+        print("  Type:", error.type)
+        print("  Message:", error.message)
+        print("  Category:", classification["category"])
+        print("  Severity:", classification["severity"])
+        print("  Recoverable:", classification["recoverable"])
+
+        if classification["recoverable"] {
+            print("  Action: Attempting recovery")
+            return self.attempt_recovery(classification)
+        } else {
+            print("  Action: Logging and escalating")
+            return false
+        }
+    }
+
+    func attempt_recovery(classification) {
+        if classification["category"] == "DataAccess" {
+            print("  Recovery: Using default values")
+            return true
+        } else if classification["category"] == "UserInput" {
+            print("  Recovery: Requesting new input")
+            return true
+        } else if classification["category"] == "System" {
+            print("  Recovery: Retrying operation")
+            return true
+        }
+        return false
+    }
+}
+
+func test_error_classification(test_cases) {
+    classifier = ExceptionClassifier()
+
+    for test_case in test_cases {
+        print("Testing:", test_case["description"])
+
+        try {
+            # Execute the test case
+            test_case["action"]()
+        } catch (e) {
+            classification = classifier.classify_error(e)
+            recovered = classifier.handle_classified_error(e, classification)
+
+            if recovered {
+                print("  Result: ✓ Error handled and recovered")
+            } else {
+                print("  Result: ✗ Error requires manual intervention")
+            }
+        }
+        print("=" * 50)
+    }
+}
+
+# Test cases for error classification
+error_test_cases = [
+    {
+        "description": "Index access error",
+        "action": func() {
+            data = [1, 2, 3]
+            return data[10]
+        }
+    },
+    {
+        "description": "Type conversion error",
+        "action": func() {
+            throw TypeError("Cannot convert 'string' to 'int'")
+        }
+    },
+    {
+        "description": "User input validation error",
+        "action": func() {
+            throw ValueError("User input validation failed: email format invalid")
+        }
+    },
+    {
+        "description": "Data integrity error",
+        "action": func() {
+            throw ValueError("Data corruption detected in database record")
+        }
+    },
+    {
+        "description": "File I/O error",
+        "action": func() {
+            throw IOError("Permission denied: cannot write to file")
+        }
+    }
+]
+
+test_error_classification(error_test_cases)
+
+print()
+
+# Pattern 3: Exception Aggregation and Batch Error Handling
+print("Pattern 3: Exception Aggregation and Batch Processing")
+
+class BatchProcessor {
+    func __init__() {
+        self.errors = []
+        self.successes = []
+        self.warnings = []
+    }
+
+    func process_items(items, processor_func) {
+        for i, item in enumerate(items) {
+            try {
+                result = processor_func(item, i)
+                append(self.successes, {"index": i, "item": item, "result": result})
+
+            } catch (e as ValueError) {
+                if "warning" in e.message {
+                    warning_info = {
+                        "index": i,
+                        "item": item,
+                        "message": e.message,
+                        "type": "warning"
+                    }
+                    append(self.warnings, warning_info)
+                } else {
+                    error_info = {
+                        "index": i,
+                        "item": item,
+                        "error": e.type,
+                        "message": e.message,
+                        "recoverable": true
+                    }
+                    append(self.errors, error_info)
+                }
+
+            } catch (e) {
+                error_info = {
+                    "index": i,
+                    "item": item,
+                    "error": e.type,
+                    "message": e.message,
+                    "recoverable": false
+                }
+                append(self.errors, error_info)
+            }
+        }
+
+        return self.generate_report()
+    }
+
+    func generate_report() {
+        total = len(self.successes) + len(self.errors) + len(self.warnings)
+
+        return {
+            "total_processed": total,
+            "successful": len(self.successes),
+            "errors": len(self.errors),
+            "warnings": len(self.warnings),
+            "success_rate": (len(self.successes) / total * 100) if total > 0 else 0,
+            "error_details": self.errors,
+            "warning_details": self.warnings,
+            "recoverable_errors": len([e for e in self.errors if e["recoverable"]])
+        }
+    }
+}
+
+# Complex item processor with various failure modes
+func complex_item_processor(item, index) {
+    # Simulate different processing scenarios
+    if item == none {
+        throw TypeError("Item cannot be none")
+    }
+
+    if item == "skip" {
+        throw ValueError("Item marked for skipping")
+    }
+
+    if item == "warn" {
+        throw ValueError("Processing warning: item needs attention")
+    }
+
+    if item == "critical" {
+        throw RuntimeError("Critical processing failure")
+    }
+
+    if index > 10 {
+        throw RuntimeError("Batch size limit exceeded")
+    }
+
+    # Simulate successful processing
+    return "processed_" + str(item) + "_at_" + str(index)
+}
+
+# Test batch processing
+test_batch = [
+    "item1", "item2", "skip", "item4", "warn",
+    "item6", "critical", "item8", none, "item10",
+    "item11", "item12"  # These will exceed the index limit
+]
+
+print("Processing batch of", len(test_batch), "items")
+processor = BatchProcessor()
+report = processor.process_items(test_batch, complex_item_processor)
+
+print("\n=== BATCH PROCESSING REPORT ===")
+print("Total items:", report["total_processed"])
+print("Successful:", report["successful"])
+print("Errors:", report["errors"])
+print("Warnings:", report["warnings"])
+print("Success rate:", str(report["success_rate"]) + "%")
+print("Recoverable errors:", report["recoverable_errors"])
+
+if len(report["error_details"]) > 0 {
+    print("\nError Details:")
+    for error in report["error_details"] {
+        print("  [" + str(error["index"]) + "] " + str(error["item"]) + " -> " + error["error"] + ": " + error["message"])
+    }
+}
+
+if len(report["warning_details"]) > 0 {
+    print("\nWarning Details:")
+    for warning in report["warning_details"] {
+        print("  [" + str(warning["index"]) + "] " + str(warning["item"]) + " -> " + warning["message"])
+    }
+}
+
+print()
+
+# Pattern 4: Exception Chaining and Context Preservation
+print("Pattern 4: Exception Chaining and Context Preservation")
+
+class ContextualException {
+    func __init__(exception_type, message, context, original_exception) {
+        self.exception = Exception(exception_type, message)
+        self.context = context
+        self.original_exception = original_exception
+        self.timestamp = "2024-01-01T12:00:00"
+        self.call_stack = self.generate_call_stack()
+    }
+
+    func generate_call_stack() {
+        return [
+            "main_operation()",
+            "secondary_operation()",
+            "low_level_operation()"
+        ]
+    }
+
+    func get_full_error_chain() {
+        chain = []
+        current = self
+
+        while current != none {
+            append(chain, {
+                "type": current.exception.type,
+                "message": current.exception.message,
+                "context": current.context,
+                "timestamp": current.timestamp
+            })
+
+            current = current.original_exception if hasattr(current, "original_exception") else none
+        }
+
+        return chain
+    }
+
+    func throw_exception() {
+        throw self.exception
+    }
+}
+
+func create_chained_exception(operation_name, original_error) {
+    context = {
+        "operation": operation_name,
+        "user_id": "user123",
+        "session_id": "session456",
+        "request_id": "req789"
+    }
+
+    message = "Operation '" + operation_name + "' failed: " + original_error.message
+    return ContextualException("RuntimeError", message, context, original_error)
+}
+
+func low_level_database_operation() {
+    throw IOError("Database connection timeout")
+}
+
+func mid_level_service_call() {
+    try {
+        return low_level_database_operation()
+    } catch (e) {
+        chained = create_chained_exception("mid_level_service_call", e)
+        chained.throw_exception()
+    }
+}
+
+func high_level_business_logic() {
+    try {
+        return mid_level_service_call()
+    } catch (e) {
+        chained = create_chained_exception("high_level_business_logic", e)
+        chained.throw_exception()
+    }
+}
+
+# Test exception chaining
+print("Testing exception chaining through call stack")
+
+try {
+    result = high_level_business_logic()
+} catch (e) {
+    print("Final caught exception:", e.type, "-", e.message)
+    print("This demonstrates how context is preserved through the call chain")
+    print("In a real system, each level would add its own context")
+}
+
+print()
+
+# Pattern 5: Exception-Safe State Machines
+print("Pattern 5: Exception-Safe State Machine")
+
+class StateMachine {
+    func __init__() {
+        self.state = "initial"
+        self.history = ["initial"]
+        self.error_state = none
+    }
+
+    func transition(new_state, operation) {
+        previous_state = self.state
+
+        try {
+            # Validate transition
+            if not self.is_valid_transition(self.state, new_state) {
+                throw ValueError("Invalid state transition from '" + self.state + "' to '" + new_state + "'")
+            }
+
+            # Perform the operation
+            result = operation() if operation != none else none
+
+            # Update state
+            self.state = new_state
+            append(self.history, new_state)
+            self.error_state = none
+
+            print("✓ Transitioned:", previous_state, "->", new_state)
+            return result
+
+        } catch (e) {
+            # Restore previous state and record error
+            self.error_state = {
+                "error": e,
+                "failed_transition": {"from": previous_state, "to": new_state},
+                "timestamp": "2024-01-01T12:00:00"
+            }
+
+            print("✗ Transition failed:", previous_state, "->", new_state, "-", e.message)
+            print("  State remains:", self.state)
+
+            # Re-throw for caller to handle
+            throw RuntimeError("State transition failed: " + e.message)
+        }
+    }
+
+    func is_valid_transition(from_state, to_state) {
+        valid_transitions = {
+            "initial": ["connecting", "error"],
+            "connecting": ["connected", "error"],
+            "connected": ["processing", "disconnecting", "error"],
+            "processing": ["connected", "completed", "error"],
+            "completed": ["initial", "error"],
+            "disconnecting": ["initial", "error"],
+            "error": ["initial", "connecting"]
+        }
+
+        return to_state in valid_transitions.get(from_state, [])
+    }
+
+    func get_status() {
+        return {
+            "current_state": self.state,
+            "history": self.history,
+            "error_state": self.error_state,
+            "is_error": self.error_state != none
+        }
+    }
+
+    func recover_from_error() {
+        if self.error_state != none {
+            print("Attempting recovery from error state")
+            self.error_state = none
+            try {
+                self.transition("initial", none)
+                return true
+            } catch (e) {
+                print("Recovery failed:", e.message)
+                return false
+            }
+        }
+        return true
+    }
+}
+
+# Test state machine with exception handling
+machine = StateMachine()
+
+state_operations = [
+    {"to": "connecting", "operation": func() { print("  Establishing connection..."); return "connection_id" }},
+    {"to": "connected", "operation": func() { print("  Connection established"); return none }},
+    {"to": "processing", "operation": func() { print("  Processing data..."); return "process_result" }},
+    {"to": "invalid", "operation": none},  # This should fail
+    {"to": "connected", "operation": func() { print("  Returning to connected state"); return none }},
+    {"to": "completed", "operation": func() { throw RuntimeError("Processing error occurred") }},  # This should fail
+    {"to": "disconnecting", "operation": func() { print("  Disconnecting..."); return none }},
+    {"to": "initial", "operation": func() { print("  Reset to initial state"); return none }}
+]
+
+for operation in state_operations {
+    try {
+        result = machine.transition(operation["to"], operation["operation"])
+        if result != none {
+            print("  Operation result:", result)
+        }
+    } catch (e as ValueError) {
+        print("  Invalid transition:", e.message)
+    } catch (e as RuntimeError) {
+        print("  Operation failed:", e.message)
+        # Attempt recovery
+        if machine.recover_from_error() {
+            print("  Recovery successful")
+        } else {
+            print("  Recovery failed")
+        }
+    }
+
+    print("  Current status:", machine.get_status()["current_state"])
+    print("  ---")
+}
+
+print("\nFinal machine status:")
+status = machine.get_status()
+print("State:", status["current_state"])
+print("History:", status["history"])
+print("Has errors:", status["is_error"])
+
+print("\n=== Advanced Exception Patterns Complete ===")
+print("Demonstrated patterns:")
+print("✓ Resource management with exception safety")
+print("✓ Error classification and automatic recovery")
+print("✓ Batch processing with error aggregation")
+print("✓ Exception chaining and context preservation")
+print("✓ Exception-safe state machine transitions")
+print("✓ Comprehensive error reporting and logging")

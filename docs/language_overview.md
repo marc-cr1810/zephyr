@@ -16,7 +16,7 @@ Zephyr is a modern, expressive scripting language designed for clarity, flexibil
 - **Object-Oriented Programming:** Create classes and objects for structured, modular code.
 
 - **Control Flow:** Direct program execution with conditionals, switches, and loops.
-- **Error Handling:** Catch and handle runtime errors gracefully.
+- **Comprehensive Error Handling:** Robust exception system with try-catch-finally blocks, typed exception catching, and seamless C++ integration.
 - **Asynchronous Programming:** Write non-blocking code with async/await and parallel execution.
 - **Advanced Assignment:** Update values in-place with compound operators and increment/decrement.
 - **Optional Chaining:** Safely access nested properties and indexes, avoiding errors on `none`.
@@ -62,8 +62,8 @@ Zephyr is a modern, expressive scripting language designed for clarity, flexibil
 - **Conditional Statements:** Branch logic with `if`/`else`.
 - **Switch Statements:** Multi-way branching with fall-through.
 - **Loops:** Iterate with `for`, `while`, and infinite `loop`.
-- **Break/Continue:** Control loop execution.
-- **Error Handling:** Use `try`/`catch` for safe code.
+- **Break/Continue:** Control loop execution with proper exception handling integration.
+- **Exception Handling:** Comprehensive try-catch-finally blocks with typed exception catching, multiple catch clauses, and control flow preservation.
 
 ---
 
@@ -94,6 +94,20 @@ Zephyr is a modern, expressive scripting language designed for clarity, flexibil
 - **Await:** Pause until a result is ready.
 - **Spawn:** Run tasks in parallel.
 - **All:** Wait for multiple tasks.
+
+---
+
+## Exception Handling
+
+- **Try-Catch-Finally:** Comprehensive error handling with guaranteed cleanup code execution.
+- **Typed Exception Catching:** Use the `as` keyword to catch specific exception types.
+- **Multiple Catch Blocks:** Chain multiple catch blocks for different exception types.
+- **Blank Catch Blocks:** Handle exceptions without accessing the exception object.
+- **Exception Objects:** First-class exception objects with type, message, and cause properties.
+- **Built-in Exception Types:** IndexError, TypeError, ValueError, KeyError, and more.
+- **Custom Exceptions:** Create and throw custom exception objects.
+- **Control Flow Integration:** Proper handling of return, break, and continue statements in exception contexts.
+- **C++ Integration:** Seamless conversion between C++ exceptions and Zephyr exception objects.
 
 ---
 

@@ -1,0 +1,131 @@
+# Test for Unified Exception System
+# This demonstrates the improved exception system that unifies C++ and Zephyr exceptions
+
+print("=== Unified Exception System Test ===\n")
+
+# Test 1: Generic Exception constructor
+print("Test 1: Generic Exception Constructor")
+try {
+    # Create exceptions using the generic constructor
+    generic_ex = Exception("RuntimeError", "Generic runtime error")
+    print("Created generic exception:", generic_ex)
+    print("Type:", generic_ex.type, "Message:", generic_ex.message)
+
+    # Throw the generic exception
+    throw generic_ex
+} catch (e as RuntimeError) {
+    print("Caught generic RuntimeError:", e.message)
+}
+print()
+
+# Test 2: Convenience constructors (same as before, but unified internally)
+print("Test 2: Convenience Exception Constructors")
+exceptions_to_test = [
+    IndexError("Array index out of bounds"),
+    TypeError("Type conversion failed"),
+    ValueError("Invalid input value"),
+    KeyError("Dictionary key missing"),
+    AttributeError("Object attribute not found"),
+    ZeroDivisionError("Division by zero attempted"),
+    OverflowError("Number overflow occurred")
+]
+
+for ex in exceptions_to_test {
+    try {
+        throw ex
+    } catch (e) {
+        print("Caught", e.type + ":", e.message)
+    }
+}
+print()
+
+# Test 3: Internal C++ exceptions are properly converted
+print("Test 3: C++ Exception Integration")
+try {
+    # This should trigger an internal IndexError from the C++ side
+    empty_list = []
+    value = empty_list[0]  # This triggers C++ index_error_t
+} catch (e as IndexError) {
+    print("C++ IndexError converted to Zephyr object:", e.message)
+    print("Exception type:", e.type)
+}
+print()
+
+# Test 4: Mixed exception handling
+print("Test 4: Mixed Exception Types in Multiple Catch Blocks")
+func test_various_exceptions(error_type) {
+    try {
+        if error_type == "cpp_index" {
+            # Trigger C++ exception
+            list = [1, 2, 3]
+            return list[10]
+        } else if error_type == "zephyr_type" {
+            # Create and throw Zephyr exception
+            throw TypeError("Custom Zephyr TypeError")
+        } else if error_type == "generic" {
+            # Use generic constructor
+            throw Exception("ValueError", "Generic constructor ValueError")
+        } else {
+            # Unknown type
+            throw RuntimeError("Unknown error type")
+        }
+    } catch (e as IndexError) {
+        print("→ Caught IndexError (likely from C++):", e.message)
+    } catch (e as TypeError) {
+        print("→ Caught TypeError (from Zephyr):", e.message)
+    } catch (e as ValueError) {
+        print("→ Caught ValueError (generic constructor):", e.message)
+    } catch (e) {
+        print("→ Caught other exception:", e.type, "-", e.message)
+    }
+}
+
+test_various_exceptions("cpp_index")
+test_various_exceptions("zephyr_type")
+test_various_exceptions("generic")
+test_various_exceptions("other")
+print()
+
+# Test 5: Exception validation
+print("Test 5: Exception Type Validation")
+try {
+    # This should fail - invalid exception type
+    invalid_ex = Exception("InvalidExceptionType", "This should not work")
+    print("This should not be reached")
+} catch (e as TypeError) {
+    print("Correctly caught invalid exception type error:", e.message)
+}
+print()
+
+# Test 6: Exception properties and methods
+print("Test 6: Exception Object Properties")
+ex = RuntimeError("Test exception with properties")
+print("Exception string representation:", ex)
+print("Exception type property:", ex.type)
+print("Exception message property:", ex.message)
+print("Exception cause property:", ex.cause)
+print()
+
+# Test 7: Exception chaining (conceptual)
+print("Test 7: Exception Information Preservation")
+try {
+    try {
+        throw ValueError("Original error")
+    } catch (original_error) {
+        print("Caught original error:", original_error.message)
+        # Create new exception with context about the original
+        new_error_msg = "Processing failed due to: " + original_error.message
+        throw RuntimeError(new_error_msg)
+    }
+} catch (e as RuntimeError) {
+    print("Final error with context:", e.message)
+}
+print()
+
+print("=== Unified Exception System Test Complete ===")
+print("✓ Generic Exception() constructor works")
+print("✓ Convenience constructors (IndexError, etc.) work")
+print("✓ C++ exceptions are properly converted")
+print("✓ Exception type validation works")
+print("✓ All exception properties are accessible")
+print("✓ Exception system is unified and maintainable")

@@ -97,6 +97,7 @@ public:
     auto visit(break_statement_t& node) -> void override;
     auto visit(continue_statement_t& node) -> void override;
     auto visit(try_catch_statement_t& node) -> void override;
+    auto visit(throw_statement_t& node) -> void override;
     auto visit(with_statement_t& node) -> void override;
     auto visit(list_destructuring_assignment_t& node) -> void override;
     auto visit(switch_statement_t& node) -> void override;
@@ -233,6 +234,19 @@ public:
         : std::runtime_error("Continue statement")
     {
     }
+};
+
+// Exception class for throwing arbitrary objects
+class thrown_object_t : public std::runtime_error
+{
+public:
+    thrown_object_t(std::shared_ptr<object_t> obj)
+        : std::runtime_error("Thrown object"), thrown_value(obj)
+    {
+    }
+
+public:
+    std::shared_ptr<object_t> thrown_value;
 };
 
 class break_loop_t : public std::runtime_error

@@ -31,6 +31,8 @@ class empty_declaration_t;
 class empty_typed_declaration_t;
 class member_variable_declaration_t;
 class with_statement_t;
+class catch_clause_t;
+class throw_statement_t;
 
 // AST Node Forward Declarations
 class number_t;
@@ -82,6 +84,7 @@ class program_t;
 class break_statement_t;
 class continue_statement_t;
 class try_catch_statement_t;
+class throw_statement_t;
 class in_expression_t;
 
 class bitwise_and_op_t;
@@ -152,6 +155,7 @@ public:
     virtual auto visit(break_statement_t& node) -> void = 0;
     virtual auto visit(continue_statement_t& node) -> void = 0;
     virtual auto visit(try_catch_statement_t& node) -> void = 0;
+    virtual auto visit(throw_statement_t& node) -> void = 0;
     virtual auto visit(with_statement_t& node) -> void = 0;
     virtual auto visit(list_destructuring_assignment_t& node) -> void = 0;
     virtual auto visit(switch_statement_t& node) -> void = 0;
@@ -1335,12 +1339,37 @@ public:
     std::unique_ptr<expression_t> return_value;
 };
 
+// Structure to represent a catch clause
+struct catch_clause_t
+{
+    std::string exception_variable_name;
+    std::string exception_type_name;
+    bool has_exception_type;
+    bool has_variable;
+    std::unique_ptr<block_t> catch_block;
+
+    catch_clause_t(std::string_view variable_name, std::string_view type_name, bool has_type, bool has_var, std::unique_ptr<block_t> block)
+        : exception_variable_name(variable_name), exception_type_name(type_name), has_exception_type(has_type), has_variable(has_var), catch_block(std::move(block))
+    {
+    }
+};
+
 class try_catch_statement_t : public statement_t
 {
 public:
-    try_catch_statement_t(std::unique_ptr<block_t> try_block, std::string_view exception_variable_name, std::unique_ptr<block_t> catch_block, int line, int column, int end_line, int end_column)
-        : statement_t(line, column, end_line, end_column), try_block(std::move(try_block)), exception_variable_name(exception_variable_name), catch_block(std::move(catch_block))
+    try_catch_statement_t(std::unique_ptr<block_t> try_block, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), try_block(std::move(try_block))
     {
+    }
+
+    auto add_catch_clause(std::unique_ptr<catch_clause_t> clause) -> void
+    {
+        catch_clauses.push_back(std::move(clause));
+    }
+
+    auto set_finally_block(std::unique_ptr<block_t> block) -> void
+    {
+        finally_block = std::move(block);
     }
 
     auto accept(ast_visitor_t& visitor) -> void override;
@@ -1348,8 +1377,23 @@ public:
 
 public:
     std::unique_ptr<block_t> try_block;
-    std::string exception_variable_name;
-    std::unique_ptr<block_t> catch_block;
+    std::vector<std::unique_ptr<catch_clause_t>> catch_clauses;
+    std::unique_ptr<block_t> finally_block;
+};
+
+class throw_statement_t : public statement_t
+{
+public:
+    throw_statement_t(std::unique_ptr<expression_t> exception_expression, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), exception_expression(std::move(exception_expression))
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
+
+public:
+    std::unique_ptr<expression_t> exception_expression;
 };
 
 class list_destructuring_assignment_t : public statement_t

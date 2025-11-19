@@ -1,0 +1,90 @@
+# Simple Test for Throwing Non-Exception Objects
+# Tests what happens when we throw integers, strings, etc.
+
+print("=== Simple Throw Test ===")
+print()
+
+# Test 1: Throwing an integer
+print("Test 1: Throwing integer 42")
+try {
+    throw 42
+} catch (val) {
+    print("Caught:", val)
+    print("Type:", type(val))
+    print("Can do math:", val + 8, "=", val + 8)
+}
+print()
+
+# Test 2: Throwing a string
+print("Test 2: Throwing string 'Hello'")
+try {
+    throw "Hello"
+} catch (val) {
+    print("Caught:", val)
+    print("Type:", type(val))
+    print("Length:", len(val))
+}
+print()
+
+# Test 3: Throwing a list
+print("Test 3: Throwing list [1, 2, 3]")
+try {
+    throw [1, 2, 3]
+} catch (val) {
+    print("Caught:", val)
+    print("Type:", type(val))
+    print("First element:", val[0])
+}
+print()
+
+# Test 4: Throwing a dictionary
+print("Test 4: Throwing dictionary")
+try {
+    throw {"name": "Alice", "age": 30}
+} catch (val) {
+    print("Caught:", val)
+    print("Type:", type(val))
+    print("Name:", val["name"])
+}
+print()
+
+# Test 5: Throwing boolean
+print("Test 5: Throwing boolean true")
+try {
+    throw true
+} catch (val) {
+    print("Caught:", val)
+    print("Type:", type(val))
+    print("Logical NOT:", not val)
+}
+print()
+
+# Test 6: Mixed with real exceptions
+print("Test 6: Mix with real exceptions")
+
+func test_throw(what_to_throw) {
+    if what_to_throw == "number" {
+        throw 999
+    } else if what_to_throw == "exception" {
+        throw RuntimeError("Real exception")
+    } else {
+        throw "Unknown type"
+    }
+}
+
+test_cases = ["number", "exception", "other"]
+
+for test in test_cases {
+    print("Throwing:", test)
+    try {
+        test_throw(test)
+    } catch (e as RuntimeError) {
+        print("  Caught as RuntimeError:", e.message)
+    } catch (val) {
+        print("  Caught as generic:", val, "- type:", type(val))
+    }
+}
+
+print()
+print("=== Test Complete ===")
+print("Result: Any object can be thrown and caught!")

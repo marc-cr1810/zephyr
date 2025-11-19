@@ -29,6 +29,8 @@ namespace
         {"this", token_type_e::this_token},
         {"try", token_type_e::try_token},
         {"catch", token_type_e::catch_token},
+        {"finally", token_type_e::finally_token},
+        {"throw", token_type_e::throw_token},
         {"with", token_type_e::with_token},
         {"as", token_type_e::as_token},
         {"break", token_type_e::break_token},

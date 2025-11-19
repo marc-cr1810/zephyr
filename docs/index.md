@@ -8,6 +8,7 @@ Welcome to the comprehensive documentation for the Zephyr programming language a
 
 - **[Language Overview](language_overview.md)** - Introduction to Zephyr syntax and features
 - **[Getting Started](getting_started.md)** - Basic tutorial for the Zephyr language
+- **[Exception Handling](examples/25_exception_handling.md)** - Comprehensive error handling with try-catch-finally
 - **[Function Overloading](FUNCTION_OVERLOADING.md)** - Advanced function overloading features
 - **[Style Guide](style_guide.md)** - Coding conventions and best practices
 - **[FAQ](faq.md)** - Frequently asked questions
@@ -58,6 +59,7 @@ If you want to contribute to Zephyr:
 ### Zephyr Language
 - **Modern Syntax** - Clean, readable syntax inspired by Python and JavaScript
 - **Dynamic Typing** - Flexible type system with optional type hints
+- **Exception Handling** - Comprehensive try-catch-finally with typed exception catching
 - **Async/Await** - Built-in support for asynchronous programming
 - **Object-Oriented** - Classes, inheritance, and interfaces
 - **Functional Programming** - First-class functions and lambda expressions
@@ -77,6 +79,7 @@ If you want to contribute to Zephyr:
 |-------|-------------|----------|
 | **Basic Syntax** | Variables, functions, control flow | [Language Overview](language_overview.md) |
 | **Type System** | Dynamic typing, type hints, conversions | [Language Overview](language_overview.md) |
+| **Exception Handling** | Try-catch-finally, typed exceptions, error recovery | [Exception Handling](examples/25_exception_handling.md) |
 | **Object-Oriented** | Classes, inheritance, polymorphism | [Language Overview](language_overview.md) |
 | **Async Programming** | Promises, async/await, concurrency | [Language Overview](language_overview.md) |
 | **Function Overloading** | Advanced function overloading system | [Function Overloading](FUNCTION_OVERLOADING.md) |

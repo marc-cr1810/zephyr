@@ -475,6 +475,54 @@ auto all_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
     return scheduler.all(promises);
 }
 
+// Utility function to convert C++ exceptions to Zephyr exception objects
+auto create_exception_object_from_cpp_exception(const zephyr::runtime_error_with_location_t& cpp_exception) -> std::shared_ptr<exception_object_t>
+{
+    return std::make_shared<exception_object_t>(cpp_exception.error_name(), cpp_exception.what());
+}
+
+// Utility function to get exception type name from string (for validation)
+auto is_valid_exception_type(const std::string& type_name) -> bool
+{
+    static const std::set<std::string> valid_types = {
+        "IndexError", "TypeError", "ValueError", "RuntimeError", "KeyError",
+        "AttributeError", "ZeroDivisionError", "OverflowError", "NameError",
+        "ImportError", "IOError", "SyntaxError", "InternalError"
+    };
+    return valid_types.find(type_name) != valid_types.end();
+}
+
+// Generic exception constructor builtin function
+auto Exception_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() < 1 || args.size() > 2) {
+        throw type_error_t("Exception() takes 1 or 2 arguments (" + std::to_string(args.size()) + " given)");
+    }
+    
+    // First argument: exception type name
+    auto type_obj = std::dynamic_pointer_cast<string_object_t>(args[0]);
+    if (!type_obj) {
+        throw type_error_t("Exception() first argument must be a string, not '" + args[0]->type()->name() + "'");
+    }
+    
+    std::string exception_type = type_obj->value();
+    if (!is_valid_exception_type(exception_type)) {
+        throw type_error_t("'" + exception_type + "' is not a valid exception type");
+    }
+    
+    // Second argument: message (optional, defaults to empty string)
+    std::string message = "";
+    if (args.size() == 2) {
+        auto message_obj = std::dynamic_pointer_cast<string_object_t>(args[1]);
+        if (!message_obj) {
+            throw type_error_t("Exception() second argument must be a string, not '" + args[1]->type()->name() + "'");
+        }
+        message = message_obj->value();
+    }
+    
+    return std::make_shared<exception_object_t>(exception_type, message);
+}
+
 // Sized integer builtin functions
 auto i8_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
@@ -789,6 +837,98 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
         s_builtin_functions["u32"] = std::make_shared<builtin_function_object_t>(u32_builtin, "u32");
         s_builtin_functions["i64"] = std::make_shared<builtin_function_object_t>(i64_builtin, "i64");
         s_builtin_functions["u64"] = std::make_shared<builtin_function_object_t>(u64_builtin, "u64");
+        
+        // Generic exception constructor function
+        s_builtin_functions["Exception"] = std::make_shared<builtin_function_object_t>(Exception_builtin, "Exception");
+        
+        // Convenience exception constructor functions that use the generic Exception function
+        s_builtin_functions["IndexError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("IndexError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("IndexError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "IndexError");
+        
+        s_builtin_functions["TypeError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("TypeError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("TypeError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "TypeError");
+        
+        s_builtin_functions["ValueError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("ValueError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("ValueError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "ValueError");
+        
+        s_builtin_functions["RuntimeError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("RuntimeError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("RuntimeError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "RuntimeError");
+        
+        s_builtin_functions["KeyError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("KeyError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("KeyError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "KeyError");
+        
+        s_builtin_functions["AttributeError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("AttributeError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("AttributeError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "AttributeError");
+        
+        s_builtin_functions["ZeroDivisionError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("ZeroDivisionError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("ZeroDivisionError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "ZeroDivisionError");
+        
+        s_builtin_functions["OverflowError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
+            if (args.size() != 1) {
+                throw type_error_t("OverflowError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+            }
+            std::vector<std::shared_ptr<object_t>> exception_args = {
+                std::make_shared<string_object_t>("OverflowError"),
+                args[0]
+            };
+            return Exception_builtin(exception_args);
+        }, "OverflowError");
         
         s_builtins_initialized = true;
     }
@@ -3328,16 +3468,269 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
 
+    bool exception_caught = false;
+    std::shared_ptr<exception_object_t> caught_exception = nullptr;
+    bool return_occurred = false;
+    return_value_t return_exception = return_value_t{nullptr};
+    bool break_occurred = false;
+    break_exception_t break_exception;
+    bool continue_occurred = false;
+    continue_exception_t continue_exception;
+
     try
     {
         node.try_block->accept(*this);
     }
+    catch (const return_value_t& return_val)
+    {
+        // Handle return statement - need to execute finally block first
+        return_occurred = true;
+        return_exception = return_val;
+    }
+    catch (const break_exception_t& break_val)
+    {
+        // Handle break statement - need to execute finally block first
+        break_occurred = true;
+        break_exception = break_val;
+    }
+    catch (const continue_exception_t& continue_val)
+    {
+        // Handle continue statement - need to execute finally block first
+        continue_occurred = true;
+        continue_exception = continue_val;
+    }
+    catch (const thrown_object_t& thrown_obj)
+    {
+        // Handle thrown arbitrary objects - store directly in first untyped catch
+        bool handled = false;
+        
+        for (const auto& catch_clause : node.catch_clauses)
+        {
+            if (!catch_clause->has_exception_type && catch_clause->has_variable)
+            {
+                // Store the original thrown object directly
+                auto& current_scope = m_scope_stack.back();
+                current_scope[catch_clause->exception_variable_name] = thrown_obj.thrown_value;
+                
+                try
+                {
+                    catch_clause->catch_block->accept(*this);
+                    handled = true;
+                    break;
+                }
+                catch (const return_value_t& catch_return)
+                {
+                    return_occurred = true;
+                    return_exception = catch_return;
+                    handled = true;
+                    break;
+                }
+                catch (const break_exception_t& catch_break)
+                {
+                    break_occurred = true;
+                    break_exception = catch_break;
+                    handled = true;
+                    break;
+                }
+                catch (const continue_exception_t& catch_continue)
+                {
+                    continue_occurred = true;
+                    continue_exception = catch_continue;
+                    handled = true;
+                    break;
+                }
+            }
+        }
+        
+        // If not handled, create exception object for potential re-throw
+        if (!handled)
+        {
+            caught_exception = std::make_shared<exception_object_t>("RuntimeError", thrown_obj.thrown_value->to_string());
+            exception_caught = true;
+        }
+    }
+    catch (const zephyr::runtime_error_with_location_t& e)
+    {
+        // Create an exception object from the C++ exception
+        caught_exception = create_exception_object_from_cpp_exception(e);
+        exception_caught = true;
+    }
     catch (const std::runtime_error& e)
     {
-        auto& current_scope = m_scope_stack.back();
-        current_scope[node.exception_variable_name] = std::make_shared<string_object_t>(e.what());
-        node.catch_block->accept(*this);
+        // Fallback for other runtime errors
+        caught_exception = std::make_shared<exception_object_t>("RuntimeError", e.what());
+        exception_caught = true;
     }
+
+    // Store whether to re-throw after finally block
+    bool should_rethrow = false;
+    
+    // Process catch blocks if an exception was thrown (but not for control flow)
+    if (exception_caught && caught_exception && !return_occurred && !break_occurred && !continue_occurred)
+    {
+        bool handled = false;
+        
+        for (const auto& catch_clause : node.catch_clauses)
+        {
+            bool should_handle = false;
+            
+            if (!catch_clause->has_exception_type)
+            {
+                // Untyped catch - handles any exception
+                should_handle = true;
+            }
+            else
+            {
+                // Typed catch - check if exception type matches
+                std::string exception_type = caught_exception->get_exception_type();
+                should_handle = (exception_type == catch_clause->exception_type_name);
+            }
+            
+            if (should_handle)
+            {
+                // Set exception variable in scope if needed
+                if (catch_clause->has_variable)
+                {
+                    auto& current_scope = m_scope_stack.back();
+                    current_scope[catch_clause->exception_variable_name] = caught_exception;
+                }
+                
+                try
+                {
+                    // Execute catch block
+                    catch_clause->catch_block->accept(*this);
+                    handled = true;
+                    break;
+                }
+                catch (const return_value_t& catch_return)
+                {
+                    // Return from catch block - override original return
+                    return_occurred = true;
+                    return_exception = catch_return;
+                    handled = true;
+                    break;
+                }
+                catch (const break_exception_t& catch_break)
+                {
+                    // Break from catch block - override original exception
+                    break_occurred = true;
+                    break_exception = catch_break;
+                    handled = true;
+                    break;
+                }
+                catch (const continue_exception_t& catch_continue)
+                {
+                    // Continue from catch block - override original exception
+                    continue_occurred = true;
+                    continue_exception = catch_continue;
+                    handled = true;
+                    break;
+                }
+            }
+        }
+        
+        // If no catch block handled the exception, we'll re-throw after finally
+        if (!handled)
+        {
+            should_rethrow = true;
+        }
+    }
+    
+    // Always execute finally block if present
+    if (node.finally_block)
+    {
+        try
+        {
+            node.finally_block->accept(*this);
+        }
+        catch (const return_value_t& finally_return)
+        {
+            // Return from finally block overrides everything
+            return_occurred = true;
+            return_exception = finally_return;
+            should_rethrow = false; // Cancel any pending exception
+            break_occurred = false;
+            continue_occurred = false;
+        }
+        catch (const break_exception_t& finally_break)
+        {
+            // Break from finally block overrides everything
+            break_occurred = true;
+            break_exception = finally_break;
+            should_rethrow = false; // Cancel any pending exception
+            return_occurred = false;
+            continue_occurred = false;
+        }
+        catch (const continue_exception_t& finally_continue)
+        {
+            // Continue from finally block overrides everything
+            continue_occurred = true;
+            continue_exception = finally_continue;
+            should_rethrow = false; // Cancel any pending exception
+            return_occurred = false;
+            break_occurred = false;
+        }
+        catch (const zephyr::runtime_error_with_location_t& finally_exception)
+        {
+            // Exception in finally block overrides everything
+            should_rethrow = true;
+            return_occurred = false;
+            caught_exception = create_exception_object_from_cpp_exception(finally_exception);
+        }
+        catch (const std::runtime_error& finally_exception)
+        {
+            // Exception in finally block overrides everything
+            should_rethrow = true;
+            return_occurred = false;
+            caught_exception = std::make_shared<exception_object_t>("RuntimeError", finally_exception.what());
+        }
+    }
+    
+    zephyr::current_error_location() = saved_location;
+    
+    // Handle control flow after finally
+    if (return_occurred)
+    {
+        throw return_exception;
+    }
+    else if (break_occurred)
+    {
+        throw break_exception;
+    }
+    else if (continue_occurred)
+    {
+        throw continue_exception;
+    }
+    else if (should_rethrow && caught_exception)
+    {
+        throw zephyr::runtime_error_with_location_t(caught_exception->get_message(), caught_exception->get_exception_type());
+    }
+}
+
+
+
+auto interpreter_t::visit(throw_statement_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::current_error_location();
+    zephyr::current_error_location().line = node.line;
+    zephyr::current_error_location().column = node.column;
+    zephyr::current_error_location().length = node.end_column - node.column + 1;
+
+    // Evaluate the exception expression
+    node.exception_expression->accept(*this);
+    auto exception_value = m_current_result;
+    
+    if (auto exception_obj = std::dynamic_pointer_cast<exception_object_t>(exception_value))
+    {
+        // Throw the exception object as a C++ exception
+        throw zephyr::runtime_error_with_location_t(exception_obj->get_message(), exception_obj->get_exception_type());
+    }
+    else
+    {
+        // Throw any other object directly
+        throw thrown_object_t(exception_value);
+    }
+    
     zephyr::current_error_location() = saved_location;
 }
 
@@ -3923,7 +4316,12 @@ auto interpreter_t::contains_return_with_value(block_t* block) -> bool
             if (contains_return_with_value(try_catch_stmt->try_block.get())) {
                 return true;
             }
-            if (contains_return_with_value(try_catch_stmt->catch_block.get())) {
+            for (const auto& catch_clause : try_catch_stmt->catch_clauses) {
+                if (contains_return_with_value(catch_clause->catch_block.get())) {
+                    return true;
+                }
+            }
+            if (try_catch_stmt->finally_block && contains_return_with_value(try_catch_stmt->finally_block.get())) {
                 return true;
             }
         }

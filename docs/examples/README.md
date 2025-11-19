@@ -28,5 +28,6 @@ This directory contains categorized documentation and annotated code samples for
 - [Interfaces](22_interfaces.md)
 - [Built-in Functions](23_built_in_functions.md)
 - [Import System](24_import_system.md)
+- [Exception Handling](25_exception_handling.md)
 
 See each file for detailed explanations and annotated code samples.
