@@ -1,0 +1,334 @@
+# test_sized_integers.zephyr
+# Test suite for Zephyr's unified integer system with sized types
+# Validates that the int_object correctly handles all sized integer operations
+
+print("Running Sized Integer Tests...")
+
+# Test 1: Basic type creation and inference
+print("Test 1: Basic type creation")
+val1: i8 = 127
+val2: u8 = 255
+val3: i16 = -32768
+val4: u16 = 65535
+val5: i32 = -2147483648
+val6: u32 = 4294967295
+val7: i64 = 9223372036854775807
+
+if type(val1) == "i8" {
+    print("✓ i8 type creation passed")
+} else {
+    print("✗ i8 type creation failed")
+}
+
+if type(val2) == "u8" {
+    print("✓ u8 type creation passed")
+} else {
+    print("✗ u8 type creation failed")
+}
+
+if type(val3) == "i16" {
+    print("✓ i16 type creation passed")
+} else {
+    print("✗ i16 type creation failed")
+}
+
+if type(val4) == "u16" {
+    print("✓ u16 type creation passed")
+} else {
+    print("✗ u16 type creation failed")
+}
+
+if type(val5) == "i32" {
+    print("✓ i32 type creation passed")
+} else {
+    print("✗ i32 type creation failed")
+}
+
+if type(val6) == "u32" {
+    print("✓ u32 type creation passed")
+} else {
+    print("✗ u32 type creation failed")
+}
+
+if type(val7) == "i64" {
+    print("✓ i64 type creation passed")
+} else {
+    print("✗ i64 type creation failed")
+}
+
+print("Basic type creation tests completed")
+
+# Test 2: Arithmetic operations
+print("\nTest 2: Arithmetic operations")
+a: u8 = 100
+b: u8 = 50
+sum_result = a + b
+diff_result = a - b
+mul_result = a * 2
+div_result = a / 2
+
+if sum_result == 150 {
+    print("✓ u8 addition passed")
+} else {
+    print("✗ u8 addition failed:", sum_result)
+}
+
+if diff_result == 50 {
+    print("✓ u8 subtraction passed")
+} else {
+    print("✗ u8 subtraction failed:", diff_result)
+}
+
+if mul_result == 200 {
+    print("✓ u8 multiplication passed")
+} else {
+    print("✗ u8 multiplication failed:", mul_result)
+}
+
+if div_result == 50 {
+    print("✓ u8 division passed")
+} else {
+    print("✗ u8 division failed:", div_result)
+}
+
+print("Arithmetic operation tests completed")
+
+# Test 3: Type promotion
+print("\nTest 3: Type promotion")
+small: i8 = 10
+medium: i16 = 1000
+result = small + medium
+
+if type(result) == "i16" {
+    print("✓ Type promotion to i16 passed")
+} else {
+    print("✗ Type promotion failed, got:", type(result))
+}
+
+if result == 1010 {
+    print("✓ Type promotion calculation passed")
+} else {
+    print("✗ Type promotion calculation failed:", result)
+}
+
+print("Type promotion tests completed")
+
+# Test 4: Comparison operations
+print("\nTest 4: Comparison operations")
+val_a: i16 = 1000
+val_b: u16 = 1000
+val_c: i16 = 500
+
+if val_a == val_b {
+    print("✓ Cross-type equality passed")
+} else {
+    print("✗ Cross-type equality failed")
+}
+
+if val_a > val_c {
+    print("✓ i16 comparison passed")
+} else {
+    print("✗ i16 comparison failed")
+}
+
+if val_b >= 1000 {
+    print("✓ u16 comparison passed")
+} else {
+    print("✗ u16 comparison failed")
+}
+
+print("Comparison operation tests completed")
+
+# Test 5: Bitwise operations
+print("\nTest 5: Bitwise operations")
+x: u8 = 170  # 10101010
+y: u8 = 85   # 01010101
+
+and_result = x & y
+or_result = x | y
+xor_result = x ^ y
+
+if and_result == 0 {
+    print("✓ Bitwise AND passed")
+} else {
+    print("✗ Bitwise AND failed:", and_result)
+}
+
+if or_result == 255 {
+    print("✓ Bitwise OR passed")
+} else {
+    print("✗ Bitwise OR failed:", or_result)
+}
+
+if xor_result == 255 {
+    print("✓ Bitwise XOR passed")
+} else {
+    print("✗ Bitwise XOR failed:", xor_result)
+}
+
+print("Bitwise operation tests completed")
+
+# Test 6: Type specification
+print("\nTest 6: Type specification")
+original: i32 = 1000
+specified_u16: u16 = 1000
+specified_i8: i8 = 100
+
+if type(specified_u16) == "u16" {
+    print("✓ Specify u16 type passed")
+} else {
+    print("✗ Specify u16 type failed:", type(specified_u16))
+}
+
+if specified_u16 == 1000 {
+    print("✓ Specify u16 value passed")
+} else {
+    print("✗ Specify u16 value failed:", specified_u16)
+}
+
+if type(specified_i8) == "i8" {
+    print("✓ Specify i8 type passed")
+} else {
+    print("✗ Specify i8 type failed:", type(specified_i8))
+}
+
+if specified_i8 == 100 {
+    print("✓ Specify i8 value passed")
+} else {
+    print("✗ Specify i8 value failed:", specified_i8)
+}
+
+print("Type specification tests completed")
+
+# Test 7: Collections with mixed types
+print("\nTest 7: Collections with mixed types")
+i8_10: i8 = 10
+u8_200: u8 = 200
+i16_neg5000: i16 = -5000
+u32_1m: u32 = 1000000
+mixed_list = [i8_10, u8_200, i16_neg5000, u32_1m]
+
+if len(mixed_list) == 4 {
+    print("✓ Mixed list length correct")
+} else {
+    print("✗ Mixed list length incorrect:", len(mixed_list))
+}
+
+if mixed_list[0] == 10 {
+    print("✓ i8 in list correct")
+} else {
+    print("✗ i8 in list incorrect:", mixed_list[0])
+}
+
+if mixed_list[1] == 200 {
+    print("✓ u8 in list correct")
+} else {
+    print("✗ u8 in list incorrect:", mixed_list[1])
+}
+
+if mixed_list[2] == -5000 {
+    print("✓ i16 in list correct")
+} else {
+    print("✗ i16 in list incorrect:", mixed_list[2])
+}
+
+if mixed_list[3] == 1000000 {
+    print("✓ u32 in list correct")
+} else {
+    print("✗ u32 in list incorrect:", mixed_list[3])
+}
+
+print("Mixed type collection tests completed")
+
+# Test 8: Function parameters with types
+print("\nTest 8: Function parameters with types")
+func double_u8(val) {
+    return val * 2
+}
+
+func add_i16(a, b) {
+    return a + b
+}
+
+u8_50: u8 = 50
+i16_100: i16 = 100
+i16_neg50: i16 = -50
+result1 = double_u8(u8_50)
+result2 = add_i16(i16_100, i16_neg50)
+
+if result1 == 100 {
+    print("✓ u8 function parameter passed")
+} else {
+    print("✗ u8 function parameter failed:", result1)
+}
+
+if result2 == 50 {
+    print("✓ i16 function parameters passed")
+} else {
+    print("✗ i16 function parameters failed:", result2)
+}
+
+print("Function parameter tests completed")
+
+# Test 9: Automatic type selection for literals
+print("\nTest 9: Automatic type selection")
+auto1 = 100
+auto2 = 70000
+auto3 = 3000000000
+
+# Default literals should be i32 unless they exceed range
+if type(auto1) == "i32" {
+    print("✓ Small literal defaults to i32")
+} else {
+    print("✗ Small literal type wrong:", type(auto1))
+}
+
+if type(auto2) == "i32" {
+    print("✓ Medium literal is i32")
+} else {
+    print("✗ Medium literal type wrong:", type(auto2))
+}
+
+if type(auto3) == "i64" {
+    print("✓ Large literal promotes to i64")
+} else {
+    print("✗ Large literal type wrong:", type(auto3))
+}
+
+print("Automatic type selection tests completed")
+
+# Test 10: Range boundary tests
+print("\nTest 10: Range boundary tests")
+max_i8: i8 = 127
+min_i8: i8 = -128
+max_u8: u8 = 255
+min_u8: u8 = 0
+
+if max_i8 == 127 {
+    print("✓ i8 max value correct")
+} else {
+    print("✗ i8 max value incorrect:", max_i8)
+}
+
+if min_i8 == -128 {
+    print("✓ i8 min value correct")
+} else {
+    print("✗ i8 min value incorrect:", min_i8)
+}
+
+if max_u8 == 255 {
+    print("✓ u8 max value correct")
+} else {
+    print("✗ u8 max value incorrect:", max_u8)
+}
+
+if min_u8 == 0 {
+    print("✓ u8 min value correct")
+} else {
+    print("✗ u8 min value incorrect:", min_u8)
+}
+
+print("Range boundary tests completed")
+
+print("\n=== SIZED INTEGER TESTS COMPLETED ===")
+print("The unified int_object system handles all sized integer types!")

@@ -689,7 +689,67 @@ std::unique_ptr<expression_t> parser_t::factor() {
         return std::make_unique<spawn_expression_t>(std::move(expr), spawn_token.line, spawn_token.column, expr->end_line, expr->end_column);
     } else if (token.type == token_type_e::number) {
         eat(token_type_e::number);
-        return std::make_unique<number_t>(std::stoi(std::string(token.text)), token.line, token.column, token.line, token.column + token.text.length() - 1);
+        
+        // Try to parse as int first, but handle overflow by creating sized integer
+        try {
+            int value = std::stoi(std::string(token.text));
+            return std::make_unique<number_t>(value, token.line, token.column, token.line, token.column + token.text.length() - 1);
+        } catch (const std::out_of_range&) {
+            // Value is too large for int, create a sized integer literal instead
+            try {
+                int64_t large_value = std::stoll(std::string(token.text));
+                
+                // Create a sized_int_literal_t with appropriate suffix to handle large values
+                std::string value_str = std::string(token.text);
+                std::string suffix;
+                
+                // Determine appropriate suffix based on value range
+                if (large_value >= 0 && large_value <= UINT32_MAX) {
+                    suffix = "u32"; // Use u32 for large positive values
+                } else if (large_value >= INT64_MIN && large_value <= INT64_MAX) {
+                    suffix = "i64"; // Use i64 for very large values
+                } else {
+                    throw syntax_error_t("Integer literal " + std::string(token.text) + " is too large to represent.");
+                }
+                
+                return std::make_unique<sized_number_t>(large_value, suffix, token.line, token.column, token.line, token.column + token.text.length() - 1);
+                
+            } catch (const std::out_of_range&) {
+                throw syntax_error_t("Integer literal " + std::string(token.text) + " is too large to represent.");
+            }
+        } catch (const std::invalid_argument&) {
+            throw syntax_error_t("Invalid integer literal: " + std::string(token.text));
+        }
+    } else if (token.type == token_type_e::sized_int_literal) {
+        eat(token_type_e::sized_int_literal);
+        
+        // Parse the sized integer literal
+        std::string full_text = std::string(token.text);
+        
+        // Find where the suffix starts (first letter after digits)
+        size_t suffix_start = 0;
+        for (size_t i = 0; i < full_text.length(); ++i) {
+            if (isalpha(full_text[i])) {
+                suffix_start = i;
+                break;
+            }
+        }
+        
+        if (suffix_start == 0) {
+            zephyr::current_error_location() = {token.line, token.column, static_cast<int>(token.text.length())};
+            throw zephyr::syntax_error_t("Invalid sized integer literal: " + full_text);
+        }
+        
+        std::string value_str = full_text.substr(0, suffix_start);
+        std::string suffix = full_text.substr(suffix_start);
+        
+        try {
+            int64_t value = std::stoll(value_str);
+            return std::make_unique<sized_number_t>(value, suffix, token.line, token.column, token.line, token.column + token.text.length() - 1);
+        } catch (const std::exception&) {
+            zephyr::current_error_location() = {token.line, token.column, static_cast<int>(token.text.length())};
+            throw zephyr::syntax_error_t("Sized integer literal value too large: " + value_str);
+        }
     } else if (token.type == token_type_e::hex_number) {
         eat(token_type_e::hex_number);
         std::string hex_str = std::string(token.text).substr(2); // Skip "0x" or "0X"
@@ -1182,7 +1242,7 @@ std::unique_ptr<expression_t> parser_t::factor() {
     } else if (token.type == token_type_e::lbrace) {
         return dictionary_literal();
     } else {
-        std::string error_msg = "Invalid factor in expression. Expected number, float_token, string, true_token, false_token, name, lparen, lbracket, lbrace, or lambda expression, but got " +
+        std::string error_msg = "Invalid factor in expression. Expected number, sized_int_literal, float_token, string, true_token, false_token, name, lparen, lbracket, lbrace, or lambda expression, but got " +
                                 token_type_to_string(m_current_token.type) +
                                 " ('" + std::string(m_current_token.text) + "').";
         zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};

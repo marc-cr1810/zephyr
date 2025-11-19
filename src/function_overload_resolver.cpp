@@ -177,6 +177,19 @@ auto function_overload_resolver_t::is_type_compatible(const std::string& param_t
     return false;
 }
 
+/**
+ * Calculates a match score for a function parameter against an argument type.
+ * Higher scores indicate better matches for overload resolution.
+ * 
+ * Scoring system:
+ * - 1000: Exact type match (highest priority)
+ * - 800: Untyped parameter (high priority fallback)
+ * - 500-distance: Implicit conversion (medium priority, closer types score higher)
+ * - -1: No match possible
+ * 
+ * This enables natural function calls like func(val: u8) with int arguments
+ * while maintaining proper type safety and overload resolution priorities.
+ */
 auto function_overload_resolver_t::calculate_type_match_score(const std::string& param_type, const std::string& arg_type) const -> int
 {
     // Exact match gets highest priority
@@ -192,6 +205,7 @@ auto function_overload_resolver_t::calculate_type_match_score(const std::string&
     }
     
     // Implicit conversion gets lower priority
+    // The distance calculation ensures that closer type matches score higher
     if (overload_utils::is_implicitly_convertible(arg_type, param_type))
     {
         int distance = overload_utils::get_type_distance(arg_type, param_type);
@@ -364,6 +378,22 @@ auto types_equal(const std::string& type1, const std::string& type2) -> bool
     return type1 == type2;
 }
 
+/**
+ * Determines if one type can be implicitly converted to another.
+ * 
+ * This function supports the following conversions:
+ * 1. Basic type conversions (int→float, various types→string)
+ * 2. Integer type conversions (unified integer system)
+ * 
+ * For integer types, all integer types can convert to each other:
+ * - int ↔ i8, u8, i16, u16, i32, u32, i64, u64
+ * - Between any sized integer types
+ * - Range validation and truncation happens at runtime
+ * 
+ * @param from_type The source type name
+ * @param to_type The target type name
+ * @return true if conversion is possible, false otherwise
+ */
 auto is_implicitly_convertible(const std::string& from_type, const std::string& to_type) -> bool
 {
     // Basic implicit conversions
@@ -385,6 +415,19 @@ auto is_implicitly_convertible(const std::string& from_type, const std::string& 
     if (from_type == "bool" && to_type == "string")
     {
         return true;
+    }
+    
+    // Integer type conversions - unified integer system support
+    // All integer types can convert to each other with the unified int_object_t
+    // The actual range checking and conversion happens at runtime during function calls
+    std::vector<std::string> integer_types = {"int", "i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
+    
+    auto from_is_int = std::find(integer_types.begin(), integer_types.end(), from_type) != integer_types.end();
+    auto to_is_int = std::find(integer_types.begin(), integer_types.end(), to_type) != integer_types.end();
+    
+    if (from_is_int && to_is_int)
+    {
+        return true;  // All integer types are convertible via the unified system
     }
     
     // Add more conversion rules as needed
@@ -412,11 +455,31 @@ auto is_implicitly_convertible_with_object(const std::shared_ptr<object_t>& from
     return false;
 }
 
+/**
+ * Calculates the "distance" between two types for conversion prioritization.
+ * Lower distances indicate preferred conversions in overload resolution.
+ * 
+ * Type conversion distances:
+ * - 0: Exact match
+ * - 1: Preferred conversions (int→float, int→sized integer)
+ * - 2: Standard conversions (sized→sized integer, types→string)
+ * - 3: Less preferred conversions (sized→int)
+ * - 100: Unknown/unsupported conversions
+ * 
+ * For integer types:
+ * - int → sized types: distance 1 (preferred for literals)
+ * - sized → sized types: distance 2 (standard conversion)
+ * - sized → int: distance 3 (less preferred)
+ * 
+ * @param from_type The source type name
+ * @param to_type The target type name  
+ * @return The conversion distance (lower = more preferred)
+ */
 auto get_type_distance(const std::string& from_type, const std::string& to_type) -> int
 {
     if (types_equal(from_type, to_type))
     {
-        return 0;
+        return 0;  // Exact match - highest priority
     }
     
     // Define type distances for common conversions
@@ -433,6 +496,39 @@ auto get_type_distance(const std::string& from_type, const std::string& to_type)
     if (from_type == "bool" && to_type == "string")
     {
         return 2;
+    }
+    
+    // Integer type conversion distances - unified integer system
+    // These distances help the overload resolver choose the best match
+    // when multiple functions could accept a converted argument
+    std::vector<std::string> integer_types = {"int", "i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
+    
+    auto from_is_int = std::find(integer_types.begin(), integer_types.end(), from_type) != integer_types.end();
+    auto to_is_int = std::find(integer_types.begin(), integer_types.end(), to_type) != integer_types.end();
+    
+    if (from_is_int && to_is_int)
+    {
+        // Base distance for integer conversions
+        int distance = 1;
+        
+        // Prefer conversions from int (default) to specific sized types
+        // This makes function calls like func(val: u8) work naturally with int literals
+        if (from_type == "int")
+        {
+            distance = 1; // Low distance for int → sized conversion
+        }
+        // Conversions between sized types have slightly higher distance
+        else if (from_type != "int" && to_type != "int")
+        {
+            distance = 2; // Medium distance for sized → sized conversion
+        }
+        // Conversions from sized types back to int have medium distance
+        else if (from_type != "int" && to_type == "int")
+        {
+            distance = 3; // Higher distance for sized → int conversion
+        }
+        
+        return distance;
     }
     
     // Unknown conversion - high distance

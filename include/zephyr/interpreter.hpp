@@ -43,6 +43,7 @@ public:
     auto visit(list_literal_t& node) -> void override;
     auto visit(dictionary_literal_t& node) -> void override;
     auto visit(name_t& node) -> void override;
+    auto visit(sized_number_t& node) -> void override;
     auto visit(binary_op_t& node) -> void override;
     auto visit(power_op_t& node) -> void override;
     auto visit(comparison_op_t& node) -> void override;
@@ -137,6 +138,14 @@ private:
     auto create_scope() -> void;
     auto destroy_scope() -> void;
     auto validate_type_constraint(const std::string& variable_name, value_t value) -> void;
+    auto convert_value_to_type(value_t value, const std::string& target_type) -> value_t;
+    auto is_integer_type_compatible(const std::string& actual_type, const std::string& expected_type, value_t value) -> bool;
+    auto value_fits_in_integer_type(int64_t value, const std::string& type_name) -> bool;
+    auto is_integer_type_name(const std::string& type_name) -> bool;
+    auto convert_integer_value(value_t value, const std::string& target_type) -> value_t;
+    auto throw_integer_overflow_error(value_t value, const std::string& actual_type, const std::string& expected_type, const std::string& variable_name) -> void;
+    auto get_type_range_string(const std::string& type_name) -> std::string;
+    auto suggest_integer_type_for_value(int64_t value) -> std::string;
     auto handle_runtime_error(const std::string& message, int line, int column) -> void;
     auto resolve_variable(const std::string& variable_name) -> value_t;
     auto variable(const std::string& variable_name, value_t value) -> void;

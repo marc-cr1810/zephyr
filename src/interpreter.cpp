@@ -1,7 +1,9 @@
 #include "zephyr/interpreter.hpp"
+#include "zephyr/objects/int_object.hpp"
 #include "zephyr/function_overload_resolver.hpp"
 #include "zephyr/module_loader.hpp"
 #include "zephyr/error_context.hpp"
+
 #include "zephyr/errors.hpp"
 #include "zephyr/objects/function_object.hpp"
 #include "zephyr/objects/lambda_object.hpp"
@@ -11,6 +13,8 @@
 #include "zephyr/async_scheduler.hpp"
 #include "zephyr/errors.hpp"
 #include "zephyr/types/type.hpp"
+#include <set>
+#include <limits>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -99,6 +103,13 @@ auto int_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
 
     if (type_name == "int") {
         return obj; // Already an int
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        // Convert any integer kind to regular int
+        int64_t value = int_obj->value_64();
+        if (value < INT32_MIN || value > INT32_MAX) {
+            throw overflow_error_t("Integer value " + std::to_string(value) + " out of range for int");
+        }
+        return int_object_t::create_int(static_cast<int>(value));
     } else if (type_name == "float") {
         auto float_obj = std::static_pointer_cast<float_object_t>(obj);
         return std::make_shared<int_object_t>(static_cast<int>(float_obj->value()));
@@ -260,6 +271,11 @@ auto type_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sh
 {
     if (args.size() != 1) {
         throw type_error_t("type() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    // Special handling for unified integer objects to return correct type names
+    if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(args[0])) {
+        return std::make_shared<string_object_t>(int_obj->type_name());
     }
 
     return std::make_shared<string_object_t>(args[0]->type()->name());
@@ -459,6 +475,264 @@ auto all_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::sha
     return scheduler.all(promises);
 }
 
+// Sized integer builtin functions
+auto i8_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("i8() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "i8") {
+        return obj; // Already an i8
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        int64_t value = int_obj->value_64();
+        if (value < -128 || value > 127) {
+            throw overflow_error_t("Value " + std::to_string(value) + " out of range for i8");
+        }
+        return int_object_t::create_i8(static_cast<int8_t>(value));
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            int64_t value = std::stoll(str_obj->value());
+            if (value < -128 || value > 127) {
+                throw overflow_error_t("Value " + std::to_string(value) + " out of range for i8");
+            }
+            return int_object_t::create_i8(static_cast<int8_t>(value));
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for i8(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("i8() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
+auto u8_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("u8() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "u8") {
+        return obj; // Already a u8
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        int64_t value = int_obj->value_64();
+        if (value < 0 || value > 255) {
+            throw overflow_error_t("Value " + std::to_string(value) + " out of range for u8");
+        }
+        return int_object_t::create_u8(static_cast<uint8_t>(value));
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            int64_t value = std::stoll(str_obj->value());
+            if (value < 0 || value > 255) {
+                throw overflow_error_t("Value " + std::to_string(value) + " out of range for u8");
+            }
+            return int_object_t::create_u8(static_cast<uint8_t>(value));
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for u8(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("u8() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
+auto i16_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("i16() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "i16") {
+        return obj; // Already an i16
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        int64_t value = int_obj->value_64();
+        if (value < -32768 || value > 32767) {
+            throw overflow_error_t("Value " + std::to_string(value) + " out of range for i16");
+        }
+        return int_object_t::create_i16(static_cast<int16_t>(value));
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            int64_t value = std::stoll(str_obj->value());
+            if (value < -32768 || value > 32767) {
+                throw overflow_error_t("Value " + std::to_string(value) + " out of range for i16");
+            }
+            return int_object_t::create_i16(static_cast<int16_t>(value));
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for i16(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("i16() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
+auto u16_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("u16() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "u16") {
+        return obj; // Already a u16
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        int64_t value = int_obj->value_64();
+        if (value < 0 || value > 65535) {
+            throw overflow_error_t("Value " + std::to_string(value) + " out of range for u16");
+        }
+        return int_object_t::create_u16(static_cast<uint16_t>(value));
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            int64_t value = std::stoll(str_obj->value());
+            if (value < 0 || value > 65535) {
+                throw overflow_error_t("Value " + std::to_string(value) + " out of range for u16");
+            }
+            return int_object_t::create_u16(static_cast<uint16_t>(value));
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for u16(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("u16() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
+auto i32_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("i32() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "i32") {
+        return obj; // Already an i32
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        int64_t value = int_obj->value_64();
+        if (value < INT32_MIN || value > INT32_MAX) {
+            throw overflow_error_t("Value " + std::to_string(value) + " out of range for i32");
+        }
+        return int_object_t::create_i32(static_cast<int32_t>(value));
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            int64_t value = std::stoll(str_obj->value());
+            if (value < INT32_MIN || value > INT32_MAX) {
+                throw overflow_error_t("Value " + std::to_string(value) + " out of range for i32");
+            }
+            return int_object_t::create_i32(static_cast<int32_t>(value));
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for i32(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("i32() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
+auto u32_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("u32() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "u32") {
+        return obj; // Already a u32
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        int64_t value = int_obj->value_64();
+        if (value < 0) {
+            throw overflow_error_t("Negative value " + std::to_string(value) + " cannot convert to u32");
+        }
+        if (value > UINT32_MAX) {
+            throw overflow_error_t("Value " + std::to_string(value) + " out of range for u32");
+        }
+        return int_object_t::create_u32(static_cast<uint32_t>(value));
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            int64_t value = std::stoll(str_obj->value());
+            if (value < 0 || value > UINT32_MAX) {
+                throw overflow_error_t("Value " + std::to_string(value) + " out of range for u32");
+            }
+            return int_object_t::create_u32(static_cast<uint32_t>(value));
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for u32(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("u32() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
+auto i64_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("i64() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "i64") {
+        return obj; // Already an i64
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        return int_object_t::create_i64(int_obj->value_64());
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            int64_t value = std::stoll(str_obj->value());
+            return int_object_t::create_i64(value);
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for i64(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("i64() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
+auto u64_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
+{
+    if (args.size() != 1) {
+        throw type_error_t("u64() takes exactly one argument (" + std::to_string(args.size()) + " given)");
+    }
+
+    auto obj = args[0];
+    auto type_name = obj->type()->name();
+
+    if (type_name == "u64") {
+        return obj; // Already a u64
+    } else if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(obj)) {
+        int64_t value = int_obj->value_64();
+        if (value < 0) {
+            throw overflow_error_t("Negative value " + std::to_string(value) + " cannot convert to u64");
+        }
+        return int_object_t::create_u64(static_cast<uint64_t>(value));
+    } else if (type_name == "string") {
+        auto str_obj = std::static_pointer_cast<string_object_t>(obj);
+        try {
+            uint64_t value = std::stoull(str_obj->value());
+            return int_object_t::create_u64(value);
+        } catch (const std::exception&) {
+            throw value_error_t("invalid literal for u64(): '" + str_obj->value() + "'");
+        }
+    } else {
+        throw type_error_t("u64() argument must be a string or integer, not '" + type_name + "'");
+    }
+}
+
 // Built-in exit function
 auto exit_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t>
 {
@@ -505,6 +779,17 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
         s_builtin_functions["all"] = std::make_shared<builtin_function_object_t>(all_builtin, "all");
         s_builtin_functions["exit"] = std::make_shared<builtin_function_object_t>(exit_builtin, "exit");
         s_builtin_functions["open"] = std::make_shared<builtin_function_object_t>(open_builtin, "open");
+        
+        // Sized integer conversion functions
+        s_builtin_functions["i8"] = std::make_shared<builtin_function_object_t>(i8_builtin, "i8");
+        s_builtin_functions["u8"] = std::make_shared<builtin_function_object_t>(u8_builtin, "u8");
+        s_builtin_functions["i16"] = std::make_shared<builtin_function_object_t>(i16_builtin, "i16");
+        s_builtin_functions["u16"] = std::make_shared<builtin_function_object_t>(u16_builtin, "u16");
+        s_builtin_functions["i32"] = std::make_shared<builtin_function_object_t>(i32_builtin, "i32");
+        s_builtin_functions["u32"] = std::make_shared<builtin_function_object_t>(u32_builtin, "u32");
+        s_builtin_functions["i64"] = std::make_shared<builtin_function_object_t>(i64_builtin, "i64");
+        s_builtin_functions["u64"] = std::make_shared<builtin_function_object_t>(u64_builtin, "u64");
+        
         s_builtins_initialized = true;
     }
 
@@ -546,6 +831,23 @@ auto interpreter_t::visit(number_t& node) -> void
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
     m_current_result = std::make_shared<int_object_t>(node.value);
+    zephyr::current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(sized_number_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::current_error_location();
+    zephyr::current_error_location().line = node.line;
+    zephyr::current_error_location().column = node.column;
+    zephyr::current_error_location().length = node.end_column - node.column + 1;
+    
+    try {
+        m_current_result = std::make_shared<int_object_t>(std::to_string(node.value), node.suffix);
+    } catch (const std::exception& e) {
+        // Convert any construction errors to runtime errors with proper location
+        throw value_error_t(e.what());
+    }
+    
     zephyr::current_error_location() = saved_location;
 }
 
@@ -715,24 +1017,24 @@ auto interpreter_t::visit(power_op_t& node) -> void
     node.right->accept(*this);
     auto right = m_current_result;
 
-    auto left_type = left->type()->name();
-    auto right_type = right->type()->name();
-
-    if (left_type == "int" && right_type == "int")
-    {
-        auto left_int = std::static_pointer_cast<int_object_t>(left);
-        auto right_int = std::static_pointer_cast<int_object_t>(right);
-        m_current_result = std::make_shared<int_object_t>(static_cast<int>(std::pow(left_int->value(), right_int->value())));
-    }
-    else if ((left_type == "int" || left_type == "float") && (right_type == "int" || right_type == "float"))
-    {
-        double left_val = (left_type == "int") ? static_cast<double>(std::static_pointer_cast<int_object_t>(left)->value()) : std::static_pointer_cast<float_object_t>(left)->value();
-        double right_val = (right_type == "int") ? static_cast<double>(std::static_pointer_cast<int_object_t>(right)->value()) : std::static_pointer_cast<float_object_t>(right)->value();
-        m_current_result = std::make_shared<float_object_t>(std::pow(left_val, right_val));
-    }
-    else
-    {
-        throw type_error_t("Unsupported operand types for **: " + left_type + " and " + right_type);
+    // Delegate to the type system for proper power operation handling
+    try {
+        m_current_result = left->power(right);
+    } catch (const type_error_t& e) {
+        // If type doesn't support power operation, try the fallback mixed arithmetic
+        auto left_type = left->type()->name();
+        auto right_type = right->type()->name();
+        
+        if ((left_type == "int" || left_type == "float") && (right_type == "int" || right_type == "float"))
+        {
+            double left_val = (left_type == "int") ? static_cast<double>(std::static_pointer_cast<int_object_t>(left)->value()) : std::static_pointer_cast<float_object_t>(left)->value();
+            double right_val = (right_type == "int") ? static_cast<double>(std::static_pointer_cast<int_object_t>(right)->value()) : std::static_pointer_cast<float_object_t>(right)->value();
+            m_current_result = std::make_shared<float_object_t>(std::pow(left_val, right_val));
+        }
+        else
+        {
+            throw type_error_t("Unsupported operand types for **: " + left_type + " and " + right_type);
+        }
     }
 
     zephyr::current_error_location() = saved_location;
@@ -758,42 +1060,8 @@ auto interpreter_t::visit(comparison_op_t& node) -> void
 
     if (node.operator_token == "==")
     {
-        if (left_type != right_type)
-        {
-            result = false;
-        }
-        else if (left_type == "int")
-        {
-            auto left_int = std::static_pointer_cast<int_object_t>(left);
-            auto right_int = std::static_pointer_cast<int_object_t>(right);
-            result = left_int->value() == right_int->value();
-        }
-        else if (left_type == "float")
-        {
-            auto left_float = std::static_pointer_cast<float_object_t>(left);
-            auto right_float = std::static_pointer_cast<float_object_t>(right);
-            result = left_float->value() == right_float->value();
-        }
-        else if (left_type == "string")
-        {
-            auto left_str = std::static_pointer_cast<string_object_t>(left);
-            auto right_str = std::static_pointer_cast<string_object_t>(right);
-            result = left_str->value() == right_str->value();
-        }
-        else if (left_type == "bool")
-        {
-            auto left_bool = std::static_pointer_cast<boolean_object_t>(left);
-            auto right_bool = std::static_pointer_cast<boolean_object_t>(right);
-            result = left_bool->m_value == right_bool->m_value;
-        }
-        else if (left_type == "none")
-        {
-            result = true; // none == none
-        }
-        else
-        {
-            result = left.get() == right.get(); // Pointer comparison for objects
-        }
+        // Use type's equals method for comparison
+        result = left->type()->equals(left, right);
     }
     else if (node.operator_token == "is")
     {
@@ -808,116 +1076,23 @@ auto interpreter_t::visit(comparison_op_t& node) -> void
     }
     else if (node.operator_token == "!=")
     {
-        // Reuse == logic and negate
-        if (left_type != right_type)
-        {
-            result = true;
-        }
-        else if (left_type == "int")
-        {
-            auto left_int = std::static_pointer_cast<int_object_t>(left);
-            auto right_int = std::static_pointer_cast<int_object_t>(right);
-            result = left_int->value() != right_int->value();
-        }
-        else if (left_type == "float")
-        {
-            auto left_float = std::static_pointer_cast<float_object_t>(left);
-            auto right_float = std::static_pointer_cast<float_object_t>(right);
-            result = left_float->value() != right_float->value();
-        }
-        else if (left_type == "string")
-        {
-            auto left_str = std::static_pointer_cast<string_object_t>(left);
-            auto right_str = std::static_pointer_cast<string_object_t>(right);
-            result = left_str->value() != right_str->value();
-        }
-        else if (left_type == "bool")
-        {
-            auto left_bool = std::static_pointer_cast<boolean_object_t>(left);
-            auto right_bool = std::static_pointer_cast<boolean_object_t>(right);
-            result = left_bool->m_value != right_bool->m_value;
-        }
-        else if (left_type == "none")
-        {
-            result = false; // none != none is false
-        }
-        else
-        {
-            result = left.get() != right.get();
-        }
+        // Use type's equals method and negate
+        result = !left->type()->equals(left, right);
     }
     else if (node.operator_token == "<" || node.operator_token == "<=" ||
              node.operator_token == ">" || node.operator_token == ">=")
     {
-        if (left_type == "int" && right_type == "int")
+        try
         {
-            auto left_int = std::static_pointer_cast<int_object_t>(left);
-            auto right_int = std::static_pointer_cast<int_object_t>(right);
-            int left_val = left_int->value();
-            int right_val = right_int->value();
-
-            if (node.operator_token == "<") result = left_val < right_val;
-            else if (node.operator_token == "<=") result = left_val <= right_val;
-            else if (node.operator_token == ">") result = left_val > right_val;
-            else if (node.operator_token == ">=") result = left_val >= right_val;
+            // Use type's compare method for comparison
+            int compare_result = left->type()->compare(left, right);
+            
+            if (node.operator_token == "<") result = compare_result < 0;
+            else if (node.operator_token == "<=") result = compare_result <= 0;
+            else if (node.operator_token == ">") result = compare_result > 0;
+            else if (node.operator_token == ">=") result = compare_result >= 0;
         }
-        else if (left_type == "float" && right_type == "float")
-        {
-            auto left_float = std::static_pointer_cast<float_object_t>(left);
-            auto right_float = std::static_pointer_cast<float_object_t>(right);
-            double left_val = left_float->value();
-            double right_val = right_float->value();
-
-            if (node.operator_token == "<") result = left_val < right_val;
-            else if (node.operator_token == "<=") result = left_val <= right_val;
-            else if (node.operator_token == ">") result = left_val > right_val;
-            else if (node.operator_token == ">=") result = left_val >= right_val;
-        }
-        else if (left_type == "string" && right_type == "string")
-        {
-            auto left_str = std::static_pointer_cast<string_object_t>(left);
-            auto right_str = std::static_pointer_cast<string_object_t>(right);
-            std::string left_val = left_str->value();
-            std::string right_val = right_str->value();
-
-            if (node.operator_token == "<") result = left_val < right_val;
-            else if (node.operator_token == "<=") result = left_val <= right_val;
-            else if (node.operator_token == ">") result = left_val > right_val;
-            else if (node.operator_token == ">=") result = left_val >= right_val;
-        }
-        else if ((left_type == "int" && right_type == "float") || (left_type == "float" && right_type == "int"))
-        {
-            // Handle mixed int/float comparisons by converting to float
-            double left_val, right_val;
-
-            if (left_type == "int")
-            {
-                auto left_int = std::static_pointer_cast<int_object_t>(left);
-                left_val = static_cast<double>(left_int->value());
-            }
-            else
-            {
-                auto left_float = std::static_pointer_cast<float_object_t>(left);
-                left_val = left_float->value();
-            }
-
-            if (right_type == "int")
-            {
-                auto right_int = std::static_pointer_cast<int_object_t>(right);
-                right_val = static_cast<double>(right_int->value());
-            }
-            else
-            {
-                auto right_float = std::static_pointer_cast<float_object_t>(right);
-                right_val = right_float->value();
-            }
-
-            if (node.operator_token == "<") result = left_val < right_val;
-            else if (node.operator_token == "<=") result = left_val <= right_val;
-            else if (node.operator_token == ">") result = left_val > right_val;
-            else if (node.operator_token == ">=") result = left_val >= right_val;
-        }
-        else
+        catch (const std::exception&)
         {
             throw type_error_t("Cannot compare objects of different types or unsupported types");
         }
@@ -1041,28 +1216,8 @@ auto interpreter_t::visit(unary_op_t& node) -> void
     }
     else if (node.operator_token == '!')
     {
-        bool is_truthy = true;
-        auto type_name = operand->type()->name();
-        if (type_name == "none")
-        {
-            is_truthy = false;
-        }
-        else if (type_name == "bool")
-        {
-            auto bool_obj = std::static_pointer_cast<boolean_object_t>(operand);
-            is_truthy = bool_obj->m_value;
-        }
-        else if (type_name == "int")
-        {
-            auto int_obj = std::static_pointer_cast<int_object_t>(operand);
-            is_truthy = int_obj->value() != 0;
-        }
-        else if (type_name == "string")
-        {
-            auto str_obj = std::static_pointer_cast<string_object_t>(operand);
-            is_truthy = !str_obj->value().empty();
-        }
-
+        // Use the object's is_truthy() method which delegates to the type
+        bool is_truthy = operand->is_truthy();
         m_current_result = std::make_shared<boolean_object_t>(!is_truthy);
     }
     zephyr::current_error_location() = saved_location;
@@ -1392,6 +1547,12 @@ auto interpreter_t::visit(assignment_t& node) -> void
 
     // Validate type constraint before assignment
     validate_type_constraint(node.variable_name, value);
+    
+    // Convert value to the specified type if there's a type constraint
+    auto constraint_it = m_type_constraints.find(node.variable_name);
+    if (constraint_it != m_type_constraints.end()) {
+        value = convert_value_to_type(value, constraint_it->second);
+    }
 
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = value;
@@ -1440,10 +1601,13 @@ auto interpreter_t::visit(typed_declaration_t& node) -> void
 
     // Validate the initial assignment against the type constraint
     validate_type_constraint(node.variable_name, value);
+    
+    // Convert value to the specified type
+    auto converted_value = convert_value_to_type(value, node.type_name);
 
     auto& current_scope = m_scope_stack.back();
-    current_scope[node.variable_name] = value;
-    m_current_result = value;
+    current_scope[node.variable_name] = converted_value;
+    m_current_result = converted_value;
     zephyr::current_error_location() = saved_location;
 }
 
@@ -1465,10 +1629,13 @@ auto interpreter_t::visit(typed_const_declaration_t& node) -> void
 
     // Validate the initial assignment against the type constraint
     validate_type_constraint(node.variable_name, value);
+    
+    // Convert value to the specified type
+    auto converted_value = convert_value_to_type(value, node.type_name);
 
     auto& current_scope = m_scope_stack.back();
-    current_scope[node.variable_name] = value;
-    m_current_result = value;
+    current_scope[node.variable_name] = converted_value;
+    m_current_result = converted_value;
     zephyr::current_error_location() = saved_location;
 }
 
@@ -1571,6 +1738,12 @@ auto interpreter_t::visit(compound_assignment_t& node) -> void
 
             // Validate type constraint before assignment
             validate_type_constraint(node.variable_name, result_value);
+            
+            // Convert value to the specified type if there's a type constraint
+            auto constraint_it = m_type_constraints.find(node.variable_name);
+            if (constraint_it != m_type_constraints.end()) {
+                result_value = convert_value_to_type(result_value, constraint_it->second);
+            }
 
             scope[node.variable_name] = result_value;
             m_current_result = result_value;
@@ -2635,7 +2808,21 @@ auto interpreter_t::visit(function_call_t& node) -> void
         {
             const auto& param = func->m_parameters[i];
 
-            // Type checking for explicitly typed parameters
+            /**
+             * Type checking and implicit conversion for explicitly typed parameters.
+             * 
+             * This section handles the conversion of function arguments to match
+             * explicitly typed parameters. It supports:
+             * 1. Exact type matches (no conversion needed)
+             * 2. Interface compatibility for class instances
+             * 3. Implicit conversions between compatible types (especially integers)
+             * 
+             * For integer types, the unified integer system allows seamless conversion
+             * between all integer types (int, i8, u8, i16, u16, i32, u32, i64, u64).
+             * This enables natural function calls like:
+             *   func process(val: u8) { ... }
+             *   process(42)  // int literal automatically converted to u8
+             */
             if (param.has_explicit_type && args[i]->type()->name() != "none")
             {
                 std::string expected_type = param.type_name;
@@ -2647,17 +2834,73 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
                 if (actual_type != expected_type)
                 {
-                    bool is_interface = false;
+                    bool is_compatible = false;
+                    
+                    // Check for interface compatibility
                     if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(args[i])) {
                         auto class_obj = class_instance->m_class_obj;
                         for (const auto& interface_name : class_obj->interfaces()) {
                             if (interface_name == expected_type) {
-                                is_interface = true;
+                                is_compatible = true;
                                 break;
                             }
                         }
                     }
-                    if (!is_interface) {
+                    
+                    // Check for implicit conversion compatibility (especially for integer types)
+                    // This uses the same conversion logic as the overload resolver to maintain consistency
+                    if (!is_compatible && overload_utils::is_implicitly_convertible(actual_type, expected_type))
+                    {
+                        // Perform the conversion for integer types using the unified integer system
+                        // All integer types can be converted through int_object_t with appropriate range handling
+                        std::vector<std::string> integer_types = {"int", "i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
+                        auto from_is_int = std::find(integer_types.begin(), integer_types.end(), actual_type) != integer_types.end();
+                        auto to_is_int = std::find(integer_types.begin(), integer_types.end(), expected_type) != integer_types.end();
+                        
+                        if (from_is_int && to_is_int) {
+                            // Convert integer types using the unified integer system
+                            if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(args[i])) {
+                                try {
+                                    // Create new integer object with the expected type
+                                    int64_t value = int_obj->value_64();
+                                    
+                                    // Create the appropriate integer type based on expected_type
+                                    if (expected_type == "i8") {
+                                        args[i] = int_object_t::create_i8(static_cast<int8_t>(value));
+                                    } else if (expected_type == "u8") {
+                                        args[i] = int_object_t::create_u8(static_cast<uint8_t>(value));
+                                    } else if (expected_type == "i16") {
+                                        args[i] = int_object_t::create_i16(static_cast<int16_t>(value));
+                                    } else if (expected_type == "u16") {
+                                        args[i] = int_object_t::create_u16(static_cast<uint16_t>(value));
+                                    } else if (expected_type == "i32") {
+                                        args[i] = int_object_t::create_i32(static_cast<int32_t>(value));
+                                    } else if (expected_type == "u32") {
+                                        args[i] = int_object_t::create_u32(static_cast<uint32_t>(value));
+                                    } else if (expected_type == "i64") {
+                                        args[i] = int_object_t::create_i64(value);
+                                    } else if (expected_type == "u64") {
+                                        args[i] = int_object_t::create_u64(static_cast<uint64_t>(value));
+                                    } else if (expected_type == "int") {
+                                        args[i] = std::make_shared<int_object_t>(static_cast<int>(value));
+                                    }
+                                    
+                                    is_compatible = true;
+                                } catch (const std::exception& e) {
+                                    // Conversion failed (e.g., value out of range)
+                                    throw type_error_t("Cannot convert " + actual_type + " value " + 
+                                                     std::to_string(int_obj->value_64()) + " to " + expected_type + 
+                                                     ": " + std::string(e.what()));
+                                }
+                            }
+                        } else {
+                            // For non-integer implicit conversions, mark as compatible
+                            // The actual conversion logic would be handled elsewhere if needed
+                            is_compatible = true;
+                        }
+                    }
+                    
+                    if (!is_compatible) {
                         throw type_error_t("Type mismatch for parameter '" + param.name +
                                                "': expected " + param.type_name +
                                                ", got " + args[i]->type()->name());
@@ -2960,6 +3203,21 @@ auto interpreter_t::visit(return_statement_t& node) -> void
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1; // Assuming return_statement_t has end_column
 
+    /**
+     * Function return type checking with implicit conversion support.
+     * 
+     * This section handles the validation and conversion of return values to match
+     * explicitly declared return types. It supports:
+     * 1. Exact type matches (no conversion needed)
+     * 2. Special handling for 'none' returns
+     * 3. Implicit conversions between compatible types (especially integers)
+     * 
+     * For integer types, expressions that return 'int' can be automatically
+     * converted to any sized integer return type. This enables natural syntax like:
+     *   func compute(a: i32, b: i32) : i32 {
+     *       return a + b  // int expression automatically converted to i32
+     *   }
+     */
     if (node.return_value)
     {
         node.return_value->accept(*this);
@@ -2972,7 +3230,55 @@ auto interpreter_t::visit(return_statement_t& node) -> void
                     if (actual_type == "none") {
                         throw return_value_t{m_current_result};
                     }
-                    throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got " + actual_type);
+                    
+                    // Check for implicit conversion compatibility (especially for integer types)
+                    // This ensures consistent behavior with function parameter conversion
+                    if (overload_utils::is_implicitly_convertible(actual_type, expected_type)) {
+                        // Perform the conversion for integer types using the unified integer system
+                        // Range validation and truncation happen here for out-of-bounds values
+                        std::vector<std::string> integer_types = {"int", "i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
+                        auto from_is_int = std::find(integer_types.begin(), integer_types.end(), actual_type) != integer_types.end();
+                        auto to_is_int = std::find(integer_types.begin(), integer_types.end(), expected_type) != integer_types.end();
+                        
+                        if (from_is_int && to_is_int) {
+                            // Convert integer types using the unified integer system
+                            if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(m_current_result)) {
+                                try {
+                                    // Create new integer object with the expected type
+                                    int64_t value = int_obj->value_64();
+                                    
+                                    // Create the appropriate integer type based on expected_type
+                                    if (expected_type == "i8") {
+                                        m_current_result = int_object_t::create_i8(static_cast<int8_t>(value));
+                                    } else if (expected_type == "u8") {
+                                        m_current_result = int_object_t::create_u8(static_cast<uint8_t>(value));
+                                    } else if (expected_type == "i16") {
+                                        m_current_result = int_object_t::create_i16(static_cast<int16_t>(value));
+                                    } else if (expected_type == "u16") {
+                                        m_current_result = int_object_t::create_u16(static_cast<uint16_t>(value));
+                                    } else if (expected_type == "i32") {
+                                        m_current_result = int_object_t::create_i32(static_cast<int32_t>(value));
+                                    } else if (expected_type == "u32") {
+                                        m_current_result = int_object_t::create_u32(static_cast<uint32_t>(value));
+                                    } else if (expected_type == "i64") {
+                                        m_current_result = int_object_t::create_i64(value);
+                                    } else if (expected_type == "u64") {
+                                        m_current_result = int_object_t::create_u64(static_cast<uint64_t>(value));
+                                    } else if (expected_type == "int") {
+                                        m_current_result = std::make_shared<int_object_t>(static_cast<int>(value));
+                                    }
+                                } catch (const std::exception& e) {
+                                    // Conversion failed (e.g., value out of range)
+                                    throw type_error_t("Cannot convert return value " + actual_type + " (" + 
+                                                     std::to_string(int_obj->value_64()) + ") to " + expected_type + 
+                                                     ": " + std::string(e.what()));
+                                }
+                            }
+                        }
+                        // For non-integer implicit conversions, the conversion would be handled elsewhere if needed
+                    } else {
+                        throw type_error_t("Type mismatch in return statement: expected " + expected_type + ", got " + actual_type);
+                    }
                 }
             }
         }
@@ -4453,6 +4759,16 @@ auto interpreter_t::validate_type_constraint(const std::string& variable_name, v
         if (normalized_expected == "dict") normalized_expected = "dictionary";
         if (normalized_actual == "dict") normalized_actual = "dictionary";
 
+        // Handle int/sized_int compatibility for unified integer system
+        if (is_integer_type_compatible(normalized_actual, normalized_expected, value)) {
+            return; // Integer types are compatible
+        }
+        
+        // Provide specific error messages for integer overflow cases
+        if (is_integer_type_name(normalized_actual) && is_integer_type_name(normalized_expected)) {
+            throw_integer_overflow_error(value, normalized_actual, normalized_expected, variable_name);
+            return; // This line won't be reached, but added for clarity
+        }
 
         // Function and lambda types are compatible
         if ((normalized_expected == "function" && normalized_actual == "lambda") ||
@@ -4478,6 +4794,213 @@ auto interpreter_t::validate_type_constraint(const std::string& variable_name, v
     }
 }
 
+auto interpreter_t::convert_value_to_type(value_t value, const std::string& target_type) -> value_t
+{
+    const std::string& current_type = value->type()->name();
+    
+    // If types are already the same, no conversion needed
+    if (current_type == target_type) {
+        return value;
+    }
+    
+    // Handle integer type conversions
+    if (is_integer_type_name(current_type) && is_integer_type_name(target_type)) {
+        return convert_integer_value(value, target_type);
+    }
+    
+    // For other types, return as-is (compatibility was already checked)
+    return value;
+}
+
+auto interpreter_t::is_integer_type_name(const std::string& type_name) -> bool
+{
+    static const std::set<std::string> integer_types = {
+        "int", "i8", "i16", "i32", "i64", "u8", "u16", "u32", "u64"
+    };
+    return integer_types.find(type_name) != integer_types.end();
+}
+
+auto interpreter_t::convert_integer_value(value_t value, const std::string& target_type) -> value_t
+{
+    int64_t int_value = 0;
+    
+    // Extract the integer value
+    if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(value)) {
+        int_value = int_obj->value_64();
+    } else {
+        return value; // Not an integer, return as-is
+    }
+    
+    // Convert to target type
+    if (target_type == "int") {
+        // Convert to regular int (with range checking already done in validate_type_constraint)
+        return int_object_t::create_int(static_cast<int>(int_value));
+    } else if (target_type == "i8") {
+        return int_object_t::create_i8(static_cast<int8_t>(int_value));
+    } else if (target_type == "u8") {
+        return int_object_t::create_u8(static_cast<uint8_t>(int_value));
+    } else if (target_type == "i16") {
+        return int_object_t::create_i16(static_cast<int16_t>(int_value));
+    } else if (target_type == "u16") {
+        return int_object_t::create_u16(static_cast<uint16_t>(int_value));
+    } else if (target_type == "i32") {
+        return int_object_t::create_i32(static_cast<int32_t>(int_value));
+    } else if (target_type == "u32") {
+        return int_object_t::create_u32(static_cast<uint32_t>(int_value));
+    } else if (target_type == "i64") {
+        return int_object_t::create_i64(int_value);
+    } else if (target_type == "u64") {
+        return int_object_t::create_u64(static_cast<uint64_t>(int_value));
+    }
+    
+    // Unknown type, return as-is
+    return value;
+}
+
+auto interpreter_t::is_integer_type_compatible(const std::string& actual_type, const std::string& expected_type, value_t value) -> bool
+{
+    // Define integer types (regular int and all sized integer types)
+    static const std::set<std::string> integer_types = {
+        "int", "i8", "i16", "i32", "i64", "u8", "u16", "u32", "u64"
+    };
+
+    // Both must be integer types for compatibility checking
+    if (integer_types.find(actual_type) == integer_types.end() || 
+        integer_types.find(expected_type) == integer_types.end()) {
+        return false;
+    }
+
+    // Special case: int and i32 are always compatible (unified system)
+    if ((actual_type == "int" && expected_type == "i32") ||
+        (actual_type == "i32" && expected_type == "int")) {
+        return true;
+    }
+
+    // If types are exactly the same, they're compatible
+    if (actual_type == expected_type) {
+        return true;
+    }
+
+    // For different sized integer types, check if the value fits in the target type
+    if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(value)) {
+        // Extract the actual value from the unified integer object
+        int64_t int_value = int_obj->value_64();
+        return value_fits_in_integer_type(int_value, expected_type);
+    }
+
+    // If we can't determine compatibility, be safe and reject
+    return false;
+}
+
+auto interpreter_t::throw_integer_overflow_error(value_t value, const std::string& actual_type, const std::string& expected_type, const std::string& variable_name) -> void
+{
+    int64_t int_value = 0;
+    
+    // Extract the integer value for the error message
+    if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(value)) {
+        int_value = int_obj->value_64();
+    }
+    
+    // Get the valid range for the target type
+    std::string range_info = get_type_range_string(expected_type);
+    
+    // Create a helpful error message
+    std::string error_msg = "Integer overflow: Cannot assign value " + std::to_string(int_value) + 
+                           " to variable '" + variable_name + "' of type " + expected_type + ". " +
+                           "Valid range for " + expected_type + " is " + range_info + ".";
+    
+    // Add suggestion for what type could hold this value
+    if (expected_type != "i64" && expected_type != "u64") {
+        std::string suggested_type = suggest_integer_type_for_value(int_value);
+        if (!suggested_type.empty() && suggested_type != expected_type) {
+            error_msg += " Consider using type " + suggested_type + " instead.";
+        }
+    }
+    
+    throw type_error_t(error_msg);
+}
+
+auto interpreter_t::get_type_range_string(const std::string& type_name) -> std::string
+{
+    if (type_name == "int" || type_name == "i32") {
+        return "-2,147,483,648 to 2,147,483,647";
+    }
+    else if (type_name == "i8") {
+        return "-128 to 127";
+    }
+    else if (type_name == "u8") {
+        return "0 to 255";
+    }
+    else if (type_name == "i16") {
+        return "-32,768 to 32,767";
+    }
+    else if (type_name == "u16") {
+        return "0 to 65,535";
+    }
+    else if (type_name == "u32") {
+        return "0 to 4,294,967,295";
+    }
+    else if (type_name == "i64") {
+        return "-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807";
+    }
+    else if (type_name == "u64") {
+        return "0 to 9,223,372,036,854,775,807"; // Limited by our int64_t representation
+    }
+    
+    return "unknown range";
+}
+
+auto interpreter_t::suggest_integer_type_for_value(int64_t value) -> std::string
+{
+    if (value < 0) {
+        // Negative values need signed types
+        if (value >= -128) return "i8";
+        if (value >= -32768) return "i16";
+        if (value >= -2147483648LL) return "i32";
+        return "i64";
+    } else {
+        // Positive values - prefer smaller types first
+        if (value <= 127) return "i8";
+        if (value <= 255) return "u8";
+        if (value <= 32767) return "i16";
+        if (value <= 65535) return "u16";
+        if (value <= 2147483647LL) return "i32";
+        if (value <= 4294967295LL) return "u32";
+        return "i64";
+    }
+}
+
+auto interpreter_t::value_fits_in_integer_type(int64_t value, const std::string& type_name) -> bool
+{
+    if (type_name == "int" || type_name == "i32") {
+        return value >= std::numeric_limits<int32_t>::min() && 
+               value <= std::numeric_limits<int32_t>::max();
+    }
+    else if (type_name == "i8") {
+        return value >= -128 && value <= 127;
+    }
+    else if (type_name == "u8") {
+        return value >= 0 && value <= 255;
+    }
+    else if (type_name == "i16") {
+        return value >= -32768 && value <= 32767;
+    }
+    else if (type_name == "u16") {
+        return value >= 0 && value <= 65535;
+    }
+    else if (type_name == "u32") {
+        return value >= 0 && value <= std::numeric_limits<uint32_t>::max();
+    }
+    else if (type_name == "i64") {
+        return true; // int64_t can always fit in i64
+    }
+    else if (type_name == "u64") {
+        return value >= 0; // Only non-negative values fit in u64
+    }
+    
+    return false;
+}
+
 auto interpreter_t::resolve_variable(const std::string& variable_name) -> value_t
 {
     for (auto it = m_scope_stack.rbegin(); it != m_scope_stack.rend(); ++it)
@@ -4501,6 +5024,13 @@ auto interpreter_t::variable(const std::string& variable_name, value_t value) ->
         {
             // Validate type constraint before assignment
             validate_type_constraint(variable_name, value);
+            
+            // Convert value to the specified type if there's a type constraint
+            auto constraint_it = m_type_constraints.find(variable_name);
+            if (constraint_it != m_type_constraints.end()) {
+                value = convert_value_to_type(value, constraint_it->second);
+            }
+            
             scope[variable_name] = value;
             return;
         }
@@ -4509,6 +5039,13 @@ auto interpreter_t::variable(const std::string& variable_name, value_t value) ->
     // If variable doesn't exist, create it in current scope
     auto& current_scope = m_scope_stack.back();
     validate_type_constraint(variable_name, value);
+    
+    // Convert value to the specified type if there's a type constraint
+    auto constraint_it = m_type_constraints.find(variable_name);
+    if (constraint_it != m_type_constraints.end()) {
+        value = convert_value_to_type(value, constraint_it->second);
+    }
+    
     current_scope[variable_name] = value;
 }
 

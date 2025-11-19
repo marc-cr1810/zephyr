@@ -53,6 +53,7 @@ examples=(
     "28_class_export_plugin_usage.zephyr"
     "29_number_formats.zephyr"
     "30_with_statement_file_io.zephyr"
+    "31_sized_integers.zephyr"
 )
 
 # Counters

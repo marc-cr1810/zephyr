@@ -80,4 +80,11 @@ namespace zephyr
         io_error_t(const std::string& message)
             : runtime_error_with_location_t(message, "IOError") {}
     };
+
+    class overflow_error_t : public runtime_error_with_location_t
+    {
+    public:
+        overflow_error_t(const std::string& message)
+            : runtime_error_with_location_t(message, "OverflowError") {}
+    };
 }

@@ -376,12 +376,44 @@ auto lexer_t::next_token() -> token_t
             {
                 if (is_float)
                 {
-                    break;
+                    break; // Second dot, stop parsing
                 }
                 is_float = true;
             }
             m_position++;
         }
+        
+        // Check for integer size suffix (only for non-float numbers)
+        if (!is_float && m_position < m_source.length() && isalpha(m_source[m_position])) {
+            size_t suffix_start = m_position;
+            
+            // Parse potential suffix (u8, i32, u64, etc.)
+            while (m_position < m_source.length() && 
+                   (isalnum(m_source[m_position]))) {
+                m_position++;
+            }
+            
+            std::string suffix = std::string(m_source.substr(suffix_start, m_position - suffix_start));
+            
+            // Check if it's a valid integer suffix
+            try {
+                // Just validate the suffix without throwing - we'll parse it later
+                if (suffix == "i8" || suffix == "i16" || suffix == "i32" || suffix == "i64" ||
+                    suffix == "u8" || suffix == "u16" || suffix == "u32" || suffix == "u64") {
+                    // Valid suffix found - return as sized integer literal
+                    size_t total_length = m_position - num_start;
+                    m_position = num_start; // reset for make_token
+                    return make_token(token_type_e::sized_int_literal, 
+                                    std::string_view(m_source.data() + num_start, total_length));
+                }
+            } catch (...) {
+                // Not a valid integer suffix - backtrack and treat as separate tokens
+            }
+            
+            // Not a valid suffix - backtrack
+            m_position = suffix_start;
+        }
+        
         size_t length = m_position - num_start;
         m_position = num_start; // reset for make_token
         return make_token(is_float ? token_type_e::float_token : token_type_e::number, std::string_view(m_source.data() + num_start, length));

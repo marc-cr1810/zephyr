@@ -1,0 +1,206 @@
+# 31_sized_integers.zephyr
+# Comprehensive demonstration of Zephyr's unified integer system with sized types
+# Shows how the unified int_object now handles i8, i16, i32, i64, u8, u16, u32, u64 types
+
+print("=== Zephyr Unified Integer System with Sized Types ===")
+print()
+
+# Basic integer literals with type inference
+print("--- Basic Integer Literals ---")
+small_val = 42
+large_val = 2147483648  # Larger than i32, will be i64
+print("small_val:", small_val, "type:", type(small_val))
+print("large_val:", large_val, "type:", type(large_val))
+print()
+
+# Explicit sized integer creation using type annotations
+print("--- Explicit Sized Integer Creation ---")
+i8_val: i8 = 127
+u8_val: u8 = 255
+i16_val: i16 = -32768
+u16_val: u16 = 65535
+i32_val: i32 = -2147483648
+u32_val: u32 = 2147483647
+i64_val: i64 = 9223372036854775807
+
+print("i8_val:", i8_val, "type:", type(i8_val))
+print("u8_val:", u8_val, "type:", type(u8_val))
+print("i16_val:", i16_val, "type:", type(i16_val))
+print("u16_val:", u16_val, "type:", type(u16_val))
+print("i32_val:", i32_val, "type:", type(i32_val))
+print("u32_val:", u32_val, "type:", type(u32_val))
+print("i64_val:", i64_val, "type:", type(i64_val))
+print()
+
+# Arithmetic operations preserve types appropriately
+print("--- Arithmetic with Type Preservation ---")
+a: u8 = 100
+b: u8 = 150
+sum_result = a + b
+print("u8(100) + u8(150) =", sum_result, "type:", type(sum_result))
+
+c: i16 = -1000
+d: i16 = 2000
+diff_result = c - d
+print("i16(-1000) - i16(2000) =", diff_result, "type:", type(diff_result))
+print()
+
+# Type promotion in mixed operations
+print("--- Type Promotion in Mixed Operations ---")
+small: i8 = 10
+medium: i16 = 1000
+large: i32 = 100000
+
+mixed1 = small + medium
+mixed2 = medium + large
+print("i8(10) + i16(1000) =", mixed1, "type:", type(mixed1))
+print("i16(1000) + i32(100000) =", mixed2, "type:", type(mixed2))
+print()
+
+# Range checking and overflow behavior
+print("--- Range Limits and Overflow Behavior ---")
+max_u8: u8 = 255
+print("max u8:", max_u8)
+
+max_i8: i8 = 127
+min_i8: i8 = -128
+print("i8 range: [", min_i8, ",", max_i8, "]")
+
+# Demonstrate automatic type selection for literals
+print("--- Automatic Type Selection ---")
+auto1 = 100      # Fits in i8, but defaults to i32 for literals
+auto2 = 300      # Larger than i8, fits in i16, but defaults to i32
+auto3 = 70000    # Larger than i16, fits in i32
+auto4 = 3000000000  # Larger than i32, automatically becomes i64
+
+print("100 ->", type(auto1))
+print("300 ->", type(auto2))
+print("70000 ->", type(auto3))
+print("3000000000 ->", type(auto4))
+print()
+
+# Working with collections of different integer types
+print("--- Collections with Mixed Integer Types ---")
+i8_10: i8 = 10
+u8_200: u8 = 200
+i16_neg5000: i16 = -5000
+u16_50000: u16 = 50000
+i32_neg1m: i32 = -1000000
+u32_2m: u32 = 2000000
+
+mixed_integers = [i8_10, u8_200, i16_neg5000, u16_50000, i32_neg1m, u32_2m]
+
+print("Mixed integer collection:")
+for val in mixed_integers {
+    print("  Value:", val, "Type:", type(val))
+}
+print()
+
+# Bitwise operations
+print("--- Bitwise Operations ---")
+a_bits: u8 = 170  # 10101010 in binary
+b_bits: u8 = 85   # 01010101 in binary
+
+print("a_bits:", a_bits, "(binary: 10101010)")
+print("b_bits:", b_bits, "(binary: 01010101)")
+print("a_bits & b_bits =", a_bits & b_bits)
+print("a_bits | b_bits =", a_bits | b_bits)
+print("a_bits ^ b_bits =", a_bits ^ b_bits)
+print()
+
+# Comparison operations
+print("--- Comparison Operations ---")
+val1: i16 = 1000
+val2: u16 = 1000
+val3: i32 = 1000
+
+print("i16(1000) == u16(1000):", val1 == val2)
+print("i16(1000) == i32(1000):", val1 == val3)
+print("u16(1000) < i32(2000):", val2 < 2000)
+print()
+
+# Functions with typed parameters and return types
+print("--- Functions with Typed Parameters and Return Types ---")
+
+# Function with explicit parameter type - demonstrates implicit parameter conversion
+func process_u8(value: u8) {
+    print("  process_u8 received:", value, "type:", type(value))
+    return value * 2
+}
+
+# Function with explicit parameter and return types
+func process_i16_explicit(value: i16) : i32 {
+    print("  process_i16_explicit received:", value, "type:", type(value))
+    computation = value + 1000
+    print("  computation result:", computation, "type:", type(computation))
+    return computation  # int expression converted to i32 return type
+}
+
+# Function with multiple typed parameters and explicit return type
+func multiply_mixed(a: u8, b: i16) : u32 {
+    print("  multiply_mixed received:", a, "type:", type(a), "and", b, "type:", type(b))
+    result = a * b
+    print("  multiplication result:", result, "type:", type(result))
+    return result  # int expression converted to u32 return type
+}
+
+print("Testing implicit parameter conversion:")
+print("Calling process_u8(50) - int literal converted to u8 parameter:")
+result1 = process_u8(50)  # int literal implicitly converted to u8
+print("  Final result:", result1, "type:", type(result1))
+print()
+
+print("Calling process_i16_explicit(250) - int literal converted to i16, return as i32:")
+result2 = process_i16_explicit(250)  # int literal → i16, int expression → i32
+print("  Final result:", result2, "type:", type(result2))
+print()
+
+print("Calling multiply_mixed(100, -50) - mixed type parameters and u32 return:")
+result3 = multiply_mixed(100, -50)  # int literals → u8 and i16, result → u32
+print("  Final result:", result3, "type:", type(result3))
+print()
+
+print("✓ All function calls work with implicit type conversions!")
+print("✓ Parameters: int literals automatically convert to sized integer parameters")
+print("✓ Return types: int expressions automatically convert to declared return types")
+print()
+
+# Type specification and conversion
+print("--- Type Specification ---")
+original: i32 = 1000
+as_u16: u16 = 1000
+as_i8: i8 = 100
+
+print("i32(1000):", original, "type:", type(original))
+print("u16(1000):", as_u16, "type:", type(as_u16))
+print("i8(100):", as_i8, "type:", type(as_i8))
+print()
+
+# Memory efficiency demonstration
+print("--- Memory Efficiency Showcase ---")
+# In a real application, using appropriate sized types saves memory
+temp1: u8 = 25
+temp2: u8 = 30
+temp3: u8 = 28
+temp4: u8 = 32
+temp5: u8 = 27
+sensor_readings = [temp1, temp2, temp3, temp4, temp5]  # Temperature readings 0-100
+
+device1: u16 = 1001
+device2: u16 = 1002
+device3: u16 = 1003
+device4: u16 = 1004
+device_ids = [device1, device2, device3, device4]   # Device IDs up to 65535
+
+stamp1: u32 = 1640995200
+stamp2: u32 = 1640995260
+stamp3: u32 = 1640995320
+timestamps = [stamp1, stamp2, stamp3]  # Unix timestamps
+
+print("Sensor readings (u8):", sensor_readings)
+print("Device IDs (u16):", device_ids)
+print("Timestamps (u32):", timestamps)
+print()
+
+print("=== Unified Integer System Demo Complete ===")
+print("The unified int_object now seamlessly handles all integer sizes!")

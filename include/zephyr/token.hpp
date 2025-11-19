@@ -61,6 +61,7 @@ enum class token_type_e
     hex_number,
     binary_number,
     octal_number,
+    sized_int_literal,
     string,
     raw_string,
     multiline_string,

@@ -34,6 +34,7 @@ class with_statement_t;
 
 // AST Node Forward Declarations
 class number_t;
+class sized_number_t;
 class float_literal_t;
 class string_literal_t;
 class fstring_t;
@@ -105,6 +106,7 @@ public:
     virtual auto visit(list_literal_t& node) -> void = 0;
     virtual auto visit(dictionary_literal_t& node) -> void = 0;
     virtual auto visit(name_t& node) -> void = 0;
+    virtual auto visit(sized_number_t& node) -> void = 0;
     virtual auto visit(binary_op_t& node) -> void = 0;
     virtual auto visit(power_op_t& node) -> void = 0;
     virtual auto visit(comparison_op_t& node) -> void = 0;
@@ -251,6 +253,22 @@ public:
 
 public:
     int value;
+};
+
+class sized_number_t : public expression_t
+{
+public:
+    sized_number_t(int64_t value, const std::string& suffix, int line, int column, int end_line, int end_column)
+        : expression_t(line, column, end_line, end_column), value(value), suffix(suffix)
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
+
+public:
+    int64_t value;
+    std::string suffix;  // e.g., "u64", "i32", etc.
 };
 
 class float_literal_t : public expression_t

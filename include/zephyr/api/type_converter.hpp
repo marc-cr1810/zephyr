@@ -9,15 +9,14 @@
 #include "zephyr/objects/dictionary_object.hpp"
 #include "zephyr/objects/none_object.hpp"
 #include "zephyr/api/result.hpp"
-#include <type_traits>
 #include <vector>
 #include <map>
 #include <string>
 #include <memory>
 #include <optional>
-#include <variant>
-#include <functional>
 #include <type_traits>
+#include <stdexcept>
+#include <cstdint>
 
 namespace zephyr::api {
 
@@ -521,5 +520,7 @@ auto validate_zephyr_type(const value_t& value, const std::string& context = "")
     }
     return from_zephyr<T>(value);
 }
+
+
 
 } // namespace zephyr::api

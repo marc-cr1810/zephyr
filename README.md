@@ -10,6 +10,7 @@ Zephyr is a powerful scripting language that combines the simplicity of dynamic 
 
 - **Dynamic Typing**: Variables can hold any type of value
 - **Optional Explicit Typing**: Enhanced type safety with optional type annotations
+- **Sized Integer Support**: Full support for i8, i16, i32, i64, u8, u16, u32, u64 with overflow protection
 - **Object-Oriented Programming**: Classes, inheritance patterns, and method chaining
 - **Functional Programming**: Lambda expressions, closures, and higher-order functions
 - **Asynchronous Programming**: Full async/await support with parallel execution
@@ -85,6 +86,33 @@ func calculate_average(numbers : list) : float {
 
 average : float = calculate_average(scores)
 print("Average score:", average)
+```
+
+### Sized Integer Support
+
+```zephyr
+# Explicit sized integers with overflow protection
+pixel_red : u8 = 255u8        # Unsigned 8-bit (0-255)
+temperature : i16 = -40i16    # Signed 16-bit (-32768 to 32767)
+file_size : u64 = 1048576u64  # Unsigned 64-bit for large values
+
+# Automatic type promotion in operations
+small_val : u8 = 100u8
+large_val : u32 = 50000u32
+result = small_val + large_val  # Promotes to u32
+
+# Overflow detection
+try {
+    overflow_test : u8 = 200u8
+    overflow_result = overflow_test + 100u8  # Throws OverflowError
+} catch (OverflowError as e) {
+    print("Overflow detected:", e.message)
+}
+
+# Built-in conversion functions
+regular_int = 42
+as_u16 = u16(regular_int)  # Convert to unsigned 16-bit
+as_i64 = i64(regular_int)  # Convert to signed 64-bit
 ```
 
 ### Object-Oriented Programming
@@ -200,6 +228,41 @@ The `examples/` directory contains 21 comprehensive example files demonstrating 
 19. **19_async_class_methods.zephyr** - Async OOP patterns
 20. **20_explicit_typing.zephyr** - Type system demonstrations
 21. **21_exit_function.zephyr** - Error handling and program termination
+22. **22_interfaces.zephyr** - Interface system demonstrations
+31. **31_sized_integers.zephyr** - Comprehensive sized integer system with unified type support
+
+### Sized Integer System Features
+
+Zephyr features a powerful unified integer system that supports both regular integers and explicitly sized integer types:
+
+**Supported Integer Types:**
+- `int` - Default integer type (32-bit signed)
+- `i8`, `i16`, `i32`, `i64` - Signed integers (8, 16, 32, 64 bits)
+- `u8`, `u16`, `u32`, `u64` - Unsigned integers (8, 16, 32, 64 bits)
+
+**Key Features:**
+- **Unified Implementation**: All integer types use a single `int_object_t` class internally
+- **Automatic Type Promotion**: Operations promote to larger types when needed (e.g., `10**12` → `i64`, not `float`)
+- **Implicit Function Conversions**: Function parameters and return types support seamless conversion
+- **Type Safety**: Range validation and appropriate truncation for out-of-bounds values
+- **Natural Syntax**: Use regular integer literals with typed parameters: `func process(val: u8) { ... }; process(42)`
+
+**Example Usage:**
+```zephyr
+# Explicit type annotations
+val_u8: u8 = 255
+val_i16: i16 = -32768
+val_u32: u32 = 4294967295
+
+# Function with typed parameters and return types
+func convert_temperature(celsius: i16) : u8 {
+    fahrenheit = celsius * 9 / 5 + 32
+    return fahrenheit  # Automatic conversion from int to u8
+}
+
+# Call with regular int literal - automatic conversion
+temp_f = convert_temperature(25)  # int(25) automatically converts to i16
+```
 
 ## Testing
 
@@ -213,6 +276,7 @@ bash test_all_examples.sh
 ./bin/zephyr examples/01_basic_features.zephyr
 ./bin/zephyr examples/13_async_await_basic.zephyr
 ./bin/zephyr examples/20_explicit_typing.zephyr
+./bin/zephyr examples/31_sized_integers.zephyr
 ```
 
 ### Module System Tests
@@ -310,10 +374,10 @@ Create dynamic plugins to extend Zephyr:
 Zephyr aims to provide:
 
 - **Simplicity**: Easy to learn and use syntax
-- **Power**: Advanced features when needed
-- **Safety**: Optional typing for large projects
-- **Performance**: Efficient C++ implementation
-- **Flexibility**: Support for multiple programming paradigms
+- **Power**: Advanced features including sized integers when needed
+- **Safety**: Optional typing and overflow protection for large projects
+- **Performance**: Efficient C++ implementation with zero-cost sized integers
+- **Flexibility**: Support for multiple programming paradigms and system-level programming
 
 ## License
 

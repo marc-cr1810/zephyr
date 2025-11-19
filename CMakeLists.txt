@@ -235,6 +235,8 @@ if(BUILD_EMBEDDING_EXAMPLE)
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:minimal_embedded_example> ${CMAKE_SOURCE_DIR}/bin/
         COMMENT "Copying minimal embedded example to bin directory"
     )
+
+
 endif()
 
 # =============================================================================

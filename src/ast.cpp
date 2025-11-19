@@ -1,5 +1,5 @@
 #include "zephyr/ast.hpp"
-#include <iostream>
+#include "zephyr/interpreter.hpp"
 
 namespace zephyr
 {
@@ -7,6 +7,21 @@ namespace zephyr
 auto number_t::accept(ast_visitor_t& visitor) -> void
 {
     visitor.visit(*this);
+}
+
+auto number_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    return std::make_unique<number_t>(value, line, column, end_line, end_column);
+}
+
+auto sized_number_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
+auto sized_number_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    return std::make_unique<sized_number_t>(value, suffix, line, column, end_line, end_column);
 }
 
 auto float_literal_t::accept(ast_visitor_t& visitor) -> void
@@ -384,10 +399,7 @@ auto right_shift_op_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
-auto number_t::clone() const -> std::unique_ptr<ast_node_t>
-{
-    return std::make_unique<number_t>(*this);
-}
+
 
 auto float_literal_t::clone() const -> std::unique_ptr<ast_node_t>
 {
