@@ -1596,14 +1596,15 @@ auto interpreter_t::visit(typed_declaration_t& node) -> void
     node.value->accept(*this);
     auto value = m_current_result;
 
-    // Store the type constraint
-    m_type_constraints[node.variable_name] = node.type_name;
-
-    // Validate the initial assignment against the type constraint
-    validate_type_constraint(node.variable_name, value);
+    // Validate the initial assignment against the type constraint FIRST
+    // This prevents creating type constraints for variables that fail validation
+    validate_type_constraint_direct(value, node.type_name, node.variable_name);
     
     // Convert value to the specified type
     auto converted_value = convert_value_to_type(value, node.type_name);
+
+    // Only store the type constraint AFTER successful validation and conversion
+    m_type_constraints[node.variable_name] = node.type_name;
 
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = converted_value;
@@ -1621,17 +1622,18 @@ auto interpreter_t::visit(typed_const_declaration_t& node) -> void
     node.value->accept(*this);
     auto value = m_current_result;
 
-    // Store the type constraint
+    // Validate the initial assignment against the type constraint FIRST
+    // This prevents creating type constraints for variables that fail validation
+    validate_type_constraint_direct(value, node.type_name, node.variable_name);
+    
+    // Convert value to the specified type
+    auto converted_value = convert_value_to_type(value, node.type_name);
+
+    // Only store the type constraint AFTER successful validation and conversion
     m_type_constraints[node.variable_name] = node.type_name;
 
     // Mark as const
     m_const_variables.insert(node.variable_name);
-
-    // Validate the initial assignment against the type constraint
-    validate_type_constraint(node.variable_name, value);
-    
-    // Convert value to the specified type
-    auto converted_value = convert_value_to_type(value, node.type_name);
 
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = converted_value;
@@ -4736,6 +4738,62 @@ auto interpreter_t::visit(right_shift_op_t& node) -> void
     zephyr::current_error_location() = saved_location;
 }
 
+/**
+ * Validates a type constraint directly without requiring it to be stored in m_type_constraints.
+ * This is used during variable declaration to validate before storing the constraint.
+ */
+auto interpreter_t::validate_type_constraint_direct(value_t value, const std::string& expected_type, const std::string& variable_name) -> void
+{
+    const std::string& actual_type = value->type()->name();
+
+    // Allow none assignment to any typed variable
+    if (actual_type == "none")
+    {
+        return;
+    }
+
+    // Handle type aliases and compatibility
+    std::string normalized_expected = expected_type;
+    std::string normalized_actual = actual_type;
+
+    // Dict is an alias for dictionary type
+    if (normalized_expected == "dict") normalized_expected = "dictionary";
+    if (normalized_actual == "dict") normalized_actual = "dictionary";
+
+    // Handle int/sized_int compatibility for unified integer system
+    if (is_integer_type_compatible(normalized_actual, normalized_expected, value)) {
+        return; // Integer types are compatible
+    }
+    
+    // Provide specific error messages for integer overflow cases
+    if (is_integer_type_name(normalized_actual) && is_integer_type_name(normalized_expected)) {
+        throw_integer_overflow_error(value, normalized_actual, normalized_expected, variable_name);
+        return; // This line won't be reached, but added for clarity
+    }
+
+    // Function and lambda types are compatible
+    if ((normalized_expected == "function" && normalized_actual == "lambda") ||
+        (normalized_expected == "lambda" && normalized_actual == "function")) {
+        return; // Allow assignment between function and lambda types
+    }
+
+    // Check if a class instance is assigned to an interface
+    if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(value)) {
+        auto class_obj = class_instance->m_class_obj;
+        for (const auto& interface_name : class_obj->interfaces()) {
+            if (interface_name == expected_type) {
+                return; // Type matches interface
+            }
+        }
+    }
+
+    // Check if normalized types match
+    if (normalized_actual != normalized_expected) {
+        throw type_error_t("Type mismatch for variable '" + variable_name +
+                          "': expected " + expected_type + ", got " + actual_type);
+    }
+}
+
 auto interpreter_t::validate_type_constraint(const std::string& variable_name, value_t value) -> void
 {
     // Check if the variable has a type constraint
@@ -4743,54 +4801,7 @@ auto interpreter_t::validate_type_constraint(const std::string& variable_name, v
     if (constraint_it != m_type_constraints.end())
     {
         const std::string& expected_type = constraint_it->second;
-        const std::string& actual_type = value->type()->name();
-
-        // Allow none assignment to any typed variable
-        if (actual_type == "none")
-        {
-            return;
-        }
-
-        // Handle type aliases and compatibility
-        std::string normalized_expected = expected_type;
-        std::string normalized_actual = actual_type;
-
-        // Dict is an alias for dictionary type
-        if (normalized_expected == "dict") normalized_expected = "dictionary";
-        if (normalized_actual == "dict") normalized_actual = "dictionary";
-
-        // Handle int/sized_int compatibility for unified integer system
-        if (is_integer_type_compatible(normalized_actual, normalized_expected, value)) {
-            return; // Integer types are compatible
-        }
-        
-        // Provide specific error messages for integer overflow cases
-        if (is_integer_type_name(normalized_actual) && is_integer_type_name(normalized_expected)) {
-            throw_integer_overflow_error(value, normalized_actual, normalized_expected, variable_name);
-            return; // This line won't be reached, but added for clarity
-        }
-
-        // Function and lambda types are compatible
-        if ((normalized_expected == "function" && normalized_actual == "lambda") ||
-            (normalized_expected == "lambda" && normalized_actual == "function")) {
-            return; // Allow assignment between function and lambda types
-        }
-
-        // Check if a class instance is assigned to an interface
-        if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(value)) {
-            auto class_obj = class_instance->m_class_obj;
-            for (const auto& interface_name : class_obj->interfaces()) {
-                if (interface_name == expected_type) {
-                    return; // Type matches interface
-                }
-            }
-        }
-
-        // Check if normalized types match
-        if (normalized_actual != normalized_expected)
-        {
-            throw type_error_t("Type error: Cannot assign " + actual_type + " to " + expected_type + " variable '" + variable_name + "'");
-        }
+        validate_type_constraint_direct(value, expected_type, variable_name);
     }
 }
 

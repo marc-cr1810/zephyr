@@ -138,6 +138,7 @@ private:
     auto create_scope() -> void;
     auto destroy_scope() -> void;
     auto validate_type_constraint(const std::string& variable_name, value_t value) -> void;
+    auto validate_type_constraint_direct(value_t value, const std::string& expected_type, const std::string& variable_name) -> void;
     auto convert_value_to_type(value_t value, const std::string& target_type) -> value_t;
     auto is_integer_type_compatible(const std::string& actual_type, const std::string& expected_type, value_t value) -> bool;
     auto value_fits_in_integer_type(int64_t value, const std::string& type_name) -> bool;
