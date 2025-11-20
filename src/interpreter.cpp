@@ -13,6 +13,7 @@
 #include "zephyr/async_scheduler.hpp"
 #include "zephyr/errors.hpp"
 #include "zephyr/types/type.hpp"
+#include <algorithm>
 #include <set>
 #include <limits>
 #include <iostream>
@@ -498,18 +499,18 @@ auto Exception_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> st
     if (args.size() < 1 || args.size() > 2) {
         throw type_error_t("Exception() takes 1 or 2 arguments (" + std::to_string(args.size()) + " given)");
     }
-    
+
     // First argument: exception type name
     auto type_obj = std::dynamic_pointer_cast<string_object_t>(args[0]);
     if (!type_obj) {
         throw type_error_t("Exception() first argument must be a string, not '" + args[0]->type()->name() + "'");
     }
-    
+
     std::string exception_type = type_obj->value();
     if (!is_valid_exception_type(exception_type)) {
         throw type_error_t("'" + exception_type + "' is not a valid exception type");
     }
-    
+
     // Second argument: message (optional, defaults to empty string)
     std::string message = "";
     if (args.size() == 2) {
@@ -519,7 +520,7 @@ auto Exception_builtin(const std::vector<std::shared_ptr<object_t>>& args) -> st
         }
         message = message_obj->value();
     }
-    
+
     return std::make_shared<exception_object_t>(exception_type, message);
 }
 
@@ -827,7 +828,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
         s_builtin_functions["all"] = std::make_shared<builtin_function_object_t>(all_builtin, "all");
         s_builtin_functions["exit"] = std::make_shared<builtin_function_object_t>(exit_builtin, "exit");
         s_builtin_functions["open"] = std::make_shared<builtin_function_object_t>(open_builtin, "open");
-        
+
         // Sized integer conversion functions
         s_builtin_functions["i8"] = std::make_shared<builtin_function_object_t>(i8_builtin, "i8");
         s_builtin_functions["u8"] = std::make_shared<builtin_function_object_t>(u8_builtin, "u8");
@@ -837,10 +838,10 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
         s_builtin_functions["u32"] = std::make_shared<builtin_function_object_t>(u32_builtin, "u32");
         s_builtin_functions["i64"] = std::make_shared<builtin_function_object_t>(i64_builtin, "i64");
         s_builtin_functions["u64"] = std::make_shared<builtin_function_object_t>(u64_builtin, "u64");
-        
+
         // Generic exception constructor function
         s_builtin_functions["Exception"] = std::make_shared<builtin_function_object_t>(Exception_builtin, "Exception");
-        
+
         // Convenience exception constructor functions that use the generic Exception function
         s_builtin_functions["IndexError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
@@ -852,7 +853,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "IndexError");
-        
+
         s_builtin_functions["TypeError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
                 throw type_error_t("TypeError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
@@ -863,7 +864,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "TypeError");
-        
+
         s_builtin_functions["ValueError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
                 throw type_error_t("ValueError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
@@ -874,7 +875,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "ValueError");
-        
+
         s_builtin_functions["RuntimeError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
                 throw type_error_t("RuntimeError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
@@ -885,7 +886,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "RuntimeError");
-        
+
         s_builtin_functions["KeyError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
                 throw type_error_t("KeyError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
@@ -896,7 +897,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "KeyError");
-        
+
         s_builtin_functions["AttributeError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
                 throw type_error_t("AttributeError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
@@ -907,7 +908,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "AttributeError");
-        
+
         s_builtin_functions["ZeroDivisionError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
                 throw type_error_t("ZeroDivisionError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
@@ -918,7 +919,7 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "ZeroDivisionError");
-        
+
         s_builtin_functions["OverflowError"] = std::make_shared<builtin_function_object_t>([](const std::vector<std::shared_ptr<object_t>>& args) -> std::shared_ptr<object_t> {
             if (args.size() != 1) {
                 throw type_error_t("OverflowError() takes exactly one argument (" + std::to_string(args.size()) + " given)");
@@ -929,13 +930,13 @@ interpreter_t::interpreter_t(const std::string& filename, const std::string& sou
             };
             return Exception_builtin(exception_args);
         }, "OverflowError");
-        
+
         s_builtins_initialized = true;
     }
 
     m_global_scope = s_builtin_functions;
     m_scope_stack.push_back(m_global_scope);
-    
+
     // Initialize function resolvers with global scope
     m_function_resolvers.emplace_back();
 }
@@ -980,14 +981,14 @@ auto interpreter_t::visit(sized_number_t& node) -> void
     zephyr::current_error_location().line = node.line;
     zephyr::current_error_location().column = node.column;
     zephyr::current_error_location().length = node.end_column - node.column + 1;
-    
+
     try {
         m_current_result = std::make_shared<int_object_t>(std::to_string(node.value), node.suffix);
     } catch (const std::exception& e) {
         // Convert any construction errors to runtime errors with proper location
         throw value_error_t(e.what());
     }
-    
+
     zephyr::current_error_location() = saved_location;
 }
 
@@ -1164,7 +1165,7 @@ auto interpreter_t::visit(power_op_t& node) -> void
         // If type doesn't support power operation, try the fallback mixed arithmetic
         auto left_type = left->type()->name();
         auto right_type = right->type()->name();
-        
+
         if ((left_type == "int" || left_type == "float") && (right_type == "int" || right_type == "float"))
         {
             double left_val = (left_type == "int") ? static_cast<double>(std::static_pointer_cast<int_object_t>(left)->value()) : std::static_pointer_cast<float_object_t>(left)->value();
@@ -1226,7 +1227,7 @@ auto interpreter_t::visit(comparison_op_t& node) -> void
         {
             // Use type's compare method for comparison
             int compare_result = left->type()->compare(left, right);
-            
+
             if (node.operator_token == "<") result = compare_result < 0;
             else if (node.operator_token == "<=") result = compare_result <= 0;
             else if (node.operator_token == ">") result = compare_result > 0;
@@ -1388,27 +1389,27 @@ auto interpreter_t::visit(slice_expression_t& node) -> void
 
     node.object->accept(*this);
     auto obj = m_current_result;
-    
+
     // Get slice parameters
     std::shared_ptr<object_t> start_obj = nullptr;
     std::shared_ptr<object_t> end_obj = nullptr;
     std::shared_ptr<object_t> step_obj = nullptr;
-    
+
     if (node.start) {
         node.start->accept(*this);
         start_obj = m_current_result;
     }
-    
+
     if (node.end) {
         node.end->accept(*this);
         end_obj = m_current_result;
     }
-    
+
     if (node.step) {
         node.step->accept(*this);
         step_obj = m_current_result;
     }
-    
+
     // Call the slice method on the object's type
     m_current_result = obj->type()->slice(obj, start_obj, end_obj, step_obj);
     zephyr::current_error_location() = saved_location;
@@ -1687,7 +1688,7 @@ auto interpreter_t::visit(assignment_t& node) -> void
 
     // Validate type constraint before assignment
     validate_type_constraint(node.variable_name, value);
-    
+
     // Convert value to the specified type if there's a type constraint
     auto constraint_it = m_type_constraints.find(node.variable_name);
     if (constraint_it != m_type_constraints.end()) {
@@ -1715,13 +1716,13 @@ auto interpreter_t::visit(const_declaration_t& node) -> void
 
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = value;
-    
+
     // Export the constant if it's not internal
     if (should_export(node.is_internal))
     {
         add_to_exports(node.variable_name, value);
     }
-    
+
     m_current_result = value;
     zephyr::current_error_location() = saved_location;
 }
@@ -1739,7 +1740,7 @@ auto interpreter_t::visit(typed_declaration_t& node) -> void
     // Validate the initial assignment against the type constraint FIRST
     // This prevents creating type constraints for variables that fail validation
     validate_type_constraint_direct(value, node.type_name, node.variable_name);
-    
+
     // Convert value to the specified type
     auto converted_value = convert_value_to_type(value, node.type_name);
 
@@ -1765,7 +1766,7 @@ auto interpreter_t::visit(typed_const_declaration_t& node) -> void
     // Validate the initial assignment against the type constraint FIRST
     // This prevents creating type constraints for variables that fail validation
     validate_type_constraint_direct(value, node.type_name, node.variable_name);
-    
+
     // Convert value to the specified type
     auto converted_value = convert_value_to_type(value, node.type_name);
 
@@ -1880,7 +1881,7 @@ auto interpreter_t::visit(compound_assignment_t& node) -> void
 
             // Validate type constraint before assignment
             validate_type_constraint(node.variable_name, result_value);
-            
+
             // Convert value to the specified type if there's a type constraint
             auto constraint_it = m_type_constraints.find(node.variable_name);
             if (constraint_it != m_type_constraints.end()) {
@@ -2289,7 +2290,7 @@ auto interpreter_t::visit(while_statement_t& node) -> void
     {
         // Yield point for cooperative execution
         check_and_yield();
-        
+
         node.condition->accept(*this);
         auto condition = m_current_result;
 
@@ -2618,21 +2619,21 @@ auto interpreter_t::visit(function_definition_t& node) -> void
 
     // Note: function_object_t constructor expects a unique_ptr to body
     auto func_obj = std::make_shared<function_object_t>(node.parameters, std::unique_ptr<block_t>(static_cast<block_t*>(node.body->clone().release())), node.return_type_name, node.explicit_return_type, node.async);
-    
+
     // Add to function overload resolver
     auto& current_resolver = m_function_resolvers.back();
     current_resolver.add_overload(node.function_name, node.parameters, func_obj);
-    
+
     // Also store in scope for backward compatibility (will be removed later)
     auto& current_scope = m_scope_stack.back();
     current_scope[node.function_name] = func_obj;
-    
+
     // Export the function if it's not internal
     if (should_export(node.is_internal))
     {
         add_to_exports(node.function_name, func_obj);
     }
-    
+
     m_current_result = func_obj;
     zephyr::current_error_location() = saved_location;
 }
@@ -2658,7 +2659,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
     // First try to resolve using overload resolvers for user-defined functions
     std::shared_ptr<function_object_t> func_obj = nullptr;
     bool found_in_overloads = false;
-    
+
     for (int i = m_function_resolvers.size() - 1; i >= 0; --i)
     {
         auto& resolver = m_function_resolvers[i];
@@ -2719,7 +2720,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
             if (class_obj->m_has_invalid_init) {
                 throw type_error_t("init method cannot return a value.");
             }
-            
+
             // Check if trying to instantiate an abstract class
             if (class_obj->m_is_abstract) {
                 throw type_error_t("Cannot instantiate abstract class '" + class_obj->m_class_name + "'.");
@@ -2952,13 +2953,13 @@ auto interpreter_t::visit(function_call_t& node) -> void
 
             /**
              * Type checking and implicit conversion for explicitly typed parameters.
-             * 
+             *
              * This section handles the conversion of function arguments to match
              * explicitly typed parameters. It supports:
              * 1. Exact type matches (no conversion needed)
              * 2. Interface compatibility for class instances
              * 3. Implicit conversions between compatible types (especially integers)
-             * 
+             *
              * For integer types, the unified integer system allows seamless conversion
              * between all integer types (int, i8, u8, i16, u16, i32, u32, i64, u64).
              * This enables natural function calls like:
@@ -2977,7 +2978,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                 if (actual_type != expected_type)
                 {
                     bool is_compatible = false;
-                    
+
                     // Check for interface compatibility
                     if (auto class_instance = std::dynamic_pointer_cast<class_instance_t>(args[i])) {
                         auto class_obj = class_instance->m_class_obj;
@@ -2988,7 +2989,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                             }
                         }
                     }
-                    
+
                     // Check for implicit conversion compatibility (especially for integer types)
                     // This uses the same conversion logic as the overload resolver to maintain consistency
                     if (!is_compatible && overload_utils::is_implicitly_convertible(actual_type, expected_type))
@@ -2998,14 +2999,14 @@ auto interpreter_t::visit(function_call_t& node) -> void
                         std::vector<std::string> integer_types = {"int", "i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
                         auto from_is_int = std::find(integer_types.begin(), integer_types.end(), actual_type) != integer_types.end();
                         auto to_is_int = std::find(integer_types.begin(), integer_types.end(), expected_type) != integer_types.end();
-                        
+
                         if (from_is_int && to_is_int) {
                             // Convert integer types using the unified integer system
                             if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(args[i])) {
                                 try {
                                     // Create new integer object with the expected type
                                     int64_t value = int_obj->value_64();
-                                    
+
                                     // Create the appropriate integer type based on expected_type
                                     if (expected_type == "i8") {
                                         args[i] = int_object_t::create_i8(static_cast<int8_t>(value));
@@ -3026,12 +3027,12 @@ auto interpreter_t::visit(function_call_t& node) -> void
                                     } else if (expected_type == "int") {
                                         args[i] = std::make_shared<int_object_t>(static_cast<int>(value));
                                     }
-                                    
+
                                     is_compatible = true;
                                 } catch (const std::exception& e) {
                                     // Conversion failed (e.g., value out of range)
-                                    throw type_error_t("Cannot convert " + actual_type + " value " + 
-                                                     std::to_string(int_obj->value_64()) + " to " + expected_type + 
+                                    throw type_error_t("Cannot convert " + actual_type + " value " +
+                                                     std::to_string(int_obj->value_64()) + " to " + expected_type +
                                                      ": " + std::string(e.what()));
                                 }
                             }
@@ -3041,7 +3042,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
                             is_compatible = true;
                         }
                     }
-                    
+
                     if (!is_compatible) {
                         throw type_error_t("Type mismatch for parameter '" + param.name +
                                                "': expected " + param.type_name +
@@ -3226,7 +3227,7 @@ auto interpreter_t::visit(function_call_t& node) -> void
         if (class_obj->m_has_invalid_init) {
             throw type_error_t("init method cannot return a value.");
         }
-        
+
         // Check if trying to instantiate an abstract class
         if (class_obj->m_is_abstract) {
             throw type_error_t("Cannot instantiate abstract class '" + class_obj->m_class_name + "'.");
@@ -3347,13 +3348,13 @@ auto interpreter_t::visit(return_statement_t& node) -> void
 
     /**
      * Function return type checking with implicit conversion support.
-     * 
+     *
      * This section handles the validation and conversion of return values to match
      * explicitly declared return types. It supports:
      * 1. Exact type matches (no conversion needed)
      * 2. Special handling for 'none' returns
      * 3. Implicit conversions between compatible types (especially integers)
-     * 
+     *
      * For integer types, expressions that return 'int' can be automatically
      * converted to any sized integer return type. This enables natural syntax like:
      *   func compute(a: i32, b: i32) : i32 {
@@ -3372,7 +3373,7 @@ auto interpreter_t::visit(return_statement_t& node) -> void
                     if (actual_type == "none") {
                         throw return_value_t{m_current_result};
                     }
-                    
+
                     // Check for implicit conversion compatibility (especially for integer types)
                     // This ensures consistent behavior with function parameter conversion
                     if (overload_utils::is_implicitly_convertible(actual_type, expected_type)) {
@@ -3381,14 +3382,14 @@ auto interpreter_t::visit(return_statement_t& node) -> void
                         std::vector<std::string> integer_types = {"int", "i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
                         auto from_is_int = std::find(integer_types.begin(), integer_types.end(), actual_type) != integer_types.end();
                         auto to_is_int = std::find(integer_types.begin(), integer_types.end(), expected_type) != integer_types.end();
-                        
+
                         if (from_is_int && to_is_int) {
                             // Convert integer types using the unified integer system
                             if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(m_current_result)) {
                                 try {
                                     // Create new integer object with the expected type
                                     int64_t value = int_obj->value_64();
-                                    
+
                                     // Create the appropriate integer type based on expected_type
                                     if (expected_type == "i8") {
                                         m_current_result = int_object_t::create_i8(static_cast<int8_t>(value));
@@ -3411,8 +3412,8 @@ auto interpreter_t::visit(return_statement_t& node) -> void
                                     }
                                 } catch (const std::exception& e) {
                                     // Conversion failed (e.g., value out of range)
-                                    throw type_error_t("Cannot convert return value " + actual_type + " (" + 
-                                                     std::to_string(int_obj->value_64()) + ") to " + expected_type + 
+                                    throw type_error_t("Cannot convert return value " + actual_type + " (" +
+                                                     std::to_string(int_obj->value_64()) + ") to " + expected_type +
                                                      ": " + std::string(e.what()));
                                 }
                             }
@@ -3503,7 +3504,7 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
     {
         // Handle thrown arbitrary objects - store directly in first untyped catch
         bool handled = false;
-        
+
         for (const auto& catch_clause : node.catch_clauses)
         {
             if (!catch_clause->has_exception_type && catch_clause->has_variable)
@@ -3511,7 +3512,7 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
                 // Store the original thrown object directly
                 auto& current_scope = m_scope_stack.back();
                 current_scope[catch_clause->exception_variable_name] = thrown_obj.thrown_value;
-                
+
                 try
                 {
                     catch_clause->catch_block->accept(*this);
@@ -3541,7 +3542,7 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
                 }
             }
         }
-        
+
         // If not handled, create exception object for potential re-throw
         if (!handled)
         {
@@ -3564,16 +3565,16 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
 
     // Store whether to re-throw after finally block
     bool should_rethrow = false;
-    
+
     // Process catch blocks if an exception was thrown (but not for control flow)
     if (exception_caught && caught_exception && !return_occurred && !break_occurred && !continue_occurred)
     {
         bool handled = false;
-        
+
         for (const auto& catch_clause : node.catch_clauses)
         {
             bool should_handle = false;
-            
+
             if (!catch_clause->has_exception_type)
             {
                 // Untyped catch - handles any exception
@@ -3585,7 +3586,7 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
                 std::string exception_type = caught_exception->get_exception_type();
                 should_handle = (exception_type == catch_clause->exception_type_name);
             }
-            
+
             if (should_handle)
             {
                 // Set exception variable in scope if needed
@@ -3594,7 +3595,7 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
                     auto& current_scope = m_scope_stack.back();
                     current_scope[catch_clause->exception_variable_name] = caught_exception;
                 }
-                
+
                 try
                 {
                     // Execute catch block
@@ -3628,14 +3629,14 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
                 }
             }
         }
-        
+
         // If no catch block handled the exception, we'll re-throw after finally
         if (!handled)
         {
             should_rethrow = true;
         }
     }
-    
+
     // Always execute finally block if present
     if (node.finally_block)
     {
@@ -3685,9 +3686,9 @@ auto interpreter_t::visit(try_catch_statement_t& node) -> void
             caught_exception = std::make_shared<exception_object_t>("RuntimeError", finally_exception.what());
         }
     }
-    
+
     zephyr::current_error_location() = saved_location;
-    
+
     // Handle control flow after finally
     if (return_occurred)
     {
@@ -3719,7 +3720,7 @@ auto interpreter_t::visit(throw_statement_t& node) -> void
     // Evaluate the exception expression
     node.exception_expression->accept(*this);
     auto exception_value = m_current_result;
-    
+
     if (auto exception_obj = std::dynamic_pointer_cast<exception_object_t>(exception_value))
     {
         // Throw the exception object as a C++ exception
@@ -3730,7 +3731,7 @@ auto interpreter_t::visit(throw_statement_t& node) -> void
         // Throw any other object directly
         throw thrown_object_t(exception_value);
     }
-    
+
     zephyr::current_error_location() = saved_location;
 }
 
@@ -3744,11 +3745,11 @@ auto interpreter_t::visit(with_statement_t& node) -> void
     // Evaluate the context expression
     node.context_expression->accept(*this);
     auto context_obj = m_current_result;
-    
+
     if (!context_obj) {
         throw value_error_t("with statement context expression evaluated to null");
     }
-    
+
     // Call __enter__ method on the context object
     std::shared_ptr<object_t> entered_value = nullptr;
     try {
@@ -3756,25 +3757,25 @@ auto interpreter_t::visit(with_statement_t& node) -> void
     } catch (const std::exception& e) {
         throw value_error_t("Error in context manager __enter__: " + std::string(e.what()));
     }
-    
+
     if (!entered_value) {
         // If __enter__ returns null, use the original object
         entered_value = context_obj;
     }
-    
+
     // Create new scope for the with block
     m_scope_stack.emplace_back();
-    
+
     // Bind the variable to the entered value
     auto& current_scope = m_scope_stack.back();
     current_scope[node.variable_name] = entered_value;
-    
+
     // Exception handling variables
     std::shared_ptr<object_t> exception_type = nullptr;
     std::shared_ptr<object_t> exception_value = nullptr;
     std::shared_ptr<object_t> traceback = nullptr;
     bool exception_occurred = false;
-    
+
     try {
         // Execute the block
         node.body->accept(*this);
@@ -3782,10 +3783,10 @@ auto interpreter_t::visit(with_statement_t& node) -> void
         exception_occurred = true;
         exception_type = std::make_shared<string_object_t>("runtime_error");
         exception_value = std::make_shared<string_object_t>(e.what());
-        
+
         // Pop scope before calling __exit__
         m_scope_stack.pop_back();
-        
+
         // Call __exit__ with exception info
         bool suppress_exception = false;
         try {
@@ -3794,48 +3795,48 @@ auto interpreter_t::visit(with_statement_t& node) -> void
             // If __exit__ throws, that becomes the new exception
             throw value_error_t("Error in context manager __exit__: " + std::string(exit_error.what()));
         }
-        
+
         zephyr::current_error_location() = saved_location;
-        
+
         // Re-throw the original exception unless __exit__ suppressed it
         if (!suppress_exception) {
             throw;
         }
-        
+
         return;  // Exception was suppressed
-        
+
     } catch (const std::exception& e) {
         exception_occurred = true;
         exception_type = std::make_shared<string_object_t>("exception");
         exception_value = std::make_shared<string_object_t>(e.what());
-        
+
         m_scope_stack.pop_back();
-        
+
         bool suppress_exception = false;
         try {
             suppress_exception = context_obj->__exit__(exception_type, exception_value, traceback);
         } catch (const std::exception& exit_error) {
             throw value_error_t("Error in context manager __exit__: " + std::string(exit_error.what()));
         }
-        
+
         zephyr::current_error_location() = saved_location;
-        
+
         if (!suppress_exception) {
             throw;
         }
-        
+
         return;
     }
-    
+
     // Normal exit path - no exception occurred
     m_scope_stack.pop_back();
-    
+
     try {
         context_obj->__exit__(exception_type, exception_value, traceback);
     } catch (const std::exception& e) {
         throw value_error_t("Error in context manager __exit__: " + std::string(e.what()));
     }
-    
+
     zephyr::current_error_location() = saved_location;
 }
 
@@ -4034,21 +4035,21 @@ auto interpreter_t::visit(class_definition_t& node) -> void
 
     // Create a new class object
     auto class_obj = std::make_shared<class_object_t>(node.class_name);
-    
+
     // Set class modifiers
     class_obj->m_is_final = node.is_final;
     class_obj->m_is_abstract = node.is_abstract;
-    
+
     // Determine what is a class and what is an interface
     std::shared_ptr<class_object_t> parent_class_obj = nullptr;
     std::vector<std::string> actual_interfaces;
-    
+
     // Handle parent class inheritance
     if (!node.parent_class.empty()) {
         auto parent_obj_val = resolve_variable(node.parent_class);
         auto parent_as_class = std::dynamic_pointer_cast<class_object_t>(parent_obj_val);
         auto parent_as_interface = std::dynamic_pointer_cast<interface_object_t>(parent_obj_val);
-        
+
         if (parent_as_class) {
             // It's a class - use as parent
             if (parent_as_class->m_is_final) {
@@ -4063,18 +4064,18 @@ auto interpreter_t::visit(class_definition_t& node) -> void
             throw type_error_t("'" + node.parent_class + "' is neither a class nor an interface.");
         }
     }
-    
+
     // Process additional inherited items (from comma-separated list)
     for (const auto& item_name : node.interfaces) {
         auto item_obj_val = resolve_variable(item_name);
         auto item_as_class = std::dynamic_pointer_cast<class_object_t>(item_obj_val);
         auto item_as_interface = std::dynamic_pointer_cast<interface_object_t>(item_obj_val);
-        
+
         if (item_as_class) {
             // It's a class - check if we already have a parent class
             if (parent_class_obj) {
-                throw type_error_t("Cannot inherit from multiple classes. Class '" + node.class_name + 
-                                 "' already inherits from '" + parent_class_obj->m_class_name + 
+                throw type_error_t("Cannot inherit from multiple classes. Class '" + node.class_name +
+                                 "' already inherits from '" + parent_class_obj->m_class_name +
                                  "' and cannot also inherit from '" + item_name + "'.");
             }
             if (item_as_class->m_is_final) {
@@ -4089,10 +4090,10 @@ auto interpreter_t::visit(class_definition_t& node) -> void
             throw type_error_t("'" + item_name + "' is neither a class nor an interface.");
         }
     }
-    
+
     // If we have a parent class, inherit from it
     if (parent_class_obj) {
-        
+
         // Inherit member variables from parent
         for (const auto& parent_var : parent_class_obj->m_member_variables) {
             // Check if child class redefines this member variable
@@ -4107,7 +4108,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
                 class_obj->add_member_variable(parent_var);
             }
         }
-        
+
         // Check abstract methods from parent are implemented
         if (parent_class_obj->m_is_abstract && !node.is_abstract) {
             for (const auto& [method_name, parent_method] : parent_class_obj->m_methods) {
@@ -4120,7 +4121,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
                         }
                     }
                     if (!implemented) {
-                        throw type_error_t("Class '" + node.class_name + "' must implement abstract method '" + 
+                        throw type_error_t("Class '" + node.class_name + "' must implement abstract method '" +
                                          method_name + "' from parent class '" + parent_class_obj->m_class_name + "'.");
                     }
                 }
@@ -4140,25 +4141,25 @@ auto interpreter_t::visit(class_definition_t& node) -> void
 
         for (const auto& interface_method : interface_obj->methods()) {
             bool method_found = false;
-            
+
             // Look for an exact signature match in the class methods
             for (const auto& class_method : node.methods) {
                 if (class_method->function_name == interface_method.name) {
                     // Check if this class method matches the interface method signature exactly
                     if (class_method->parameters.size() == interface_method.parameters.size()) {
                         bool signature_matches = true;
-                        
+
                         for (size_t i = 0; i < class_method->parameters.size(); ++i) {
                             const auto& class_param = class_method->parameters[i];
                             const auto& interface_param = interface_method.parameters[i];
-                            
+
                             // Compare parameter types (empty type means untyped parameter)
                             if (class_param.type_name != interface_param.type_name) {
                                 signature_matches = false;
                                 break;
                             }
                         }
-                        
+
                         if (signature_matches) {
                             method_found = true;
                             break;
@@ -4166,7 +4167,7 @@ auto interpreter_t::visit(class_definition_t& node) -> void
                     }
                 }
             }
-            
+
             if (!method_found) {
                 // Generate a detailed error message with the expected signature
                 std::string expected_signature = interface_method.name + "(";
@@ -4178,8 +4179,8 @@ auto interpreter_t::visit(class_definition_t& node) -> void
                     }
                 }
                 expected_signature += ")";
-                
-                throw type_error_t("Class '" + node.class_name + "' does not implement interface method '" + 
+
+                throw type_error_t("Class '" + node.class_name + "' does not implement interface method '" +
                                  expected_signature + "' from interface '" + interface_name + "'.");
             }
         }
@@ -4191,26 +4192,26 @@ auto interpreter_t::visit(class_definition_t& node) -> void
         if (method->function_name == "init" && method->body && contains_return_with_value(method->body.get())) {
             class_obj->m_has_invalid_init = true;
         }
-        
+
         // Check that abstract methods don't have a body
         if (method->is_abstract && method->body) {
             throw syntax_error_t("Abstract method '" + method->function_name + "' cannot have a body.");
         }
-        
+
         // Check that non-abstract methods have a body
         if (!method->is_abstract && !method->body) {
             throw syntax_error_t("Non-abstract method '" + method->function_name + "' must have a body.");
         }
-        
+
         auto cloned_method = method->clone();
         class_obj->add_method(method->function_name, std::shared_ptr<function_definition_t>(static_cast<function_definition_t*>(cloned_method.release())));
     }
-    
+
     // Check that non-abstract classes don't have abstract methods
     if (!node.is_abstract) {
         for (const auto& method : node.methods) {
             if (method->is_abstract) {
-                throw type_error_t("Non-abstract class '" + node.class_name + 
+                throw type_error_t("Non-abstract class '" + node.class_name +
                                  "' cannot have abstract method '" + method->function_name + "'.");
             }
         }
@@ -4242,13 +4243,13 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     // Store the class in the current scope
     auto& current_scope = m_scope_stack.back();
     current_scope[node.class_name] = class_obj;
-    
+
     // Export the class if it's not internal
     if (should_export(node.is_internal))
     {
         add_to_exports(node.class_name, class_obj);
     }
-    
+
     m_current_result = class_obj;
     zephyr::current_error_location() = saved_location;
 }
@@ -4362,7 +4363,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
 
     node.object->accept(*this);
     auto obj = m_current_result;
-    
+
     // Check if this is a super call
     bool is_super = m_is_super_call;
     m_is_super_call = false; // Reset the flag
@@ -4384,17 +4385,17 @@ auto interpreter_t::visit(method_call_t& node) -> void
         {
             throw name_error_t("Module '" + module_obj->get_module_name() + "' has no export '" + node.method_name + "'");
         }
-        
+
         // Check if it's a function object
         auto function_obj = std::dynamic_pointer_cast<function_object_t>(export_value);
         auto builtin_function_obj = std::dynamic_pointer_cast<builtin_function_object_t>(export_value);
         auto class_obj = std::dynamic_pointer_cast<class_object_t>(export_value);
-        
+
         if (!function_obj && !builtin_function_obj && !class_obj)
         {
             throw type_error_t("'" + node.method_name + "' is not a function");
         }
-        
+
         // Handle builtin functions from plugins
         if (builtin_function_obj)
         {
@@ -4402,7 +4403,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
             zephyr::current_error_location() = saved_location;
             return;
         }
-        
+
         // Handle class instantiation from modules
         if (class_obj)
         {
@@ -4410,7 +4411,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
             if (class_obj->m_has_invalid_init) {
                 throw type_error_t("init method cannot return a value.");
             }
-            
+
             // Check if trying to instantiate an abstract class
             if (class_obj->m_is_abstract) {
                 throw type_error_t("Cannot instantiate abstract class '" + class_obj->m_class_name + "'.");
@@ -4476,9 +4477,9 @@ auto interpreter_t::visit(method_call_t& node) -> void
             zephyr::current_error_location() = saved_location;
             return;
         }
-        
+
         // Execute the function directly using interpreter logic (similar to function_call_t)
-        
+
         // Check parameter count
         if (args.size() != function_obj->m_parameters.size())
         {
@@ -4529,7 +4530,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
             m_scope_stack.push_back(module_global_scope);
             m_function_resolvers.emplace_back(); // Add function resolver for module scope
         }
-        
+
         // Push function scope
         m_scope_stack.push_back(function_scope);
         m_function_resolvers.emplace_back(); // Add function resolver for function scope
@@ -4595,7 +4596,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
                 m_const_variables.erase(param.name);
             }
         }
-        
+
         zephyr::current_error_location() = saved_location;
         return;
     }
@@ -4614,7 +4615,7 @@ auto interpreter_t::visit(method_call_t& node) -> void
                 throw type_error_t("Class has no parent class for super call");
             }
         }
-        
+
         // Use overload resolver to find the best matching method
         auto resolution_result = class_to_use->resolve_method_call(node.method_name, args);
         if (!resolution_result.found_match)
@@ -4794,25 +4795,25 @@ auto interpreter_t::visit(super_expression_t& node) -> void
             }
         }
     }
-    
+
     if (!current_instance)
     {
         throw name_error_t("'super' not available in current context - must be inside a class method");
     }
-    
+
     // Get the parent class
     auto parent_class = current_instance->m_class_obj->parent_class();
     if (!parent_class)
     {
         throw type_error_t("Class '" + current_instance->m_class_obj->m_class_name + "' has no parent class");
     }
-    
+
     // Create a special "super" proxy that references the parent class methods but uses the current instance's data
     // For now, we'll return the current instance but mark it for special handling in method calls
     // The actual super method resolution will happen in method_call visitor
     m_current_result = current_instance;
     m_is_super_call = true;  // We'll need to add this flag to the interpreter
-    
+
     zephyr::current_error_location() = saved_location;
 }
 
@@ -4945,12 +4946,12 @@ auto interpreter_t::pop_scope() -> std::map<std::string, value_t>
     }
     auto scope = m_scope_stack.back();
     m_scope_stack.pop_back();
-    
+
     // Also remove the corresponding function resolver
     if (!m_function_resolvers.empty()) {
         m_function_resolvers.pop_back();
     }
-    
+
     return scope;
 }
 
@@ -4987,7 +4988,7 @@ auto interpreter_t::visit(spawn_expression_t& node) -> void
     // Create a resolved promise instead of using lambda capture
     auto& scheduler = async_scheduler_t::instance();
     auto promise_obj = scheduler.create_resolved_promise(result);
-    
+
     m_current_result = promise_obj;
     zephyr::current_error_location() = saved_location;
 }
@@ -5162,7 +5163,7 @@ auto interpreter_t::validate_type_constraint_direct(value_t value, const std::st
     if (is_integer_type_compatible(normalized_actual, normalized_expected, value)) {
         return; // Integer types are compatible
     }
-    
+
     // Provide specific error messages for integer overflow cases
     if (is_integer_type_name(normalized_actual) && is_integer_type_name(normalized_expected)) {
         throw_integer_overflow_error(value, normalized_actual, normalized_expected, variable_name);
@@ -5206,17 +5207,17 @@ auto interpreter_t::validate_type_constraint(const std::string& variable_name, v
 auto interpreter_t::convert_value_to_type(value_t value, const std::string& target_type) -> value_t
 {
     const std::string& current_type = value->type()->name();
-    
+
     // If types are already the same, no conversion needed
     if (current_type == target_type) {
         return value;
     }
-    
+
     // Handle integer type conversions
     if (is_integer_type_name(current_type) && is_integer_type_name(target_type)) {
         return convert_integer_value(value, target_type);
     }
-    
+
     // For other types, return as-is (compatibility was already checked)
     return value;
 }
@@ -5232,14 +5233,14 @@ auto interpreter_t::is_integer_type_name(const std::string& type_name) -> bool
 auto interpreter_t::convert_integer_value(value_t value, const std::string& target_type) -> value_t
 {
     int64_t int_value = 0;
-    
+
     // Extract the integer value
     if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(value)) {
         int_value = int_obj->value_64();
     } else {
         return value; // Not an integer, return as-is
     }
-    
+
     // Convert to target type
     if (target_type == "int") {
         // Convert to regular int (with range checking already done in validate_type_constraint)
@@ -5261,7 +5262,7 @@ auto interpreter_t::convert_integer_value(value_t value, const std::string& targ
     } else if (target_type == "u64") {
         return int_object_t::create_u64(static_cast<uint64_t>(int_value));
     }
-    
+
     // Unknown type, return as-is
     return value;
 }
@@ -5274,7 +5275,7 @@ auto interpreter_t::is_integer_type_compatible(const std::string& actual_type, c
     };
 
     // Both must be integer types for compatibility checking
-    if (integer_types.find(actual_type) == integer_types.end() || 
+    if (integer_types.find(actual_type) == integer_types.end() ||
         integer_types.find(expected_type) == integer_types.end()) {
         return false;
     }
@@ -5304,20 +5305,20 @@ auto interpreter_t::is_integer_type_compatible(const std::string& actual_type, c
 auto interpreter_t::throw_integer_overflow_error(value_t value, const std::string& actual_type, const std::string& expected_type, const std::string& variable_name) -> void
 {
     int64_t int_value = 0;
-    
+
     // Extract the integer value for the error message
     if (auto int_obj = std::dynamic_pointer_cast<int_object_t>(value)) {
         int_value = int_obj->value_64();
     }
-    
+
     // Get the valid range for the target type
     std::string range_info = get_type_range_string(expected_type);
-    
+
     // Create a helpful error message
-    std::string error_msg = "Integer overflow: Cannot assign value " + std::to_string(int_value) + 
+    std::string error_msg = "Integer overflow: Cannot assign value " + std::to_string(int_value) +
                            " to variable '" + variable_name + "' of type " + expected_type + ". " +
                            "Valid range for " + expected_type + " is " + range_info + ".";
-    
+
     // Add suggestion for what type could hold this value
     if (expected_type != "i64" && expected_type != "u64") {
         std::string suggested_type = suggest_integer_type_for_value(int_value);
@@ -5325,7 +5326,7 @@ auto interpreter_t::throw_integer_overflow_error(value_t value, const std::strin
             error_msg += " Consider using type " + suggested_type + " instead.";
         }
     }
-    
+
     throw type_error_t(error_msg);
 }
 
@@ -5355,7 +5356,7 @@ auto interpreter_t::get_type_range_string(const std::string& type_name) -> std::
     else if (type_name == "u64") {
         return "0 to 9,223,372,036,854,775,807"; // Limited by our int64_t representation
     }
-    
+
     return "unknown range";
 }
 
@@ -5382,7 +5383,7 @@ auto interpreter_t::suggest_integer_type_for_value(int64_t value) -> std::string
 auto interpreter_t::value_fits_in_integer_type(int64_t value, const std::string& type_name) -> bool
 {
     if (type_name == "int" || type_name == "i32") {
-        return value >= std::numeric_limits<int32_t>::min() && 
+        return value >= std::numeric_limits<int32_t>::min() &&
                value <= std::numeric_limits<int32_t>::max();
     }
     else if (type_name == "i8") {
@@ -5406,7 +5407,7 @@ auto interpreter_t::value_fits_in_integer_type(int64_t value, const std::string&
     else if (type_name == "u64") {
         return value >= 0; // Only non-negative values fit in u64
     }
-    
+
     return false;
 }
 
@@ -5433,13 +5434,13 @@ auto interpreter_t::variable(const std::string& variable_name, value_t value) ->
         {
             // Validate type constraint before assignment
             validate_type_constraint(variable_name, value);
-            
+
             // Convert value to the specified type if there's a type constraint
             auto constraint_it = m_type_constraints.find(variable_name);
             if (constraint_it != m_type_constraints.end()) {
                 value = convert_value_to_type(value, constraint_it->second);
             }
-            
+
             scope[variable_name] = value;
             return;
         }
@@ -5448,13 +5449,13 @@ auto interpreter_t::variable(const std::string& variable_name, value_t value) ->
     // If variable doesn't exist, create it in current scope
     auto& current_scope = m_scope_stack.back();
     validate_type_constraint(variable_name, value);
-    
+
     // Convert value to the specified type if there's a type constraint
     auto constraint_it = m_type_constraints.find(variable_name);
     if (constraint_it != m_type_constraints.end()) {
         value = convert_value_to_type(value, constraint_it->second);
     }
-    
+
     current_scope[variable_name] = value;
 }
 
@@ -5490,14 +5491,14 @@ auto interpreter_t::visit(import_statement_t& node) -> void
     {
         throw import_error_t("Module loader not set");
     }
-    
+
     // Load the module first to get the canonical file path
     auto module = m_module_loader->load_module(
-        node.get_module_specifier(), 
-        node.is_path_based(), 
+        node.get_module_specifier(),
+        node.is_path_based(),
         m_current_module ? m_current_module->get_file_path() : ""
     );
-    
+
     // Use the loaded module's file path as the import key for consistent tracking
     // Canonicalize the path to resolve differences like "./file.ext" vs "file.ext"
     std::string module_file_path;
@@ -5507,16 +5508,16 @@ auto interpreter_t::visit(import_statement_t& node) -> void
         // Fallback to absolute path if canonical fails
         module_file_path = std::filesystem::absolute(module->get_file_path()).string();
     }
-    
+
     // Check for double import using the module's canonical file path
     if (m_imported_modules.find(module_file_path) != m_imported_modules.end())
     {
         throw import_error_t("Module '" + node.get_module_specifier() + "' has already been imported in this module");
     }
-    
+
     // Track the import using the module's canonical file path
     m_imported_modules.insert(module_file_path);
-    
+
     switch (node.get_import_type())
     {
         case import_statement_t::import_type_e::lazy_import:
@@ -5534,15 +5535,15 @@ auto interpreter_t::visit(import_statement_t& node) -> void
                 size_t last_dot = spec.find_last_of('.');
                 var_name = (last_dot != std::string::npos) ? spec.substr(last_dot + 1) : spec;
             }
-            
+
             // Create a module object that supports direct member access
             auto module_obj = std::make_shared<module_object_t>(module, var_name);
-            
+
             // Store the module object in the current scope
             variable(var_name, module_obj);
             break;
         }
-        
+
         case import_statement_t::import_type_e::named_import:
         {
             // Named import: import symbol1, symbol2 from module [as alias]
@@ -5553,11 +5554,11 @@ auto interpreter_t::visit(import_statement_t& node) -> void
                 {
                     throw name_error_t("Module '" + node.get_module_specifier() + "' has no export '" + symbol_name + "'");
                 }
-                
+
                 // Import the symbol into current scope
                 variable(symbol_name, export_value);
             }
-            
+
             // If there's an alias for the module itself, create a filtered module object
             if (node.has_alias())
             {
@@ -5566,7 +5567,7 @@ auto interpreter_t::visit(import_statement_t& node) -> void
             }
             break;
         }
-        
+
         case import_statement_t::import_type_e::string_import:
         {
             // String import: import "./lib/math.zephyr" [as alias] - creates module object
@@ -5581,16 +5582,16 @@ auto interpreter_t::visit(import_statement_t& node) -> void
                 std::filesystem::path path(node.get_module_specifier());
                 var_name = path.stem().string();
             }
-            
+
             // Create a module object that supports direct member access
             auto module_obj = std::make_shared<module_object_t>(module, var_name);
-            
+
             // Store the module object in the current scope
             variable(var_name, module_obj);
             break;
         }
     }
-    
+
     zephyr::current_error_location() = saved_location;
 }
 
@@ -5669,11 +5670,11 @@ auto interpreter_t::remove_global_variable(const std::string& name) -> bool
 auto interpreter_t::check_and_yield() -> void
 {
     m_operation_count++;
-    
+
     // Yield every 50 operations to allow cooperative multitasking
     if (m_operation_count >= 50) {
         m_operation_count = 0;
-        
+
         // Check if we're in an async task and should yield
         auto& scheduler = async_scheduler_t::instance();
         auto current_task = scheduler.get_current_task();
