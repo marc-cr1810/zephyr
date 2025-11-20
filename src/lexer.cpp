@@ -52,7 +52,6 @@ namespace
         {"import", token_type_e::import_token},
         {"from", token_type_e::from_token},
         {"internal", token_type_e::internal_token},
-        {"as", token_type_e::as_token},
     };
 } // namespace
 
@@ -141,7 +140,7 @@ auto lexer_t::next_token() -> token_t
                 // In raw strings, backslash doesn't escape, so we just check for the quote
                 break;
             }
-            
+
             if (m_source[m_position] == '\n')
             {
                 m_line++;
@@ -228,7 +227,7 @@ auto lexer_t::next_token() -> token_t
             {
                 break;
             }
-            
+
             if (m_source[m_position] == '\n')
             {
                 m_line++;
@@ -238,7 +237,7 @@ auto lexer_t::next_token() -> token_t
             {
                 m_column++;
             }
-            
+
             // Handle escape sequences in multi-line strings
             if (m_source[m_position] == '\\' && m_position + 1 < m_source.length())
             {
@@ -255,9 +254,9 @@ auto lexer_t::next_token() -> token_t
             }
             m_position++;
         }
-        
+
         size_t content_length = m_position - content_start_pos;
-        
+
         // Skip closing triple quotes if found
         if (m_position + 2 < m_source.length() &&
             m_source[m_position] == quote_type &&
@@ -319,18 +318,18 @@ auto lexer_t::next_token() -> token_t
     if (isdigit(current_char))
     {
         size_t num_start = m_position;
-        
+
         // Check for special number formats (0x, 0b, 0o)
         if (current_char == '0' && m_position + 1 < m_source.length())
         {
             char second_char = m_source[m_position + 1];
-            
+
             // Hexadecimal: 0x or 0X
             if (second_char == 'x' || second_char == 'X')
             {
                 m_position += 2; // Skip '0x'
-                while (m_position < m_source.length() && 
-                       (isdigit(m_source[m_position]) || 
+                while (m_position < m_source.length() &&
+                       (isdigit(m_source[m_position]) ||
                         (m_source[m_position] >= 'a' && m_source[m_position] <= 'f') ||
                         (m_source[m_position] >= 'A' && m_source[m_position] <= 'F')))
                 {
@@ -340,12 +339,12 @@ auto lexer_t::next_token() -> token_t
                 m_position = num_start; // reset for make_token
                 return make_token(token_type_e::hex_number, std::string_view(m_source.data() + num_start, length));
             }
-            
+
             // Binary: 0b or 0B
             if (second_char == 'b' || second_char == 'B')
             {
                 m_position += 2; // Skip '0b'
-                while (m_position < m_source.length() && 
+                while (m_position < m_source.length() &&
                        (m_source[m_position] == '0' || m_source[m_position] == '1'))
                 {
                     m_position++;
@@ -354,12 +353,12 @@ auto lexer_t::next_token() -> token_t
                 m_position = num_start; // reset for make_token
                 return make_token(token_type_e::binary_number, std::string_view(m_source.data() + num_start, length));
             }
-            
+
             // Octal: 0o or 0O
             if (second_char == 'o' || second_char == 'O')
             {
                 m_position += 2; // Skip '0o'
-                while (m_position < m_source.length() && 
+                while (m_position < m_source.length() &&
                        (m_source[m_position] >= '0' && m_source[m_position] <= '7'))
                 {
                     m_position++;
@@ -369,7 +368,7 @@ auto lexer_t::next_token() -> token_t
                 return make_token(token_type_e::octal_number, std::string_view(m_source.data() + num_start, length));
             }
         }
-        
+
         // Regular decimal numbers (integers and floats)
         bool is_float = false;
         while (m_position < m_source.length() && (isdigit(m_source[m_position]) || m_source[m_position] == '.'))
@@ -384,19 +383,19 @@ auto lexer_t::next_token() -> token_t
             }
             m_position++;
         }
-        
+
         // Check for integer size suffix (only for non-float numbers)
         if (!is_float && m_position < m_source.length() && isalpha(m_source[m_position])) {
             size_t suffix_start = m_position;
-            
+
             // Parse potential suffix (u8, i32, u64, etc.)
-            while (m_position < m_source.length() && 
+            while (m_position < m_source.length() &&
                    (isalnum(m_source[m_position]))) {
                 m_position++;
             }
-            
+
             std::string suffix = std::string(m_source.substr(suffix_start, m_position - suffix_start));
-            
+
             // Check if it's a valid integer suffix
             try {
                 // Just validate the suffix without throwing - we'll parse it later
@@ -405,17 +404,17 @@ auto lexer_t::next_token() -> token_t
                     // Valid suffix found - return as sized integer literal
                     size_t total_length = m_position - num_start;
                     m_position = num_start; // reset for make_token
-                    return make_token(token_type_e::sized_int_literal, 
+                    return make_token(token_type_e::sized_int_literal,
                                     std::string_view(m_source.data() + num_start, total_length));
                 }
             } catch (...) {
                 // Not a valid integer suffix - backtrack and treat as separate tokens
             }
-            
+
             // Not a valid suffix - backtrack
             m_position = suffix_start;
         }
-        
+
         size_t length = m_position - num_start;
         m_position = num_start; // reset for make_token
         return make_token(is_float ? token_type_e::float_token : token_type_e::number, std::string_view(m_source.data() + num_start, length));
