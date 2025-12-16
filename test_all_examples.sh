@@ -54,6 +54,9 @@ examples=(
     "29_number_formats.zephyr"
     "30_with_statement_file_io.zephyr"
     "31_sized_integers.zephyr"
+    "32_comprehensive_enums.zephyr"
+    "33_enhanced_enum_pattern_matching.zephyr"
+    "34_compare_classes.zephyr"
 )
 
 # Counters

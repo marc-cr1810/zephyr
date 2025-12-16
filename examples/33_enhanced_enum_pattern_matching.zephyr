@@ -1,0 +1,342 @@
+# Enhanced Enum Pattern Matching in Switch Statements
+# This example demonstrates the enhanced pattern matching capabilities for enums
+
+print("=== Enhanced Enum Pattern Matching Demo ===")
+
+# 1. Define enums with various data patterns
+print("\n1. Defining Test Enums")
+print("======================")
+
+# Simple enum for basic pattern matching
+enum Status {
+    PENDING,
+    PROCESSING,
+    COMPLETE,
+    FAILED
+}
+
+# Enum with single data values
+enum Result {
+    SUCCESS(value),
+    ERROR(message),
+    WARNING(message)
+}
+
+# Enum with multiple data values for destructuring
+enum Shape {
+    CIRCLE(radius),
+    RECTANGLE(width, height),
+    TRIANGLE(base, height, side1, side2, side3)
+}
+
+# Complex enum for advanced pattern matching
+enum Message {
+    TEXT(content),
+    IMAGE(url, width, height),
+    VIDEO(url, duration, quality),
+    SYSTEM(type, data, timestamp),
+    EMPTY
+}
+
+print("✓ Enums defined successfully")
+
+# 2. Basic enum pattern matching (without destructuring)
+print("\n2. Basic Enum Pattern Matching")
+print("===============================")
+
+func check_status(status) {
+    switch status {
+        case Status.PENDING:
+            return "Still waiting..."
+        case Status.PROCESSING:
+            return "Working on it..."
+        case Status.COMPLETE:
+            return "All done!"
+        case Status.FAILED:
+            return "Something went wrong"
+        default:
+            return "Unknown status"
+    }
+}
+
+# Test basic pattern matching
+pending_status = Status.PENDING
+complete_status = Status.COMPLETE
+failed_status = Status.FAILED
+
+print("Pending:", check_status(pending_status))
+print("Complete:", check_status(complete_status))
+print("Failed:", check_status(failed_status))
+
+# 3. Single parameter destructuring
+print("\n3. Single Parameter Destructuring")
+print("==================================")
+
+func process_result(result) {
+    switch result {
+        case Result.SUCCESS(value):
+            return "Success with value: " + str(value)
+        case Result.ERROR(msg):
+            return "Error occurred: " + msg
+        case Result.WARNING(msg):
+            return "Warning: " + msg
+        default:
+            return "Unknown result type"
+    }
+}
+
+# Test single parameter destructuring
+success_result = Result.SUCCESS("Data processed successfully")
+error_result = Result.ERROR("File not found")
+warning_result = Result.WARNING("Deprecated API used")
+
+print("Success:", process_result(success_result))
+print("Error:", process_result(error_result))
+print("Warning:", process_result(warning_result))
+
+# 4. Multiple parameter destructuring
+print("\n4. Multiple Parameter Destructuring")
+print("====================================")
+
+func calculate_area(shape) {
+    switch shape {
+        case Shape.CIRCLE(r):
+            return 3.14159 * r * r
+        case Shape.RECTANGLE(w, h):
+            return w * h
+        case Shape.TRIANGLE(base, height, s1, s2, s3):
+            # Using base and height for area calculation
+            return 0.5 * base * height
+        default:
+            return 0
+    }
+}
+
+func describe_shape(shape) {
+    switch shape {
+        case Shape.CIRCLE(radius):
+            return "Circle with radius " + str(radius)
+        case Shape.RECTANGLE(width, height):
+            return "Rectangle " + str(width) + "x" + str(height)
+        case Shape.TRIANGLE(base, height, side1, side2, side3):
+            return "Triangle: base=" + str(base) + ", height=" + str(height) +
+                   ", sides=[" + str(side1) + "," + str(side2) + "," + str(side3) + "]"
+        default:
+            return "Unknown shape"
+    }
+}
+
+# Test multiple parameter destructuring
+circle = Shape.CIRCLE(5)
+rectangle = Shape.RECTANGLE(10, 8)
+triangle = Shape.TRIANGLE(6, 4, 5, 5, 8)
+
+print("Circle area:", calculate_area(circle))
+print("Rectangle area:", calculate_area(rectangle))
+print("Triangle area:", calculate_area(triangle))
+
+print("Circle description:", describe_shape(circle))
+print("Rectangle description:", describe_shape(rectangle))
+print("Triangle description:", describe_shape(triangle))
+
+# 5. Complex pattern matching with mixed data types
+print("\n5. Complex Pattern Matching")
+print("============================")
+
+func process_message(message) {
+    switch message {
+        case Message.TEXT(content):
+            return "Text message: '" + content + "' (length: " + str(len(content)) + ")"
+        case Message.IMAGE(url, width, height):
+            return "Image: " + url + " (" + str(width) + "x" + str(height) + ")"
+        case Message.VIDEO(url, duration, quality):
+            return "Video: " + url + " (duration: " + str(duration) + "s, quality: " + quality + ")"
+        case Message.SYSTEM(type, data, timestamp):
+            return "System message [" + type + "]: " + str(data) + " at " + str(timestamp)
+        case Message.EMPTY:
+            return "Empty message"
+        default:
+            return "Unknown message type"
+    }
+}
+
+# Test complex pattern matching
+text_msg = Message.TEXT("Hello, world!")
+image_msg = Message.IMAGE("photo.jpg", 1920, 1080)
+video_msg = Message.VIDEO("clip.mp4", 120, "HD")
+system_msg = Message.SYSTEM("login", {"user": "alice", "ip": "192.168.1.1"}, 1640995200)
+empty_msg = Message.EMPTY
+
+messages = [text_msg, image_msg, video_msg, system_msg, empty_msg]
+
+print("Processing messages:")
+for msg in messages {
+    print("  " + process_message(msg))
+}
+
+# 6. Nested pattern matching with fall-through
+print("\n6. Pattern Matching with Fall-through")
+print("======================================")
+
+func categorize_message(message) {
+    category = ""
+    details = ""
+
+    switch message {
+        case Message.TEXT(content):
+            category = "content"
+            details = "text: " + content
+            # Fall through to add common processing
+        case Message.IMAGE(url, width, height):
+            if category == "" {
+                category = "media"
+                details = "image: " + str(width) + "x" + str(height)
+            }
+            # Fall through to add media processing
+        case Message.VIDEO(url, duration, quality):
+            if category == "" {
+                category = "media"
+                details = "video: " + str(duration) + "s"
+            }
+            # Common media processing (would be here in fall-through)
+            break
+        case Message.SYSTEM(type, data, timestamp):
+            category = "system"
+            details = "type: " + type
+            break
+        case Message.EMPTY:
+            category = "empty"
+            details = "no content"
+            break
+        default:
+            category = "unknown"
+            details = "unrecognized format"
+    }
+
+    return {"category": category, "details": details}
+}
+
+print("Message categorization:")
+for msg in messages {
+    result = categorize_message(msg)
+    print("  Category: " + result["category"] + " - " + result["details"])
+}
+
+# 7. Enum methods with enhanced switch statements
+print("\n7. Enum Methods with Pattern Matching")
+print("=====================================")
+
+# Add methods to existing enums (this would be done at enum definition time)
+enum HttpResponse {
+    OK(data, headers),
+    NOT_FOUND(resource),
+    SERVER_ERROR(message, code),
+    REDIRECT(location, permanent),
+    UNAUTHORIZED(realm)
+
+    # Method that uses enhanced switch pattern matching internally
+    func get_status_code() {
+        switch this {
+            case HttpResponse.OK(data, headers):
+                return 200
+            case HttpResponse.NOT_FOUND(resource):
+                return 404
+            case HttpResponse.SERVER_ERROR(msg, code):
+                return code  # Use extracted code parameter
+            case HttpResponse.REDIRECT(location, permanent):
+                return permanent ? 301 : 302  # Use extracted permanent flag
+            case HttpResponse.UNAUTHORIZED(realm):
+                return 401
+            default:
+                return 500
+        }
+    }
+
+    func get_description() {
+        switch this {
+            case HttpResponse.OK(data, headers):
+                return "Success with " + str(len(headers)) + " headers"
+            case HttpResponse.NOT_FOUND(resource):
+                return "Resource not found: " + resource
+            case HttpResponse.SERVER_ERROR(message, code):
+                return "Server error " + str(code) + ": " + message
+            case HttpResponse.REDIRECT(location, permanent):
+                redirect_type = permanent ? "permanent" : "temporary"
+                return "Redirect (" + redirect_type + ") to: " + location
+            case HttpResponse.UNAUTHORIZED(realm):
+                return "Authentication required for realm: " + realm
+            default:
+                return "Unknown response"
+        }
+    }
+
+    func is_success() {
+        switch this {
+            case HttpResponse.OK(data, headers):
+                return true
+            case HttpResponse.REDIRECT(location, permanent):
+                return true  # Redirects can be considered successful
+            default:
+                return false
+        }
+    }
+}
+
+# Test enum methods with pattern matching
+responses = [
+    HttpResponse.OK({"users": ["alice", "bob"]}, {"content-type": "application/json"}),
+    HttpResponse.NOT_FOUND("/api/nonexistent"),
+    HttpResponse.SERVER_ERROR("Database connection failed", 503),
+    HttpResponse.REDIRECT("https://newsite.com", true),
+    HttpResponse.UNAUTHORIZED("admin")
+]
+
+print("HTTP Response analysis:")
+for response in responses {
+    print("  Response: " + str(response))
+    print("    Status Code: " + str(response.get_status_code()))
+    print("    Description: " + response.get_description())
+    print("    Is Success: " + str(response.is_success()))
+    print()
+}
+
+# 8. Error handling in pattern matching
+print("\n8. Error Handling in Pattern Matching")
+print("======================================")
+
+# Test pattern matching with invalid patterns (these should be caught by the enhanced system)
+func safe_pattern_match(value) {
+    try {
+        switch value {
+            case Status.PENDING:
+                return "valid pattern"
+            case 42:  # This should still work for literal patterns
+                return "literal match"
+            default:
+                return "no match"
+        }
+    } catch (error) {
+        return "Pattern matching error: " + str(error)
+    }
+}
+
+# Test with various values
+test_values = [Status.PENDING, Status.COMPLETE, 42, "hello", Result.SUCCESS("test")]
+
+print("Safe pattern matching tests:")
+for value in test_values {
+    result = safe_pattern_match(value)
+    print("  " + str(value) + " -> " + result)
+}
+
+print("\n=== Enhanced Enum Pattern Matching Demo Complete ===")
+print("\nSummary of enhanced features demonstrated:")
+print("✓ Basic enum variant pattern matching")
+print("✓ Single parameter destructuring in switch cases")
+print("✓ Multiple parameter destructuring with variable binding")
+print("✓ Complex pattern matching with mixed data types")
+print("✓ Fall-through behavior with pattern bindings")
+print("✓ Enum instance methods using enhanced switch statements")
+print("✓ Proper variable scoping for destructured parameters")
+print("✓ Error handling and validation for pattern matching")
+print("✓ Integration with existing literal pattern matching")

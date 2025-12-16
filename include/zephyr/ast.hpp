@@ -15,6 +15,7 @@ class case_statement_t;
 class ternary_expression_t;
 class lambda_expression_t;
 class class_definition_t;
+class enum_declaration_t;
 class interface_definition_t;
 class method_call_t;
 class member_access_t;
@@ -163,6 +164,7 @@ public:
     virtual auto visit(program_t& node) -> void = 0;
     virtual auto visit(lambda_expression_t& node) -> void = 0;
     virtual auto visit(class_definition_t& node) -> void = 0;
+    virtual auto visit(enum_declaration_t& node) -> void = 0;
     virtual auto visit(interface_definition_t& node) -> void = 0;
     virtual auto visit(this_expression_t& node) -> void = 0;
     virtual auto visit(super_expression_t& node) -> void = 0;
@@ -1538,6 +1540,40 @@ public:
     bool is_internal;
     bool is_final;
     bool is_abstract;
+};
+
+// Enum variant definition for AST
+struct enum_variant_definition_t
+{
+    std::string variant_name;
+    std::vector<std::string> parameter_names;
+    std::vector<std::string> parameter_types;
+    bool has_parameters;
+    
+    enum_variant_definition_t(std::string name)
+        : variant_name(std::move(name)), has_parameters(false) {}
+        
+    enum_variant_definition_t(std::string name, std::vector<std::string> param_names, std::vector<std::string> param_types = {})
+        : variant_name(std::move(name)), parameter_names(std::move(param_names)), parameter_types(std::move(param_types)), has_parameters(true) {}
+};
+
+// Enum declaration
+class enum_declaration_t : public statement_t
+{
+public:
+    enum_declaration_t(std::string_view enum_name, std::vector<enum_variant_definition_t> variants, std::vector<std::unique_ptr<function_definition_t>> methods, bool is_internal, int line, int column, int end_line, int end_column)
+        : statement_t(line, column, end_line, end_column), enum_name(enum_name), variants(std::move(variants)), methods(std::move(methods)), is_internal(is_internal)
+    {
+    }
+
+    auto accept(ast_visitor_t& visitor) -> void override;
+    auto clone() const -> std::unique_ptr<ast_node_t> override;
+
+public:
+    std::string enum_name;
+    std::vector<enum_variant_definition_t> variants;
+    std::vector<std::unique_ptr<function_definition_t>> methods;
+    bool is_internal;
 };
 
 // Program

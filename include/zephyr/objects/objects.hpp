@@ -19,3 +19,4 @@
 #include "builtin_function_object.hpp"
 #include "promise_object.hpp"
 #include "exception_object.hpp"
+#include "enum_object.hpp"

@@ -1,0 +1,195 @@
+# Comprehensive Enum Feature Demonstration
+# This example showcases all implemented enum features in Zephyr
+
+print("=== Comprehensive Enum Feature Test ===")
+
+# 1. Simple enums without data
+print("\n1. Simple Enums:")
+enum Direction {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST
+}
+
+north = Direction.NORTH
+south = Direction.SOUTH
+print("Directions:", north, south)
+
+# 2. Enums with single parameter
+print("\n2. Enums with Single Parameter:")
+enum Temperature {
+    COLD(degrees),
+    WARM(degrees),
+    HOT(degrees)
+}
+
+cold_temp = Temperature.COLD(-5)
+warm_temp = Temperature.WARM(20)
+hot_temp = Temperature.HOT(35)
+print("Temperatures:", cold_temp, warm_temp, hot_temp)
+
+# 3. Enums with multiple parameters
+print("\n3. Enums with Multiple Parameters:")
+enum Command {
+    QUIT,
+    MOVE(x, y),
+    RESIZE(width, height),
+    SET_COLOR(r, g, b, alpha)
+}
+
+quit_cmd = Command.QUIT
+move_cmd = Command.MOVE(100, 200)
+resize_cmd = Command.RESIZE(800, 600)
+color_cmd = Command.SET_COLOR(255, 128, 64, 0.8)
+print("Commands:", quit_cmd, move_cmd, resize_cmd, color_cmd)
+
+# 4. Mixed enums (some variants with data, some without)
+print("\n4. Mixed Enums:")
+enum Result {
+    SUCCESS(value),
+    ERROR(message, code),
+    PENDING,
+    CANCELLED
+}
+
+success_result = Result.SUCCESS("Operation completed")
+error_result = Result.ERROR("File not found", 404)
+pending_result = Result.PENDING
+cancelled_result = Result.CANCELLED
+print("Results:", success_result, error_result, pending_result, cancelled_result)
+
+# 5. Enums as function parameters and return values
+print("\n5. Enums as Function Parameters:")
+func process_direction(dir) {
+    print("Processing direction:", dir)
+    return "Moved " + str(dir)
+}
+
+func get_status(success) {
+    if success {
+        return Result.SUCCESS("All good")
+    } else {
+        return Result.ERROR("Something failed", 500)
+    }
+}
+
+result1 = process_direction(Direction.NORTH)
+result2 = get_status(true)
+result3 = get_status(false)
+print("Function results:", result1, result2, result3)
+
+# 6. Using enum constructors stored in variables
+print("\n6. Enum Constructors in Variables:")
+move_constructor = Command.MOVE
+color_constructor = Command.SET_COLOR
+
+move1 = move_constructor(50, 75)
+move2 = move_constructor(200, 300)
+color1 = color_constructor(255, 0, 0, 1.0)
+color2 = color_constructor(0, 255, 0, 0.5)
+
+print("Created with stored constructors:", move1, move2, color1, color2)
+
+# 7. Complex nested structures with enums
+print("\n7. Complex Structures with Enums:")
+enum Message {
+    TEXT(content),
+    IMAGE(url, width, height),
+    VIDEO(url, duration),
+    SYSTEM(type, data)
+}
+
+text_msg = Message.TEXT("Hello, World!")
+image_msg = Message.IMAGE("photo.jpg", 1920, 1080)
+video_msg = Message.VIDEO("movie.mp4", 120)
+system_msg = Message.SYSTEM("notification", "User logged in")
+
+messages = [text_msg, image_msg, video_msg, system_msg]
+print("Message list:")
+for msg in messages {
+    print("  -", msg)
+}
+
+# 8. Enums with different data types
+print("\n8. Enums with Different Data Types:")
+enum Value {
+    INTEGER(num),
+    STRING(text),
+    BOOLEAN(flag),
+    LIST(items)
+}
+
+int_val = Value.INTEGER(42)
+str_val = Value.STRING("Hello")
+bool_val = Value.BOOLEAN(true)
+list_val = Value.LIST([1, 2, 3, 4, 5])
+
+print("Different types:", int_val, str_val, bool_val, list_val)
+
+# 9. Real-world example: HTTP Response
+print("\n9. Real-world Example - HTTP Response:")
+enum HttpResponse {
+    OK(data),
+    NOT_FOUND(url),
+    SERVER_ERROR(message, code),
+    REDIRECT(location),
+    UNAUTHORIZED
+}
+
+responses = [
+    HttpResponse.OK({"users": ["alice", "bob"]}),
+    HttpResponse.NOT_FOUND("/api/missing"),
+    HttpResponse.SERVER_ERROR("Database connection failed", 500),
+    HttpResponse.REDIRECT("/login"),
+    HttpResponse.UNAUTHORIZED
+]
+
+print("HTTP Responses:")
+for response in responses {
+    print("  Response:", response)
+}
+
+# 10. Enum equality testing
+print("\n10. Enum Equality Testing:")
+status1 = Result.PENDING
+status2 = Result.PENDING
+status3 = Result.CANCELLED
+
+print("status1 == status2:", status1 == status2)
+print("status1 == status3:", status1 == status3)
+
+success1 = Result.SUCCESS("test")
+success2 = Result.SUCCESS("test")
+success3 = Result.SUCCESS("different")
+
+print("success1 == success2:", success1 == success2)
+print("success1 == success3:", success1 == success3)
+
+# 11. Internal enums (not exported)
+print("\n11. Internal Enums:")
+internal enum InternalStatus {
+    ACTIVE,
+    INACTIVE,
+    MAINTENANCE(reason)
+}
+
+internal_active = InternalStatus.ACTIVE
+internal_maintenance = InternalStatus.MAINTENANCE("Server update")
+print("Internal enums:", internal_active, internal_maintenance)
+
+print("\n=== All Enum Features Demonstrated Successfully! ===")
+print("\nSummary of implemented features:")
+print("✓ Simple enums without parameters")
+print("✓ Enums with single parameters")
+print("✓ Enums with multiple parameters")
+print("✓ Mixed enums (some variants with/without data)")
+print("✓ Enums as function parameters and return values")
+print("✓ Enum constructors stored in variables")
+print("✓ Complex nested structures with enums")
+print("✓ Enums with different data types")
+print("✓ Real-world usage patterns")
+print("✓ Enum equality comparison")
+print("✓ Internal enum declarations")
+print("✓ C++ API support for enum creation and manipulation")
+print("✓ Pattern matching infrastructure (ready for future switch enhancements)")

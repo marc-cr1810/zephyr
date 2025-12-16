@@ -6,6 +6,7 @@
 #include "zephyr/api/type_converter.hpp"
 #include "zephyr/api/dynamic_loader.hpp"
 #include "zephyr/api/result.hpp"
+#include "zephyr/api/enum_api.hpp"
 #include "zephyr/interpreter.hpp"
 #include "zephyr/runtime.hpp"
 #include "zephyr/module_loader.hpp"
@@ -128,6 +129,31 @@ public:
     
     // List registered classes
     auto list_classes() -> std::vector<std::string>;
+    
+    // =============================================================================
+    // Enum Registration
+    // =============================================================================
+    
+    // Register enum
+    auto register_enum(const std::string& name, const enum_api_t& enum_obj) -> void;
+    
+    // Register enum using builder
+    auto register_enum(enum_builder_t&& builder) -> enum_api_t;
+    
+    // Create enum builder
+    auto create_enum(const std::string& name) -> enum_builder_t;
+    
+    // Unregister enum
+    auto unregister_enum(const std::string& name) -> bool;
+    
+    // Check if enum is registered
+    auto has_enum(const std::string& name) -> bool;
+    
+    // Get registered enum
+    auto get_enum(const std::string& name) -> std::optional<enum_api_t>;
+    
+    // List registered enums
+    auto list_enums() -> std::vector<std::string>;
     
     // =============================================================================
     // Module Registration

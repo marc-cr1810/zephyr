@@ -309,6 +309,11 @@ auto class_definition_t::accept(ast_visitor_t& visitor) -> void
     visitor.visit(*this);
 }
 
+auto enum_declaration_t::accept(ast_visitor_t& visitor) -> void
+{
+    visitor.visit(*this);
+}
+
 auto method_call_t::accept(ast_visitor_t& visitor) -> void
 {
     visitor.visit(*this);
@@ -1060,6 +1065,16 @@ auto class_definition_t::clone() const -> std::unique_ptr<ast_node_t>
         new_methods.push_back(m ? std::unique_ptr<function_definition_t>(static_cast<function_definition_t*>(m->clone().release())) : nullptr);
     }
     return std::make_unique<class_definition_t>(class_name, parent_class, interfaces, std::move(new_members), std::move(new_methods), is_internal, is_final, is_abstract, line, column, end_line, end_column);
+}
+
+auto enum_declaration_t::clone() const -> std::unique_ptr<ast_node_t>
+{
+    auto new_methods = std::vector<std::unique_ptr<function_definition_t>>();
+    for(const auto& m : methods)
+    {
+        new_methods.push_back(m ? std::unique_ptr<function_definition_t>(static_cast<function_definition_t*>(m->clone().release())) : nullptr);
+    }
+    return std::make_unique<enum_declaration_t>(enum_name, variants, std::move(new_methods), is_internal, line, column, end_line, end_column);
 }
 
 auto program_t::clone() const -> std::unique_ptr<ast_node_t>

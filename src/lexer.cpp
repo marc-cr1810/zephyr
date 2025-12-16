@@ -25,6 +25,7 @@ namespace
         {"func", token_type_e::func},
         {"return", token_type_e::return_token},
         {"class", token_type_e::class_token},
+        {"enum", token_type_e::enum_token},
         {"interface", token_type_e::interface_token},
         {"this", token_type_e::this_token},
         {"try", token_type_e::try_token},

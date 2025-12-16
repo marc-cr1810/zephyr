@@ -67,6 +67,7 @@ private:
     auto function_call(std::string function_name, token_t name_token) -> std::unique_ptr<function_call_t>;
     auto lambda_expression() -> std::unique_ptr<lambda_expression_t>;
     auto class_definition() -> std::unique_ptr<class_definition_t>;
+    auto enum_declaration() -> std::unique_ptr<enum_declaration_t>;
     auto interface_definition() -> std::unique_ptr<interface_definition_t>;
     auto function_signature() -> function_signature_t;
     auto method_call(std::unique_ptr<expression_t> object, std::string method_name, token_t method_token) -> std::unique_ptr<method_call_t>;

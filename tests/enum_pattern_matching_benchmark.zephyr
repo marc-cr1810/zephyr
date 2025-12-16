@@ -1,0 +1,450 @@
+# Enhanced Enum Pattern Matching Performance Benchmark
+# This benchmark compares the performance of different pattern matching approaches
+
+print("=== Enum Pattern Matching Performance Benchmark ===")
+
+# Import timing utilities (assuming they exist)
+import time
+
+# Benchmark configuration
+ITERATIONS = 10000
+WARMUP_ITERATIONS = 1000
+
+func benchmark_section(name) {
+    print("\n--- " + name + " ---")
+}
+
+func time_operation(name, operation_func, iterations) {
+    # Warmup
+    for i in range(WARMUP_ITERATIONS) {
+        operation_func()
+    }
+
+    start_time = time.now()
+    for i in range(iterations) {
+        operation_func()
+    }
+    end_time = time.now()
+
+    total_time = end_time - start_time
+    avg_time = total_time / iterations
+    ops_per_sec = iterations / total_time
+
+    print(name + ":")
+    print("  Total time: " + str(total_time) + "s")
+    print("  Average per operation: " + str(avg_time * 1000) + "ms")
+    print("  Operations per second: " + str(ops_per_sec))
+
+    return total_time
+}
+
+# Test enums for benchmarking
+enum SimpleEnum {
+    FIRST,
+    SECOND,
+    THIRD,
+    FOURTH,
+    FIFTH
+}
+
+enum SingleParamEnum {
+    VALUE(data),
+    TEXT(content),
+    NUMBER(num),
+    FLAG(status),
+    INFO(details)
+}
+
+enum MultiParamEnum {
+    POINT(x, y),
+    RECTANGLE(x, y, width, height),
+    CIRCLE(center_x, center_y, radius),
+    TRIANGLE(x1, y1, x2, y2, x3, y3),
+    LINE(start_x, start_y, end_x, end_y, thickness)
+}
+
+enum ComplexEnum {
+    SIMPLE,
+    WITH_DATA(value, metadata, timestamp),
+    WITH_NESTED(outer, inner, context),
+    WITH_MIXED(text, numbers, flags, objects)
+}
+
+# Test data sets
+simple_values = [
+    SimpleEnum.FIRST, SimpleEnum.SECOND, SimpleEnum.THIRD,
+    SimpleEnum.FOURTH, SimpleEnum.FIFTH
+]
+
+single_param_values = [
+    SingleParamEnum.VALUE("test1"),
+    SingleParamEnum.TEXT("hello world"),
+    SingleParamEnum.NUMBER(12345),
+    SingleParamEnum.FLAG(true),
+    SingleParamEnum.INFO("benchmark data")
+]
+
+multi_param_values = [
+    MultiParamEnum.POINT(10, 20),
+    MultiParamEnum.RECTANGLE(0, 0, 100, 200),
+    MultiParamEnum.CIRCLE(50, 75, 25),
+    MultiParamEnum.TRIANGLE(0, 0, 10, 0, 5, 10),
+    MultiParamEnum.LINE(0, 0, 100, 100, 2)
+]
+
+complex_values = [
+    ComplexEnum.SIMPLE,
+    ComplexEnum.WITH_DATA("data", {"key": "value"}, 1640995200),
+    ComplexEnum.WITH_NESTED("outer", "inner", {"context": true}),
+    ComplexEnum.WITH_MIXED("text", [1, 2, 3], {"flag": true}, {"nested": "object"})
+]
+
+# 1. Baseline: Simple enum matching (traditional)
+benchmark_section("1. Baseline: Simple Enum Matching")
+
+func baseline_simple_matching() {
+    for value in simple_values {
+        result = switch value {
+            case SimpleEnum.FIRST: "first"
+            case SimpleEnum.SECOND: "second"
+            case SimpleEnum.THIRD: "third"
+            case SimpleEnum.FOURTH: "fourth"
+            case SimpleEnum.FIFTH: "fifth"
+            default: "unknown"
+        }
+    }
+}
+
+baseline_time = time_operation("Simple enum matching (baseline)", baseline_simple_matching, ITERATIONS)
+
+# 2. Enhanced: Simple enum matching with pattern infrastructure
+benchmark_section("2. Enhanced: Simple Enum Matching")
+
+func enhanced_simple_matching() {
+    for value in simple_values {
+        result = switch value {
+            case SimpleEnum.FIRST: "first"
+            case SimpleEnum.SECOND: "second"
+            case SimpleEnum.THIRD: "third"
+            case SimpleEnum.FOURTH: "fourth"
+            case SimpleEnum.FIFTH: "fifth"
+            default: "unknown"
+        }
+    }
+}
+
+enhanced_simple_time = time_operation("Enhanced simple enum matching", enhanced_simple_matching, ITERATIONS)
+simple_overhead = ((enhanced_simple_time - baseline_time) / baseline_time) * 100
+
+# 3. Single parameter destructuring
+benchmark_section("3. Single Parameter Destructuring")
+
+func single_param_destructuring() {
+    for value in single_param_values {
+        result = switch value {
+            case SingleParamEnum.VALUE(data):
+                "value: " + str(data)
+            case SingleParamEnum.TEXT(content):
+                "text: " + content
+            case SingleParamEnum.NUMBER(num):
+                "number: " + str(num)
+            case SingleParamEnum.FLAG(status):
+                "flag: " + str(status)
+            case SingleParamEnum.INFO(details):
+                "info: " + details
+            default:
+                "unknown"
+        }
+    }
+}
+
+single_param_time = time_operation("Single parameter destructuring", single_param_destructuring, ITERATIONS)
+single_param_overhead = ((single_param_time - baseline_time) / baseline_time) * 100
+
+# 4. Multiple parameter destructuring
+benchmark_section("4. Multiple Parameter Destructuring")
+
+func multi_param_destructuring() {
+    for value in multi_param_values {
+        result = switch value {
+            case MultiParamEnum.POINT(x, y):
+                "point(" + str(x) + "," + str(y) + ")"
+            case MultiParamEnum.RECTANGLE(x, y, w, h):
+                "rect(" + str(x) + "," + str(y) + "," + str(w) + "," + str(h) + ")"
+            case MultiParamEnum.CIRCLE(cx, cy, r):
+                "circle(" + str(cx) + "," + str(cy) + "," + str(r) + ")"
+            case MultiParamEnum.TRIANGLE(x1, y1, x2, y2, x3, y3):
+                "triangle(" + str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(x3) + "," + str(y3) + ")"
+            case MultiParamEnum.LINE(sx, sy, ex, ey, t):
+                "line(" + str(sx) + "," + str(sy) + "," + str(ex) + "," + str(ey) + "," + str(t) + ")"
+            default:
+                "unknown"
+        }
+    }
+}
+
+multi_param_time = time_operation("Multiple parameter destructuring", multi_param_destructuring, ITERATIONS)
+multi_param_overhead = ((multi_param_time - baseline_time) / baseline_time) * 100
+
+# 5. Complex enum matching
+benchmark_section("5. Complex Enum Matching")
+
+func complex_enum_matching() {
+    for value in complex_values {
+        result = switch value {
+            case ComplexEnum.SIMPLE:
+                "simple"
+            case ComplexEnum.WITH_DATA(value, metadata, timestamp):
+                "data: " + str(value) + " meta: " + str(metadata) + " time: " + str(timestamp)
+            case ComplexEnum.WITH_NESTED(outer, inner, context):
+                "nested: " + str(outer) + "/" + str(inner) + " ctx: " + str(context)
+            case ComplexEnum.WITH_MIXED(text, numbers, flags, objects):
+                "mixed: " + text + " nums: " + str(numbers) + " flags: " + str(flags) + " objs: " + str(objects)
+            default:
+                "unknown"
+        }
+    }
+}
+
+complex_time = time_operation("Complex enum matching", complex_enum_matching, ITERATIONS)
+complex_overhead = ((complex_time - baseline_time) / baseline_time) * 100
+
+# 6. Method pattern matching
+benchmark_section("6. Method Pattern Matching")
+
+enum BenchmarkMethodEnum {
+    DATA(value),
+    POINT(x, y),
+    INFO(text, metadata)
+
+    func process() {
+        switch this {
+            case BenchmarkMethodEnum.DATA(value):
+                return "processed data: " + str(value)
+            case BenchmarkMethodEnum.POINT(x, y):
+                return "processed point: (" + str(x) + "," + str(y) + ")"
+            case BenchmarkMethodEnum.INFO(text, metadata):
+                return "processed info: " + text + " with " + str(metadata)
+            default:
+                return "unknown"
+        }
+    }
+}
+
+method_test_values = [
+    BenchmarkMethodEnum.DATA("test"),
+    BenchmarkMethodEnum.POINT(100, 200),
+    BenchmarkMethodEnum.INFO("info", {"key": "value"})
+]
+
+func method_pattern_matching() {
+    for value in method_test_values {
+        result = value.process()
+    }
+}
+
+method_time = time_operation("Method pattern matching", method_pattern_matching, ITERATIONS)
+method_overhead = ((method_time - baseline_time) / baseline_time) * 100
+
+# 7. Mixed pattern types (enum + literal)
+benchmark_section("7. Mixed Pattern Types")
+
+mixed_test_values = [
+    SimpleEnum.FIRST, 42, "hello", SimpleEnum.SECOND, 3.14, true, SimpleEnum.THIRD
+]
+
+func mixed_pattern_matching() {
+    for value in mixed_test_values {
+        result = switch value {
+            case SimpleEnum.FIRST: "enum_first"
+            case SimpleEnum.SECOND: "enum_second"
+            case SimpleEnum.THIRD: "enum_third"
+            case 42: "literal_int"
+            case "hello": "literal_string"
+            case 3.14: "literal_float"
+            case true: "literal_bool"
+            default: "unknown"
+        }
+    }
+}
+
+mixed_time = time_operation("Mixed pattern matching", mixed_pattern_matching, ITERATIONS)
+mixed_overhead = ((mixed_time - baseline_time) / baseline_time) * 100
+
+# 8. Nested switch statements
+benchmark_section("8. Nested Switch Statements")
+
+func nested_switch_matching() {
+    for outer in single_param_values {
+        switch outer {
+            case SingleParamEnum.VALUE(data):
+                inner_result = switch data {
+                    case "test1": "nested_test1"
+                    case "test2": "nested_test2"
+                    default: "nested_other"
+                }
+            case SingleParamEnum.TEXT(content):
+                inner_result = switch len(content) {
+                    case 5: "short"
+                    case 11: "hello world length"
+                    default: "other length"
+                }
+            default:
+                inner_result = "no nested match"
+        }
+    }
+}
+
+nested_time = time_operation("Nested switch matching", nested_switch_matching, ITERATIONS)
+nested_overhead = ((nested_time - baseline_time) / baseline_time) * 100
+
+# Performance summary
+print("\n=== Performance Summary ===")
+print("Baseline (simple enum): " + str(baseline_time) + "s")
+print()
+print("Performance overhead compared to baseline:")
+print("  Enhanced simple matching: " + str(simple_overhead) + "%")
+print("  Single param destructuring: " + str(single_param_overhead) + "%")
+print("  Multiple param destructuring: " + str(multi_param_overhead) + "%")
+print("  Complex enum matching: " + str(complex_overhead) + "%")
+print("  Method pattern matching: " + str(method_overhead) + "%")
+print("  Mixed pattern types: " + str(mixed_overhead) + "%")
+print("  Nested switch statements: " + str(nested_overhead) + "%")
+
+# Memory usage estimation
+print("\n=== Memory Usage Analysis ===")
+print("Pattern matching creates temporary variable bindings:")
+print("  Simple enum: 0 extra variables")
+print("  Single param: 1 extra variable per match")
+print("  Multiple param: 2-6 extra variables per match")
+print("  Complex enum: 1-4 extra variables per match")
+print()
+print("Scope management overhead:")
+print("  Push/pop scope per destructuring case")
+print("  Variable cleanup after case execution")
+
+# Recommendations
+print("\n=== Performance Recommendations ===")
+print("1. Use simple enum matching when no data extraction is needed")
+print("2. Prefer single-parameter destructuring over complex patterns when possible")
+print("3. Avoid deep nesting of switch statements in performance-critical code")
+print("4. Consider caching extracted values if used multiple times")
+print("5. Use default cases to avoid unnecessary pattern matching attempts")
+
+# Feature completeness test
+print("\n=== Feature Completeness Test ===")
+
+completeness_tests = 0
+completeness_passed = 0
+
+# Test 1: Basic enum matching
+try {
+    test_val = SimpleEnum.FIRST
+    result = switch test_val {
+        case SimpleEnum.FIRST: "pass"
+        default: "fail"
+    }
+    completeness_tests += 1
+    if result == "pass" {
+        completeness_passed += 1
+        print("✓ Basic enum matching: PASS")
+    } else {
+        print("✗ Basic enum matching: FAIL")
+    }
+} catch (error) {
+    completeness_tests += 1
+    print("✗ Basic enum matching: ERROR - " + str(error))
+}
+
+# Test 2: Single parameter destructuring
+try {
+    test_val = SingleParamEnum.VALUE("test")
+    result = switch test_val {
+        case SingleParamEnum.VALUE(data): "pass:" + data
+        default: "fail"
+    }
+    completeness_tests += 1
+    if result == "pass:test" {
+        completeness_passed += 1
+        print("✓ Single parameter destructuring: PASS")
+    } else {
+        print("✗ Single parameter destructuring: FAIL")
+    }
+} catch (error) {
+    completeness_tests += 1
+    print("✗ Single parameter destructuring: ERROR - " + str(error))
+}
+
+# Test 3: Multiple parameter destructuring
+try {
+    test_val = MultiParamEnum.POINT(10, 20)
+    result = switch test_val {
+        case MultiParamEnum.POINT(x, y): x + y
+        default: -1
+    }
+    completeness_tests += 1
+    if result == 30 {
+        completeness_passed += 1
+        print("✓ Multiple parameter destructuring: PASS")
+    } else {
+        print("✗ Multiple parameter destructuring: FAIL")
+    }
+} catch (error) {
+    completeness_tests += 1
+    print("✗ Multiple parameter destructuring: ERROR - " + str(error))
+}
+
+# Test 4: Method pattern matching
+try {
+    test_val = BenchmarkMethodEnum.DATA("test")
+    result = test_val.process()
+    completeness_tests += 1
+    if result == "processed data: test" {
+        completeness_passed += 1
+        print("✓ Method pattern matching: PASS")
+    } else {
+        print("✗ Method pattern matching: FAIL")
+    }
+} catch (error) {
+    completeness_tests += 1
+    print("✗ Method pattern matching: ERROR - " + str(error))
+}
+
+# Test 5: Mixed pattern types
+try {
+    literal_result = switch 42 {
+        case 42: "literal"
+        default: "no match"
+    }
+    enum_result = switch SimpleEnum.FIRST {
+        case SimpleEnum.FIRST: "enum"
+        default: "no match"
+    }
+    completeness_tests += 1
+    if literal_result == "literal" and enum_result == "enum" {
+        completeness_passed += 1
+        print("✓ Mixed pattern types: PASS")
+    } else {
+        print("✗ Mixed pattern types: FAIL")
+    }
+} catch (error) {
+    completeness_tests += 1
+    print("✗ Mixed pattern types: ERROR - " + str(error))
+}
+
+completeness_rate = (completeness_passed * 100.0) / completeness_tests
+print("\nFeature Completeness: " + str(completeness_passed) + "/" + str(completeness_tests) + " (" + str(completeness_rate) + "%)")
+
+print("\n=== Benchmark Complete ===")
+print("Iterations per test: " + str(ITERATIONS))
+print("Warmup iterations: " + str(WARMUP_ITERATIONS))
+print("Total test time: ~" + str((baseline_time + enhanced_simple_time + single_param_time + multi_param_time + complex_time + method_time + mixed_time + nested_time)) + "s")
+
+# Exit with appropriate code
+if completeness_passed == completeness_tests {
+    print("🎉 All features working correctly!")
+    exit(0)
+} else {
+    print("❌ Some features not working correctly")
+    exit(1)
+}

@@ -111,6 +111,9 @@ enum class token_type_e
     internal_token,
     star,
 
+    // Enum system tokens
+    enum_token,
+
     // End of file
     end_of_file,
 

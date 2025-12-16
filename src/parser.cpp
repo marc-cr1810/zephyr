@@ -40,6 +40,7 @@ std::string token_type_to_string(token_type_e type) {
         case token_type_e::not_op: return "not_op !";
         case token_type_e::name: return "name";
         case token_type_e::class_token: return "class";
+        case token_type_e::enum_token: return "enum";
         case token_type_e::interface_token: return "interface";
         case token_type_e::number: return "number";
         case token_type_e::string: return "string";
@@ -199,6 +200,8 @@ std::unique_ptr<statement_t> parser_t::statement() {
                m_current_token.type == token_type_e::abstract_token ||
                m_current_token.type == token_type_e::class_token) {
         return class_definition();
+    } else if (m_current_token.type == token_type_e::enum_token) {
+        return enum_declaration();
     } else if (m_current_token.type == token_type_e::interface_token) {
         return interface_definition();
     } else if (m_current_token.type == token_type_e::return_token) {
@@ -2335,6 +2338,98 @@ std::unique_ptr<class_definition_t> parser_t::class_definition() {
     );
 }
 
+std::unique_ptr<enum_declaration_t> parser_t::enum_declaration() {
+    token_t enum_token = m_current_token;
+    eat(token_type_e::enum_token);
+
+    std::string enum_name(m_current_token.text);
+    eat(token_type_e::name);
+
+    eat(token_type_e::lbrace);
+
+    std::vector<enum_variant_definition_t> variants;
+    std::vector<std::unique_ptr<function_definition_t>> methods;
+
+    while (m_current_token.type != token_type_e::rbrace) {
+        if (m_current_token.type == token_type_e::name) {
+            // Parse variant definition
+            std::string variant_name(m_current_token.text);
+            eat(token_type_e::name);
+
+            if (m_current_token.type == token_type_e::lparen) {
+                // Variant with parameters
+                eat(token_type_e::lparen);
+                
+                std::vector<std::string> param_names;
+                std::vector<std::string> param_types;
+                
+                if (m_current_token.type != token_type_e::rparen) {
+                    // Parse first parameter
+                    param_names.push_back(std::string(m_current_token.text));
+                    eat(token_type_e::name);
+                    
+                    // Check for optional type annotation
+                    if (m_current_token.type == token_type_e::colon) {
+                        eat(token_type_e::colon);
+                        param_types.push_back(std::string(m_current_token.text));
+                        eat(token_type_e::name);
+                    }
+                    
+                    // Parse additional parameters
+                    while (m_current_token.type == token_type_e::comma) {
+                        eat(token_type_e::comma);
+                        param_names.push_back(std::string(m_current_token.text));
+                        eat(token_type_e::name);
+                        
+                        if (m_current_token.type == token_type_e::colon) {
+                            eat(token_type_e::colon);
+                            if (param_types.size() == param_names.size() - 1) {
+                                param_types.push_back(std::string(m_current_token.text));
+                                eat(token_type_e::name);
+                            } else {
+                                // Inconsistent type annotations - skip for now
+                                eat(token_type_e::name);
+                            }
+                        }
+                    }
+                }
+                
+                eat(token_type_e::rparen);
+                variants.emplace_back(variant_name, param_names, param_types);
+            } else {
+                // Simple variant (no parameters)
+                variants.emplace_back(variant_name);
+            }
+
+            // Optional comma after variant
+            if (m_current_token.type == token_type_e::comma) {
+                eat(token_type_e::comma);
+            }
+        } else if (m_current_token.type == token_type_e::func) {
+            // Parse enum method
+            auto method = function_definition();
+            methods.push_back(std::move(method));
+        } else {
+            zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
+            throw zephyr::syntax_error_t("Expected variant name or method definition in enum");
+        }
+    }
+
+    token_t end_token = m_current_token;
+    eat(token_type_e::rbrace);
+
+    return std::make_unique<enum_declaration_t>(
+        enum_name,
+        std::move(variants),
+        std::move(methods),
+        false, // is_internal - will be set by caller if needed
+        enum_token.line,
+        enum_token.column,
+        end_token.line,
+        end_token.column
+    );
+}
+
 std::unique_ptr<interface_definition_t> parser_t::interface_definition() {
     token_t interface_token = m_current_token;
     eat(token_type_e::interface_token);
@@ -2788,6 +2883,13 @@ auto parser_t::internal_declaration() -> std::unique_ptr<statement_t>
         class_def->is_internal = true;
         return class_def;
     }
+    else if (m_current_token.type == token_type_e::enum_token)
+    {
+        // Internal enum
+        auto enum_def = enum_declaration();
+        enum_def->is_internal = true;
+        return enum_def;
+    }
     else if (m_current_token.type == token_type_e::const_token)
     {
         // Internal const declaration
@@ -2798,7 +2900,7 @@ auto parser_t::internal_declaration() -> std::unique_ptr<statement_t>
     else
     {
         zephyr::current_error_location() = {m_current_token.line, m_current_token.column, 1};
-        throw syntax_error_t("'internal' can only be used with func, async, class, or const declarations");
+        throw syntax_error_t("'internal' can only be used with func, async, class, enum, or const declarations");
     }
 }
 

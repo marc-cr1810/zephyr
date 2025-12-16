@@ -19,7 +19,7 @@ Zephyr is a powerful scripting language that combines the simplicity of dynamic 
 - **Built-in Data Structures**: Lists, dictionaries, and complex nesting support
 - **Error Handling**: Try-catch blocks and comprehensive error reporting
 - **String Operations**: Advanced string manipulation and formatting
-- **Control Flow**: If-else, loops, switch statements with fall-through
+- **Control Flow**: If-else, loops, switch statements with enhanced enum pattern matching
 
 ## Quick Start
 
@@ -230,6 +230,8 @@ The `examples/` directory contains 21 comprehensive example files demonstrating 
 21. **21_exit_function.zephyr** - Error handling and program termination
 22. **22_interfaces.zephyr** - Interface system demonstrations
 31. **31_sized_integers.zephyr** - Comprehensive sized integer system with unified type support
+32. **32_comprehensive_enums.zephyr** - Complete enum system with all features
+33. **33_enhanced_enum_pattern_matching.zephyr** - Advanced pattern matching in switch statements
 
 ### Sized Integer System Features
 

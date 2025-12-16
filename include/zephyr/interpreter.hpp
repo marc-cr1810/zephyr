@@ -61,6 +61,7 @@ public:
     auto visit(ternary_expression_t& node) -> void override;
     auto visit(lambda_expression_t& node) -> void override;
     auto visit(class_definition_t& node) -> void override;
+    auto visit(enum_declaration_t& node) -> void override;
     auto visit(interface_definition_t& node) -> void override;
     auto visit(method_call_t& node) -> void override;
     auto visit(member_access_t& node) -> void override;
@@ -147,6 +148,24 @@ private:
     auto convert_integer_value(value_t value, const std::string& target_type) -> value_t;
     auto throw_integer_overflow_error(value_t value, const std::string& actual_type, const std::string& expected_type, const std::string& variable_name) -> void;
     auto get_type_range_string(const std::string& type_name) -> std::string;
+    
+    // Enhanced pattern matching support
+    struct pattern_match_result_t {
+        bool matched;
+        std::map<std::string, std::shared_ptr<object_t>> bindings;
+        
+        pattern_match_result_t() : matched(false) {}
+        pattern_match_result_t(bool match) : matched(match) {}
+        pattern_match_result_t(bool match, std::map<std::string, std::shared_ptr<object_t>> bind) 
+            : matched(match), bindings(std::move(bind)) {}
+    };
+    
+    auto match_pattern(std::shared_ptr<object_t> value, expression_t* pattern) -> pattern_match_result_t;
+    auto match_enum_pattern(std::shared_ptr<object_t> value, member_access_t* member_access) -> pattern_match_result_t;
+    auto match_enum_destructuring_pattern(std::shared_ptr<object_t> value, method_call_t* method_call) -> pattern_match_result_t;
+    auto match_literal_pattern(std::shared_ptr<object_t> value, expression_t* pattern) -> pattern_match_result_t;
+    auto get_enum_name_from_pattern(expression_t* expr) -> std::string;
+    auto are_objects_equal(std::shared_ptr<object_t> left, std::shared_ptr<object_t> right) -> bool;
     auto suggest_integer_type_for_value(int64_t value) -> std::string;
     auto handle_runtime_error(const std::string& message, int line, int column) -> void;
     auto resolve_variable(const std::string& variable_name) -> value_t;

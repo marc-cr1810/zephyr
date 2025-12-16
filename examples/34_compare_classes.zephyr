@@ -1,0 +1,62 @@
+# Compare enum variant calls with class constructor calls
+# This example tests the similarity between enum variants and class constructors
+
+print("=== Comparing Enums with Classes ===")
+
+# First, test how class constructors work
+class Point {
+    func init(x, y) {
+        this.x = x
+        this.y = y
+    }
+
+    func to_string() {
+        return "Point(" + str(this.x) + ", " + str(this.y) + ")"
+    }
+}
+
+print("Class constructor test:")
+print("Point =", Point)
+point1 = Point(10, 20)
+print("Created point:", point1)
+
+# Now test enum variants
+enum Shape {
+    CIRCLE(radius),
+    RECTANGLE(width, height),
+    POINT
+}
+
+print("\nEnum variant test:")
+print("Shape.CIRCLE =", Shape.CIRCLE)
+print("Shape.RECTANGLE =", Shape.RECTANGLE)
+print("Shape.POINT =", Shape.POINT)
+
+# Try creating enum variants
+print("\nTrying to create enum variants...")
+
+# Simple variant (no parameters)
+try {
+    point_shape = Shape.POINT
+    print("SUCCESS: Created point shape:", point_shape)
+} catch (error) {
+    print("ERROR with POINT:", error)
+}
+
+# Variant with one parameter
+try {
+    circle_shape = Shape.CIRCLE(5.0)
+    print("SUCCESS: Created circle shape:", circle_shape)
+} catch (error) {
+    print("ERROR with CIRCLE:", error)
+}
+
+# Variant with two parameters
+try {
+    rect_shape = Shape.RECTANGLE(10, 20)
+    print("SUCCESS: Created rectangle shape:", rect_shape)
+} catch (error) {
+    print("ERROR with RECTANGLE:", error)
+}
+
+print("\n=== Comparison completed ===")

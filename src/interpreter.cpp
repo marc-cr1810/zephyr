@@ -2712,6 +2712,83 @@ auto interpreter_t::visit(function_call_t& node) -> void
             return;
         }
 
+        // Check if it's an enum variant constructor
+        if (callable_obj->type()->name() == "enum_variant_constructor")
+        {
+            m_current_result = callable_obj->call(args);
+            zephyr::current_error_location() = saved_location;
+            return;
+        }
+
+        // Check if it's a bound enum method (static method call)
+        if (callable_obj->type()->name() == "bound_enum_method")
+        {
+            auto bound_enum_method = std::dynamic_pointer_cast<bound_enum_method_t>(callable_obj);
+            if (bound_enum_method)
+            {
+            // Get the enum and method definition
+            auto enum_obj = bound_enum_method->get_enum_object();
+            if (!enum_obj) {
+                throw type_error_t("Enum object has been destroyed");
+            }
+
+            auto method_func = enum_obj->get_method(bound_enum_method->get_method_name());
+            if (!method_func) {
+                throw name_error_t("Method '" + bound_enum_method->get_method_name() + "' no longer exists");
+            }
+
+            // Check parameter count
+            if (args.size() != method_func->parameters.size()) {
+                throw type_error_t("Static method '" + bound_enum_method->get_method_name() + "' expects " +
+                                   std::to_string(method_func->parameters.size()) + " arguments, got " +
+                                   std::to_string(args.size()));
+            }
+
+            // Create new scope for static method
+            std::map<std::string, value_t> method_scope;
+
+            // For static methods, 'this' is bound to the enum type itself
+            method_scope["this"] = enum_obj;
+
+            // Bind parameters to arguments
+            for (size_t i = 0; i < method_func->parameters.size(); ++i) {
+                const auto& param = method_func->parameters[i];
+                method_scope[param.name] = args[i];
+
+                if (param.is_const) {
+                    m_const_variables.insert(param.name);
+                }
+            }
+
+            // Push method scope
+            m_scope_stack.push_back(method_scope);
+            m_function_resolvers.emplace_back();
+            m_expected_return_types.push_back(method_func->return_type_name);
+
+            try {
+                // Execute method body
+                method_func->body->accept(*this);
+            } catch (const return_value_t& e) {
+                m_current_result = e.value;
+            }
+
+            // Clean up scope
+            m_scope_stack.pop_back();
+            m_function_resolvers.pop_back();
+            m_expected_return_types.pop_back();
+
+            // Remove const parameters from tracking
+            for (const auto& param : method_func->parameters) {
+                if (param.is_const) {
+                    m_const_variables.erase(param.name);
+                }
+            }
+
+            zephyr::current_error_location() = saved_location;
+            return;
+            }
+        }
+
         // Check if it's a class object (for class instantiation)
         auto class_obj = std::dynamic_pointer_cast<class_object_t>(callable_obj);
         if (class_obj)
@@ -3874,49 +3951,33 @@ auto interpreter_t::visit(switch_statement_t& node) -> void
     node.expression->accept(*this);
     auto switch_value = m_current_result;
 
+
     bool matched = false;
     bool fall_through = false;
+    bool has_pattern_bindings = false;
 
     for (auto& case_stmt : node.cases)
     {
         if (!matched && !fall_through)
         {
-            case_stmt->value->accept(*this);
-            auto case_value = m_current_result;
-            // Basic equality comparison
-            bool is_equal = false;
-            auto left_type = switch_value->type()->name();
-            auto right_type = case_value->type()->name();
-
-            if (left_type == right_type)
-            {
-                if (left_type == "int")
-                {
-                    auto left_int = std::static_pointer_cast<int_object_t>(switch_value);
-                    auto right_int = std::static_pointer_cast<int_object_t>(case_value);
-                    is_equal = left_int->value() == right_int->value();
-                }
-                else if (left_type == "string")
-                {
-                    auto left_str = std::static_pointer_cast<string_object_t>(switch_value);
-                    auto right_str = std::static_pointer_cast<string_object_t>(case_value);
-                    is_equal = left_str->value() == right_str->value();
-                }
-                else if (left_type == "bool")
-                {
-                    auto left_bool = std::static_pointer_cast<boolean_object_t>(switch_value);
-                    auto right_bool = std::static_pointer_cast<boolean_object_t>(case_value);
-                    is_equal = left_bool->m_value == right_bool->m_value;
-                }
-                else if (left_type == "none")
-                {
-                    is_equal = true;
-                }
-            }
-
-            if (is_equal)
+            // Enhanced pattern matching
+            auto match_result = match_pattern(switch_value, case_stmt->value.get());
+            
+            if (match_result.matched)
             {
                 matched = true;
+                
+                // Create new scope for pattern bindings if we have any
+                if (!match_result.bindings.empty())
+                {
+                    std::map<std::string, value_t> new_scope;
+                    for (const auto& [var_name, value] : match_result.bindings)
+                    {
+                        new_scope[var_name] = value;
+                    }
+                    push_scope(new_scope);
+                    has_pattern_bindings = true;
+                }
             }
         }
 
@@ -3932,11 +3993,19 @@ auto interpreter_t::visit(switch_statement_t& node) -> void
             }
             catch (const break_exception_t&)
             {
+                // Pop scope for pattern bindings before breaking
+                if (has_pattern_bindings)
+                {
+                    pop_scope();
+                    has_pattern_bindings = false;
+                }
+                zephyr::current_error_location() = saved_location;
                 return;
             }
         }
     }
 
+    // Handle default case
     if (!matched && node.has_default_case)
     {
         for (auto& stmt : node.default_statements)
@@ -3944,7 +4013,166 @@ auto interpreter_t::visit(switch_statement_t& node) -> void
             stmt->accept(*this);
         }
     }
+
+    // Pop scope for pattern bindings if we didn't break early
+    if (has_pattern_bindings)
+    {
+        pop_scope();
+    }
+
     zephyr::current_error_location() = saved_location;
+}
+
+// Enhanced pattern matching implementation
+auto interpreter_t::match_pattern(std::shared_ptr<object_t> value, expression_t* pattern) -> pattern_match_result_t
+{
+    // Handle member access patterns (e.g., MyEnum.VARIANT)
+    if (auto member_access = dynamic_cast<member_access_t*>(pattern)) {
+        return match_enum_pattern(value, member_access);
+    }
+    
+    // Handle function call patterns for enum destructuring (e.g., Color.RGB(r, g, b))
+    // Note: This would need to be a method call pattern in current AST structure
+    if (auto method_call = dynamic_cast<method_call_t*>(pattern)) {
+        return match_enum_destructuring_pattern(value, method_call);
+    }
+
+    // Handle literal patterns (existing basic functionality)
+    return match_literal_pattern(value, pattern);
+}
+
+auto interpreter_t::match_enum_pattern(std::shared_ptr<object_t> value, member_access_t* member_access) -> pattern_match_result_t
+{
+    // Handle both enum_variant_object_t and enum_variant_constructor_t
+    auto enum_variant = std::dynamic_pointer_cast<enum_variant_object_t>(value);
+    auto enum_constructor = std::dynamic_pointer_cast<enum_variant_constructor_t>(value);
+    
+    std::string value_enum_name;
+    std::string value_variant_name;
+    
+    if (enum_variant) {
+        value_enum_name = enum_variant->get_enum_name();
+        value_variant_name = enum_variant->get_variant_name();
+    } else if (enum_constructor) {
+        value_enum_name = enum_constructor->get_enum_name();
+        value_variant_name = enum_constructor->get_variant_name();
+    } else {
+        return pattern_match_result_t(false);
+    }
+
+    // Evaluate the enum.variant pattern
+    std::string pattern_enum_name = get_enum_name_from_pattern(member_access->object.get());
+    std::string pattern_variant_name = member_access->member_name;
+    
+    if (pattern_enum_name == value_enum_name && pattern_variant_name == value_variant_name) {
+        return pattern_match_result_t(true);
+    }
+
+    return pattern_match_result_t(false);
+}
+
+auto interpreter_t::match_enum_destructuring_pattern(std::shared_ptr<object_t> value,
+                                    method_call_t* method_call) -> pattern_match_result_t
+{
+    auto enum_variant = std::dynamic_pointer_cast<enum_variant_object_t>(value);
+    if (!enum_variant) {
+        return pattern_match_result_t(false);
+    }
+
+    // Get enum and variant names
+    std::string enum_name = get_enum_name_from_pattern(method_call->object.get());
+    std::string variant_name = method_call->method_name;
+
+    // Check if enum variant matches the pattern
+    if (!enum_variant->matches_pattern(enum_name, variant_name)) {
+        return pattern_match_result_t(false);
+    }
+
+    // Extract variable names from the pattern
+    std::vector<std::string> variable_names;
+    for (const auto& arg : method_call->arguments) {
+        if (auto name_node = dynamic_cast<name_t*>(arg.get())) {
+            variable_names.push_back(name_node->name);
+        } else {
+            throw syntax_error_t("Only identifiers are supported in enum destructuring patterns");
+        }
+    }
+
+    // Check if parameter count matches
+    if (variable_names.size() != enum_variant->get_data_count()) {
+        throw type_error_t("Pattern expects " + std::to_string(variable_names.size()) + 
+                         " parameters but enum variant has " + std::to_string(enum_variant->get_data_count()));
+    }
+
+    // Extract data and create bindings
+    std::map<std::string, std::shared_ptr<object_t>> bindings;
+    try {
+        auto extracted_data = enum_variant->extract_data_for_pattern(variable_names);
+        bindings = std::move(extracted_data);
+    } catch (const std::exception& e) {
+        throw type_error_t("Failed to extract enum data: " + std::string(e.what()));
+    }
+
+    return pattern_match_result_t(true, std::move(bindings));
+}
+
+auto interpreter_t::match_literal_pattern(std::shared_ptr<object_t> value, expression_t* pattern) -> pattern_match_result_t
+{
+    // Evaluate the pattern expression
+    pattern->accept(*this);
+    auto pattern_value = m_current_result;
+
+    // Perform type-aware equality comparison
+    if (are_objects_equal(value, pattern_value)) {
+        return pattern_match_result_t(true);
+    }
+
+    return pattern_match_result_t(false);
+}
+
+auto interpreter_t::get_enum_name_from_pattern(expression_t* expr) -> std::string
+{
+    if (auto name_node = dynamic_cast<name_t*>(expr)) {
+        return name_node->name;
+    }
+    
+    // For more complex expressions, evaluate and get the string representation
+    expr->accept(*this);
+    auto result = m_current_result;
+    return result->to_string();
+}
+
+auto interpreter_t::are_objects_equal(std::shared_ptr<object_t> left, std::shared_ptr<object_t> right) -> bool
+{
+    auto left_type = left->type()->name();
+    auto right_type = right->type()->name();
+
+    if (left_type != right_type) {
+        return false;
+    }
+
+    if (left_type == "int") {
+        auto left_int = std::static_pointer_cast<int_object_t>(left);
+        auto right_int = std::static_pointer_cast<int_object_t>(right);
+        return left_int->value() == right_int->value();
+    } else if (left_type == "string") {
+        auto left_str = std::static_pointer_cast<string_object_t>(left);
+        auto right_str = std::static_pointer_cast<string_object_t>(right);
+        return left_str->value() == right_str->value();
+    } else if (left_type == "bool") {
+        auto left_bool = std::static_pointer_cast<boolean_object_t>(left);
+        auto right_bool = std::static_pointer_cast<boolean_object_t>(right);
+        return left_bool->m_value == right_bool->m_value;
+    } else if (left_type == "none") {
+        return true; // All none objects are equal
+    } else if (left_type == "enum_variant") {
+        auto left_variant = std::static_pointer_cast<enum_variant_object_t>(left);
+        auto right_variant = std::static_pointer_cast<enum_variant_object_t>(right);
+        return left_variant->equals(right_variant);
+    }
+
+    // For other types, fall back to string comparison
+    return left->to_string() == right->to_string();
 }
 
 auto interpreter_t::visit(case_statement_t& node) -> void
@@ -4251,6 +4479,49 @@ auto interpreter_t::visit(class_definition_t& node) -> void
     }
 
     m_current_result = class_obj;
+    zephyr::current_error_location() = saved_location;
+}
+
+auto interpreter_t::visit(enum_declaration_t& node) -> void
+{
+    zephyr::error_location_context_t saved_location = zephyr::current_error_location();
+    zephyr::current_error_location().line = node.line;
+    zephyr::current_error_location().column = node.column;
+    zephyr::current_error_location().length = node.enum_name.length();
+
+    // Create a new enum object
+    auto enum_obj = std::make_shared<enum_object_t>(node.enum_name);
+
+    // Add variants to the enum
+    for (const auto& variant : node.variants) {
+        if (variant.has_parameters) {
+            enum_obj->add_variant(variant.variant_name, variant.parameter_names, variant.parameter_types);
+        } else {
+            enum_obj->add_variant(variant.variant_name);
+        }
+    }
+
+    // Add methods to the enum
+    for (const auto& method : node.methods) {
+        if (method) {
+            // Clone the method and convert unique_ptr to shared_ptr (same as class methods)
+            auto cloned_method = method->clone();
+            enum_obj->add_method(method->function_name, std::shared_ptr<function_definition_t>(static_cast<function_definition_t*>(cloned_method.release())));
+        }
+    }
+
+    // Store the enum in current scope
+    // Store the enum in the current scope
+    auto& current_scope = m_scope_stack.back();
+    current_scope[node.enum_name] = enum_obj;
+
+    // Export the enum if it's not internal
+    if (should_export(node.is_internal))
+    {
+        add_to_exports(node.enum_name, enum_obj);
+    }
+
+    m_current_result = enum_obj;
     zephyr::current_error_location() = saved_location;
 }
 
@@ -4593,6 +4864,155 @@ auto interpreter_t::visit(method_call_t& node) -> void
         {
             if (param.is_const)
             {
+                m_const_variables.erase(param.name);
+            }
+        }
+
+        zephyr::current_error_location() = saved_location;
+        return;
+    }
+
+    // Handle enum variant constructor calls (e.g., Status.RUNNING(75))
+    auto enum_obj = std::dynamic_pointer_cast<enum_object_t>(obj);
+    if (enum_obj)
+    {
+        // Check if the method name corresponds to a variant
+        if (enum_obj->has_variant(node.method_name))
+        {
+            // Get the variant constructor and call it
+            auto variant_constructor = enum_obj->member(node.method_name);
+            m_current_result = variant_constructor->call(args);
+            zephyr::current_error_location() = saved_location;
+            return;
+        }
+        else if (enum_obj->has_method(node.method_name))
+        {
+            // Handle enum static method calls (called on the enum type)
+            auto method_func = enum_obj->get_method(node.method_name);
+            if (!method_func) {
+                throw name_error_t("Method '" + node.method_name + "' definition not found");
+            }
+
+            // Check parameter count
+            if (args.size() != method_func->parameters.size()) {
+                throw type_error_t("Static method '" + node.method_name + "' expects " +
+                                   std::to_string(method_func->parameters.size()) + " arguments, got " +
+                                   std::to_string(args.size()));
+            }
+
+            // Create new scope for static method
+            std::map<std::string, value_t> method_scope;
+
+            // For static methods called on enum type, 'this' is bound to the enum type itself
+            method_scope["this"] = enum_obj;
+
+            // Bind parameters to arguments
+            for (size_t i = 0; i < method_func->parameters.size(); ++i) {
+                const auto& param = method_func->parameters[i];
+                method_scope[param.name] = args[i];
+
+                if (param.is_const) {
+                    m_const_variables.insert(param.name);
+                }
+            }
+
+            // Push method scope
+            m_scope_stack.push_back(method_scope);
+            m_function_resolvers.emplace_back();
+            m_expected_return_types.push_back(method_func->return_type_name);
+
+            try {
+                // Execute method body
+                method_func->body->accept(*this);
+            } catch (const return_value_t& e) {
+                m_current_result = e.value;
+            }
+
+            // Clean up scope
+            m_scope_stack.pop_back();
+            m_function_resolvers.pop_back();
+            m_expected_return_types.pop_back();
+
+            // Remove const parameters from tracking
+            for (const auto& param : method_func->parameters) {
+                if (param.is_const) {
+                    m_const_variables.erase(param.name);
+                }
+            }
+
+            zephyr::current_error_location() = saved_location;
+            return;
+        }
+        else
+        {
+            throw name_error_t("Enum '" + enum_obj->get_enum_name() + "' has no variant or method '" + node.method_name + "'");
+        }
+    }
+
+    // Handle enum variant method calls
+    auto enum_variant = std::dynamic_pointer_cast<enum_variant_object_t>(obj);
+    if (enum_variant)
+    {
+        // Get the parent enum to access methods
+        auto parent_enum = enum_variant->get_parent_enum();
+        if (!parent_enum) {
+            throw type_error_t("Parent enum no longer exists");
+        }
+
+        // Check if method exists on the enum
+        if (!parent_enum->has_method(node.method_name)) {
+            throw name_error_t("Enum '" + enum_variant->get_enum_name() + "' has no method '" + node.method_name + "'");
+        }
+
+        // Get the method definition
+        auto method_func = parent_enum->get_method(node.method_name);
+        if (!method_func) {
+            throw name_error_t("Method '" + node.method_name + "' definition not found");
+        }
+
+        // Check parameter count
+        if (args.size() != method_func->parameters.size()) {
+            throw type_error_t("Method '" + node.method_name + "' expects " +
+                               std::to_string(method_func->parameters.size()) + " arguments, got " +
+                               std::to_string(args.size()));
+        }
+
+        // Create new scope for method
+        std::map<std::string, value_t> method_scope;
+
+        // Add 'this' to the scope (bound to the enum variant)
+        method_scope["this"] = enum_variant;
+
+        // Bind parameters to arguments
+        for (size_t i = 0; i < method_func->parameters.size(); ++i) {
+            const auto& param = method_func->parameters[i];
+            method_scope[param.name] = args[i];
+
+            if (param.is_const) {
+                m_const_variables.insert(param.name);
+            }
+        }
+
+        // Push method scope
+        m_scope_stack.push_back(method_scope);
+        m_function_resolvers.emplace_back();
+        m_expected_return_types.push_back(method_func->return_type_name);
+
+        try {
+            // Execute method body
+            method_func->body->accept(*this);
+        } catch (const return_value_t& e) {
+            m_current_result = e.value;
+        }
+
+        // Clean up scope
+        m_scope_stack.pop_back();
+        m_function_resolvers.pop_back();
+        m_expected_return_types.pop_back();
+
+        // Remove const parameters from tracking
+        for (const auto& param : method_func->parameters) {
+            if (param.is_const) {
                 m_const_variables.erase(param.name);
             }
         }

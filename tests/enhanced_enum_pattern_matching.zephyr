@@ -1,0 +1,276 @@
+# Enhanced Enum Pattern Matching Test Suite
+# Simple working test for the enhanced pattern matching features
+
+print("=== Enhanced Enum Pattern Matching Test Suite ===")
+
+# Test Results Tracking
+total_tests = 0
+passed_tests = 0
+failed_tests = 0
+
+func test_assert(condition, test_name) {
+    total_tests += 1
+    if condition {
+        passed_tests += 1
+        print("✓ PASS: " + test_name)
+        return true
+    } else {
+        failed_tests += 1
+        print("✗ FAIL: " + test_name)
+        return false
+    }
+}
+
+# Test Enums Definition
+enum SimpleEnum {
+    FIRST,
+    SECOND,
+    THIRD
+}
+
+enum DataEnum {
+    VALUE(data),
+    TEXT(content),
+    NUMBER(num)
+}
+
+# Test 1: Basic Enum Pattern Matching
+print("\n--- Basic Enum Pattern Matching ---")
+
+func test_basic_enum_patterns() {
+    first_val = SimpleEnum.FIRST
+    second_val = SimpleEnum.SECOND
+
+    # Test FIRST
+    result1 = "unknown"
+    switch first_val {
+        case SimpleEnum.FIRST: {
+            result1 = "first"
+            break
+        }
+        case SimpleEnum.SECOND: {
+            result1 = "second"
+            break
+        }
+        case SimpleEnum.THIRD: {
+            result1 = "third"
+            break
+        }
+        default: {
+            result1 = "default"
+        }
+    }
+
+    # Test SECOND
+    result2 = "unknown"
+    switch second_val {
+        case SimpleEnum.FIRST: {
+            result2 = "first"
+            break
+        }
+        case SimpleEnum.SECOND: {
+            result2 = "second"
+            break
+        }
+        case SimpleEnum.THIRD: {
+            result2 = "third"
+            break
+        }
+        default: {
+            result2 = "default"
+        }
+    }
+
+    test_assert(result1 == "first", "Basic enum pattern - FIRST")
+    test_assert(result2 == "second", "Basic enum pattern - SECOND")
+}
+
+test_basic_enum_patterns()
+
+# Test 2: Enum with Data Pattern Matching
+print("\n--- Enum with Data Pattern Matching ---")
+
+func test_data_enum_patterns() {
+    value_enum = DataEnum.VALUE("test")
+    text_enum = DataEnum.TEXT("hello")
+    number_enum = DataEnum.NUMBER(42)
+
+    # Test VALUE
+    result1 = "unknown"
+    switch value_enum {
+        case DataEnum.VALUE: {
+            result1 = "value"
+            break
+        }
+        case DataEnum.TEXT: {
+            result1 = "text"
+            break
+        }
+        case DataEnum.NUMBER: {
+            result1 = "number"
+            break
+        }
+        default: {
+            result1 = "default"
+        }
+    }
+
+    # Test TEXT
+    result2 = "unknown"
+    switch text_enum {
+        case DataEnum.VALUE: {
+            result2 = "value"
+            break
+        }
+        case DataEnum.TEXT: {
+            result2 = "text"
+            break
+        }
+        case DataEnum.NUMBER: {
+            result2 = "number"
+            break
+        }
+        default: {
+            result2 = "default"
+        }
+    }
+
+    # Test NUMBER
+    result3 = "unknown"
+    switch number_enum {
+        case DataEnum.VALUE: {
+            result3 = "value"
+            break
+        }
+        case DataEnum.TEXT: {
+            result3 = "text"
+            break
+        }
+        case DataEnum.NUMBER: {
+            result3 = "number"
+            break
+        }
+        default: {
+            result3 = "default"
+        }
+    }
+
+    test_assert(result1 == "value", "Data enum pattern - VALUE")
+    test_assert(result2 == "text", "Data enum pattern - TEXT")
+    test_assert(result3 == "number", "Data enum pattern - NUMBER")
+}
+
+test_data_enum_patterns()
+
+# Test 3: Mixed Pattern Types
+print("\n--- Mixed Pattern Types ---")
+
+func test_mixed_patterns() {
+    test_values = [SimpleEnum.FIRST, SimpleEnum.SECOND, 42, "hello"]
+    expected_results = ["enum_first", "enum_second", "int_42", "string_hello"]
+    actual_results = []
+
+    for value in test_values {
+        result = "unknown"
+        switch value {
+            case SimpleEnum.FIRST: {
+                result = "enum_first"
+                break
+            }
+            case SimpleEnum.SECOND: {
+                result = "enum_second"
+                break
+            }
+            case 42: {
+                result = "int_42"
+                break
+            }
+            case "hello": {
+                result = "string_hello"
+                break
+            }
+            default: {
+                result = "other"
+            }
+        }
+        append(actual_results, result)
+    }
+
+    test_assert(actual_results == expected_results, "Mixed pattern types work correctly")
+}
+
+test_mixed_patterns()
+
+# Test 4: Default Cases
+print("\n--- Default Cases ---")
+
+func test_default_cases() {
+    third_val = SimpleEnum.THIRD
+
+    # Test with default case
+    result1 = "unknown"
+    switch third_val {
+        case SimpleEnum.FIRST: {
+            result1 = "first"
+            break
+        }
+        case SimpleEnum.SECOND: {
+            result1 = "second"
+            break
+        }
+        default: {
+            result1 = "default_case"
+        }
+    }
+
+    test_assert(result1 == "default_case", "Default case works correctly")
+}
+
+test_default_cases()
+
+# Test 5: Error Handling
+print("\n--- Error Handling ---")
+
+func test_error_handling() {
+    simple_val = SimpleEnum.FIRST
+    error_occurred = false
+
+    try {
+        result = "unknown"
+        switch simple_val {
+            case SimpleEnum.FIRST: {
+                result = "valid"
+                break
+            }
+            default: {
+                result = "default"
+            }
+        }
+        error_occurred = false
+    } catch (error) {
+        error_occurred = true
+    }
+
+    test_assert(!error_occurred, "Valid patterns don't throw errors")
+}
+
+test_error_handling()
+
+# Generate Summary
+print("\n=== Test Summary ===")
+print("Total tests: " + str(total_tests))
+print("Passed: " + str(passed_tests))
+print("Failed: " + str(failed_tests))
+
+if failed_tests == 0 {
+    print("🎉 All tests passed!")
+    print("✓ Basic enum variant pattern matching works")
+    print("✓ Enum with data pattern matching works")
+    print("✓ Mixed literal and enum patterns work")
+    print("✓ Default case handling works")
+    print("✓ Error handling works correctly")
+    exit(0)
+} else {
+    print("❌ " + str(failed_tests) + " test(s) failed")
+    exit(1)
+}
